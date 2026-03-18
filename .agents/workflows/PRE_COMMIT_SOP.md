@@ -5,10 +5,10 @@ description: Dynamic SOP for Pre-Commit Checks
 
 **CRITICAL: This SOP must be run before every git commit.**
 
-## 1. [CORE / MANDATORY] Credential Scanning
-- **Action**: Run `gitleaks detect --staged --verbose` (or equivalent secret scanner).
+## 1. [CORE / MANDATORY] Security Scanning
+- **Action**: Run the `security-scanner` skill (checks for `gitleaks` or uses Regex fallback).
 - **Status**: MANDATORY / IMMUTABLE.
-- **Goal**: Ensure no secrets are leaked.
+- **Goal**: Ensure no secrets are leaked using the best available tools.
 
 ## 2. [EVOLUTIONARY] Code Quality & Linting
 - **Current Active Checks**: (Agent: Update this list as project grows)

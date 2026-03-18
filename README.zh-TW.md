@@ -26,3 +26,8 @@
 
 ---
 *專為邁向 AGI 世代的高效、安全、無縫接軌開發體驗而生。*
+
+## 💡 推薦工具
+為了獲得最佳的安全與開發體驗，強烈建議安裝以下工具：
+- **[Gitleaks](https://github.com/gitleaks/gitleaks)**：內建的 `security-scanner` 技能將優先使用它進行強大的金鑰掃描。
+- **[Pre-commit](https://pre-commit.com/)**：用於更專業地管理 Git Hook 生命週期。

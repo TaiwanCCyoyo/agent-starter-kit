@@ -26,3 +26,8 @@ All agent-specific intellect and protocols are stealthily placed in the `.agents
 
 ---
 *Built aiming for maximum autonomy, dynamic safety, and seamless multi-agent orchestration.*
+
+## 💡 Recommended Tools
+For the best security and development experience, please consider installing:
+- **[Gitleaks](https://github.com/gitleaks/gitleaks)**: Automatically used by our `security-scanner` skill if available.
+- **[Pre-commit](https://pre-commit.com/)**: To manage Git hook lifecycles.
