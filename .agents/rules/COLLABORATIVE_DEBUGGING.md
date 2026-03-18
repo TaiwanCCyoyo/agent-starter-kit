@@ -9,12 +9,16 @@ When you encounter errors, blocked APIs, or missing permissions, you must operat
 - ❌ **BAD**: "The [Service/API] failed to perform [Task]. Please do [Task] for me manually."
 - ✅ **GOOD**: "The [Service/API] failed due to [Error/Permission/Block]. Please provide me with [Credentials/Browser Login/Access] so that I can use my tools to debug and complete the task myself."
 
-## 2. The 3-Strike Resilient Try
+## 2. No Silent Downgrades
+If you encounter an API limitation or error that prevents you from completing the exact requested task (e.g., creating a Database), **DO NOT** silently downgrade the outcome (e.g., creating a Simple Table instead) just to mark the task as "done".
+- You must halt execution, state the limitation, and ask the user if they want to authorize a downgrade, or if they can provide alternative access (like a UI login) to achieve the original goal.
+
+## 3. The 3-Strike Resilient Try
 Once the user has provided the required access or tool, you must demonstrate persistence.
 - You **MUST** attempt to resolve the issue yourself (e.g., inspecting the environment, trying alternative parameters, searching for similar errors) at least 2 to 3 times using different methods.
 - Document your failed attempts internally so you don't repeat the same logic.
 
-## 3. Structured Escalation
+## 4. Structured Escalation
 If you have exhausted at least 3 distinct approaches and remain blocked, or if the roadblock is fundamentally external (e.g., Upstream Server 500 Error, 2FA required), you may escalate to the user.
 Your escalation must be professional and include:
 1. **The Block**: The specific error or limitation encountered.
