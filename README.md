@@ -1,4 +1,4 @@
-[繁體中文版 (Traditional Chinese) 🇹🇼](./README.zh-TW.md)
+[繁體中文版 (Traditional Chinese) 🇹🇼](./doc/README.zh-TW.md)
 
 # 🚀 Agent Starter Kit
 
