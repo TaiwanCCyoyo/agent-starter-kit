@@ -5,25 +5,20 @@
 ## 1. Project Mission
 (To be defined in instantiated MEMORY.md)
 
-## 2. Active Git Hooks & Commit Checks
-*Synced with `PRE_COMMIT_SOP.md`:*
-- [x] **Credential Scanning** (MANDATORY)
-- [ ] Python Linting (Planned)
+## 2. Active Git Hooks & Workspace Checks
+- [List active pre-commit hooks or CI/CD checks here. Sync with `PRE_COMMIT_SOP.md` if applicable.]
 
 ## 3. Architecture Decisions
-- [Architecture Log](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/memory/ARCHITECTURE.md) (Optional link if content grows)
+- [Briefly describe major architectural choices here. Create a separate `.md` file in this directory and link it here if the content grows significantly.]
 
 ## 4. User Preferences
-- [User Preferences & Style](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/memory/USER_PREFERENCES.md) (建議：將詳細偏好拆分至獨立連結)
+- [Document specific user preferences, coding styles, or recurring feedback here to ensure long-term consistency.]
 
 ## 5. Wisdom & Solved Complex Bugs
-- [Wisdom Log](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/memory/WISDOM.md) (建議：記錄長期累積的開發經驗)
+- [Record project-specific hacks, complex bug resolutions, or "Aha!" moments that should be remembered across sessions.]
 
-## 6. Brain Index (Key Resources)
-- [MEMORY_RULES.md (核心規則)](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/rules/MEMORY_RULES.md)
-- [TEAM.md (團隊配置)](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/TEAM.md)
-- [Other SOPs & Workflows](file:///c:/Users/xjp01/Documents/agent-starter-kit/.agents/workflows/)
+*(Agent Note: This `MEMORY.md` acts as your project's Brain Index. As any section above grows in complexity, you are encouraged to modularize it by creating dedicated `.md` files within the `memory/` folder and linking them here. This keeps the main index scannable.)*
 
-## 7. Current Focus & Session Handover
-- **目前工作**: (當前任務描述)
-- **Session 狀態**: (給下一位 Agent 的交接摘要)
+## 6. Current Focus & Session Handover
+- **Current Task**: (Describe the active task and next steps)
+- **Session State**: (Provide a concise summary for the next Agent's context)
