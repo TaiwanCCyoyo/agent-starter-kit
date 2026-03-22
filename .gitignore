@@ -1,2 +1,3 @@
 # Ignore agent instantiated memory to prevent committing project-specific state to the starter kit
-.agents/memory/MEMORY.md
+.agents/memory/*
+!.agents/memory/*.example.md
