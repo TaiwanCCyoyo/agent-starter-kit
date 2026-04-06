@@ -4,7 +4,7 @@
 
 The ultimate long-term goal of this project is to provide a universal, shared initialization framework (Starter Kit) for **all mainstream AI Agent tools** on the market (such as Cursor, Claude Code, Gemini CLI, Antigravity, etc.). It equips your repository with a standardized, underlying engineering infrastructure (like native Pre-commit hooks) and reliable workflows, ensuring that any AI operation runs autonomously within a safe, clean, and constraint-free environment.
 
-The current implementation and architectural choices are **deeply optimized for Antigravity** as our first major milestone. Because different Agents have various hook mechanisms and reading constraints, we have deliberately isolated Antigravity's specific custom settings and slash-command logic into the `.agent/` directory, paving the way to support dedicated namespaces for other Agents in the future.
+The current implementation provides optimized, agent-specific namespaces to ensure different tools respect their unique hook mechanisms and reading constraints.
 
 ## 🧠 Core Philosophy
 
@@ -14,12 +14,12 @@ The current implementation and architectural choices are **deeply optimized for 
 
 ## 📂 Architecture
 
-All agent-specific intellect and operational protocols are stealthily isolated in the `.agent/` directory, natively readable by major IDE agents.
+Agent-specific intellect and operational protocols are isolated to prevent cross-agent interference:
 
-* **`.agent/rules/`**: The Core Beliefs and debugging SOPs.
-* **`.agent/workflows/`**: Agent execution commands (including automated tools like memory compression and saving algorithms).
-* **`.agent/skills/`**: Extended tools and custom subagent orchestration configurations.
-* **`.agents/memory/`**: Contains the critical `MEMORY.md`, serving as the project's stateful brain.
+* **`.agent/`**: **Antigravity-specific** rules, workflows, and slash-command logic.
+* **`.gemini/`**: **Gemini CLI-specific** rules and skills (configured in `GEMINI.md`).
+* **`.agents/memory/`**: The **shared** stateful brain containing `MEMORY.md`. 
+  * *Note: Files here are git-ignored. Agents must bypass ignore patterns to access them.*
 
 ## ⚙️ How to Initialize (For AI Agents)
 
@@ -29,9 +29,11 @@ All agent-specific intellect and operational protocols are stealthily isolated i
 **AI Agent Instructions**: When asked to initialize the project, you must independently execute the following 3 steps:
 
 ### Step 1: Bootstrap Long-Term Memory
-Check if `.agents/memory/MEMORY.md` exists. If not:
-1. Run `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
-2. **Comprehensive Initialization**: Do NOT leave the new file with placeholders. You must actively read the repository files (READMEs, configuration files, structure) and comprehensively populate all relevant sections of `MEMORY.md` (such as Project Mission, Tech Stack, User Preferences) to serve as a robust foundational state.
+Check if `.agents/memory/MEMORY.md` exists. 
+- **Important**: You MUST bypass `.gitignore` filters to check/read this directory.
+- If missing:
+  1. Run `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
+  2. **Comprehensive Initialization**: Do NOT leave the new file with placeholders. You must actively read the repository files (READMEs, configuration files, structure) and comprehensively populate all relevant sections of `MEMORY.md` (such as Project Mission, Tech Stack, User Preferences).
 
 ### Step 2: Ensure Tooling & Sync Environment
 This project relies on **[uv](https://astral.sh/)** for fast Python package management.

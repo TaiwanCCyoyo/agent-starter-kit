@@ -4,7 +4,7 @@
 
 專案的終極長期目標，是為**市面上所有主流的 AI Agent 工具**（例如 Cursor, Claude Code, Gemini CLI, Antigravity 等）量身打造一個共用的專案初始設定包 (Starter Kit)。它提供了標準化的底層工程設施（如 Pre-commit）與工作流程，確保所有 AI 在執行高度自治任務時，能在一個安全、乾淨的環境中運作。
 
-目前的實作首航與架構**特別針對 Antigravity 進行了深度優化**。由於各個 Agent 的自訂掛鉤機制不同，我們將專屬 Antigravity 的客製化設定與自動化指令隔離在 `.agent/` 目錄中，並期望未來持續擴充對其他 Agent 的專屬支援。
+目前的實作提供了針對不同 Agent 優化的命名空間，確保各個工具能遵循其獨特的掛鉤機制與讀取限制。
 
 ## 🧠 核心哲學
 
@@ -14,24 +14,26 @@
 
 ## 📂 系統架構
 
-為了不污染使用者的正式原始碼，所有左右 Agent 行為的規則與檔案，皆隱藏於 `.agent/` 目錄下，這也是各種 Agent 預設支援讀取的內部掛載點。
+為了避免不同 Agent 之間的邏輯互相干擾，專屬的指令與規範已被隔離：
 
-* **`.agent/rules/`**：Agent 的最高決策原則（包含驗證規範、協作除錯 SOP）。
-* **`.agent/workflows/`**：由 Agent 執行的自動化任務腳本，包含記憶體自動壓縮 (`/compress-memory`) 與快速筆記 (`/save-memory`)。
-* **`.agent/skills/`**：延伸能力工具箱與外部功能掛載。
-* **`.agents/memory/MEMORY.md`**：專屬本專案的歷史變遷記錄簿，是 Agent 執行任何任務前必讀的「大腦」。
+* **`.agent/`**：**Antigravity 專屬**的規則、工作流與斜槓指令邏輯。
+* **`.gemini/`**：**Gemini CLI 專屬**的規則與技能（詳見 `GEMINI.md`）。
+* **`.agents/memory/`**：**共用**的專案大腦，包含 `MEMORY.md`。
+  * *注意：此目錄下的檔案被 git-ignored。Agent 存取時必須主動繞過過濾器。*
 
 ## ⚙️ 初始化指南 (How to Initialize - 給 AI Agent 的指示)
 
-**人類開發者**：當你使用此模板開啟全新專案時，只需對你的 AI Agent（如 Antigravity）下達指令：
+**人類開發者**：當你使用此模板開啟全新專案時，只需對你的 AI Agent 下達指令：
 > *「請參照 README 幫我初始化專案。」*
 
 **AI Agent 指令**：當你收到上方的人類請求時，你必須**自動且依序**執行以下三個任務：
 
 ### 第一步：建立並同步專案大腦 (Memory)
-請檢查 `.agents/memory/MEMORY.md` 是否存在，若不存在：
-1. 執行 `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
-2. **全面初始化大腦**：絕對不要讓檔案留有空白預設值！你必須主動掃描當前專案的 README、設定檔與目錄結構。根據你的分析，全面填寫 `MEMORY.md` 的所有相關區塊（包括但不限於：專案目標定位、技術堆疊、與初步的開發者偏好），以此奠定堅實的上下文基礎。
+請檢查 `.agents/memory/MEMORY.md` 是否存在。
+- **重要提示**：你必須在工具中設定**繞過 .gitignore** 才能讀取此目錄。
+- 若不存在：
+  1. 執行 `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
+  2. **全面初始化大腦**：絕對不要讓檔案留有空白預設值！你必須主動掃描當前專案的 README、設定檔與目錄結構。根據你的分析，全面填寫 `MEMORY.md` 的所有相關區塊（包括但不限於：專案目標定位、技術堆疊、與初步的開發者偏好），以此奠定堅實的上下文基礎。
 
 ### 第二步：確保環境依賴與套件同步
 本專案嚴重依賴 **[uv](https://astral.sh/)** 作為極速套件管理器。
