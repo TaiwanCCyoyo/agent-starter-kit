@@ -1,59 +1,50 @@
 [繁體中文版 (Traditional Chinese) 🇹🇼](./doc/README.zh-TW.md)
 
-# 🚀 Agent Starter Kit
+# 🚀 AI Agent Starter Kit
 
-A robust, highly autonomous, and evolving multi-agent template designed specifically for AI-driven IDEs and CLI tools (such as Antigravity, Claude Code, and Cursor).
+The ultimate long-term goal of this project is to provide a universal, shared initialization framework (Starter Kit) for **all mainstream AI Agent tools** on the market (such as Cursor, Claude Code, Gemini CLI, Antigravity, etc.). It equips your repository with a standardized, underlying engineering infrastructure (like native Pre-commit hooks) and reliable workflows, ensuring that any AI operation runs autonomously within a safe, clean, and constraint-free environment.
 
-This starter kit is built upon the philosophy of **Verification-First execution**, **Long-Term Memory persistence**, and **Self-Evolving security SOPs**.
+The current implementation and architectural choices are **deeply optimized for Antigravity** as our first major milestone. Because different Agents have various hook mechanisms and reading constraints, we have deliberately isolated Antigravity's specific custom settings and slash-command logic into the `.agent/` directory, paving the way to support dedicated namespaces for other Agents in the future.
 
-## 🧠 Core Principles
+## 🧠 Core Philosophy
 
-1. **Verification-First**: AI agents must verify tasks by providing tangible evidence (logs, outputs, terminal text). Human dependencies (e.g., waiting for authentication) MUST be requested upfront during the planning phase.
-2. **Evolving Pre-Commit Security**: Before any commit is made, an unskippable and evolving SOP (`pre-commit-sop.md`) is executed. The first rule is ALWAYS a credential/secret scan (e.g., `gitleaks`). As the project grows in complexity, the agent is responsible for dynamically adding related linter checks to this SOP.
-3. **Long-Term Memory**: Agents track project preferences, architectures, and Git hooks via `.agents/memory/MEMORY.md`. This prevents context amnesia across sessions. (Note: Use `memory/MEMORY.example.md` as a starting template).
-4. **Team Bootstrapping**: If the underlying AI CLI lacks native subagent capabilities, the main orchestrated agent is instructed to actively seek human guidance to build a script that spawns background CLI worker instances.
-5. **Reusability**: Equipped with **Claude's official `skill-creator`** (from [anthropics/skills](https://github.com/anthropics/skills)), allowing the agent to systematically draft, test, benchmark, and deploy new skills without reinventing the wheel.
+1. **Long-Term Memory Persistence**: The agent tracks project goals, architectural decisions, and lessons learned in `.agents/memory/MEMORY.md`. This entirely eliminates context amnesia across different coding sessions.
+2. **Native Pre-Commit Safety**: We retired outdated AI-reliant visual checks. Security scanning (detect-secrets) and native code formatters (Ruff) are now injected directly into the Git `pre-commit` hooks. Neither humans nor agents can push unsafe credentials.
+3. **Verification-First Execution**: Agents are strictly forbidden to report a task as complete without tangible terminal output or script execution validation. Blind coding is rejected.
 
 ## 📂 Architecture
 
-All agent-specific intellect and protocols are stealthily placed in the `.agents/` directory, natively readable by tools like Antigravity.
+All agent-specific intellect and operational protocols are stealthily isolated in the `.agent/` directory, natively readable by major IDE agents.
 
-* **`.agents/rules/`**: The Core Beliefs (e.g., Security, Delegation, Memory triggers).
-* **`.agents/workflows/`**: The Execution SOPs (e.g., Evolving Pre-Commit loops).
-* **`.agents/skills/`**: Extended tools and external CLI linkages (including `skill-creator` and fallback subagent delegate tools).
-* **`.agents/memory/MEMORY.example.md`**: The blueprint for the project's long-term memory tracking.
-* **`.agents/TEAM.yaml`**: The repository of recognized subagent roles and responsibilities.
+* **`.agent/rules/`**: The Core Beliefs and debugging SOPs.
+* **`.agent/workflows/`**: Agent execution commands (including automated tools like memory compression and saving algorithms).
+* **`.agent/skills/`**: Extended tools and custom subagent orchestration configurations.
+* **`.agents/memory/`**: Contains the critical `MEMORY.md`, serving as the project's stateful brain.
 
-## ⚙️ Getting Started (Local Setup)
+## ⚙️ How to Initialize (For AI Agents)
 
-This project uses **[uv](https://github.com/astral-sh/uv)** for high-performance Python package management and virtual environments.
+**Human Developer**: When starting a fresh project from this template, simply prompt your AI Assistant: 
+> *"Please follow the README to initialize this repository."*
 
-### 1. Prerequisite
-Ensure you have `uv` installed on your system:
-```powershell
-powershell -c "irm https://astral-sh.uv.run/install.ps1 | iex"
-```
+**AI Agent Instructions**: When asked to initialize the project, you must independently execute the following 3 steps:
 
-### 2. Initialize Local Environment
-Run the following command in the root directory to create a local `.venv` and install all required dependencies:
-```powershell
-uv sync
-```
+### Step 1: Bootstrap Long-Term Memory
+Check if `.agents/memory/MEMORY.md` exists. If not:
+1. Run `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
+2. **Comprehensive Initialization**: Do NOT leave the new file with placeholders. You must actively read the repository files (READMEs, configuration files, structure) and comprehensively populate all relevant sections of `MEMORY.md` (such as Project Mission, Tech Stack, User Preferences) to serve as a robust foundational state.
 
-### 3. Running Orchestration
-To use the `delegate-task` skill with the local environment:
-```powershell
-uv run .agents/skills/delegate-task/delegate.py --role Feature_Developer --task "Your task here"
-```
+### Step 2: Ensure Tooling & Sync Environment
+This project relies on **[uv](https://astral.sh/)** for fast Python package management.
+1. Check if `uv` is installed globally.
+   - If not installed, execute: `powershell -c "irm https://astral-sh.uv.run/install.ps1 | iex"`
+2. Sync the environment and install dependencies:
+   - Run `uv sync`
 
-Using `uv run` ensures that the script correctly loads the local virtual environment and its dependencies (like `pyyaml`) without polluting your global Python installation.
-
----
+### Step 3: Enforce Native Security (Pre-commit)
+**Crucial Step:** You MUST install the Git hooks to ensure secret scanning and auto-formatting are locally enforced before any future commits.
+- Run `uv run pre-commit install`
+- Verify it succeeded.
 
 ---
+
 *Built aiming for maximum autonomy, dynamic safety, and seamless multi-agent orchestration.*
-
-## 💡 Recommended Tools
-For the best security and development experience, please consider installing:
-- **[Gitleaks](https://github.com/gitleaks/gitleaks)**: Automatically used by our `security-scanner` skill if available.
-- **[Pre-commit](https://pre-commit.com/)**: To manage Git hook lifecycles.

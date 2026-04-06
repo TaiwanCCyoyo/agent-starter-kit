@@ -86,7 +86,7 @@ def main():
 {avoid_when_md}
 
 ## Allowed Skills (Permissions)
-You are restricted to using the following skills: {', '.join(permissions)}
+You are restricted to using the following skills: {", ".join(permissions)}
 (If "*" is listed, you may use any available skill). Do NOT hallucinate skills.
 
 ## Project Guardian Protocol & Memory
@@ -114,7 +114,7 @@ Do not just output to the console. You must explicitly create/overwrite that fil
     import os
 
     # On Windows, running batch/cmd wrapper scripts requires shell=True
-    use_shell = os.name == 'nt'
+    use_shell = os.name == "nt"
     subprocess.run(["gemini", "-p", str(prompt_file)], shell=use_shell)
 
 
