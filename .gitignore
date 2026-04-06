@@ -2,8 +2,8 @@
 .agents/memory/*
 !.agents/memory/*.example.md
 
-# Ignore temporary files used by the delegate-task skill
-.agents/temp/*
+# Ignore temporary files
+.agent/temp/*
 
 agent-testbed/*
 

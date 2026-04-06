@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: Core Rule - Reuse Existing Implementations
 ---
 # Reuse Principles

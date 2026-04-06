@@ -1,4 +1,5 @@
 ---
+trigger: always_on
 description: Core Rule - Collaborative Debugging & Enablement
 ---
 # Collaborative Debugging Rules
