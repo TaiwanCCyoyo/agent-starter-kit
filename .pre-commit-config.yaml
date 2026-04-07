@@ -15,6 +15,15 @@ repos:
       - id: detect-secrets
         exclude: package\.lock\.json
 
+  # Enforce English content for core documentation and agent logic
+  - repo: local
+    hooks:
+      - id: enforce-english
+        name: Enforce English Content
+        entry: python scripts/check_english.py
+        language: system
+        files: ^(README\.md|\.gemini\/GEMINI\.md|.*\/skills\/.*|.*\/workflows\/.*|.*\/rules\/.*)$
+
   # Ruff (Python Linter & Formatter)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.9
