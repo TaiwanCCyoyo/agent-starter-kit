@@ -7,8 +7,11 @@ This document defines the foundational mandates and operational protocols for Ge
 ### 1. Bypass .gitignore for Critical Files
 **CRITICAL**: Many essential files (like `MEMORY.md`) are git-ignored to prevent committing local state.
 - You MUST explicitly bypass ignore patterns when accessing `.agents/memory/`.
-- **Tooling**: Set `respect_git_ignore: false` for `list_directory`/`glob`, and `no_ignore: true` for `grep_search`.
-- **Fallback**: Use `run_shell_command` with `Get-Content` if file-reading tools are blocked.
+- **Tooling**: 
+  - `glob`: Set `respect_git_ignore: false`.
+  - `list_directory`: Set `file_filtering_options: { respect_git_ignore: false }`.
+  - `grep_search`: Set `no_ignore: true`.
+- **Fallback**: `read_file` LACKS ignore-bypass parameters. If blocked, you MUST use `run_shell_command` (e.g., `Get-Content` or `cat`) to read the file.
 
 ### 2. Verification-First Execution
 **STRICT ENFORCEMENT**: Never claim a task is complete without tangible evidence.
@@ -19,12 +22,13 @@ This document defines the foundational mandates and operational protocols for Ge
   - **Evidence**: [Snippet of terminal output proving success]
   - **Exemption Justification**: [Only for documentation-only changes]
 
-### 3. Long-Term Memory & State
-- **Soul of the Session**: Rely on `.agents/memory/MEMORY.md` to eliminate context amnesia.
-- **Sync Protocol**: 
-  - **Pre-Task**: Read `MEMORY.md` before starting; update it with your current intent.
-  - **Post-Task**: Update `MEMORY.md` with results and "Lessons Learned."
-- **Initialization**: If missing, bootstrap from `MEMORY.example.md` and populate it by analyzing the codebase immediately.
+### 3. Long-Term Memory & State (The "Soul" Protocol)
+**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. UNLESS a task is a one-time minor matter ENTIRELY UNRELATED to the current project (e.g., general knowledge questions, greetings), you MUST follow the **Sync Protocol**.
+- **Sync Protocol**:
+  1. **Pre-Task Sync**: Read `MEMORY.md` (and related sub-files) BEFORE any research or planning. You must understand the project's current "Soul" to act correctly.
+  2. **Plan-Phase Sync**: After research and planning, update the `Doing` section in `MEMORY.md` with your specific intent BEFORE you start modifying files. **You MUST choose a short, distinct Session Name for yourself and prefix your entry.** (e.g., `- **[Session Name]**: ...`).
+  3. **Post-Task Sync**: After successful validation, update the `Done` section (keeping your Session Name prefix) and record `Lessons Learned` to avoid repeating mistakes.
+- **Bypass Rule**: Always use `respect_git_ignore: false` or shell commands to access `.agents/memory/`. If missing, bootstrap from `MEMORY.example.md` immediately.
 
 ### 4. Collaborative Debugging & Enablement
 - **Ask for Enablement, Not Completion**: If blocked (permissions, API keys), ask for the **tools or access** to solve it yourself. Do not ask the user to do the manual work for you.
@@ -39,6 +43,16 @@ This document defines the foundational mandates and operational protocols for Ge
 - **Don't Reinvent the Wheel**: Check existing patterns in the codebase or reference open-source implementations before writing complex logic from scratch.
 - **Copy and Adapt**: Prioritize adapting proven configurations and scripts.
 
+### 7. Prevent Feature Deletion
+**CRITICAL**: Do not delete existing functions or features without explicit intent or request.
+- **Suspect Utility**: If a purpose is unclear, assume it is necessary (e.g., undocumented feature, bug fix, or future-use).
+- **Verification**: Always verify and preserve existing logic unless expressly authorized or required by the current task to remove it.
+
+### 8. Language & I18N Mandates
+- **Communication**: Use **Traditional Chinese** (`zh-TW`) for all user-facing communication (responses, plans, walkthroughs).
+- **Project Output**: Use **English** for all technical outputs (code, commit messages, `SKILL.md`, config files).
+- **Documentation**: Root `README.md` MUST be in English and link to the Traditional Chinese version at `docs/zh-TW/README.md`.
+
 ## 🛠️ Technical Stack & Tooling
 
 - **Environment**: Python >=3.12, managed via **uv**.
@@ -48,5 +62,5 @@ This document defines the foundational mandates and operational protocols for Ge
 
 ## 📂 Key Resources
 - **Memory**: `.agents/memory/MEMORY.md` (The stateful project brain)
-- **Workflows**: `.gemini/skills/` (Custom capabilities)
-- **Reference**: `doc/README.zh-TW.md` (Project overview in Traditional Chinese)
+- **Skills**: `.gemini/skills/` (Gemini-specific capabilities)
+- **Reference**: `docs/zh-TW/README.md` (Project overview in Traditional Chinese)

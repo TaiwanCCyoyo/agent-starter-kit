@@ -1,4 +1,4 @@
-[English Version (英文版) 🇬🇧](../README.md)
+[English Version (英文版) 🇬🇧](../../README.md)
 
 # 🚀 AI Agent Starter Kit
 

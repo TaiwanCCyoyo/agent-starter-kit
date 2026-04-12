@@ -1,4 +1,4 @@
-[繁體中文版 (Traditional Chinese) 🇹🇼](./doc/README.zh-TW.md)
+[繁體中文版 (Traditional Chinese) 🇹🇼](./docs/zh-TW/README.md)
 
 # 🚀 AI Agent Starter Kit
 

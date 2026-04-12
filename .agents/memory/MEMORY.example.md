@@ -12,5 +12,11 @@
 - [List unfinished tasks or things the next session needs to pick up]
 
 ## 4. Current State & Unfinished Business
-- **Doing**: [What the current session is about to do. Update this BEFORE starting work.]
-- **Done**: [What was just completed. Update this AFTER finishing work.]
+
+*Note for Agents: When updating this section, prefix your entries with a short, distinct Session Name (e.g., `[Session Name]`).*
+
+### Doing
+- **[Session Name]**: [What this session is about to do. Update this BEFORE starting work.]
+
+### Done
+- **[Session Name]**: [What was just completed. Update this AFTER finishing work.]
