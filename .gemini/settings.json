@@ -1,0 +1,21 @@
+{
+  "hooksConfig": {
+    "enabled": true,
+    "notifications": true
+  },
+  "hooks": {
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "name": "ruff-auto-format",
+            "description": "Automatically run ruff format on modified .py files",
+            "type": "command",
+            "command": "uv run python scripts/auto_format.py"
+          }
+        ]
+      }
+    ]
+  }
+}

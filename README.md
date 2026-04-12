@@ -8,9 +8,10 @@ The current implementation provides optimized, agent-specific namespaces to ensu
 
 ## 🧠 Core Philosophy
 
-1. **Long-Term Memory Persistence**: The agent tracks project goals, architectural decisions, and lessons learned in `.agents/memory/MEMORY.md`. This entirely eliminates context amnesia across different coding sessions.
-2. **Native Pre-Commit Safety**: We retired outdated AI-reliant visual checks. Security scanning (detect-secrets) and native code formatters (Ruff) are now injected directly into the Git `pre-commit` hooks. Neither humans nor agents can push unsafe credentials.
-3. **Verification-First Execution**: Agents are strictly forbidden to report a task as complete without tangible terminal output or script execution validation. Blind coding is rejected.
+1. **Long-Term Memory Persistence**: The agent tracks project goals and lessons learned in `.agents/memory/MEMORY.md`, eliminating context amnesia.
+2. **Automated Python Hygiene**: Python formatting (`ruff-format`) and lint-fixing (`ruff --fix`) are now **completely automatic** via Gemini CLI hooks (AfterTool) and Git pre-commit hooks.
+3. **Native Pre-Commit Safety**: Security scanning (`detect-secrets`) is integrated into Git hooks. Neither humans nor agents can push unsafe credentials.
+4. **Verification-First Execution**: Agents are strictly forbidden to report a task as complete without tangible validation (scripts or tests). Blind coding is rejected.
 
 ## 📂 Architecture
 
