@@ -9,7 +9,7 @@
   "hooks": {
     "AfterTool": [
       {
-        "matcher": ".*",
+        "matcher": "^(write_file|replace|run_shell_command)$",
         "hooks": [
           {
             "name": "auto_format",

@@ -51,6 +51,14 @@ commandPrefix = ["Test-Path", "Get-Content", "Measure-Object", "ForEach-Object",
 decision = "allow"
 priority = 100
 
+# --- Memory PowerShell Command Approval ---
+[[rule]]
+toolName = "run_shell_command"
+# Matches Set-Content commands targeting .agents/memory/ path with either / or \
+argsPattern = '"command":\s*".*Set-Content\s+.*\.agents[\\/]memory[\\/].*"'
+decision = "allow"
+priority = 500
+
 # --- Memory Path (.agents/memory/) Edit Approval ---
 [[rule]]
 toolName = ["write_file", "replace"]
