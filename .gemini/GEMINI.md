@@ -4,14 +4,15 @@ This document defines the foundational mandates and operational protocols for Ge
 
 ## 🚀 Core Operational Mandates
 
-### 1. Bypass .gitignore for Critical Files
+### 1. Bypass .gitignore for Critical Files (The "Soul" Protocol)
 **CRITICAL**: Many essential files (like `MEMORY.md`) are git-ignored to prevent committing local state.
-- You MUST explicitly bypass ignore patterns when accessing `.agents/memory/`.
-- **Tooling**:
-  - `glob`: Set `respect_git_ignore: false`.
-  - `list_directory`: Set `file_filtering_options: { respect_git_ignore: false }`.
-  - `grep_search`: Set `no_ignore: true`.
-- **Fallback**: `read_file` LACKS ignore-bypass parameters. If blocked, you MUST use `run_shell_command` (e.g., `Get-Content` or `cat`) to read the file.
+- **Bypass Mandate**: You MUST explicitly bypass ignore patterns ONLY when accessing `.agents/memory/`.
+- **Tooling Selection (The Dual-Tool Strategy)**:
+    - **For Reading Ignored Memory**: Because `read_file` respects `.gitignore` and lacks a bypass parameter, you MUST use `grep_search` with `no_ignore: true` and `pattern: "^"` for files in `.agents/memory/`. This is the ONLY stable way to handle UTF-8/Traditional Chinese in Windows without Mojibake.
+        - **Example**: `grep_search(pattern="^", dir_path=".agents/memory/MEMORY.md", no_ignore=True)`
+    - **For Writing Ignored Memory**: Use the standard `write_file` tool. It is verified to bypass `.gitignore` restrictions for writing.
+        - **Example**: `write_file(file_path=".agents/memory/MEMORY.md", content="...")`
+    - **For ALL Tracked Code**: You MUST strictly use standard tools (`read_file`, `write_file`, `replace`) as they work perfectly for non-ignored files.
 
 ### 2. Verification-First Execution
 **STRICT ENFORCEMENT**: Never claim a task is complete without tangible evidence.
