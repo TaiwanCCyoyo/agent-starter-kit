@@ -52,7 +52,7 @@ This document defines the foundational mandates and operational protocols for Ge
 - **Communication**: Use **Traditional Chinese** (`zh-TW`) for all user-facing communication (responses, plans, walkthroughs).
 - **Project Output**: Use **English** for all technical outputs (code, commit messages, `SKILL.md`, config files, comments).
 - **Encoding**: ALL files MUST be saved in **UTF-8** (without BOM). Avoid Mojibake by ensuring consistent encoding across tools.
-- **Validation Hook**: A mandatory `AfterTool` hook runs `scripts/validate_file.py` to enforce these rules.
+- **Validation Hook**: A mandatory `AfterTool` hook runs `scripts/file_hygiene.py` to enforce these rules.
     - **Exception Paths**: `.agents/memory/`, `docs/zh-TW/`, and the first line of `README.md` are allowed to contain Traditional Chinese.
 - **Documentation**: Root `README.md` MUST be in English and link to the Traditional Chinese version at `docs/zh-TW/README.md`.
 

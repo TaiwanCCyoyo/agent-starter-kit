@@ -6,7 +6,12 @@ description: Rules for language preferences (Traditional Chinese for collaborati
 # Language and I18N Documentation Rules
 
 ## 1. Language Preferences
-- **Collaboration & Communication**: When communicating with the user (e.g., in responses, implementation plans, walkthroughs), use **Traditional Chinese** (`zh-TW`) by default. Technical terms may remain in English.
+- **[MANDATORY] Collaboration & Communication**: When interacting with the USER outside of source code modifications, you **MUST** use **Traditional Chinese** (`zh-TW`) by default. This strictly applies to:
+  - Dialogue responses
+  - Implementation Plans
+  - Task summaries & Walkthroughs
+  - All artifacts generated during Planning Mode
+  *(Note: Technical terms, technical comments, and variable names may remain in English.)*
 - **Project Output**: All project-related files (source code, git commit messages, `SKILL.md` files, configuration files, etc.) must be in **English**.
 
 ## 2. I18N Documentation (README) Rules

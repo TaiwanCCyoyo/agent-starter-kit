@@ -4,7 +4,7 @@ description: Check Python code formatting and linting using Ruff (`uv run ruff`)
 
 # Python Format Check (Ruff)
 
-This workflow uses `ruff` (via `uv`) as the unified Python linter and formatter. 
+This workflow uses `ruff` (via `uv`) as the unified Python linter and formatter.
 
 **Prerequisites**: This script relies on `uv` being installed and used as the package manager in this project.
 
@@ -15,24 +15,29 @@ In this project, Python formatting is now **automatic** for AI agents.
 
 ---
 
-## 1. Manual Cleanup (Entire Project)
-Run these commands to manually format the code and fix auto-fixable lint errors across all Python files.
+## 1. Project-wide Hygiene & Auto-Fix
+Run this command to format the code and fix auto-fixable lint errors across the entire project. This script captures and displays any errors that cannot be fixed automatically.
 
 ### PowerShell (Windows) / Bash (macOS/Linux)
 // turbo
 ```powershell
-uv run ruff check --fix .; uv run ruff format .
+uv run python scripts/auto_format.py
 ```
 
 ---
 
-## 2. Check Only (No Auto-Fix)
-If you only want to see what's wrong without changing the files automatically (e.g., for CI validation):
+## 2. Check Specific Files/Directories
+You can also target specific paths. You can view all available options using the `--help` flag.
 
 ### PowerShell (Windows) / Bash (macOS/Linux)
 // turbo
 ```powershell
-uv run ruff check .; uv run ruff format --check .
+uv run python scripts/auto_format.py --help
+uv run python scripts/auto_format.py scripts/ some_file.py
 ```
+
+> [!NOTE]
+> The `--hook` flag is reserved for internal use by the Gemini AI agent and should not be used in manual CLI execution.
+
 
 __Note__: If a line exceeds line-length and cannot be broken nicely, append `# noqa: E501` to the end of the line to suppress the Ruff warning.
