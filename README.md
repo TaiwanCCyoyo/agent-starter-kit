@@ -1,53 +1,35 @@
-[繁體中文版 (Traditional Chinese) 🇹🇼](./docs/zh-TW/README.md)
+[繁體中文版本 (Traditional Chinese)](docs/zh-TW/README.md)
+# AI Agent Starter Kit
 
-# 🚀 AI Agent Starter Kit
+A standardized, friction-less engineering infrastructure for multi-agent ecosystems (Gemini CLI, Antigravity, and more).
 
-The ultimate long-term goal of this project is to provide a universal, shared initialization framework (Starter Kit) for **all mainstream AI Agent tools** on the market (such as Cursor, Claude Code, Gemini CLI, Antigravity, etc.). It equips your repository with a standardized, underlying engineering infrastructure (like native Pre-commit hooks) and reliable workflows, ensuring that any AI operation runs autonomously within a safe, clean, and constraint-free environment.
-
-The current implementation provides optimized, agent-specific namespaces to ensure different tools respect their unique hook mechanisms and reading constraints.
-
-## 🧠 Core Philosophy
+## 🚀 Core Philosophy
 
 1. **Long-Term Memory Persistence**: The agent tracks project goals and lessons learned in `.agents/memory/MEMORY.md`, eliminating context amnesia.
-2. **Automated Python Hygiene**: Python formatting (`ruff-format`) and lint-fixing (`ruff --fix`) are now **completely automatic** via Gemini CLI hooks (AfterTool) and Git pre-commit hooks.
-3. **Native Pre-Commit Safety**: Security scanning (`detect-secrets`) is integrated into Git hooks. Neither humans nor agents can push unsafe credentials.
-4. **Verification-First Execution**: Agents are strictly forbidden to report a task as complete without tangible validation (scripts or tests). Blind coding is rejected.
+2. **Automated Maintenance**: Python formatting (`ruff`) and file hygiene (UTF-8, English constraints) are **completely automatic** via Gemini CLI `AfterTool` hooks and Git `pre-commit` hooks.
+3. **Native Security**: Security scanning (`detect-secrets`) is integrated into the pre-commit workflow.
+4. **Auto-Approval Policies**: Standardized tasks (like memory updates in `.agents/memory/`) are auto-approved for Gemini CLI to minimize interruptions.
+5. **Encoding & Language Integrity**: Mandatory validation (UTF-8 and English) for core logic, enforced via Gemini CLI hooks and `pre-commit`.
+6. **Verification-First Execution**: Agents must provide tangible validation evidence before marking tasks as complete.
 
-## 📂 Architecture
+## 🏗️ Architecture
 
-Agent-specific intellect and operational protocols are isolated to prevent cross-agent interference:
+Agent-specific protocols are isolated:
 
-* **`.agent/`**: **Antigravity-specific** rules, workflows, and slash-command logic.
-* **`.gemini/`**: **Gemini CLI-specific** rules and skills (configured in `GEMINI.md`).
-* **`.agents/memory/`**: The **shared** stateful brain containing `MEMORY.md`. 
-  * *Note: Files here are git-ignored. Agents must bypass ignore patterns to access them.*
+* **`.agent/`**: **Antigravity-specific** rules and workflows.
+* **`.gemini/`**: **Gemini CLI-specific** policies, skills, and hooks.
+* **`.agents/memory/`**: **Shared** stateful brain (Git-ignored).
 
-## ⚙️ How to Initialize (For AI Agents)
+## 🛠️ How to Initialize
 
-**Human Developer**: When starting a fresh project from this template, simply prompt your AI Assistant: 
-> *"Please follow the README to initialize this repository."*
+**For Humans**:
+Prompt your AI Assistant: *"Please follow the README to initialize this repository."*
 
-**AI Agent Instructions**: When asked to initialize the project, you must independently execute the following 3 steps:
-
-### Step 1: Bootstrap Long-Term Memory
-Check if `.agents/memory/MEMORY.md` exists. 
-- **Important**: You MUST bypass `.gitignore` filters to check/read this directory.
-- If missing:
-  1. Run `cp .agents/memory/MEMORY.example.md .agents/memory/MEMORY.md`
-  2. **Comprehensive Initialization**: Do NOT leave the new file with placeholders. You must actively read the repository files (READMEs, configuration files, structure) and comprehensively populate all relevant sections of `MEMORY.md` (such as Project Mission, Tech Stack, User Preferences).
-
-### Step 2: Ensure Tooling & Sync Environment
-This project relies on **[uv](https://astral.sh/)** for fast Python package management.
-1. Check if `uv` is installed globally.
-   - If not installed, execute: `powershell -c "irm https://astral-sh.uv.run/install.ps1 | iex"`
-2. Sync the environment and install dependencies:
-   - Run `uv sync`
-
-### Step 3: Enforce Native Security (Pre-commit)
-**Crucial Step:** You MUST install the Git hooks to ensure secret scanning and auto-formatting are locally enforced before any future commits.
-- Run `uv run pre-commit install`
-- Verify it succeeded.
+**For Agents**:
+1. **Bootstrap Memory**: Copy `.agents/memory/MEMORY.example.md` to `.agents/memory/MEMORY.md`.
+   - **Crucial**: You MUST immediately populate the **Mission** section in `MEMORY.md` based on the current `README.md` and project context to establish the session's "Soul."
+2. **Install Hooks**: Run `uv run pre-commit install`.
+3. **Verify Setup**: Run `uv run ruff check .` to ensure the environment is ready.
 
 ---
-
-*Built aiming for maximum autonomy, dynamic safety, and seamless multi-agent orchestration.*
+*Note: This project enforces **UTF-8 (without BOM)** encoding and **English** for technical documentation/code.*

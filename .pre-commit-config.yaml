@@ -15,14 +15,15 @@ repos:
       - id: detect-secrets
         exclude: package\.lock\.json
 
-  # Enforce English content for core documentation and agent logic
+  # Enforce encoding (UTF-8) and language constraints for the entire project
   - repo: local
     hooks:
-      - id: enforce-english
-        name: Enforce English Content
-        entry: python scripts/check_english.py
+      - id: file-validation
+        name: File Hygiene (Encoding, English & Cleanup)
+        entry: uv run python scripts/file_hygiene.py
         language: system
-        files: ^(README\.md|\.gemini\/GEMINI\.md|.*\/skills\/.*|.*\/workflows\/.*|.*\/rules\/.*)$
+        types: [text]
+        exclude: ^(uv\.lock|.*\.json)$  # Optional: exclude specific auto-generated files if needed
 
   # Ruff (Python Linter & Formatter)
   - repo: https://github.com/astral-sh/ruff-pre-commit

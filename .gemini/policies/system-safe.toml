@@ -1,0 +1,61 @@
+# system-safe.toml - System security policy for auto-approval
+# This file defines which Git and PowerShell commands can be executed automatically to reduce interruptions.
+
+# --- Safe Git Commands ---
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git status"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git diff"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git log"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git show"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git pull"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git branch"
+decision = "allow"
+priority = 100
+
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "git remote"
+decision = "allow"
+priority = 100
+
+# --- Common PowerShell Read & Base Commands ---
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = ["Test-Path", "Get-Content", "Measure-Object", "ForEach-Object", "New-Item", "cat", "ls", "grep"]
+decision = "allow"
+priority = 100
+
+# --- Memory Path (.agents/memory/) Edit Approval ---
+[[rule]]
+toolName = ["write_file", "replace"]
+# Securely match only the file_path field.
+# [\\/] matches both Windows (\) and Unix (/) separators.
+argsPattern = '"file_path":\s*".*\.agents[\\/]memory[\\/].*"'
+decision = "allow"
+priority = 500

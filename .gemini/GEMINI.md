@@ -7,7 +7,7 @@ This document defines the foundational mandates and operational protocols for Ge
 ### 1. Bypass .gitignore for Critical Files
 **CRITICAL**: Many essential files (like `MEMORY.md`) are git-ignored to prevent committing local state.
 - You MUST explicitly bypass ignore patterns when accessing `.agents/memory/`.
-- **Tooling**: 
+- **Tooling**:
   - `glob`: Set `respect_git_ignore: false`.
   - `list_directory`: Set `file_filtering_options: { respect_git_ignore: false }`.
   - `grep_search`: Set `no_ignore: true`.
@@ -48,9 +48,12 @@ This document defines the foundational mandates and operational protocols for Ge
 - **Suspect Utility**: If a purpose is unclear, assume it is necessary (e.g., undocumented feature, bug fix, or future-use).
 - **Verification**: Always verify and preserve existing logic unless expressly authorized or required by the current task to remove it.
 
-### 8. Language & I18N Mandates
+### 8. Language & Encoding Mandates
 - **Communication**: Use **Traditional Chinese** (`zh-TW`) for all user-facing communication (responses, plans, walkthroughs).
-- **Project Output**: Use **English** for all technical outputs (code, commit messages, `SKILL.md`, config files).
+- **Project Output**: Use **English** for all technical outputs (code, commit messages, `SKILL.md`, config files, comments).
+- **Encoding**: ALL files MUST be saved in **UTF-8** (without BOM). Avoid Mojibake by ensuring consistent encoding across tools.
+- **Validation Hook**: A mandatory `AfterTool` hook runs `scripts/validate_file.py` to enforce these rules.
+    - **Exception Paths**: `.agents/memory/`, `docs/zh-TW/`, and the first line of `README.md` are allowed to contain Traditional Chinese.
 - **Documentation**: Root `README.md` MUST be in English and link to the Traditional Chinese version at `docs/zh-TW/README.md`.
 
 ## 🛠️ Technical Stack & Tooling

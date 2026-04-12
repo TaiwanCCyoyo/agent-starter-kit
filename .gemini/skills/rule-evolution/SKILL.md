@@ -38,13 +38,13 @@ Invoke the `generalist` subagent:
 
 #### Step B: Checker Verification
 Invoke the `generalist` subagent:
-- **Prompt**: `You are the Rule Compliance Expert. Evaluate the Tester's output and tool calls against the constraints in {TargetRule}. 
+- **Prompt**: `You are the Rule Compliance Expert. Evaluate the Tester's output and tool calls against the constraints in {TargetRule}.
     - If compliant, output TEST_PASSED.
     - If non-compliant, explain exactly which constraint was violated and provide a "fix and strengthen" suggestion for the rule.`
 
 #### Step C: Feedback & Patching
 - **If TEST_PASSED**: The rule is robust for this scenario. Exit or proceed to the next scenario.
-- **If TEST_FAILED**: 
+- **If TEST_FAILED**:
     - Analyze the Checker's feedback.
     - Apply a "Failure-Driven Patch" to `{TargetRule}` (e.g., changing "SHOULD" to "MUST", adding specific formatting requirements).
     - Clear the testbed and repeat from Step A.

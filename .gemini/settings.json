@@ -1,4 +1,7 @@
 {
+  "policyPaths": [
+    "./.gemini/policies/"
+  ],
   "hooksConfig": {
     "enabled": true,
     "notifications": true
@@ -6,13 +9,19 @@
   "hooks": {
     "AfterTool": [
       {
-        "matcher": "write_file|replace",
+        "matcher": ".*",
         "hooks": [
           {
-            "name": "ruff-auto-format",
-            "description": "Automatically run ruff format on modified .py files",
+            "name": "auto_format",
+            "description": "Automatically fixes python syntax and formats code after modifications.",
             "type": "command",
-            "command": "uv run python scripts/auto_format.py"
+            "command": "uv run python ./scripts/auto_format.py --hook"
+          },
+          {
+            "name": "file-hygiene-compliance",
+            "description": "Validate file encoding (UTF-8), language, and clean trailing whitespace",
+            "type": "command",
+            "command": "uv run python ./scripts/file_hygiene.py --hook"
           }
         ]
       }
