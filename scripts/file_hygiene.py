@@ -26,7 +26,7 @@ def is_path_allowed(filepath):
     return False
 
 
-def check_file_hygiene(filepath):
+def check_file_hygiene(filepath, is_hook=False):
     """
     Validates file encoding, language constraints, and cleans up hygiene issues.
     Returns True if valid and unchanged, False if invalid or modified.
@@ -46,37 +46,37 @@ def check_file_hygiene(filepath):
         print(f"Error reading {filepath}: {e}")
         return False
 
-    # 2. Trailing Whitespace Cleanup
+    # 2. Trailing Whitespace Cleanup (ONLY in hook mode)
     lines = content.splitlines(keepends=True)
-    new_lines = []
-    modified = False
-    for line in lines:
-        # Detect the line ending
-        if line.endswith("\r\n"):
-            ending = "\r\n"
-        elif line.endswith("\n"):
-            ending = "\n"
-        else:
-            ending = ""
+    new_lines = lines
+    if is_hook:
+        new_lines = []
+        modified = False
+        for line in lines:
+            # Detect the line ending
+            if line.endswith("\r\n"):
+                ending = "\r\n"
+            elif line.endswith("\n"):
+                ending = "\n"
+            else:
+                ending = ""
 
-        # Remove trailing spaces/tabs but keep the line ending
-        stripped = line.rstrip("\r\n").rstrip(" \t")
-        new_line = stripped + ending
-        if new_line != line:
-            modified = True
-        new_lines.append(new_line)
+            # Remove trailing spaces/tabs but keep the line ending
+            stripped = line.rstrip("\r\n").rstrip(" \t")
+            new_line = stripped + ending
+            if new_line != line:
+                modified = True
+            new_lines.append(new_line)
 
-    if modified:
-        try:
-            with open(filepath, "w", encoding="utf-8", newline="") as f:
-                f.writelines(new_lines)
-            print(f"Hygiene: Removed trailing whitespace in {filepath}")
-            # Even if cleaned, we return False to inform pre-commit that the file was modified
-            # and needs to be re-staged.
-            return False
-        except Exception as e:
-            print(f"Error cleaning whitespace in {filepath}: {e}")
-            return False
+        if modified:
+            try:
+                with open(filepath, "w", encoding="utf-8", newline="") as f:
+                    f.writelines(new_lines)
+                print(f"Hygiene: Removed trailing whitespace in {filepath} (Hook Mode)")
+                return True
+            except Exception as e:
+                print(f"Error cleaning whitespace in {filepath}: {e}")
+                return False
 
     # 3. Language Check (If NOT in allowed paths)
     if not is_path_allowed(filepath):
@@ -100,36 +100,35 @@ def check_file_hygiene(filepath):
 
 def main():
     parser = argparse.ArgumentParser(description="File Hygiene Tool: Validates encoding, language, and cleanliness.")
-    parser.add_argument("--hook", action="store_true", help="Run in Hook mode, reading JSON from stdin for Gemini CLI.")
-    parser.add_argument("files", nargs="*", help="Specific files to check.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--hook", action="store_true", help="Run in Hook mode, reading JSON from stdin for Gemini CLI.")
+    group.add_argument("--file", nargs="+", dest="files", help="Specific files to check (for manual use or pre-commit).")
 
     args = parser.parse_args()
-    files = args.files
+    files = []
 
-    if args.hook:
-        # Piped mode (Gemini Hook)
+    if args.files:
+        files = args.files
+    elif args.hook:
+        # Piped mode (Gemini Hook). Only read stdin if it's not a terminal to avoid hanging.
         try:
-            content = sys.stdin.read()
-            if not content:
-                # Silent return for Gemini CLI
-                return
-            data = json.loads(content)
-            file_path = data.get("tool_input", {}).get("file_path") or data.get("tool_input", {}).get("TargetFile")
-            if file_path:
-                files = [file_path]
+            if not sys.stdin.isatty():
+                content = sys.stdin.read()
+                if content:
+                    data = json.loads(content)
+                    file_path = data.get("tool_input", {}).get("file_path") or data.get("tool_input", {}).get("TargetFile")
+                    if file_path:
+                        files = [file_path]
         except Exception:
-            # Fallback to empty if stdin parsing fails
             pass
 
     if not files:
-        # No files provided, and not in hook mode or stdin empty
-        if not args.hook:
-            print("Usage: python file_hygiene.py <file1> <file2> ... or use --hook for Gemini CLI.")
+        # If no files found in hook mode or empty --file, exit quietly
         sys.exit(0)
 
     failed = False
     for f in files:
-        if not check_file_hygiene(f):
+        if not check_file_hygiene(f, is_hook=args.hook):
             failed = True
 
     if failed:

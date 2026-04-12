@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: file-validation
         name: File Hygiene (Encoding, English & Cleanup)
-        entry: uv run python scripts/file_hygiene.py
+        entry: uv run python scripts/file_hygiene.py --file
         language: system
         types: [text]
         exclude: ^(uv\.lock|.*\.json)$  # Optional: exclude specific auto-generated files if needed
