@@ -24,12 +24,14 @@ This document defines the foundational mandates and operational protocols for Ge
   - **Exemption Justification**: [Only for documentation-only changes]
 
 ### 3. Long-Term Memory & State (The "Soul" Protocol)
-**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. UNLESS a task is a one-time minor matter ENTIRELY UNRELATED to the current project (e.g., general knowledge questions, greetings), you MUST follow the **Sync Protocol**.
-- **Sync Protocol**:
-  1. **Pre-Task Sync**: Read `MEMORY.md` (and related sub-files) BEFORE any research or planning. You must understand the project's current "Soul" to act correctly.
-  2. **Plan-Phase Sync**: After research and planning, update the `Doing` section in `MEMORY.md` with your specific intent BEFORE you start modifying files. **You MUST choose a short, distinct Session Name for yourself and prefix your entry.** (e.g., `- **[Session Name]**: ...`).
-  3. **Post-Task Sync**: After successful validation, update the `Done` section (keeping your Session Name prefix) and record `Lessons Learned` to avoid repeating mistakes.
-- **Bypass Rule**: Always use `respect_git_ignore: false` or shell commands to access `.agents/memory/`. If missing, bootstrap from `MEMORY.example.md` immediately.
+**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. This is the central hub for all sessions (including Antigravity).
+- **Mandatory Alignment**: ALL memory operations (reading, updating, auditing) MUST strictly follow the **`memory-maintenance` skill**.
+- **Sync Ritual**:
+  1. **Pre-Task**: Read `MEMORY.md` via `grep_search` (with `no_ignore: true`) BEFORE research to align with the project's soul.
+  2. **Plan-Phase**: Update the `Doing` section with a high-signal intent prefixed by a unique **Session Name**.
+  3. **Post-Task**: Move intent to `Done`, record high-signal `Lessons Learned`, and delegate pending sub-tasks to the next session.
+- **Bypass Rule**: Always bypass `.gitignore` for `.agents/memory/`. If missing, bootstrap from `MEMORY.example.md` immediately.
+- **Progressive Disclosure**: Keep the main `MEMORY.md` lean. Archive historical logs (>500 tokens) to sub-files as per the skill.
 
 ### 4. Collaborative Debugging & Enablement
 - **Ask for Enablement, Not Completion**: If blocked (permissions, API keys), ask for the **tools or access** to solve it yourself. Do not ask the user to do the manual work for you.

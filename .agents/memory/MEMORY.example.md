@@ -9,7 +9,7 @@
 - **Git Hook Initialization**: Merely having a `.pre-commit-config.yaml` is not enough; hooks must be explicitly installed using `uv run pre-commit install`. Always check if `.git/hooks/pre-commit` exists before assuming protection is active.
 
 ## 3. Session Handover & Delegated Tasks
-- [List unfinished tasks or things the next session needs to pick up]
+- [ ] [List unfinished tasks or things the next session needs to pick up]
 
 ## 4. Current State & Unfinished Business
 
