@@ -14,7 +14,16 @@ This skill transforms the project's memory into a **Living Skill Guide**. It ens
 - **Prefer**: "Fixed: Regex greedy matching in `system-safe.toml`." (Concise & Direct)
 - **Tone**: Use imperative/infinitive forms. Focus on *what* and *why*, not the narrative.
 
-### 2. Progressive Disclosure
+### 2. Sync Strategies (The "Signal-to-Noise" Filter)
+- **Standard Sync (Full Ritual)**:
+  - **Applicability**: Mandatory for all **Directive** tasks (any file modification, code fix, or infrastructure change).
+  - **Action**: Follow all 3 phases (Pre-Task, Plan-Phase, Post-Task).
+- **Lightweight Sync (Read-Only)**:
+  - **Applicability**: Recommended for **Inquiry** tasks (pure consultation, log retrieval, codebase exploration without modification).
+  - **Action**: Perform **Pre-Task only** (Read MEMORY.md to stay aligned). **Skip** writing to `Doing`/`Done` unless a critical `Lesson Learned` or architectural decision is produced.
+  - **Goal**: Minimize noise in `MEMORY.md` and save context tokens.
+
+### 3. Progressive Disclosure
 - **Main Memory**: Keep only the most recent/critical insights (Mission, Tech Stack, Current State).
 - **Archive**: Move historical logs or resolved issues to sub-files (e.g., `ARCHIVE.md`) if a section exceeds 500 tokens.
 - **Links**: Use Markdown links to point to detailed documentation or scripts.

@@ -26,10 +26,9 @@ This document defines the foundational mandates and operational protocols for Ge
 ### 3. Long-Term Memory & State (The "Soul" Protocol)
 **CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. This is the central hub for all sessions (including Antigravity).
 - **Mandatory Alignment**: ALL memory operations (reading, updating, auditing) MUST strictly follow the **`memory-maintenance` skill**.
-- **Sync Ritual**:
-  1. **Pre-Task**: Read `MEMORY.md` via `grep_search` (with `no_ignore: true`) BEFORE research to align with the project's soul.
-  2. **Plan-Phase**: Update the `Doing` section with a high-signal intent prefixed by a unique **Session Name**.
-  3. **Post-Task**: Move intent to `Done`, record high-signal `Lessons Learned`, and delegate pending sub-tasks to the next session.
+- **Sync Ritual** (Execution frequency depends on task strategy in skill):
+  1. **Pre-Task (Always Mandatory)**: Read `MEMORY.md` via `grep_search` (with `no_ignore: true`) BEFORE research to align with the project's soul.
+  2. **Plan-Phase & Post-Task (Task-Dependent)**: Update `Doing`, `Done`, and `Lessons Learned` for all **Directive** tasks or high-signal architectural decisions. Skip for pure Inquiry tasks to minimize noise.
 - **Bypass Rule**: Always bypass `.gitignore` for `.agents/memory/`. If missing, bootstrap from `MEMORY.example.md` immediately.
 - **Progressive Disclosure**: Keep the main `MEMORY.md` lean. Archive historical logs (>500 tokens) to sub-files as per the skill.
 
