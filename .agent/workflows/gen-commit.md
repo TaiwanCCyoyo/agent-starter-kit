@@ -1,40 +1,34 @@
 ---
-description: Generate a conventional Git commit message based on current changes.
+description: Generate a high-quality Git commit message using commit-helper standards.
 ---
 
 # Generate Commit Message SOP
 
-When the User runs `/gen-commit` (or asks you to generate a commit message), follow these precise steps:
+When the User runs `/gen-commit` (or asks you to generate a commit message), follow these precise steps, leveraging the `commit-helper` skill for quality standards.
 
-**Goal**: Analyze the user's local code changes and generate a high-quality, English Git commit message following the Conventional Commits specification.
+## Step 1: Analyze Context
+1.  **Current Status**: Execute `git status` to check staged and unstaged changes.
+2.  **Staged Changes**: Execute `git diff --cached` to analyze the exact lines of code to be committed.
+3.  **User Input**: Incorporate any additional context or instructions provided by the user.
 
-## Step 1: Analyze Changes
-- If you have terminal access, you MUST execute `git status` and `git diff` (or `git diff --cached` if files are already staged) to strictly analyze the exact lines of code that were added, modified, or deleted.
-- If you do not have terminal access, politely ask the user to provide their current `git diff` output.
+## Step 2: Quality Standards (Consult Skill)
+You MUST use the **commit-helper** skill for all decisions regarding:
+-   **Conventional Commits** format.
+-   **English language** usage.
+-   **Imperative mood** and formatting rules.
+-   **Security Check**: Ensure no sensitive data (like `.env`) is staged.
 
-## Step 2: Formulate the Message
-Based on your analysis, draft a commit message adhering to these rules:
-1. **Language**: The commit message MUST be in **English** (as per project global rules).
-2. **Format**: Follow the Conventional Commits specification:
-   `<type>[optional scope]: <description>`
+## Step 3: Execution Plan
+1.  **Draft Message**: Based on the analysis, draft a commit message in English.
+2.  **Present Draft**: Show the draft to the user in a code block.
+3.  **Summary**: Provide a brief **Traditional Chinese** summary of the changes.
+4.  **Confirm/Execute**:
+    -   If the user specifically requested an autonomous commit, add the trailer `Agent-Status: autonomous` and execute `git commit -m "..."`.
+    -   Otherwise, wait for the user to confirm the message before executing.
 
-   *Types include:*
-   - `feat`: A new feature
-   - `fix`: A bug fix
-   - `docs`: Documentation only changes
-   - `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc.)
-   - `refactor`: A code change that neither fixes a bug nor adds a feature
-   - `perf`: A code change that improves performance
-   - `test`: Adding missing tests or correcting existing tests
-   - `chore`: Changes to the build process or auxiliary tools/libraries
-
-3. **Description**:
-   - Keep the first line (subject) under 50 characters.
-   - Use the imperative mood (e.g., "add", not "added").
-   - Do not capitalize the first letter.
-   - Do not end the subject line with a period.
-4. **Body (Optional)**: If the changes are complex, provide a body paragraph wrapped at 72 characters explaining *why* the change was made and *what* the core logic alters.
-
-## Step 3: Present to the User
-- Present the final proposed `git commit` command (or raw message string) within a code block so the user can easily copy and paste it.
-- Along with the English commit message, provide a very brief **Traditional Chinese** summary of what you inferred from the diff to assure the user you understood the changes.
+## Step 4: Handle Failures
+If `git commit` is blocked by pre-commit hooks (e.g., Ruff linting error), address the errors:
+1.  Analyze the terminal output to identify the failing files/lines.
+2.  Fix the issues directly.
+3.  Re-stage the fixed files.
+4.  Retry the commit.
