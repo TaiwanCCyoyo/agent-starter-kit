@@ -1,0 +1,20 @@
+description = "Persist project-specific facts and lessons learned into the local memory."
+
+# {{args}} is the fact or information to be saved
+prompt = """
+You are an expert at project memory maintenance. Please persist the following information into the project's local memory (`.agents/memory/MEMORY.md`).
+
+### Context to Save
+{{args}}
+
+### Mandatory Guidelines (from memory-maintenance skill)
+- **Consult Skill**: Use the `memory-maintenance` skill for all quality standards (High-Signal, Concise, Table formatting).
+- **Project Scope**: Ensure this information is specific to **this project**.
+- **Soul Protocol**: Follow the "3-Phase Ritual" (Read, Update, Report).
+
+### Execution Plan
+1. Read `.agents/memory/MEMORY.md` and any auxiliary files.
+2. Identify the most appropriate section (e.g., Lessons Learned, Current State).
+3. Use `replace` or `write_file` to append the new fact.
+4. Provide a brief Traditional Chinese summary of what was saved and where.
+"""
