@@ -24,13 +24,16 @@ This document defines the foundational mandates and operational protocols for Ge
   - **Exemption Justification**: [Only for documentation-only changes]
 
 ### 3. Long-Term Memory & State (The "Soul" Protocol)
-**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. This is the central hub for all sessions (including Antigravity).
-- **Mandatory Alignment**: ALL memory operations (reading, updating, auditing) MUST strictly follow the **`memory-maintenance` skill**.
-- **Sync Ritual** (Execution frequency depends on task strategy in skill):
-  1. **Pre-Task (Always Mandatory)**: Read `MEMORY.md` via `grep_search` (with `no_ignore: true`) BEFORE research to align with the project's soul.
-  2. **Plan-Phase & Post-Task (Task-Dependent)**: Update `Doing`, `Done`, and `Lessons Learned` for all **Directive** tasks or high-signal architectural decisions. Skip for pure Inquiry tasks to minimize noise.
-- **Bypass Rule**: Always bypass `.gitignore` for `.agents/memory/`. If missing, bootstrap from `MEMORY.example.md` immediately.
-- **Progressive Disclosure**: Keep the main `MEMORY.md` lean. Archive historical logs (>500 tokens) to sub-files as per the skill.
+**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. This is the central hub for all sessions.
+- **Mandatory Alignment**: ALL memory operations MUST strictly follow the **`memory-maintenance` skill**.
+- **Automated Lifecycle (New)**:
+    1.  **SessionStart (Auto-Injection)**: At startup, the system automatically injects `MEMORY.md` and Git context into the session. You MUST align your current goal with the detected branch/worktree mission immediately.
+    2.  **AfterAgent (Auto-Nudging)**: After each turn, a system hook monitors changes. If you receive a nudge (e.g., "Detected changes. Please run `save-memory`"), you MUST treat it as a high-priority directive to persist your progress and lessons learned.
+- **Sync Ritual**:
+    - **Pre-Task**: Automatically handled by `SessionStart`. Validate the injected context.
+    - **Post-Task**: Triggered by `AfterAgent` or manual intent. Follow the Skill's 3-Phase Ritual.
+- **Bypass Rule**: Always bypass `.gitignore` for `.agents/memory/`.
+- **Progressive Disclosure**: Keep `MEMORY.md` lean. Archive history > 500 tokens.
 
 ### 4. Collaborative Debugging & Enablement
 - **Ask for Enablement, Not Completion**: If blocked (permissions, API keys), ask for the **tools or access** to solve it yourself. Do not ask the user to do the manual work for you.

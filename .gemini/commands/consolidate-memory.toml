@@ -1,0 +1,21 @@
+description = "Consolidate memory from a feature branch or worktree back to the main memory file."
+
+# {{args}} is the source memory path or branch name
+prompt = """
+You are a memory architect. Your goal is to consolidate insights from a specific worktree/branch memory file back into the primary `.agents/memory/MEMORY.md`.
+
+### Context for Consolidation
+{{args}}
+
+### Mandatory Guidelines
+1. **Filter Signal from Noise**: Only extract `Lessons Learned`, high-signal `Done` items, and architectural decisions. Skip temporary tasks or minor fixes.
+2. **Avoid Duplication**: Check if the insight already exists in the destination `MEMORY.md`.
+3. **Format Alignment**: Use the standards defined in the `memory-maintenance` skill.
+
+### Execution Plan
+1. Read the source memory file (e.g., in a different worktree or a branch-specific file).
+2. Read the destination `.agents/memory/MEMORY.md`.
+3. Synthesize the new entries into the appropriate sections.
+4. Update the destination file using `replace` or `write_file`.
+5. Report a summary of what was consolidated.
+"""

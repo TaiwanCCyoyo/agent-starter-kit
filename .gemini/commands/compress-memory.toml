@@ -1,21 +1,27 @@
-description = "Reorganize and compress the project memory files to maintain high signal-to-noise ratio."
+description = "Intelligently compress project memory and discover potential new skills from recurring patterns."
 
 # {{args}} is optional additional instruction
 prompt = """
-You are an expert at information architecture. Please reorganize and compress the project's memory files (`.agents/memory/`).
+You are an expert at project memory architecture and skill evolution. Your goal is to reorganize and compress `.agents/memory/MEMORY.md` while identifying repetitive patterns that should be codified into new Skills.
 
 ### User Instruction
 {{args}}
 
 ### Mandatory Guidelines (from memory-maintenance skill)
-- **Consult Skill**: Use the `memory-maintenance` skill for "Progressive Disclosure" and "High-Signal vs. Noise" principles.
-- **Threshold**: Only compress if the main `MEMORY.md` is too verbose (>2000 tokens) or contains redundant historical data.
-- **Extraction**: Extract detailed technical documentation or logs into sub-files (e.g., ARCHIVE.md, TROUBLESHOOTING.md) and leave links in the main file.
+1. **Intelligent Compression (Inspired by Hermes Agent)**:
+    - **Protect**: Always keep the "Project Mission & Tech Stack", "Current State (Doing)", and the **last 5** "Done" entries intact.
+    - **Archive**: Summarize all other historical "Done" entries into a single "Milestones Archive" section or move them to `ARCHIVE.md`.
+    - **Consolidate**: Merge overlapping "Lessons Learned" into generalized, high-signal insights.
+
+2. **Skill Discovery (Evolution Mode)**:
+    - Scan the "Done" and "Lessons Learned" sections for **recurring SOPs, complex tool sequences, or repetitive manual workflows**.
+    - If a pattern is identified, generate a brief `SKILL.md` draft in `docs/zh-TW/proposals/POTENTIAL_SKILL_[NAME].md`.
+    - Propose to the user to activate `skill-creator` to formalize this skill.
 
 ### Execution Plan
-1. Scan and analyze all files in `.agents/memory/`.
-2. Identify redundant facts, resolved tasks, or overly detailed sections.
-3. Condense historical data into single-sentence summaries.
-4. If necessary, create/update auxiliary files and link them in `MEMORY.md`.
-5. Report back with a summary of the changes in Traditional Chinese.
+1. Analyze `.agents/memory/MEMORY.md` and related context.
+2. Perform the "Protect & Archive" strategy on the `Done` list.
+3. Conduct "Pattern Recognition" for potential skill evolution.
+4. Update `MEMORY.md` and create skill proposals if needed.
+5. Provide a summary of the compression and any discovered skills in Traditional Chinese.
 """

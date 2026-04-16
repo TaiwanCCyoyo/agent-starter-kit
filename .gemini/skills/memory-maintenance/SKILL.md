@@ -46,13 +46,32 @@ This skill transforms the project's memory into a **Living Skill Guide**. It ens
   2. Update `Lessons Learned` with high-signal insights to prevent regression.
   3. Explicitly delegate unfinished sub-tasks in the `Handover` section.
 
-## Best Practices for Tables and Lists
-- **Consistency**: Keep tables (like Testing Status) updated and aligned.
-- **Evidence**: Always include evidence or notes (e.g., `[Verified]`, `[Blocked]`).
-- **Hierarchy**: Use Markdown headers to maintain a clear visual structure for the next Agent.
+## 4. Automated Lifecycle & Nudge Response
 
-## Maintenance Checklist
-- [ ] Is the Mission statement up to date?
-- [ ] Are the Tech Stack constraints (Ruff, uv, etc.) accurately reflected?
-- [ ] Does `Lessons Learned` contain fluff or repetitive history? (If so, prune/archive).
-- [ ] Is the `Done` list getting too long? (Keep only the last ~5-10 entries).
+This section defines how the Agent interacts with system-level hooks for seamless memory management.
+
+### I. SessionStart: Context Alignment
+- **Behavior**: Upon startup, check for injected `additionalContext` containing Git branch and `MEMORY.md` content.
+- **Action**: Immediately validate if the current `Doing` task aligns with the detected branch mission. If in a new Worktree, propose a goal alignment to the user.
+- **Goal**: Zero-manual loading of memory.
+
+### II. AfterAgent: The Nudge Response
+- **Trigger**: System emits a nudge: `Detected changes. Please run save-memory`.
+- **Response Protocol**:
+    1. **Acknowledge**: Briefly confirm the system's detection.
+    2. **Summarize**: Extract the key `Done` items and `Lessons Learned` from the *current* turn only.
+    3. **Execute**: Call the `save-memory` command (or the `write_file` equivalent) to update `.agents/memory/MEMORY.md`.
+- **Priority**: System nudges are high-priority; do not ignore them unless there's a critical error.
+
+### III. Intelligent Compression & Skill Discovery
+- **Thresholds**:
+    - Total `MEMORY.md` size > 2000 tokens.
+    - `Done` list entries > 15.
+- **Compression Strategy**:
+    - **Protect**: Mission, Tech Stack, and the last 3 `Done` entries.
+    - **Compress**: Summarize older `Done` entries into a "Milestones Archive" section.
+- **Skill Discovery**: During compression, analyze if a repetitive workflow exists. If so, suggest activating `skill-creator` to encapsulate the wisdom.
+
+## 5. Git Worktree Sync (Contextual Mobility)
+- **Objective**: Ensure intelligence flows between parallel development environments.
+- **Action**: When tasking in a Worktree, mark entries with `[Worktree: branch-name]`. Upon merging/closing, use `consolidate-memory` (or manual transfer) to backfill critical `Lessons Learned` to the main branch memory.
