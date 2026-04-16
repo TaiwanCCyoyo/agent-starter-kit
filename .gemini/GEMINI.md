@@ -44,6 +44,7 @@ This document defines the foundational mandates and operational protocols for Ge
 ### 6. Reuse & Efficiency
 - **Don't Reinvent the Wheel**: Check existing patterns in the codebase or reference open-source implementations before writing complex logic from scratch.
 - **Copy and Adapt**: Prioritize adapting proven configurations and scripts.
+- **Traceable Design**: For all architectural proposals or reuse of external patterns, you MUST explicitly cite the source of inspiration (e.g., industry-standard patterns, specific library architectures, or proven open-source implementations). Citing technical origins provides weight to your strategies and ensures the "why" is grounded in established practices.
 
 ### 7. Prevent Feature Deletion
 **CRITICAL**: Do not delete existing functions or features without explicit intent or request.
