@@ -27,9 +27,14 @@ def update_memory_doing(memory_path, branch_name):
 
         pattern = re.compile(r"(### Doing\n)(.*?)(\n###|\Z)", re.DOTALL)
         if pattern.search(content):
-            updated_content = pattern.sub(rf"\1- **[Auto-Sync]**: Working on branch '{branch_name}'.\n\3", content)
+            mission_prompt = (
+                f"- **[MISSION REQUIRED]**: This worktree is for branch '{branch_name}'.\n"
+                f"  - **Branch Goal**: [Agent: PLEASE DEFINE THE SPECIFIC GOAL OF THIS BRANCH HERE]\n"
+                f"  - **Definition of Done**: [Agent: LIST 2-3 CRITERIA THAT SIGNIFY COMPLETION]\n"
+            )
+            updated_content = pattern.sub(rf"\1{mission_prompt}\n\3", content)
             memory_path.write_text(updated_content, encoding="utf-8")
-            print(f">>> [Git Hook] Updated MEMORY.md 'Doing' section for branch '{branch_name}'.")
+            print(f">>> [Git Hook] Initialized MEMORY.md for branch '{branch_name}' with a mission prompt.")
     except Exception as e:
         print(f">>> [Git Hook] Failed to update MEMORY.md: {e}")
 

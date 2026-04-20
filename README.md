@@ -12,15 +12,47 @@ A standardized, friction-less engineering infrastructure for multi-agent ecosyst
 5. **Encoding & Language Integrity**: Mandatory validation (UTF-8 and English) for core logic, enforced via Gemini CLI hooks and `pre-commit`.
 6. **Verification-First Execution**: Agents must provide tangible validation evidence before marking tasks as complete.
 
-## 🏗️ Architecture
+## 🧠 Memory Management Workflow
 
-Agent-specific protocols are isolated:
+This project uses a proactive memory system to maintain long-term context across sessions and worktrees.
 
-* **`.agent/`**: **Antigravity-specific** rules and workflows.
-* **`.gemini/`**: **Gemini CLI-specific** policies, skills, and hooks.
-* **`.agents/memory/`**: **Shared** stateful brain (Git-ignored).
+### 1. Daily Usage
+- **Save Memory**: When you finish a sub-task, use `/save-memory`. The agent will automatically update the `Done` section.
+- **Auto-Nudge**: If the agent modifies files but forgets to update `MEMORY.md`, a system hook will automatically remind them.
+
+### 2. Multi-Worktree Consolidation
+When working with multiple worktrees, your memories will naturally diverge. To bring insights back to the main repository:
+1. Run the consolidation tool:
+   ```bash
+   uv run python .gemini/skills/worktree-manager/scripts/memory_consolidator.py /path/to/worktree
+   ```
+2. Follow the tool's suggestions to merge high-signal `Lessons Learned` and `Done` items into your primary `MEMORY.md`.
+
+### 3. Memory Compression
+If `MEMORY.md` becomes too large (over 2000 tokens), the system will suggest compression. Run:
+- `/compress-memory`: Summarizes old `Done` items into a single historical entry to keep the context lean.
+
+## 🪝 Automated Hooks & Lifecycle
+
+This repository utilizes several hooks to maintain system integrity:
+
+| Hook Type | Name | Purpose | Script |
+| :--- | :--- | :--- | :--- |
+| **Git** | `pre-commit` | Lints, formats, and scans for secrets. | `.pre-commit-config.yaml` |
+| **Git** | `post-checkout` | Initializes memory and hooks in new worktrees. | `scripts/git_post_checkout.py` |
+| **Gemini CLI** | `SessionStart` | Loads project memory and branch context. | `scripts/session_start.py` |
+| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `scripts/file_hygiene.py` |
+| **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `scripts/memory_nudger.py` |
+| **Gemini CLI** | `AfterAgent` | Checks memory file size and warns if compression is needed. | `scripts/memory_compressor.py` |
+
+### Troubleshooting Hooks
+If hooks are not firing:
+1. Ensure you have run `uv run pre-commit install --hook-type pre-commit --hook-type pre-push`.
+2. Check `.git/hooks/post-checkout` exists and is executable.
+3. Verify `.gemini/settings.json` has the correct `matcher` and `command` paths.
 
 ## 🛠️ How to Initialize
+...
 
 **For Humans**:
 Prompt your AI Assistant: *"Please follow the README to initialize this repository."*

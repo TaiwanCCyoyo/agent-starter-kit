@@ -11,9 +11,13 @@ def get_git_info():
         branch = subprocess.check_output("git branch --show-current", shell=True, text=True, encoding="utf-8").strip()
         worktree_list = subprocess.check_output("git worktree list", shell=True, text=True, encoding="utf-8").strip()
         is_worktree = len(worktree_list.splitlines()) > 1
-        return branch or "detached", is_worktree
+
+        # Get recent commit message as a hint for the branch mission
+        last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, text=True, encoding="utf-8").strip()
+
+        return branch or "detached", is_worktree, last_commit_msg
     except Exception as e:
-        return f"unknown (error: {str(e)})", False
+        return f"unknown (error: {str(e)})", False, "No history found"
 
 
 def read_memory(root_dir: Path):
@@ -75,13 +79,12 @@ def sync_memory_if_needed(current_root: Path):
 
 
 def main():
-    # ... (header same as before)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
     root_dir = Path(__file__).resolve().parent.parent
 
-    # NEW: Sync memory before reading
+    # Sync memory before reading
     sync_status = sync_memory_if_needed(root_dir)
 
     # Read input from stdin if any
@@ -91,9 +94,19 @@ def main():
     except Exception:
         pass
 
-    branch, is_worktree = get_git_info()
+    branch, is_worktree, last_msg = get_git_info()
     purpose = get_branch_purpose(branch)
     memory_content = read_memory(root_dir)
+
+    # Check if mission is uninitialized
+    mission_alert = ""
+    if "[MISSION REQUIRED]" in memory_content:
+        mission_alert = f"""
+> [!IMPORTANT]
+> **UNINITIALIZED BRANCH MISSION DETECTED**
+> This worktree was recently created for branch `{branch}`.
+> **ACTION REQUIRED**: Please define the 'Branch Goal' and 'Definition of Done' in the `Doing` section of `MEMORY.md` before starting technical tasks.
+"""
 
     # Construct context
     additional_context = f"""
@@ -101,27 +114,23 @@ def main():
 - **Current Git Branch**: `{branch}` ({purpose})
 - **Git Worktree Status**: {"Active Worktree" if is_worktree else "Main Workspace"}
 - **Memory Sync Status**: {sync_status if sync_status else "Up to date"}
-...
+{mission_alert}
 
 ### [Goal Alignment Suggestion]
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
-Please check the `MEMORY.md` below and move relevant items to the `Doing` section if they match this goal.
+**Context Clue (Last Commit)**: `{last_msg}`
+
+Please check the `MEMORY.md` below and align your current task with the project mission.
 
 ### [Project Memory: MEMORY.md]
 {memory_content}
 
 ---
-*Note: This context was automatically injected by the SessionStart hook. Align your current 'Doing' task with the branch mission.*
+*Note: This context was automatically injected by the SessionStart hook.*
 """
 
-    # Prepare output following Gemini CLI hook schema
-    output = {
-        "hookSpecificOutput": {"additionalContext": additional_context},
-        "systemMessage": f"Memory loaded for branch '{branch}' ({purpose}). Welcome back, task synchronized.",
-    }
-
-    # Print to stdout
-    print(json.dumps(output, ensure_ascii=False))
+    # Print directly as Markdown to be captured by the hook
+    print(additional_context)
 
 
 if __name__ == "__main__":

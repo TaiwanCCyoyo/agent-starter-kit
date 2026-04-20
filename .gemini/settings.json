@@ -29,6 +29,12 @@
             "description": "Nudges the agent to update memory if changes are detected.",
             "type": "command",
             "command": "uv run python ./scripts/memory_nudger.py"
+          },
+          {
+            "name": "memory-size-check",
+            "description": "Checks memory file size and warns if compression is needed.",
+            "type": "command",
+            "command": "uv run python ./scripts/memory_compressor.py"
           }
         ]
       }

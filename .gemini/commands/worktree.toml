@@ -1,0 +1,16 @@
+description = "Manage Git worktree lifecycle (create or finish) according to the worktree-manager skill."
+
+prompt = """
+You are a specialized agent handling Git worktrees. The user has requested a worktree operation.
+
+### Request
+{{args}}
+
+### Mandatory Instructions
+1. Immediately invoke the `activate_skill` tool with `name="worktree-manager"`.
+2. Determine if the user is asking to **create** (split) or **finish** (teardown) a worktree.
+3. If creating: Follow Phase 1 of the skill. Crucially, you MUST edit the newly created worktree's `MEMORY.md` file to explicitly define its `Branch Goal` and `Definition of Done` based on the user's intent. Do not leave the `[MISSION REQUIRED]` prompt unfilled.
+4. If finishing: Follow Phase 3 of the skill. Perform consolidation, merge, and cleanup safely.
+
+Always provide a brief summary of the completed steps.
+"""
