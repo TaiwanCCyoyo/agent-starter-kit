@@ -29,8 +29,14 @@
 當被要求初始化專案時，您必須獨立執行以下步驟：
 1. **啟動記憶體**：將 `.agents/memory/MEMORY.example.md` 複製為 `.agents/memory/MEMORY.md`。
    - **關鍵步驟**：您必須立即根據目前的 `README.md` 與專案脈絡填充 `MEMORY.md` 中的 **Mission**（任務目標）區塊，以建立此 Session 的「靈魂」。
-2. **安裝鉤子 (Hooks)**：執行 `uv run pre-commit install`。
-3. **驗證設定**：執行 `uv run ruff check .` 確保環境已就緒。
+2. **安裝 Hook**：執行以下指令安裝標準與自定義 Hook：
+   ```bash
+   uv run pre-commit install
+   # 註冊同步協議 (Linux/macOS)
+   printf "#!/bin/bash\nuv run python scripts/git_post_checkout.py \"\$@\"" > .git/hooks/post-checkout
+   chmod +x .git/hooks/post-checkout
+   ```
+3. **驗證設定**：執行 `uv run ruff check .` 確保環境就緒。
 
 ---
 *注意：本專案強制要求使用 **UTF-8 (without BOM)** 編碼，且技術文件與程式碼必須使用 **英文**。*

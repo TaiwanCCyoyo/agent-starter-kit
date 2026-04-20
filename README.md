@@ -28,7 +28,13 @@ Prompt your AI Assistant: *"Please follow the README to initialize this reposito
 **For Agents**:
 1. **Bootstrap Memory**: Copy `.agents/memory/MEMORY.example.md` to `.agents/memory/MEMORY.md`.
    - **Crucial**: You MUST immediately populate the **Mission** section in `MEMORY.md` based on the current `README.md` and project context to establish the session's "Soul."
-2. **Install Hooks**: Run `uv run pre-commit install`.
+2. **Install Hooks**: Run the following to install standard and custom hooks:
+   ```bash
+   uv run pre-commit install
+   # Register sync protocol (Linux/macOS)
+   printf "#!/bin/bash\nuv run python scripts/git_post_checkout.py \"\$@\"" > .git/hooks/post-checkout
+   chmod +x .git/hooks/post-checkout
+   ```
 3. **Verify Setup**: Run `uv run ruff check .` to ensure the environment is ready.
 
 ---

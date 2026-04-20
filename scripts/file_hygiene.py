@@ -26,6 +26,45 @@ def is_path_allowed(filepath):
     return False
 
 
+def get_sync_targets(filepath):
+    """
+    Identifies related documentation files that may need synchronization.
+    """
+    path = Path(filepath).as_posix()
+    targets = []
+
+    # Case 1: Root README.md modified -> check all docs/*/README.md
+    if path == "README.md":
+        docs_dir = Path("docs")
+        if docs_dir.exists():
+            for lang_dir in docs_dir.iterdir():
+                if lang_dir.is_dir():
+                    target = lang_dir / "README.md"
+                    if target.exists():
+                        targets.append(target.as_posix())
+
+    # Case 2: docs/<lang>/<filename> modified
+    elif path.startswith("docs/"):
+        parts = Path(path).parts
+        if len(parts) >= 3:
+            current_lang = parts[1]
+            filename = "/".join(parts[2:])
+
+            # 2a. Check root README if it's a README
+            if filename.lower() == "readme.md":
+                targets.append("README.md")
+
+            # 2b. Check other languages in docs/
+            docs_dir = Path("docs")
+            for lang_dir in docs_dir.iterdir():
+                if lang_dir.is_dir() and lang_dir.name != current_lang:
+                    target = lang_dir / filename
+                    if target.exists():
+                        targets.append(target.as_posix())
+
+    return targets
+
+
 def check_file_hygiene(filepath, is_hook=False):
     """
     Validates file encoding, language constraints, and cleans up hygiene issues.
@@ -94,6 +133,16 @@ def check_file_hygiene(filepath, is_hook=False):
                 print(f"Error: Non-English (CJK) character or Mojibake found in {filepath} at line {i + 1}:")
                 print(f"  > {line.strip()}")
                 return False
+
+    # 4. Universal Documentation Sync Alert
+    sync_targets = get_sync_targets(filepath)
+    if sync_targets:
+        print("\n" + "!" * 60)
+        print(f">>> [SYNC ALERT] '{filepath}' was modified.")
+        print(">>> Please ensure the following related files are updated:")
+        for t in sync_targets:
+            print(f"    [ ] {t}")
+        print("!" * 60 + "\n")
 
     return True
 
