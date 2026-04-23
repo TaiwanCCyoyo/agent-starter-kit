@@ -1,4 +1,3 @@
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -47,22 +46,66 @@ DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
 """
 
 
-def read_memory(root_dir: Path):
-    """Read or initialize the project memory file."""
+def read_memory(root_dir: Path, branch: str):
+    """Read or initialize the project memory file with smart prompts."""
     memory_dir = root_dir / ".agents" / "memory"
     memory_path = memory_dir / "MEMORY.md"
 
+    is_new = False
     if not memory_path.exists():
+        is_new = True
         try:
             memory_dir.mkdir(parents=True, exist_ok=True)
-            memory_path.write_text(DEFAULT_MEMORY_TEMPLATE, encoding="utf-8")
+            # Initial template setup
+            content = DEFAULT_MEMORY_TEMPLATE
+
+            # Inject mission prompt for new initialization
+            mission_prompt = f"""- **[MISSION REQUIRED]**: This is a new session on branch `{branch}`.
+  - **Short-term Goal**: [What are we doing right now?]
+  - **Mid-term Goal**: [What does this branch achieve?]
+  - **Long-term Impact**: [How does this benefit the project?]
+  - **Definition of Done**: [2-3 concrete criteria]"""
+
+            content = content.replace("- **[Session Name]**: [MISSION REQUIRED] Define the 'Branch Goal' and 'Definition of Done' here.", mission_prompt)
+            memory_path.write_text(content, encoding="utf-8")
         except Exception as e:
             return f"Error initializing memory: {str(e)}"
 
     try:
-        return memory_path.read_text(encoding="utf-8")
+        content = memory_path.read_text(encoding="utf-8")
+        if is_new:
+            return f"*(Initialized new memory for branch `{branch}`)*\n\n" + content
+        return content
     except Exception as e:
         return f"Error reading memory: {str(e)}"
+
+
+def sync_memory_if_needed(current_root: Path):
+    """Proactively sync MEMORY.md from main repo if missing in worktree."""
+    memory_rel_path = Path(".agents/memory/MEMORY.md")
+    target_path = current_root / memory_rel_path
+
+    if target_path.exists():
+        return "Memory exists"
+
+    try:
+        # Find the main repository root using git
+        common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8").strip()
+        main_root = Path(common_dir).resolve().parent
+
+        if main_root == current_root:
+            return "Main repository (no sync needed)"
+
+        source_path = main_root / memory_rel_path
+        if source_path.exists():
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            import shutil
+
+            shutil.copy2(source_path, target_path)
+            return f"Synchronized from main repo ({main_root.name})"
+    except Exception as e:
+        return f"Sync check failed: {str(e)}"
+    return "No source memory found"
 
 
 def get_branch_purpose(branch):
@@ -78,59 +121,21 @@ def get_branch_purpose(branch):
     return "General Development"
 
 
-def sync_memory_if_needed(current_root: Path):
-    """Ensure MEMORY.md exists in worktree by copying from main repo if needed."""
-    memory_rel_path = Path(".agents/memory/MEMORY.md")
-    target_path = current_root / memory_rel_path
-
-    if target_path.exists():
-        return  # Already synced
-
-    try:
-        # Find the main repository root
-        main_git_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8").strip()
-        main_root = Path(main_git_dir).resolve().parent  # Usually .git is inside main_root
-
-        # In some worktree setups, git-common-dir points elsewhere,
-        # let's try a more robust way to find main root if it's a sibling.
-        if not (main_root / memory_rel_path).exists():
-            # Fallback: check sibling directory based on our naming convention
-            for sibling in current_root.parent.iterdir():
-                if sibling.is_dir() and (sibling / memory_rel_path).exists() and sibling != current_root:
-                    main_root = sibling
-                    break
-
-        source_path = main_root / memory_rel_path
-        if source_path.exists():
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            import shutil
-
-            shutil.copy2(source_path, target_path)
-            return f"Synchronized from {main_root.name}"
-    except Exception as e:
-        return f"Sync failed: {str(e)}"
-    return "No source memory found for sync."
-
-
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
     root_dir = Path(__file__).resolve().parent.parent
 
-    # Sync memory before reading
+    # 1. First, try to sync from main if missing
     sync_status = sync_memory_if_needed(root_dir)
 
-    # Read input from stdin if any
-    try:
-        if not sys.stdin.isatty():
-            json.load(sys.stdin)
-    except Exception:
-        pass
-
+    # 2. Get Git Info
     branch, is_worktree, last_msg = get_git_info()
     purpose = get_branch_purpose(branch)
-    memory_content = read_memory(root_dir)
+
+    # 3. Read (or initialize if still missing)
+    memory_content = read_memory(root_dir, branch)
 
     # Check if mission is uninitialized
     mission_alert = ""

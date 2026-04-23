@@ -22,11 +22,11 @@
 
 ### 2. 多工作區匯合 (Multi-Worktree Consolidation)
 當同時使用多個 Worktree 時，各地的記憶會自然產生分歧。若要將洞察帶回主倉庫：
-1. 執行匯合工具：
+1. 使用 Gemini CLI 指令：
    ```bash
-   uv run python .gemini/skills/worktree-manager/scripts/memory_consolidator.py /path/to/worktree
+   /worktree finish <path/to/worktree>
    ```
-2. 根據工具建議，將高價值的 `Lessons Learned` 與 `Done` 項目合併至主倉庫的 `MEMORY.md`。
+2. Agent 會自動執行 **AI 語意合併 (Semantic Consolidation)**，將高價值的 `Lessons Learned` 與 `Done` 項目合併至主倉庫的 `MEMORY.md`。
 
 ### 3. 記憶壓縮
 若 `MEMORY.md` 變得過於臃腫（超過 2000 tokens），系統會建議壓縮。請執行：
@@ -38,17 +38,15 @@
 
 | hook類型 | 名稱 | 用途 | 腳本 |
 | :--- | :--- | :--- | :--- |
-| **Git** | `pre-commit` | 語法檢查、格式化與金鑰掃描。 | `.pre-commit-config.yaml` |
-| **Git** | `post-checkout` | 在新 Worktree 中初始化記憶與hook。 | `scripts/git_post_checkout.py` |
 | **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `scripts/session_start.py` |
 | **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `scripts/file_hygiene.py` |
 | **Gemini CLI** | `AfterAgent` | 在檔案變動後提醒 Agent 更新記憶。 | `scripts/memory_nudger.py` |
+| **Gemini CLI** | `AfterAgent` | 檢查記憶體檔案大小並在需要時建議壓縮。 | `scripts/memory_compressor.py` |
 
 ### hook故障排除
 如果hook沒有觸發：
 1. 確保已執行 `uv run pre-commit install --hook-type pre-commit --hook-type pre-push`。
-2. 檢查 `.git/hooks/post-checkout` 是否存在且具備執行權限。
-3. 驗證 `.gemini/settings.json` 中的 `matcher` 與 `command` 路徑是否正確。
+2. 驗證 `.gemini/settings.json` 中的 `matcher` 與 `command` 路徑是否正確。
 
 ## 🏗️ 系統架構
 ...
@@ -70,14 +68,11 @@
    - **Gemini CLI**：首次存取專案時，系統會自動觸發 `scripts/session_start.py` 並建立 `.agents/memory/MEMORY.md`。
    - **其他 Agent (如 Antigravity)**：由於不支援 `SessionStart` hook，您必須手動參考 `scripts/session_start.py` 中的範本建立 `.agents/memory/MEMORY.md`，或要求 Gemini CLI 協助初始化。
    - **關鍵步驟**：您必須立即根據目前的 `README.md` 與專案脈絡填充 `MEMORY.md` 中的 **Mission**（任務目標）區塊，以建立此 Session 的「靈魂」。
-2. **安裝 Hook**：執行以下指令安裝標準與自定義 Hook：
+2. **安裝 Hook**：執行以下指令安裝標準 Hook：
    ```bash
    uv run pre-commit install
-   # 註冊同步協議 (Linux/macOS)
-   printf "#!/bin/bash\nuv run python scripts/git_post_checkout.py \"\$@\"" > .git/hooks/post-checkout
-   chmod +x .git/hooks/post-checkout
    ```
 3. **驗證設定**：執行 `uv run ruff check .` 確保環境就緒。
 
 ---
-*注意：本專案強制要求使用 **UTF-8 (without BOM)** 編碼，且技術文件與程式碼必須使用 **英文**。*
+*Note: 本專案強制要求使用 **UTF-8 (without BOM)** 編碼，且技術文件與程式碼必須使用 **英文**。*

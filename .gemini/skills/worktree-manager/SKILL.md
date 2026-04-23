@@ -20,9 +20,12 @@ When instructed to create a new worktree (e.g., for a new feature or bugfix), th
 ### Phase 3: Teardown (Finishing a Worktree)
 When a worktree's mission is accomplished, the Agent MUST execute the "Closing Ritual" BEFORE removing the worktree:
 1. **Validation**: Ensure all items in the worktree's `Definition of Done` are met and tests pass.
-2. **Memory Consolidation**:
-   - Run `uv run python scripts/memory_consolidator.py <worktree_path>`.
-   - Read the output and manually integrate the high-signal `Lessons Learned` and `Done` items into the MAIN repository's `.agents/memory/MEMORY.md`.
+2. **AI Semantic Consolidation**:
+   - Read the `MEMORY.md` from the worktree path and the MAIN repository.
+   - Use LLM reasoning to synthesize a unified memory.
+   - **Lessons Learned**: Merge overlapping insights and keep high-signal discoveries.
+   - **Done Items**: Transfer completed milestones to the main memory, prefixing them with the branch/session context if relevant.
+   - **Action**: Use the `replace` or `write_file` tool to update the MAIN repository's `.agents/memory/MEMORY.md`.
 3. **Branch Merge**: Merge the worktree's branch into the main development branch (e.g., `main`).
 4. **Cleanup**: Execute `git worktree remove <worktree_path>`.
 5. **Branch Deletion**: Delete the merged branch using `git branch -d <branch_name>`.
@@ -40,5 +43,6 @@ This skill operates on top of the project's automated infrastructure. The follow
 **Important**: While the `post-checkout` hook provides the **scaffolding** (files and basic prompts), the Agent exercising this skill is RESPONSIBLE for the **intellectual injection** (defining the actual branch-specific mission).
 
 ## 4. Tooling
-- **`.gemini/skills/worktree-manager/scripts/memory_consolidator.py`**: Used during Phase 3 to extract insights before deletion.
+- **AI Semantic Engine**: Primary tool for memory consolidation during Phase 3 (Semantic merging of `MEMORY.md` files).
 - **`git worktree` commands**: For physical environment management.
+- **`scripts/git_post_checkout.py`**: Automated safety net for basic worktree scaffolding.

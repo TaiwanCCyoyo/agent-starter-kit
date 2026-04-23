@@ -22,11 +22,11 @@ This project uses a proactive memory system to maintain long-term context across
 
 ### 2. Multi-Worktree Consolidation
 When working with multiple worktrees, your memories will naturally diverge. To bring insights back to the main repository:
-1. Run the consolidation tool:
+1. Use the Gemini CLI command:
    ```bash
-   uv run python .gemini/skills/worktree-manager/scripts/memory_consolidator.py /path/to/worktree
+   /worktree finish <path/to/worktree>
    ```
-2. Follow the tool's suggestions to merge high-signal `Lessons Learned` and `Done` items into your primary `MEMORY.md`.
+2. The agent will automatically perform **AI Semantic Consolidation** to merge high-signal `Lessons Learned` and `Done` items into your primary `MEMORY.md`.
 
 ### 3. Memory Compression
 If `MEMORY.md` becomes too large (over 2000 tokens), the system will suggest compression. Run:
@@ -38,8 +38,6 @@ This repository utilizes several hooks to maintain system integrity:
 
 | Hook Type | Name | Purpose | Script |
 | :--- | :--- | :--- | :--- |
-| **Git** | `pre-commit` | Lints, formats, and scans for secrets. | `.pre-commit-config.yaml` |
-| **Git** | `post-checkout` | Initializes memory and hooks in new worktrees. | `scripts/git_post_checkout.py` |
 | **Gemini CLI** | `SessionStart` | Loads project memory and branch context. | `scripts/session_start.py` |
 | **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `scripts/file_hygiene.py` |
 | **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `scripts/memory_nudger.py` |
@@ -48,8 +46,7 @@ This repository utilizes several hooks to maintain system integrity:
 ### Troubleshooting Hooks
 If hooks are not firing:
 1. Ensure you have run `uv run pre-commit install --hook-type pre-commit --hook-type pre-push`.
-2. Check `.git/hooks/post-checkout` exists and is executable.
-3. Verify `.gemini/settings.json` has the correct `matcher` and `command` paths.
+2. Verify `.gemini/settings.json` has the correct `matcher` and `command` paths.
 
 ## 🛠️ How to Initialize
 ...
@@ -62,12 +59,9 @@ Prompt your AI Assistant: *"Please follow the README to initialize this reposito
    - **Gemini CLI**: Accessing the codebase for the first time will automatically trigger `scripts/session_start.py`, creating `.agents/memory/MEMORY.md` if it doesn't exist.
    - **Other Agents (e.g., Antigravity)**: You must manually create `.agents/memory/MEMORY.md` using the template found in `scripts/session_start.py` or ask a Gemini CLI session to initialize it for you, as these agents do not support the `SessionStart` hook.
    - **Crucial**: You MUST immediately populate the **Mission** section in the newly created `MEMORY.md` based on the current `README.md` and project context to establish the session's "Soul."
-2. **Install Hooks**: Run the following to install standard and custom hooks:
+2. **Install Hooks**: Run the following to install standard hooks:
    ```bash
    uv run pre-commit install
-   # Register sync protocol (Linux/macOS)
-   printf "#!/bin/bash\nuv run python scripts/git_post_checkout.py \"\$@\"" > .git/hooks/post-checkout
-   chmod +x .git/hooks/post-checkout
    ```
 3. **Verify Setup**: Run `uv run ruff check .` to ensure the environment is ready.
 
