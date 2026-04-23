@@ -1,6 +1,5 @@
 # Ignore agent instantiated memory to prevent committing project-specific state to the starter kit
 .agents/memory/*
-!.agents/memory/*.example.md
 
 # Ignore temporary files
 .agent/temp/*

@@ -66,7 +66,9 @@
 
 **AI Agent 指令**：
 當被要求初始化專案時，您必須獨立執行以下步驟：
-1. **啟動記憶體**：將 `.agents/memory/MEMORY.example.md` 複製為 `.agents/memory/MEMORY.md`。
+1. **啟動記憶體**：
+   - **Gemini CLI**：首次存取專案時，系統會自動觸發 `scripts/session_start.py` 並建立 `.agents/memory/MEMORY.md`。
+   - **其他 Agent (如 Antigravity)**：由於不支援 `SessionStart` hook，您必須手動參考 `scripts/session_start.py` 中的範本建立 `.agents/memory/MEMORY.md`，或要求 Gemini CLI 協助初始化。
    - **關鍵步驟**：您必須立即根據目前的 `README.md` 與專案脈絡填充 `MEMORY.md` 中的 **Mission**（任務目標）區塊，以建立此 Session 的「靈魂」。
 2. **安裝 Hook**：執行以下指令安裝標準與自定義 Hook：
    ```bash

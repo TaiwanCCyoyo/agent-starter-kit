@@ -20,15 +20,49 @@ def get_git_info():
         return f"unknown (error: {str(e)})", False, "No history found"
 
 
+DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
+
+*(Agent Note: This is your Soul. Update this BEFORE starting and AFTER finishing tasks. All files in `.agents/memory/` are git-ignored by default.)*
+
+## 1. Project Mission & Long-term Goals
+[Define the ultimate goal of this project and architectural rules here]
+
+## 2. Lessons Learned (Avoid Repeating Mistakes)
+- **Git Hook Initialization**: Merely having a `.pre-commit-config.yaml` is not enough; hooks must be explicitly installed using `uv run pre-commit install`. Always check if `.git/hooks/pre-commit` exists before assuming protection is active.
+
+## 3. Session Handover & Delegated Tasks
+- [ ] [List unfinished tasks or things the next session needs to pick up]
+
+## 4. Current State & Unfinished Business
+
+| Feature | Status | Evidence/Notes |
+| :--- | :--- | :--- |
+| **Initial Setup** | [ ] | Base project structure |
+
+### Doing
+- **[Session Name]**: [MISSION REQUIRED] Define the 'Branch Goal' and 'Definition of Done' here.
+
+### Done
+- [Record completed tasks here]
+"""
+
+
 def read_memory(root_dir: Path):
-    """Read the project memory file from root."""
-    memory_path = root_dir / ".agents" / "memory" / "MEMORY.md"
-    if memory_path.exists():
+    """Read or initialize the project memory file."""
+    memory_dir = root_dir / ".agents" / "memory"
+    memory_path = memory_dir / "MEMORY.md"
+
+    if not memory_path.exists():
         try:
-            return memory_path.read_text(encoding="utf-8")
+            memory_dir.mkdir(parents=True, exist_ok=True)
+            memory_path.write_text(DEFAULT_MEMORY_TEMPLATE, encoding="utf-8")
         except Exception as e:
-            return f"Error reading memory: {str(e)}"
-    return "No project memory found. Please initialize .agents/memory/MEMORY.md."
+            return f"Error initializing memory: {str(e)}"
+
+    try:
+        return memory_path.read_text(encoding="utf-8")
+    except Exception as e:
+        return f"Error reading memory: {str(e)}"
 
 
 def get_branch_purpose(branch):

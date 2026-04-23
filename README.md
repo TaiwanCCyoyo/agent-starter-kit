@@ -58,8 +58,10 @@ If hooks are not firing:
 Prompt your AI Assistant: *"Please follow the README to initialize this repository."*
 
 **For Agents**:
-1. **Bootstrap Memory**: Copy `.agents/memory/MEMORY.example.md` to `.agents/memory/MEMORY.md`.
-   - **Crucial**: You MUST immediately populate the **Mission** section in `MEMORY.md` based on the current `README.md` and project context to establish the session's "Soul."
+1. **Initialize Memory**:
+   - **Gemini CLI**: Accessing the codebase for the first time will automatically trigger `scripts/session_start.py`, creating `.agents/memory/MEMORY.md` if it doesn't exist.
+   - **Other Agents (e.g., Antigravity)**: You must manually create `.agents/memory/MEMORY.md` using the template found in `scripts/session_start.py` or ask a Gemini CLI session to initialize it for you, as these agents do not support the `SessionStart` hook.
+   - **Crucial**: You MUST immediately populate the **Mission** section in the newly created `MEMORY.md` based on the current `README.md` and project context to establish the session's "Soul."
 2. **Install Hooks**: Run the following to install standard and custom hooks:
    ```bash
    uv run pre-commit install
