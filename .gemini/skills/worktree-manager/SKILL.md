@@ -38,7 +38,7 @@ This skill operates on top of the project's automated infrastructure. The follow
 | :--- | :--- | :--- |
 | **`post-checkout`** | Git Hook | Automatically copies `MEMORY.md` and installs basic hooks (`pre-commit`) into the new worktree upon creation. |
 | **`session_start.py`** | Gemini Hook | Automatically alerts the Agent if a branch mission (`[MISSION REQUIRED]`) is uninitialized during session startup. |
-| **`memory_nudger.py`** | Gemini Hook | Reminds the Agent to update `MEMORY.md` after any file modifications within the worktree. |
+| **`.gemini/scripts/memory_nudger.py`** | Gemini Hook | Reminds the Agent to update `MEMORY.md` after any file modifications within the worktree. |
 
 **Important**: While the `post-checkout` hook provides the **scaffolding** (files and basic prompts), the Agent exercising this skill is RESPONSIBLE for the **intellectual injection** (defining the actual branch-specific mission).
 

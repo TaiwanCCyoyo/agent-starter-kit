@@ -46,8 +46,8 @@
 | :--- | :--- | :--- | :--- |
 | **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `.gemini/scripts/session_start.py` |
 | **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `scripts/auto_format.py`, `scripts/file_hygiene.py` |
-| **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `scripts/memory_nudger.py` |
-| **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `scripts/memory_compressor.py` |
+| **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `.gemini/scripts/memory_nudger.py` |
+| **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.codex/hooks/post_tool_use_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |

@@ -28,13 +28,13 @@
             "name": "memory-nudger",
             "description": "Nudges the agent to update memory if changes are detected.",
             "type": "command",
-            "command": "uv run python ./scripts/memory_nudger.py"
+            "command": "uv run python ./.gemini/scripts/memory_nudger.py"
           },
           {
             "name": "memory-size-check",
             "description": "Checks memory file size and warns if compression is needed.",
             "type": "command",
-            "command": "uv run python ./scripts/memory_compressor.py"
+            "command": "uv run python ./.gemini/scripts/memory_compressor.py"
           }
         ]
       }

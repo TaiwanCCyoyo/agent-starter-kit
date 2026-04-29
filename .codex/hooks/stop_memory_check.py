@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 
 MEMORY_REMINDER_INTERVAL = 3
+MEMORY_TOKEN_LIMIT = 2000
+MEMORY_LINE_LIMIT = 100
 STATE_FILE = Path(".agents/memory/.codex_stop_memory_state.json")
 
 
@@ -53,6 +55,29 @@ def changed_non_memory_files(root: Path) -> list[str]:
     return [path for path in changed_files if "MEMORY.md" not in path.replace("\\", "/")]
 
 
+def count_tokens(text: str) -> int:
+    """Estimate tokens roughly enough for hook-time memory health checks."""
+    return len(text) // 4
+
+
+def memory_health_message(root: Path) -> str:
+    path = memory_path(root)
+    if not path.exists():
+        return "No MEMORY.md found."
+
+    content = path.read_text(encoding="utf-8")
+    tokens = count_tokens(content)
+    lines = len(content.splitlines())
+
+    report = ["--- Memory Health Report ---", f"Approximate Tokens: {tokens}", f"Line Count: {lines}"]
+    if tokens > MEMORY_TOKEN_LIMIT or lines > MEMORY_LINE_LIMIT:
+        report.extend(["", "[STATUS: VERBOSE]", "Recommendation: Use the `compress-memory` skill to summarize historical data."])
+    else:
+        report.extend(["", "[STATUS: LEAN]", "No immediate compression required."])
+
+    return "\n".join(report)
+
+
 def memory_update_message(root: Path) -> str:
     state = read_state(root)
     current_memory_mtime = memory_mtime(root)
@@ -88,17 +113,11 @@ def main() -> int:
 
     root = repo_root(event.get("cwd") or ".")
 
-    memory_message = ""
-    try:
-        result = subprocess.run(["uv", "run", "python", "scripts/memory_compressor.py"], cwd=root, text=True, capture_output=True)
-        memory_message = "\n".join(part.strip() for part in [result.stdout, result.stderr] if part.strip())
-    except Exception as exc:
-        memory_message = f"Memory size check failed: {exc}"
-
     messages = []
     memory_update_reminder = memory_update_message(root)
     if memory_update_reminder:
         messages.append(memory_update_reminder)
+    memory_message = memory_health_message(root)
     if memory_message:
         messages.append(memory_message)
 
