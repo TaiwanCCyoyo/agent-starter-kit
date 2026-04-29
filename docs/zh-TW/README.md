@@ -1,78 +1,107 @@
-[English Version (英文版本)](../../README.md)
+[English Version](../../README.md)
 # AI Agent Starter Kit
 
-這是一個標準化的、無摩擦的 AI Agent 工程基礎設施，專為多 Agent 生態系統（如 Gemini CLI、Antigravity 等）設計。
+這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Gemini CLI、Codex、Antigravity 等工具。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
 
-## 🚀 核心理念
+## 核心理念
 
-1. **長期記憶持久化 (Long-Term Memory)**：Agent 會透過 `.agents/memory/MEMORY.md` 追蹤專案目標與經驗教訓，消除上下文遺忘。
-2. **自動化維護 (Automated Maintenance)**：Python 格式化 (`ruff`) 與檔案衛生檢查（UTF-8、英文限制）透過 Gemini CLI `AfterTool` hook與 Git `pre-commit` hook**完全自動化**執行。
-3. **原生安全掃描 (Native Security)**：`detect-secrets` 已整合至 pre-commit 工作流，確保金鑰與敏感資訊不會被提交。
-4. **自動授權政策 (Auto-Approval Policies)**：標準化任務（如 `.agents/memory/` 內的更新）在 Gemini CLI 中為自動授權，以減少中斷。
-5. **編碼與語言完整性 (Encoding & Language Integrity)**：核心邏輯強制使用 UTF-8 編碼與英文內容，由 `AfterTool` 與 `pre-commit` 執行驗證。
-6. **驗證優先執行 (Verification-First)**：Agent 在報告任務完成前，必須提供實質的驗證證據（腳本執行、測試結果）。
+1. **長期記憶持久化**：Agent 透過 `.agents/memory/MEMORY.md` 保存專案目標與經驗，降低跨 session 的上下文流失。
+2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層，但共用同一份專案記憶。
+3. **自動化維護**：格式化、lint、檔案衛生檢查與記憶提醒由 Agent hooks 與 repository 驗證腳本執行。
+4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
+5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
+6. **驗證優先**：Agent 必須提供具體驗證結果，才能宣告任務完成。
 
-## 🧠 記憶管理工作流
+## 記憶管理流程
 
-本專案使用主動式記憶系統來維持跨 Session 與跨 Worktree 的長期脈絡。
+本專案使用主動式記憶系統，維持跨 session 與 worktree 的長期上下文。
 
 ### 1. 日常使用
-- **保存記憶**：當您完成子任務時，請使用 `/save-memory`。Agent 會自動更新 `Done` 區塊。
-- **自動提醒 (Auto-Nudge)**：如果 Agent 修改了檔案但忘記更新 `MEMORY.md`，系統hook會自動發出提醒。
 
-### 2. 多工作區匯合 (Multi-Worktree Consolidation)
-當同時使用多個 Worktree 時，各地的記憶會自然產生分歧。若要將洞察帶回主倉庫：
+- **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.agents/memory/MEMORY.md`。
+- **自動提醒**：當 Agent 已經進行多輪工作且仍有 pending changes 時，hook 會提醒更新記憶。
+- **記憶壓縮**：當 `MEMORY.md` 過大時，系統會提醒進行壓縮。
+
+### 2. 多 Worktree 整合
+
+使用多個 worktree 時，各 worktree 的記憶可能逐漸分歧。要把洞見合併回主 repository：
+
 1. 使用 Gemini CLI 指令：
    ```bash
    /worktree finish <path/to/worktree>
    ```
-2. Agent 會自動執行 **AI 語意合併 (Semantic Consolidation)**，將高價值的 `Lessons Learned` 與 `Done` 項目合併至主倉庫的 `MEMORY.md`。
+2. Agent 會執行 AI semantic consolidation，將高價值的 `Lessons Learned` 與 `Done` 項目合併回主要 `MEMORY.md`。
 
-### 3. 記憶壓縮
-若 `MEMORY.md` 變得過於臃腫（超過 2000 tokens），系統會建議壓縮。請執行：
-- `/compress-memory`：將舊的 `Done` 項目總結為單一歷史紀錄，保持上下文精簡。
+### 3. Agent 工作流程
 
-## 🪝 自動化hook與生命週期 (Automated Hooks & Lifecycle)
+- **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
+- **Codex**：使用 `.codex/skills/` 裡的 command-like skills；可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。
+- **Antigravity**：使用 `.agent/workflows/` 與 `.agent/rules/`。
 
-本儲存庫利用多個hook來維護系統完整性：
+## 自動化 Hooks 與生命週期
 
-| hook類型 | 名稱 | 用途 | 腳本 |
+本 repository 使用各 Agent 原生 hooks 維護系統一致性：
+
+| Agent | Hook 類型 | 用途 | Script |
 | :--- | :--- | :--- | :--- |
-| **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `scripts/file_hygiene.py` |
-| **Gemini CLI** | `AfterAgent` | 在檔案變動後提醒 Agent 更新記憶。 | `scripts/memory_nudger.py` |
-| **Gemini CLI** | `AfterAgent` | 檢查記憶體檔案大小並在需要時建議壓縮。 | `scripts/memory_compressor.py` |
+| **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `.gemini/scripts/session_start.py` |
+| **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `scripts/auto_format.py`, `scripts/file_hygiene.py` |
+| **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `scripts/memory_nudger.py` |
+| **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `scripts/memory_compressor.py` |
+| **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
+| **Codex** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.codex/hooks/post_tool_use_hygiene.py` |
+| **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
 
-### hook故障排除
-如果hook沒有觸發：
-1. 確保已執行 `uv run pre-commit install --hook-type pre-commit --hook-type pre-push`。
-2. 驗證 `.gemini/settings.json` 中的 `matcher` 與 `command` 路徑是否正確。
+### Hook 疑難排解
 
-## 🏗️ 系統架構
-...
+如果 hooks 沒有觸發：
 
-不同 Agent 的協議與工作流已進行隔離：
-
-* **`.agent/`**：**Antigravity 特定**的規則與工作流。
-* **`.gemini/`**：**Gemini CLI 特定**的政策、技能與hook。
-* **`.agents/memory/`**：**共享**的狀態大腦（Git-ignored）。
-
-## 🛠️ 如何初始化
-
-**開發人員**：
-請直接向您的 AI 助手下達指令：*"請按照 README 初始化此儲存庫。"*
-
-**AI Agent 指令**：
-當被要求初始化專案時，您必須獨立執行以下步驟：
-1. **啟動記憶體**：
-   - **Gemini CLI**：首次存取專案時，系統會自動觸發 `scripts/session_start.py` 並建立 `.agents/memory/MEMORY.md`。
-   - **其他 Agent (如 Antigravity)**：由於不支援 `SessionStart` hook，您必須手動參考 `scripts/session_start.py` 中的範本建立 `.agents/memory/MEMORY.md`，或要求 Gemini CLI 協助初始化。
-   - **關鍵步驟**：您必須立即根據目前的 `README.md` 與專案脈絡填充 `MEMORY.md` 中的 **Mission**（任務目標）區塊，以建立此 Session 的「靈魂」。
-2. **安裝 Hook**：執行以下指令安裝標準 Hook：
+1. 確認 Git hooks 已安裝：
    ```bash
    uv run pre-commit install
    ```
-3. **驗證設定**：執行 `uv run ruff check .` 確保環境就緒。
+2. Gemini CLI：檢查 `.gemini/settings.json` 的 matcher 與 command path。
+3. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
+4. 確認 Agent 已信任 project-local configuration layer。
+
+## 模板使用方式
+
+套用到新專案時，依照支援的工具複製對應的 Agent 基礎設施：
+
+| Path | 用途 |
+| :--- | :--- |
+| `AGENTS.md` | Codex 與其他 Agent 的薄路由。 |
+| `.agents/memory/` | 共用長期專案記憶位置。 |
+| `.agent/` | Antigravity rules、skills、workflows。 |
+| `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
+| `.codex/` | Codex instructions、hooks、private command-like skills。 |
+| `scripts/` | 共用檔案衛生、格式化與記憶輔助腳本。 |
+| `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
+
+複製後，請將 `.agents/memory/MEMORY.md` 替換成目標專案的真實 mission，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
+
+## 初始化
+
+**給人類使用者**：
+
+請提示 AI assistant：「Please follow the README to initialize this repository.」
+
+**給 Agent**：
+
+1. **初始化記憶**
+   - **Gemini CLI**：首次存取時會自動觸發 `.gemini/scripts/session_start.py`，若 `.agents/memory/MEMORY.md` 不存在則建立它。
+   - **Codex**：首次 trusted session 會觸發 `.codex/hooks/session_start.py`，注入 `.codex/AGENTS.md` 與 `.agents/memory/MEMORY.md`。
+   - **其他 Agent**：手動使用 `.gemini/scripts/session_start.py` 中的模板建立 `.agents/memory/MEMORY.md`，或請支援的 Agent 協助初始化。
+   - 依照目標專案內容填寫 `MEMORY.md` 的 **Mission** 區塊。
+2. **安裝 Hooks**
+   ```bash
+   uv run pre-commit install
+   ```
+3. **驗證設定**
+   ```bash
+   uv run ruff check .
+   ```
 
 ---
-*Note: 本專案強制要求使用 **UTF-8 (without BOM)** 編碼，且技術文件與程式碼必須使用 **英文**。*
+
+本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/` 與 `.agents/memory/`。

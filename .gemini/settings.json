@@ -15,7 +15,7 @@
             "name": "memory-context-loader",
             "description": "Auto-loads MEMORY.md and aligns with branch context.",
             "type": "command",
-            "command": "uv run python ./scripts/session_start.py"
+            "command": "uv run python ./.gemini/scripts/session_start.py"
           }
         ]
       }

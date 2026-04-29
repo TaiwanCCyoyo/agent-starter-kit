@@ -1,17 +1,25 @@
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 
+def repo_root() -> Path:
+    """Resolve the repository root from the current working directory."""
+    try:
+        root = subprocess.check_output("git rev-parse --show-toplevel", shell=True, text=True, encoding="utf-8").strip()
+        return Path(root)
+    except Exception:
+        return Path.cwd().resolve()
+
+
 def get_git_info():
     """Detect current git branch and worktree status."""
     try:
-        # Use shell=True for PowerShell and specify encoding for Windows
         branch = subprocess.check_output("git branch --show-current", shell=True, text=True, encoding="utf-8").strip()
         worktree_list = subprocess.check_output("git worktree list", shell=True, text=True, encoding="utf-8").strip()
         is_worktree = len(worktree_list.splitlines()) > 1
 
-        # Get recent commit message as a hint for the branch mission
         last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, text=True, encoding="utf-8").strip()
 
         return branch or "detached", is_worktree, last_commit_msg
@@ -56,10 +64,8 @@ def read_memory(root_dir: Path, branch: str):
         is_new = True
         try:
             memory_dir.mkdir(parents=True, exist_ok=True)
-            # Initial template setup
             content = DEFAULT_MEMORY_TEMPLATE
 
-            # Inject mission prompt for new initialization
             mission_prompt = f"""- **[MISSION REQUIRED]**: This is a new session on branch `{branch}`.
   - **Short-term Goal**: [What are we doing right now?]
   - **Mid-term Goal**: [What does this branch achieve?]
@@ -80,6 +86,18 @@ def read_memory(root_dir: Path, branch: str):
         return f"Error reading memory: {str(e)}"
 
 
+def read_codex_instructions(root_dir: Path):
+    """Read Codex-specific repository instructions for SessionStart context."""
+    instructions_path = root_dir / ".codex" / "AGENTS.md"
+    if not instructions_path.exists():
+        return "Codex instructions not found at `.codex/AGENTS.md`."
+
+    try:
+        return instructions_path.read_text(encoding="utf-8")
+    except Exception as e:
+        return f"Error reading Codex instructions: {str(e)}"
+
+
 def sync_memory_if_needed(current_root: Path):
     """Proactively sync MEMORY.md from main repo if missing in worktree."""
     memory_rel_path = Path(".agents/memory/MEMORY.md")
@@ -89,7 +107,6 @@ def sync_memory_if_needed(current_root: Path):
         return "Memory exists"
 
     try:
-        # Find the main repository root using git
         common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8").strip()
         main_root = Path(common_dir).resolve().parent
 
@@ -99,8 +116,6 @@ def sync_memory_if_needed(current_root: Path):
         source_path = main_root / memory_rel_path
         if source_path.exists():
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            import shutil
-
             shutil.copy2(source_path, target_path)
             return f"Synchronized from main repo ({main_root.name})"
     except Exception as e:
@@ -125,19 +140,13 @@ def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
-    root_dir = Path(__file__).resolve().parent.parent
-
-    # 1. First, try to sync from main if missing
+    root_dir = repo_root()
     sync_status = sync_memory_if_needed(root_dir)
-
-    # 2. Get Git Info
     branch, is_worktree, last_msg = get_git_info()
     purpose = get_branch_purpose(branch)
-
-    # 3. Read (or initialize if still missing)
+    codex_instructions = read_codex_instructions(root_dir)
     memory_content = read_memory(root_dir, branch)
 
-    # Check if mission is uninitialized
     mission_alert = ""
     if "[MISSION REQUIRED]" in memory_content:
         mission_alert = f"""
@@ -147,7 +156,6 @@ def main():
 > **ACTION REQUIRED**: Please define the 'Branch Goal' and 'Definition of Done' in the `Doing` section of `MEMORY.md` before starting technical tasks.
 """
 
-    # Construct context
     additional_context = f"""
 ## [System: Session Auto-Initialization]
 - **Current Git Branch**: `{branch}` ({purpose})
@@ -159,16 +167,18 @@ def main():
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 **Context Clue (Last Commit)**: `{last_msg}`
 
-Please check the `MEMORY.md` below and align your current task with the project mission.
+Please check the Codex instructions and `MEMORY.md` below before repository work.
+
+### [Codex Repository Instructions: .codex/AGENTS.md]
+{codex_instructions}
 
 ### [Project Memory: MEMORY.md]
 {memory_content}
 
 ---
-*Note: This context was automatically injected by the SessionStart hook.*
+*Note: This context was automatically injected by the Codex SessionStart hook.*
 """
 
-    # Print directly as Markdown to be captured by the hook
     print(additional_context)
 
 

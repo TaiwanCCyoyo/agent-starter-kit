@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python \"$(git rev-parse --show-toplevel)/.codex/hooks/session_start.py\"",
+            "timeout": 30,
+            "statusMessage": "Loading project memory"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python \"$(git rev-parse --show-toplevel)/.codex/hooks/post_tool_use_hygiene.py\"",
+            "timeout": 60,
+            "statusMessage": "Checking file hygiene"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python \"$(git rev-parse --show-toplevel)/.codex/hooks/stop_memory_check.py\"",
+            "timeout": 30,
+            "statusMessage": "Checking memory maintenance"
+          }
+        ]
+      }
+    ]
+  }
+}
