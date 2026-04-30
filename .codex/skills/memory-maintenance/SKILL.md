@@ -41,6 +41,15 @@ After file-changing work:
 3. Put unresolved follow-up in `Session Handover`.
 4. Keep the last entries readable and short.
 
+## Memory Subagents
+
+Codex provides read-only memory support agents under `.codex/agents/`:
+
+- `memory_auditor`: use for delegated analysis of what should be saved after meaningful work.
+- `memory_compressor`: use for delegated compression drafts when `MEMORY.md` becomes verbose.
+
+These agents may recommend or draft memory changes, but the main agent owns the final decision and file edit for `.agents/memory/MEMORY.md`.
+
 ## Compression
 
 When memory exceeds roughly 2000 tokens or the `Done` list becomes noisy:

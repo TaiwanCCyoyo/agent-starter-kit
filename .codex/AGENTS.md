@@ -35,6 +35,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
 - Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
 - Use `.codex/skills/memory-maintenance/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
+- When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.agents/memory/MEMORY.md` edits.
 
 ## Verification
 
@@ -61,3 +62,10 @@ Use the Codex-private skills in `.codex/skills/` when the task matches:
 - `PostToolUse` runs baseline hygiene checks after file edits.
 - `Stop` emits low-noise memory update and compression reminders when action may be needed.
 - Official Codex `.rules` files control command execution policy, not behavioral instructions.
+
+## Subagents
+
+- Codex project custom agents live in `.codex/agents/*.toml`.
+- `repo_explorer` and `implementation_reviewer` are general read-only support agents.
+- `memory_auditor` and `memory_compressor` are read-only memory support agents.
+- Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.

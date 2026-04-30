@@ -9,6 +9,9 @@ This is a command-like Codex skill. It replaces Gemini-style `/compress-memory` 
 
 Follow `.codex/skills/memory-maintenance/SKILL.md` for quality rules.
 
+When the user explicitly asks for delegated memory compression analysis, use the read-only `memory_compressor` subagent to draft a compression proposal. The main
+agent must review and apply any final `.agents/memory/MEMORY.md` edits.
+
 ## Workflow
 
 1. Read relevant files in `.agents/memory/`.
