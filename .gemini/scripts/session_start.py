@@ -7,7 +7,7 @@ from pathlib import Path
 def repo_root() -> Path:
     """Resolve the repository root from the current working directory."""
     try:
-        root = subprocess.check_output("git rev-parse --show-toplevel", shell=True, text=True, encoding="utf-8").strip()
+        root = subprocess.check_output("git rev-parse --show-toplevel", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
         return Path(root)
     except Exception:
         return Path.cwd().resolve()
@@ -16,11 +16,11 @@ def repo_root() -> Path:
 def get_git_info():
     """Detect current git branch and worktree status."""
     try:
-        branch = subprocess.check_output("git branch --show-current", shell=True, text=True, encoding="utf-8").strip()
-        worktree_list = subprocess.check_output("git worktree list", shell=True, text=True, encoding="utf-8").strip()
+        branch = subprocess.check_output("git branch --show-current", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
+        worktree_list = subprocess.check_output("git worktree list", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
         is_worktree = len(worktree_list.splitlines()) > 1
 
-        last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, text=True, encoding="utf-8").strip()
+        last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
 
         return branch or "detached", is_worktree, last_commit_msg
     except Exception as e:
@@ -95,7 +95,7 @@ def sync_memory_if_needed(current_root: Path):
         return "Memory exists"
 
     try:
-        common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8").strip()
+        common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
         main_root = Path(common_dir).resolve().parent
 
         if main_root == current_root:
@@ -154,13 +154,13 @@ def main():
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 **Context Clue (Last Commit)**: `{last_msg}`
 
-Please check the `MEMORY.md` below and align your current task with the project mission.
+*Note: `.gemini/GEMINI.md` has been automatically loaded by the system. Please align your current task with the project mission and the memory state below.*
 
 ### [Project Memory: MEMORY.md]
 {memory_content}
 
 ---
-*Note: This context was automatically injected by the SessionStart hook.*
+*Note: This context was automatically injected by the Gemini SessionStart hook.*
 """
 
     print(additional_context)

@@ -28,25 +28,34 @@ This skill transforms the project's memory into a **Living Skill Guide**. It ens
 - **Archive**: Move historical logs or resolved issues to sub-files (e.g., `ARCHIVE.md`) if a section exceeds 500 tokens.
 - **Links**: Use Markdown links to point to detailed documentation or scripts.
 
-### 3. The Sync Protocol (The 3-Phase Ritual)
+## 4. The Sync Protocol (The 3-Phase Ritual)
 
-#### I. Pre-Task: Loading the Soul
+### I. Pre-Task: Loading the Soul
 - **Action**: Read `.agents/memory/MEMORY.md` (and `MEMORY.example.md` if needed).
 - **Goal**: Align with the project's mission and pick up where the last session left off.
 - **Output**: Choose a short, distinct **Session Name**.
 
-#### II. Plan-Phase: Signaling Intent
+### II. Plan-Phase: Signaling Intent
 - **Action**: Update the `Doing` section.
 - **Format**: `- **[Session Name]**: [Action-led intent]`.
 - **Purpose**: Prevent conflict between concurrent sessions and establish presence.
 
-#### III. Post-Task: Harvesting Wisdom
+### III. Post-Task: Harvesting Wisdom
 - **Action**:
   1. Move your entry from `Doing` to `Done`.
   2. Update `Lessons Learned` with high-signal insights to prevent regression.
   3. Explicitly delegate unfinished sub-tasks in the `Handover` section.
 
-## 4. Automated Lifecycle & Nudge Response
+## 5. Specialized Subagents (Specialized Intelligence)
+
+This architecture leverages specialized subagents to ensure high-quality memory operations without overloading the main session context.
+
+- **`memory-auditor`**: Used during `save-memory` or worktree teardown to analyze diffs and identify durable decisions, lessons, and handoff notes.
+- **`memory-compressor`**: Used during `compress-memory` to draft concise memory blocks and identify repetitive patterns for skill evolution.
+- **`repo-explorer`**: Used to map architectural boundaries and dependencies before proposing significant state changes.
+- **`implementation-reviewer`**: Used to audit memory update scripts and validation logic for correctness and protocol compliance.
+
+## 6. Automated Lifecycle & Nudge Response
 
 This section defines how the Agent interacts with system-level hooks for seamless memory management.
 
@@ -72,6 +81,6 @@ This section defines how the Agent interacts with system-level hooks for seamles
     - **Compress**: Summarize older `Done` entries into a "Milestones Archive" section.
 - **Skill Discovery**: During compression, analyze if a repetitive workflow exists. If so, suggest activating `skill-creator` to encapsulate the wisdom.
 
-## 5. Git Worktree Sync (Contextual Mobility)
+## 7. Git Worktree Sync (Contextual Mobility)
 - **Objective**: Ensure intelligence flows between parallel development environments.
 - **Action**: When tasking in a Worktree, mark entries with `[Worktree: branch-name]`. Upon merging/closing, use `consolidate-memory` (or manual transfer) to backfill critical `Lessons Learned` to the main branch memory.

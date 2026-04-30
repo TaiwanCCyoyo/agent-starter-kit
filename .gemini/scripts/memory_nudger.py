@@ -1,5 +1,94 @@
 import json
+import os
+import subprocess
 import sys
+import tempfile
+from pathlib import Path
+
+MEMORY_REMINDER_INTERVAL = 3
+STATE_FILE = Path(".agents/memory/.gemini_session_state.json")
+
+
+def repo_root() -> Path:
+    """Resolve the repository root from the current working directory."""
+    try:
+        # Suppress stderr to prevent bleeding raw git errors into the console/prompt
+        root = subprocess.check_output("git rev-parse --show-toplevel", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL).strip()
+        return Path(root)
+    except Exception:
+        return Path.cwd().resolve()
+
+
+def memory_path(root: Path) -> Path:
+    return root / ".agents" / "memory" / "MEMORY.md"
+
+
+def state_path(root: Path) -> Path:
+    return root / STATE_FILE
+
+
+def read_state(root: Path) -> dict:
+    path = state_path(root)
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def write_state(root: Path, state: dict) -> None:
+    path = state_path(root)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # Atomic write using a temporary file
+        fd, temp_path = tempfile.mkstemp(dir=str(path.parent), text=True)
+        try:
+            # Set permissions to 0644 (readable by all, writable by owner)
+            os.chmod(temp_path, 0o644)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2, sort_keys=True)
+                f.write("\n")
+            os.replace(temp_path, str(path))
+        except Exception:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            raise
+    except Exception:
+        # Fail gracefully to avoid blocking the main workflow
+        pass
+
+
+def get_memory_mtime(root: Path) -> float:
+    path = memory_path(root)
+    if not path.exists():
+        return 0.0
+    return path.stat().st_mtime
+
+
+def changed_non_memory_files(root: Path) -> list[str]:
+    """Detect changed files, including untracked ones, excluding memory."""
+    try:
+        # Suppress stderr to keep terminal output clean
+        changed = subprocess.check_output("git status --porcelain", shell=True, text=True, encoding="utf-8", stderr=subprocess.DEVNULL)
+        changed_files: list[str] = []
+        for line in changed.splitlines():
+            if not line.strip():
+                continue
+            # Extract path: "M  path", "?? path", "A  path"
+            # Handle quoted paths (e.g., if there are spaces)
+            path = line[3:].strip().strip('"')
+            if " -> " in path:
+                path = path.split(" -> ", 1)[1].strip().strip('"')
+
+            normalized = path.replace("\\", "/")
+            if normalized.startswith(".agents/memory/"):
+                continue
+            changed_files.append(path)
+        return changed_files
+    except Exception:
+        # If Git fails (e.g. not a repo), return empty list to avoid constant nudging
+        return []
 
 
 def main():
@@ -7,61 +96,40 @@ def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
-    # Read input from stdin (Gemini CLI passes hook context here)
-    try:
-        input_data = json.load(sys.stdin)
-        # transcript_path is provided in the hook context
-        transcript_path = input_data.get("transcript_path")
-        if not transcript_path:
-            return
+    root = repo_root()
+    state = read_state(root)
 
-        with open(transcript_path, "r", encoding="utf-8") as f:
-            transcript = json.load(f)
-    except Exception:
+    current_memory_mtime = get_memory_mtime(root)
+    previous_memory_mtime = float(state.get("memory_mtime", 0.0))
+    response_count = int(state.get("response_count", 0))
+
+    # Reset counter if memory was updated
+    if current_memory_mtime > previous_memory_mtime:
+        response_count = 0
+
+    non_memory_changes = changed_non_memory_files(root)
+
+    # If no changes, reset state
+    if not non_memory_changes:
+        state["memory_mtime"] = current_memory_mtime
+        state["response_count"] = 0
+        write_state(root, state)
         return
 
-    # Check the last turn for tool calls that modify files
-    # Gemini CLI transcript structure: { "turns": [ { "messages": [ ... ] } ] }
-    has_modifications = False
-    if "turns" in transcript and len(transcript["turns"]) > 0:
-        last_turn = transcript["turns"][-1]
-        for msg in last_turn.get("messages", []):
-            tool_calls = msg.get("tool_calls", [])
-            if tool_calls:
-                for call in tool_calls:
-                    # Look for tools that modify the filesystem
-                    name = call.get("function", {}).get("name")
-                    if name in ["write_file", "replace"]:
-                        # Extract the file path from tool arguments
-                        import json as json_pkg
+    # Increment response count for this "turn"
+    response_count += 1
+    state["memory_mtime"] = current_memory_mtime
+    state["response_count"] = response_count
+    write_state(root, state)
 
-                        args = call.get("function", {}).get("arguments", "{}")
-                        if isinstance(args, str):
-                            try:
-                                args = json_pkg.loads(args)
-                            except Exception:
-                                args = {}
-
-                        file_path = args.get("file_path", "")
-                        # IGNORE changes to the memory file itself to avoid recursive loops
-                        if "MEMORY.md" not in file_path:
-                            has_modifications = True
-                            break
-            if has_modifications:
-                break
-
-    output = {}
-    if has_modifications:
-        # If changes detected, nudge the agent to use the proper commands or skills
-        output["reason"] = (
-            "System detected file modifications. Please use the 'save-memory' command OR follow the 'memory-maintenance' skill protocol "
-            "to update MEMORY.md (Done & Lessons Learned) to ensure alignment with the Soul Protocol."
-        )
-        # Optional: systemMessage to alert the user
-        output["systemMessage"] = "[System] Changes detected. Nudging agent to use 'save-memory' or 'memory-maintenance' skill."
-
-    # Print to stdout
-    print(json.dumps(output))
+    # Only nudge if interval reached
+    if response_count >= MEMORY_REMINDER_INTERVAL:
+        output = {
+            "reason": f"Project changes are still pending after {response_count} turns. Please update MEMORY.md (Done & Lessons Learned).",
+            "systemMessage": f"[System] Memory update reminder: {len(non_memory_changes)} files changed. "
+            f"Before finishing, update `.agents/memory/MEMORY.md` with durable decisions or handoff notes.",
+        }
+        print(json.dumps(output))
 
 
 if __name__ == "__main__":

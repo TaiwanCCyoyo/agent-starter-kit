@@ -15,52 +15,44 @@ This document defines the foundational mandates and operational protocols for Ge
     - **For ALL Tracked Code**: You MUST strictly use standard tools (`read_file`, `write_file`, `replace`) as they work perfectly for non-ignored files.
 
 ### 2. Verification-First Execution
-**STRICT ENFORCEMENT**: Never claim a task is complete without tangible evidence.
-- **Active Testing**: You MUST run scripts, unit tests, or syntax checkers BEFORE finishing.
+**STRICT ENFORCEMENT**: Do not claim completion without verification evidence.
+- **Hook Alignment**: Rely on configured hooks (e.g., `scripts/file_hygiene.py`, `ruff`) for baseline hygiene. Do not manually rerun baseline checks only to create evidence.
+- **Active Testing**: Run additional task-specific tests or scripts when the change requires validation beyond hook coverage.
 - **Verification Report**: Every completion MUST include the following format:
   ### 🏁 Verification Report
-  - **Verification Executed**: [Command ran, e.g., `uv run ruff check .`]
-  - **Evidence**: [Snippet of terminal output proving success]
-  - **Exemption Justification**: [Only for documentation-only changes]
+  - **Verification Executed**: [Command ran, e.g., `uv run pytest`]
+  - **Evidence**: [Snippet of output proving success]
+  - **Exemption Justification**: [If verification is skipped, state why and the residual risk]
 
 ### 3. Long-Term Memory & State (The "Soul" Protocol)
-**CRITICAL**: Failure to sync with memory guarantees context amnesia and mission failure. This is the central hub for all sessions.
-- **Mandatory Alignment**: ALL memory operations MUST strictly follow the **`memory-maintenance` skill**.
-- **Automated Lifecycle (New)**:
-    1.  **SessionStart (Auto-Injection)**: At startup, the system automatically injects `MEMORY.md` and Git context into the session. You MUST align your current goal with the detected branch/worktree mission immediately.
-    2.  **AfterAgent (Auto-Nudging)**: After each turn, a system hook monitors changes. If you receive a nudge (e.g., "Detected changes. Please run `save-memory`"), you MUST treat it as a high-priority directive to persist your progress and lessons learned.
-- **Sync Ritual**:
-    - **Pre-Task**: Automatically handled by `SessionStart`. Validate the injected context.
-    - **Post-Task**: Triggered by `AfterAgent` or manual intent. Follow the Skill's 3-Phase Ritual.
+**CRITICAL**: Failure to sync with memory guarantees context amnesia.
+- **Mandatory Alignment**: Follow the **`memory-maintenance` skill** for updates and audits.
+- **Automated Lifecycle**:
+    1.  **SessionStart**: System injects Git context and `MEMORY.md`. Align with branch mission immediately.
+    2.  **AfterAgent (Nudging)**: Stateful hooks monitor progress. If nudged, update `MEMORY.md`.
+- **Command-Like Skills**:
+    - `save-memory` -> Update `MEMORY.md` with Done & Lessons.
+    - `compress-memory` -> Archive historical details to keep memory lean.
 - **Bypass Rule**: Always bypass `.gitignore` for `.agents/memory/`.
-- **Progressive Disclosure**: Keep `MEMORY.md` lean. Archive history > 500 tokens.
 
-### 4. Collaborative Debugging & Enablement
-- **Ask for Enablement, Not Completion**: If blocked (permissions, API keys), ask for the **tools or access** to solve it yourself. Do not ask the user to do the manual work for you.
-- **No Silent Downgrades**: If a task cannot be completed as requested, halt and consult the user. Do not unilaterally simplify the task.
-- **3-Strike Persistence**: Attempt at least 3 distinct debugging approaches before escalating.
+### 4. Learning And Escalation
+- **No Silent Friction**: Do not silently normalize repeated friction. If a blocker, workaround, or uncertainty appears more than once, pause and surface it to the user.
+- **Explicit Tradeoffs**: Prefer explicit tradeoffs over hidden assumptions. State what you know and what you are assuming.
+- **Process Debugging**: Treat repeated confusion as a process bug. Convert it into an instruction, skill update, or memory lesson.
+- **Immediate Escalation**: Ask for user assistance immediately when credentials, approvals, environment ownership, or irreversible tradeoffs are needed.
 
-### 5. Security & Secrets
+### 5. Surgical Editing & Feature Preservation
+- **Minimal Surface Area**: Prefer the smallest change that satisfies the verified goal. Do not rewrite adjacent code or formatting without need.
+- **Prevent Feature Deletion**: Do not delete existing functions or logic unless expressly authorized. If a purpose is unclear, assume it is necessary.
+
+### 6. Security & Secrets
 - **No Secrets Policy**: Never log, print, or commit API keys or sensitive credentials.
-- **Pre-commit Integrity**: Git `pre-commit` hooks are mandatory. Ensure they are installed (`uv run pre-commit install`). Do not bypass them.
+- **Pre-commit Integrity**: Ensure hooks are installed (`uv run pre-commit install`). Do not bypass.
 
-### 6. Reuse & Efficiency
-- **Don't Reinvent the Wheel**: Check existing patterns in the codebase or reference open-source implementations before writing complex logic from scratch.
-- **Copy and Adapt**: Prioritize adapting proven configurations and scripts.
-- **Traceable Design**: For all architectural proposals or reuse of external patterns, you MUST explicitly cite the source of inspiration (e.g., industry-standard patterns, specific library architectures, or proven open-source implementations). Citing technical origins provides weight to your strategies and ensures the "why" is grounded in established practices.
-
-### 7. Prevent Feature Deletion
-**CRITICAL**: Do not delete existing functions or features without explicit intent or request.
-- **Suspect Utility**: If a purpose is unclear, assume it is necessary (e.g., undocumented feature, bug fix, or future-use).
-- **Verification**: Always verify and preserve existing logic unless expressly authorized or required by the current task to remove it.
-
-### 8. Language & Encoding Mandates
-- **Communication**: Use **Traditional Chinese** (`zh-TW`) for all user-facing communication (responses, plans, walkthroughs).
-- **Project Output**: Use **English** for all technical outputs (code, commit messages, `SKILL.md`, config files, comments).
-- **Encoding**: ALL files MUST be saved in **UTF-8** (without BOM). Avoid Mojibake by ensuring consistent encoding across tools.
-- **Validation Hook**: A mandatory `AfterTool` hook runs `scripts/file_hygiene.py` to enforce these rules.
-    - **Exception Paths**: `.agents/memory/`, `docs/zh-TW/`, and the first line of `README.md` are allowed to contain Traditional Chinese.
-- **Documentation**: Root `README.md` MUST be in English and link to the Traditional Chinese version at `docs/zh-TW/README.md`.
+### 7. Language & Encoding Mandates
+- **Communication**: Use **Traditional Chinese** (`zh-TW`) for user interaction.
+- **Project Output**: Use **English** for code, commits, and technical docs.
+- **Encoding**: ALL files MUST be saved in **UTF-8** (without BOM).
 
 ## 🛠️ Technical Stack & Tooling
 

@@ -1,16 +1,20 @@
-description = "Manage Git worktree lifecycle (create or finish) according to the worktree-manager skill."
+description = "Manage Git worktrees while preserving project memory and context."
 
+# {{args}} is the worktree action (create, finish, consolidate)
 prompt = """
-You are a specialized agent handling Git worktrees. The user has requested a worktree operation.
+You are an expert at Git worktree lifecycle management. Please perform the requested worktree action.
 
-### Request
+### Action
 {{args}}
 
-### Mandatory Instructions
-1. Immediately invoke the `activate_skill` tool with `name="worktree-manager"`.
-2. Determine if the user is asking to **create** (split) or **finish** (teardown) a worktree.
-3. If creating: Follow Phase 1 of the skill. Crucially, you MUST edit the newly created worktree's `MEMORY.md` file to explicitly define its `Branch Goal` and `Definition of Done` based on the user's intent. Do not leave the `[MISSION REQUIRED]` prompt unfilled.
-4. If finishing: Follow Phase 3 of the skill. Perform consolidation, merge, and cleanup safely.
+### Mandatory Guidelines (from worktree-manager skill)
+- **Soul Protocol**: Ensure memory is injected during creation and consolidated during teardown.
+- **Exploration**: Use the `repo-explorer` subagent to map out the repository structure if creating or merging complex worktrees.
+- **Consolidation**: Use the `memory-auditor` subagent to identify critical lessons to backfill to the main branch memory.
 
-Always provide a brief summary of the completed steps.
+### Execution Plan
+1. Follow the protocols defined in the `worktree-manager` skill.
+2. Use `git worktree` commands for physical management.
+3. Use specialized subagents for analysis and memory synchronization.
+4. Provide a Traditional Chinese summary of the results.
 """

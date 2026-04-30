@@ -11,10 +11,12 @@ You are an expert at project memory maintenance. Please persist the following in
 - **Consult Skill**: Use the `memory-maintenance` skill for all quality standards (High-Signal, Concise, Table formatting).
 - **Project Scope**: Ensure this information is specific to **this project**.
 - **Soul Protocol**: Follow the "3-Phase Ritual" (Read, Update, Report).
+- **Delegation**: When updating memory after complex changes, you SHOULD use the `memory-auditor` subagent to analyze diffs and identify durable lessons/decisions.
 
 ### Execution Plan
-1. Read `.agents/memory/MEMORY.md` and any auxiliary files.
-2. Identify the most appropriate section (e.g., Lessons Learned, Current State).
-3. Use `replace` or `write_file` to append the new fact.
-4. Provide a brief Traditional Chinese summary of what was saved and where.
+1. (Optional) Invoke `memory-auditor` to audit recent changes and suggest memory updates.
+2. Read `.agents/memory/MEMORY.md` and any auxiliary files.
+3. Identify the most appropriate section (e.g., Lessons Learned, Current State).
+4. Use `replace` or `write_file` to append the new fact or the auditor's suggestions.
+5. Provide a brief Traditional Chinese summary of what was saved and where.
 """

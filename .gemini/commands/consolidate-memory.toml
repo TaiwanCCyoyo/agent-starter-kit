@@ -1,21 +1,21 @@
-description = "Consolidate memory from a feature branch or worktree back to the main memory file."
+description = "Intelligently merge memory from multiple branches or worktrees."
 
-# {{args}} is the source memory path or branch name
+# {{args}} is optional additional instruction
 prompt = """
-You are a memory architect. Your goal is to consolidate insights from a specific worktree/branch memory file back into the primary `.agents/memory/MEMORY.md`.
+You are an expert at project memory architecture. Your goal is to consolidate the `.agents/memory/MEMORY.md` from a source branch/worktree into the main repository's memory.
 
-### Context for Consolidation
+### User Instruction
 {{args}}
 
-### Mandatory Guidelines
-1. **Filter Signal from Noise**: Only extract `Lessons Learned`, high-signal `Done` items, and architectural decisions. Skip temporary tasks or minor fixes.
-2. **Avoid Duplication**: Check if the insight already exists in the destination `MEMORY.md`.
-3. **Format Alignment**: Use the standards defined in the `memory-maintenance` skill.
+### Mandatory Guidelines (from memory-maintenance skill)
+1. **High-Signal Filtering**: Do not blindly copy all entries. Filter for durable lessons, architectural decisions, and completed milestones.
+2. **Delegation**: You SHOULD use the `memory-auditor` subagent to analyze the source memory and identify the most valuable insights to backfill.
 
 ### Execution Plan
-1. Read the source memory file (e.g., in a different worktree or a branch-specific file).
-2. Read the destination `.agents/memory/MEMORY.md`.
-3. Synthesize the new entries into the appropriate sections.
-4. Update the destination file using `replace` or `write_file`.
-5. Report a summary of what was consolidated.
+1. Read the source `MEMORY.md` (e.g., from another worktree or the current dirty state).
+2. Invoke `memory-auditor` to audit the source content and suggest high-signal backfill items.
+3. Read the target `.agents/memory/MEMORY.md`.
+4. Use `replace` or `write_file` to merge the suggestions into the target memory.
+5. Prefix consolidated milestones with the source branch context if relevant.
+6. Provide a summary of the consolidation in Traditional Chinese.
 """
