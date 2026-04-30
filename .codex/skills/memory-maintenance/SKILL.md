@@ -13,6 +13,7 @@ This is a Codex-private skill. It is intentionally stored in `.codex/skills` and
 - Prefer durable facts, architectural decisions, and lessons learned over task narration.
 - Do not save secrets or user-private data.
 - Use English for technical memory entries unless the existing section explicitly uses Traditional Chinese.
+- Treat repeated blockers, repeated workarounds, mistaken assumptions, hidden tradeoffs, and recurring user-assistance needs as memory-worthy process signals when they can prevent future recurrence.
 
 ## Three-Phase Ritual
 
@@ -23,6 +24,13 @@ Read `.agents/memory/MEMORY.md` before substantial work. Align with the mission,
 ### 2. During Work
 
 For file-changing tasks, maintain a short session intent in `Doing` when the task is large or likely to span turns.
+
+Escalate instead of normalizing friction:
+
+1. Ask for user help immediately when the next step needs user authority, credentials, global settings, external accounts, environment ownership, a product decision, or an irreversible tradeoff.
+2. If a workaround is needed once, keep the task moving and note the risk.
+3. If the same workaround or confusion repeats, tell the user the pattern and recommend the durable fix.
+4. If the lesson should survive the session, add it to `Lessons Learned` or `Session Handover`.
 
 ### 3. Post-task
 
