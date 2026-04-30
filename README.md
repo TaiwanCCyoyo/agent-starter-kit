@@ -16,6 +16,8 @@ A standardized, frictionless engineering infrastructure for multi-agent ecosyste
 
 This project uses a proactive memory system to maintain long-term context across sessions and worktrees.
 
+For a detailed architecture, setup model, and copy checklist, see [Memory System Introduction](docs/en/MEMORY_SYSTEM_INTRODUCTION.md).
+
 ### 1. Daily Usage
 
 - **Save Memory**: When you finish a meaningful sub-task, update `.agents/memory/MEMORY.md` through the relevant agent workflow.
@@ -70,7 +72,6 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 | Path | Purpose |
 | :--- | :--- |
-| `AGENTS.md` | Thin router for Codex and other agents. |
 | `.agents/memory/` | Shared long-term project memory location. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |

@@ -16,6 +16,8 @@
 
 本專案使用主動式記憶系統，維持跨 session 與 worktree 的長期上下文。
 
+詳細架構、設定模型與複製清單請參考 [記憶系統介紹](MEMORY_SYSTEM_INTRODUCTION.md)。
+
 ### 1. 日常使用
 
 - **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.agents/memory/MEMORY.md`。
@@ -70,7 +72,6 @@
 
 | Path | 用途 |
 | :--- | :--- |
-| `AGENTS.md` | Codex 與其他 Agent 的薄路由。 |
 | `.agents/memory/` | 共用長期專案記憶位置。 |
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |

@@ -50,9 +50,19 @@ def memory_mtime(root: Path) -> float:
 
 
 def changed_non_memory_files(root: Path) -> list[str]:
-    changed = subprocess.run(["git", "diff", "--name-only"], cwd=root, text=True, capture_output=True)
-    changed_files = [line for line in changed.stdout.splitlines() if line.strip()]
-    return [path for path in changed_files if "MEMORY.md" not in path.replace("\\", "/")]
+    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True)
+    changed_files: list[str] = []
+    for line in changed.stdout.splitlines():
+        if not line.strip():
+            continue
+        path = line[3:].strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1].strip()
+        normalized = path.replace("\\", "/")
+        if normalized.startswith(".agents/memory/"):
+            continue
+        changed_files.append(path)
+    return changed_files
 
 
 def count_tokens(text: str) -> int:
@@ -60,26 +70,33 @@ def count_tokens(text: str) -> int:
     return len(text) // 4
 
 
-def memory_health_message(root: Path) -> str:
+def memory_health_message(root: Path, state: dict) -> str:
     path = memory_path(root)
     if not path.exists():
         return "No MEMORY.md found."
 
+    current_memory_mtime = memory_mtime(root)
+    previous_health_mtime = float(state.get("health_memory_mtime", 0.0))
     content = path.read_text(encoding="utf-8")
     tokens = count_tokens(content)
     lines = len(content.splitlines())
+    state["health_memory_mtime"] = current_memory_mtime
+    state["health_tokens"] = tokens
+    state["health_lines"] = lines
 
-    report = ["--- Memory Health Report ---", f"Approximate Tokens: {tokens}", f"Line Count: {lines}"]
-    if tokens > MEMORY_TOKEN_LIMIT or lines > MEMORY_LINE_LIMIT:
-        report.extend(["", "[STATUS: VERBOSE]", "Recommendation: Use the `compress-memory` skill to summarize historical data."])
-    else:
-        report.extend(["", "[STATUS: LEAN]", "No immediate compression required."])
+    if current_memory_mtime <= previous_health_mtime:
+        return ""
 
-    return "\n".join(report)
+    if tokens <= MEMORY_TOKEN_LIMIT and lines <= MEMORY_LINE_LIMIT:
+        return ""
+
+    return (
+        f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large ({tokens} approximate tokens, {lines} lines). "
+        "Use `compress-memory` to preserve current decisions and lessons while summarizing historical detail."
+    )
 
 
-def memory_update_message(root: Path) -> str:
-    state = read_state(root)
+def memory_update_message(root: Path, state: dict) -> str:
     current_memory_mtime = memory_mtime(root)
     previous_memory_mtime = float(state.get("memory_mtime", 0.0))
     response_count = int(state.get("response_count", 0))
@@ -89,19 +106,21 @@ def memory_update_message(root: Path) -> str:
 
     non_memory_changes = changed_non_memory_files(root)
     if not non_memory_changes:
-        write_state(root, {"memory_mtime": current_memory_mtime, "response_count": 0})
+        state["memory_mtime"] = current_memory_mtime
+        state["response_count"] = 0
         return ""
 
     response_count += 1
-    write_state(root, {"memory_mtime": current_memory_mtime, "response_count": response_count})
+    state["memory_mtime"] = current_memory_mtime
+    state["response_count"] = response_count
 
     if response_count < MEMORY_REMINDER_INTERVAL:
         return ""
 
     return (
-        f"{response_count} Codex responses have passed while repository changes are pending. "
-        "Before finishing, update `.agents/memory/MEMORY.md` using the `save-memory` skill unless the task was read-only "
-        "or the user explicitly skipped memory updates."
+        f"Memory update reminder: project changes are still pending after {response_count} Codex responses. "
+        "Before finishing, update `.agents/memory/MEMORY.md` with durable decisions, lessons, or handoff notes if this work changed project state. "
+        "Skip the update only if the task was read-only, trivial, or the user explicitly asked not to update memory."
     )
 
 
@@ -113,13 +132,15 @@ def main() -> int:
 
     root = repo_root(event.get("cwd") or ".")
 
+    state = read_state(root)
     messages = []
-    memory_update_reminder = memory_update_message(root)
+    memory_update_reminder = memory_update_message(root, state)
     if memory_update_reminder:
         messages.append(memory_update_reminder)
-    memory_message = memory_health_message(root)
+    memory_message = memory_health_message(root, state)
     if memory_message:
         messages.append(memory_message)
+    write_state(root, state)
 
     if messages:
         print(json.dumps({"systemMessage": "\n\n".join(messages)}))

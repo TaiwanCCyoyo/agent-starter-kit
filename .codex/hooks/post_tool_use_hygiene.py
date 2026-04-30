@@ -17,6 +17,20 @@ def run(root: Path, args: list[str]) -> tuple[int, str, str]:
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
+def changed_files(root: Path) -> list[str]:
+    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True)
+    files: list[str] = []
+    for line in changed.stdout.splitlines():
+        if not line.strip():
+            continue
+        path = line[3:].strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1].strip()
+        if path and (root / path).is_file():
+            files.append(path)
+    return files
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -33,8 +47,7 @@ def main() -> int:
     if code != 0:
         checks.append("`uv run ruff check .` failed.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
-    changed = subprocess.run(["git", "diff", "--name-only"], cwd=root, text=True, capture_output=True)
-    files = [line.strip() for line in changed.stdout.splitlines() if line.strip()]
+    files = changed_files(root)
     text_files = [f for f in files if Path(f).suffix.lower() in {".md", ".py", ".toml", ".json", ".yaml", ".yml"}]
     if text_files:
         code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", *text_files])

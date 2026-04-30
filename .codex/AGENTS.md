@@ -1,86 +1,52 @@
 # Codex Instructions for AI Agent Starter Kit
 
-This file is the Codex-specific instruction layer for this repository. It translates the Gemini CLI configuration into Codex-native behavior.
+This file is the Codex-specific instruction entrypoint for this repository. It is injected by `.codex/hooks/session_start.py`.
 
 ## Scope
 
 - These instructions apply only to OpenAI Codex.
 - Treat `.codex/` as a private Codex support directory.
-- Do not assume `.codex/skills` is an official Codex skill discovery location. Use it because this file explicitly points Codex to it.
 - Shared project memory remains in `.agents/memory/MEMORY.md`.
+- Root `AGENTS.md` is intentionally absent to avoid polluting non-Codex agents and subagents.
 
-## Operating Rules
-
-### Language and Encoding
+## Operating Contract
 
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, `SKILL.md`, workflow documents, and technical docs.
-- Save files as UTF-8 without BOM.
-- Root `README.md` must remain English, except for the first-line link to the Traditional Chinese README.
-- Traditional Chinese content is allowed only in `.agents/memory/` and `docs/zh-TW/`.
-
-### Memory Protocol
-
-- Before substantial work, read `.agents/memory/MEMORY.md` to align with the project mission and active handoff.
-- For any task that modifies files, update `.agents/memory/MEMORY.md` after the task unless the user explicitly says not to.
-- Keep memory updates high-signal and concise.
-- Use `.codex/skills/memory-maintenance/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
-- If `.agents/memory/MEMORY.md` is missing, run `uv run python .codex/hooks/session_start.py` or initialize it from that script's template.
-
-### Verification
-
-- Do not claim completion without tangible verification.
-- For Python changes, run `uv run ruff check .` and relevant script checks.
-- For Codex configuration changes, validate TOML, JSON, and required `SKILL.md` frontmatter.
-- If verification is skipped, state the exact reason. Documentation-only changes may use a clear exemption.
-
-### Security
-
-- Never print, store, or commit secrets, tokens, passwords, or API keys.
-- Keep `.env` and `.env.local` untracked.
-- Do not disable secret scanning, pre-commit checks, or file hygiene checks without explicit user authorization.
-- Use Codex sandbox approvals for privileged or networked operations. Ask for enablement, not for the user to complete the task manually.
-
-### Editing Discipline
-
+- Keep root `README.md` English except for the first-line Traditional Chinese README link.
+- Keep Traditional Chinese content only in `.agents/memory/` and `docs/zh-TW/`.
 - Use `apply_patch` for manual file edits.
-- Do not delete existing features or rules unless the user explicitly requests removal.
-- Prefer existing scripts, skills, and workflow patterns over new abstractions.
-- Keep changes scoped to the current request.
+- Respect dirty worktrees and never revert user changes unless explicitly requested.
+- Never print, store, or commit secrets, tokens, passwords, or API keys.
 
-### Git and Worktrees
+## Memory
 
-- Respect dirty worktrees. Never revert user changes unless explicitly requested.
-- Use `.codex/skills/gen-commit/SKILL.md` when generating commits.
-- Use `.codex/skills/worktree-manager/SKILL.md` when creating, finishing, or consolidating Git worktrees.
+- Before substantial work, align with the injected `.agents/memory/MEMORY.md`.
+- For file-changing tasks, update memory after the task unless the user explicitly says not to.
+- Keep memory updates high-signal: durable decisions, lessons, current state, and handoff notes.
+- Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
+- Use `.codex/skills/memory-maintenance/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
 
-## Codex Private Skills
+## Verification
 
-The Codex-private skills for this repository live under `.codex/skills/`.
-
-Use these files when the task matches their descriptions:
-
-- `.codex/skills/compress-memory/SKILL.md`
-- `.codex/skills/gen-commit/SKILL.md`
-- `.codex/skills/memory-maintenance/SKILL.md`
-- `.codex/skills/save-memory/SKILL.md`
-- `.codex/skills/worktree-manager/SKILL.md`
+- Do not claim completion without verification evidence.
+- Rely on configured hooks for baseline hygiene checks.
+- Run additional task-specific checks when the change requires validation beyond hook coverage.
+- If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
 
 ## Codex Command-Like Skills
 
-Codex does not register repository slash commands from files. Use command-like skills instead:
+Use the Codex-private skills in `.codex/skills/` when the task matches:
 
-- `/gen-commit` or `gen-commit` triggers `.codex/skills/gen-commit/SKILL.md`.
-- `/save-memory` or `save memory` triggers `.codex/skills/save-memory/SKILL.md`.
-- `/compress-memory` or `compress memory` triggers `.codex/skills/compress-memory/SKILL.md`.
-- `/worktree` or `worktree finish` triggers `.codex/skills/worktree-manager/SKILL.md`.
+- `/gen-commit` or `gen-commit` -> `.codex/skills/gen-commit/SKILL.md`
+- `/save-memory` or `save memory` -> `.codex/skills/save-memory/SKILL.md`
+- `/compress-memory` or `compress memory` -> `.codex/skills/compress-memory/SKILL.md`
+- `/worktree` or `worktree finish` -> `.codex/skills/worktree-manager/SKILL.md`
 
-## Hooks
+## Hooks And Rules
 
-Codex hooks are configured in `.codex/config.toml` and `.codex/hooks.json`.
-
-- `SessionStart` injects `.codex/AGENTS.md`, project memory, branch, and worktree context through `.codex/hooks/session_start.py`.
-- `PostToolUse` for file edits runs Codex hygiene checks.
-- `Stop` emits memory maintenance reminders after several Codex response rounds with pending changes, and runs memory size checks.
-
-Project-local hooks require the `.codex/` project layer to be trusted by Codex.
+- Codex hooks are configured in `.codex/config.toml` and `.codex/hooks.json`.
+- `SessionStart` injects this file, project memory, branch, and worktree context.
+- `PostToolUse` runs baseline hygiene checks after file edits.
+- `Stop` emits low-noise memory update and compression reminders when action may be needed.
+- Official Codex `.rules` files control command execution policy, not behavioral instructions.
