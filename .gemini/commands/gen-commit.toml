@@ -1,9 +1,9 @@
-description = "Generate a high-quality Git commit message using commit-helper standards."
+description = "Generate a high-quality Git commit message using the commit-specialist agent."
 
 # {{args}} is optional additional context from user
 # We use !{...} to inject git context directly into the prompt
 prompt = """
-You are an expert at Git commit quality. Please perform a commit using the following context and guidelines.
+Delegate this task to the `commit-specialist` subagent.
 
 ### Context
 1. Current Status:
@@ -12,17 +12,8 @@ You are an expert at Git commit quality. Please perform a commit using the follo
 2. Staged Changes (Diff):
 !{git diff --cached}
 
-3. Additional User Instruction: {{args}}
+3. Additional User Instruction:
+{{args}}
 
-### Mandatory Guidelines (from commit-helper skill)
-- **Consult Skill**: Use the `commit-helper` skill for all quality standards (Conventional Commits, English, Imperative mood).
-- **Format**: `<type>[optional scope]: <description>`
-- **Check**: Ensure no sensitive data (e.g. .env) is staged.
-- **Hook Handling**: If `pre-commit` hooks fail, fix the issues and retry.
-
-### Execution Plan
-1. Analyze the context and draft a message in English.
-2. Present the draft in a code block.
-3. Provide a brief Traditional Chinese summary.
-4. If this is an autonomous request, add `Agent-Status: autonomous` and execute `git commit -m "..."`. Otherwise, wait for user confirmation.
+The subagent must follow the `commit-helper` skill standards.
 """
