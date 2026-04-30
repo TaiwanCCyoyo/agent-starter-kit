@@ -118,9 +118,15 @@ def memory_update_message(root: Path, state: dict) -> str:
         return ""
 
     return (
-        f"Memory update reminder: project changes are still pending after {response_count} Codex responses. "
-        "Before finishing, update `.agents/memory/MEMORY.md` with durable decisions, lessons, or handoff notes if this work changed project state. "
-        "Skip the update only if the task was read-only, trivial, or the user explicitly asked not to update memory."
+        f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} Codex responses.\n"
+        "Before finishing this task, you MUST:\n"
+        "1. Update `.agents/memory/MEMORY.md` (Done & Lessons Learned).\n"
+        "2. Append a session summary to `.agents/memory/SESSION_LOG.md` using this format:\n\n"
+        "### [YYYY-MM-DD] Session Summary\n"
+        "- **Goal**: [Brief statement]\n"
+        "- **Achievements**: [Concise bullets]\n"
+        "- **Pending**: [Remaining work/issues]\n\n"
+        "Note: Summaries must be in English. Discuss progress with the user in Traditional Chinese (zh-TW)."
     )
 
 

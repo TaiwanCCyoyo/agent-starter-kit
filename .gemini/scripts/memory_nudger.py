@@ -125,9 +125,18 @@ def main():
     # Only nudge if interval reached
     if response_count >= MEMORY_REMINDER_INTERVAL:
         output = {
-            "reason": f"Project changes are still pending after {response_count} turns. Please update MEMORY.md (Done & Lessons Learned).",
-            "systemMessage": f"[System] Memory update reminder: {len(non_memory_changes)} files changed. "
-            f"Before finishing, update `.agents/memory/MEMORY.md` with durable decisions or handoff notes.",
+            "reason": f"Significant changes detected after {response_count} turns. Prompting for Memory and Session Log updates.",
+            "systemMessage": (
+                f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} turns.\n"
+                "Before finishing this task, you MUST:\n"
+                "1. Update `.agents/memory/MEMORY.md` (Done & Lessons Learned).\n"
+                "2. Append a session summary to `.agents/memory/SESSION_LOG.md` using this format:\n\n"
+                "### [YYYY-MM-DD] Session Summary\n"
+                "- **Goal**: [Brief statement]\n"
+                "- **Achievements**: [Concise bullets]\n"
+                "- **Pending**: [Remaining work/issues]\n\n"
+                "Note: Summaries must be in English. Discuss progress with the user in Traditional Chinese (zh-TW)."
+            ),
         }
         print(json.dumps(output))
 

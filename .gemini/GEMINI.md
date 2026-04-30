@@ -1,5 +1,11 @@
 # GEMINI.md - Instructional Context for Gemini CLI
 
+## 🤖 Available Gemini 3.0 Models
+- **Pro**: `gemini-3-pro-preview` (High reasoning, planning, complex tasks)
+- **Flash**: `gemini-3-flash-preview` (Speed, simple tasks, reading)
+
+---
+
 This document defines the foundational mandates and operational protocols for Gemini CLI within the **AI Agent Starter Kit**. These rules take absolute precedence.
 
 ## 🚀 Core Operational Mandates

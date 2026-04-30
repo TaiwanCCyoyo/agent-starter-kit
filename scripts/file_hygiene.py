@@ -10,7 +10,6 @@ CJK_RE = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]")
 
 # Paths where non-English content is EXPLICITLY allowed
 ALLOWED_PATHS = [
-    ".agents/memory/",
     "docs/zh-TW/",
 ]
 
@@ -130,9 +129,17 @@ def check_file_hygiene(filepath, is_hook=False):
         for i in range(start_index, len(eval_lines)):
             line = eval_lines[i]
             if CJK_RE.search(line):
+                # Double-check: If the file IS actually allowed but prefix matching missed it,
+                # this would still trigger. But based on is_path_allowed, we skip this whole block.
                 print(f"Error: Non-English (CJK) character or Mojibake found in {filepath} at line {i + 1}:")
                 print(f"  > {line.strip()}")
+                print("Note: If this is intentional, move the content to an allowed path (docs/zh-TW/ or .agents/memory/).")
                 return False
+    else:
+        # In allowed paths, we already did the UTF-8 encoding check above.
+        # This prevents Traditional Chinese from being flagged as "Mojibake"
+        # simply because they are non-ASCII.
+        pass
 
     # 4. Universal Documentation Sync Alert
     sync_targets = get_sync_targets(filepath)
