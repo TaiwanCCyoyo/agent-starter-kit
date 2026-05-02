@@ -7,13 +7,16 @@ description: Use when the user says /gen-commit, gen-commit, generate commit, cr
 
 This is a command-like Codex skill. It replaces Gemini-style `/gen-commit` with a skill trigger that can be invoked by plain text.
 
+When the user explicitly asks to generate or create a commit, delegate staged-change analysis and commit-message drafting to the `commit_specialist` subagent
+when useful. The main agent remains responsible for confirming user intent, staged scope, and final safety.
+
 ## Workflow
 
 1. Inspect `git status`.
 2. Inspect staged changes with `git diff --cached`.
 3. If nothing is staged, inspect unstaged changes and ask before staging unless the user explicitly requested autonomous staging.
 4. Confirm that no `.env`, credentials, local memory noise, generated state, or unrelated files are staged.
-5. Draft an English Conventional Commit message.
+5. Use `commit_specialist` to draft an English Conventional Commit message when delegation is appropriate.
 6. If the user requested only a message, return the message without committing.
 7. If the user requested a commit, run the commit.
 8. If hooks fail, fix the issue, restage only affected intended files, and retry.

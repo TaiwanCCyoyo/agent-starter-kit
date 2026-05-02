@@ -69,4 +69,5 @@ Use the Codex-private skills in `.codex/skills/` when the task matches:
 - `repo_explorer` and `implementation_reviewer` are general read-only support agents.
 - `memory_auditor` and `memory_compressor` are read-only memory support agents.
 - `doc_translator` is a workspace-write documentation translation agent that may edit only the explicit target translation file.
+- `commit_specialist` is a workspace-write Git commit support agent for staged-change review, commit message drafting, and explicit commit execution.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
