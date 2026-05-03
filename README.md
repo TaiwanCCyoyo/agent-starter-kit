@@ -47,7 +47,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | Agent | Hook Type | Purpose | Script |
 | :--- | :--- | :--- | :--- |
 | **Gemini CLI** | `SessionStart` | Loads project memory and branch context. | `.gemini/scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `.gemini/scripts/after_tool_auto_format.py`, `.gemini/scripts/after_tool_file_hygiene.py` |
+| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `.gemini/scripts/auto_format.py`, `.gemini/scripts/file_hygiene.py` |
 | **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `.gemini/scripts/memory_nudger.py` |
 | **Gemini CLI** | `AfterAgent` | Checks memory file size and warns if compression is needed. | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
