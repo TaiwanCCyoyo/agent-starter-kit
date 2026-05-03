@@ -47,7 +47,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | Agent | Hook Type | Purpose | Script |
 | :--- | :--- | :--- | :--- |
 | **Gemini CLI** | `SessionStart` | Loads project memory and branch context. | `.gemini/scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `scripts/auto_format.py`, `scripts/file_hygiene.py` |
+| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `.gemini/scripts/after_tool_auto_format.py`, `.gemini/scripts/after_tool_file_hygiene.py` |
 | **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `.gemini/scripts/memory_nudger.py` |
 | **Gemini CLI** | `AfterAgent` | Checks memory file size and warns if compression is needed. | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
@@ -76,7 +76,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
 | `.codex/` | Codex instructions, hooks, and private command-like skills. |
-| `scripts/` | Shared hygiene, formatting, and memory helper scripts. |
+| `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
 After copying, replace `.agents/memory/MEMORY.md` with the target project's real mission, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check .`.

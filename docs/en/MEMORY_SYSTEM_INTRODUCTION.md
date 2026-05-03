@@ -66,7 +66,7 @@ When reusing this starter kit, copy only the agent layers you need.
 | `.codex/` | You want Codex support. | Review hooks, skills, and `.codex/AGENTS.md`. |
 | `.gemini/` | You want Gemini CLI support. | Review settings, commands, and scripts. |
 | `.agent/` | You want Antigravity support. | Review rules, skills, and workflows. |
-| `scripts/` | You want shared hygiene scripts. | Keep only scripts referenced by enabled agents. |
+| `scripts/` | You want repository-level hygiene scripts. | Keep Git-facing baseline scripts and route agent-specific logic through agent adapters. |
 | `.pre-commit-config.yaml` | You want repository-level checks. | Install with `uv run pre-commit install`. |
 
 After copying:

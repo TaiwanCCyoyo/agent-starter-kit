@@ -47,7 +47,7 @@
 | Agent | Hook 類型 | 用途 | Script |
 | :--- | :--- | :--- | :--- |
 | **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `.gemini/scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `scripts/auto_format.py`, `scripts/file_hygiene.py` |
+| **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `.gemini/scripts/after_tool_auto_format.py`, `.gemini/scripts/after_tool_file_hygiene.py` |
 | **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `.gemini/scripts/memory_nudger.py` |
 | **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
@@ -76,7 +76,7 @@
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills。 |
-| `scripts/` | 共用檔案衛生、格式化與記憶輔助腳本。 |
+| `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 
 複製後，請將 `.agents/memory/MEMORY.md` 替換成目標專案的真實 mission，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。

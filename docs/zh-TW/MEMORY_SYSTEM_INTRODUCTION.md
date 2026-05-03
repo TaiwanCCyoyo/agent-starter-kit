@@ -65,7 +65,7 @@ Antigravity 主要使用 `.agent/workflows/` 與 `.agent/rules/` 作為指令和
 | `.codex/` | 需要 Codex 支援。 | 檢查 hooks、skills 與 `.codex/AGENTS.md`。 |
 | `.gemini/` | 需要 Gemini CLI 支援。 | 檢查 settings、commands 與 scripts。 |
 | `.agent/` | 需要 Antigravity 支援。 | 檢查 rules、skills 與 workflows。 |
-| `scripts/` | 需要共用 hygiene scripts。 | 只保留啟用的 Agent 會引用的 scripts。 |
+| `scripts/` | 需要 repository 層級 hygiene scripts。 | 保留 Git-facing baseline scripts，Agent 專屬邏輯放在各自 adapter。 |
 | `.pre-commit-config.yaml` | 需要 repository 層級檢查。 | 使用 `uv run pre-commit install` 安裝。 |
 
 複製後：

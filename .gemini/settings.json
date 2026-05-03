@@ -47,13 +47,13 @@
             "name": "auto_format",
             "description": "Automatically fixes python syntax and formats code after modifications.",
             "type": "command",
-            "command": "uv run python ./scripts/auto_format.py --hook"
+            "command": "uv run python ./.gemini/scripts/after_tool_auto_format.py"
           },
           {
             "name": "file-hygiene-compliance",
             "description": "Validate file encoding (UTF-8), language, and clean trailing whitespace",
             "type": "command",
-            "command": "uv run python ./scripts/file_hygiene.py --hook"
+            "command": "uv run python ./.gemini/scripts/after_tool_file_hygiene.py"
           }
         ]
       }
