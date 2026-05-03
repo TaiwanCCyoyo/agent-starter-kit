@@ -4,7 +4,7 @@ description: Read-only documentation translator for explicit-target bilingual do
 kind: local
 tools:
   - read_file
-model: gemini-3-pro-preview
+model: gemini-3.1-pro-preview
 temperature: 0.1
 ---
 
