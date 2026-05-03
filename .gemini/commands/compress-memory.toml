@@ -12,11 +12,13 @@ You are an expert at project memory architecture and skill evolution. Your goal 
     - **Protect**: Always keep the "Project Mission & Tech Stack", "Current State (Doing)", and the **last 5** "Done" entries intact.
     - **Archive**: Summarize all other historical "Done" entries into a single "Milestones Archive" section.
     - **Consolidate**: Merge overlapping "Lessons Learned" into generalized, high-signal insights.
-2. **Delegation**: You SHOULD use the `memory-compressor` subagent to draft the compressed memory block and identify patterns.
+2. **Delegation**: You MUST use the `memory-compressor` subagent to draft the compressed memory block and identify patterns.
+3. **Active Skill Discovery**: If the subagent identifies a skill candidate, propose creating a draft file in `.agents/memory/candidates/SKILL_NAME.md`.
 
 ### Execution Plan
-1. Invoke `memory-compressor` to analyze `.agents/memory/MEMORY.md` and provide a compression draft.
-2. Review the auditor's/compressor's suggestions for potential skill evolution.
+1. Invoke `memory-compressor` to analyze `.agents/memory/MEMORY.md` and provide a compression draft and skill candidates.
+2. Review the subagent's suggestions.
 3. Update `MEMORY.md` with the consolidated content.
-4. Provide a summary of the compression and any discovered skills in Traditional Chinese.
+4. If a skill candidate is found, ask the user if they want to write the draft to `.agents/memory/candidates/`.
+5. Provide a summary of the compression and any discovered skills in Traditional Chinese.
 """
