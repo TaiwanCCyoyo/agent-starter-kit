@@ -59,10 +59,9 @@ When memory exceeds roughly 2000 tokens or the `Done` list becomes noisy:
 - Move historical detail to an archive file under `.agents/memory/` when useful.
 - During compression, identify repeated workflows that should become skills.
 
-## Skill Evolution Candidates
+## Skill Evolution Candidates (Active Discovery)
 
-During compression or explicit memory audits, look for repeated memory patterns that should be promoted out of memory. This is suggestion-only: do not create
-skills, rules, docs, hooks, or scripts unless the user explicitly asks.
+During compression or explicit memory audits, look for repeated memory patterns that should be promoted out of memory.
 
 Classify candidates as:
 
@@ -74,21 +73,22 @@ Classify candidates as:
 
 Use these signals:
 
-- The same operational sequence appears across multiple memory entries.
+- The same operational sequence appears across multiple memory entries (3+ times).
 - A lesson describes a stable decision rule rather than a single completed task.
 - A handoff item keeps recurring because no reusable workflow exists.
 - Compression needs to preserve long procedural detail that would be better as a skill or doc.
-- A reminder or validation pattern is deterministic enough to become a hook.
 
-Report candidates in this compact format:
+**Drafting (Active)**: If a pattern is identified (excluding `none`), use the `memory-compressor` subagent to physically draft a candidate file (e.g., `SKILL_CANDIDATE.md` or `RULE_CANDIDATE.md`) capturing the wisdom. Save this candidate to `.agents/memory/candidates/`.
+
+Report to the user in this compact format:
 
 ```text
-Potential evolution candidate:
+Potential evolution candidate drafted:
 - Topic: <short name>
 - Type: <skill|rule|doc|hook>
 - Reason: <why memory should not remain the only home>
-- Suggested target: <path or surface>
-- Next action: <ask user approval, draft proposal, or keep in memory>
+- Draft Location: <path to candidate file>
+- Next action: <ask user to review or formally adopt>
 ```
 
 If there are no meaningful candidates, say so briefly instead of inventing one.

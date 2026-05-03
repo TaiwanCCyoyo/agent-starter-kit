@@ -72,14 +72,29 @@ This section defines how the Agent interacts with system-level hooks for seamles
     3. **Execute**: Call the `save-memory` command (or the `write_file` equivalent) to update `.agents/memory/MEMORY.md`.
 - **Priority**: System nudges are high-priority; do not ignore them unless there's a critical error.
 
-### III. Intelligent Compression & Skill Discovery
+### III. Intelligent Compression & Skill Evolution
 - **Thresholds**:
     - Total `MEMORY.md` size > 2000 tokens.
     - `Done` list entries > 15.
 - **Compression Strategy**:
     - **Protect**: Mission, Tech Stack, and the last 3 `Done` entries.
     - **Compress**: Summarize older `Done` entries into a "Milestones Archive" section.
-- **Skill Discovery**: During compression, analyze if a repetitive workflow exists. If so, suggest activating `skill-creator` to encapsulate the wisdom.
+- **Skill Evolution Candidates (Active Discovery)**:
+    - **Detection**: During compression or explicit audits, scan `Lessons Learned` and `Handover` for repeated memory patterns (e.g., the same operational sequence appears 3+ times, or a lesson describes a stable decision rule).
+    - **Classification**: Classify the recurring pattern as one of:
+      - `skill`: a repeatable task workflow with steps, inputs, outputs.
+      - `rule`: an always-on behavior constraint (update `GEMINI.md`).
+      - `doc`: stable explanatory material for architecture.
+      - `hook`: deterministic lifecycle automation.
+    - **Drafting (Active)**: Use the `memory-compressor` subagent to draft a candidate file (e.g., `SKILL_CANDIDATE.md` or `RULE_CANDIDATE.md`) capturing the wisdom.
+    - **Staging**: Save the candidate to `.agents/memory/candidates/` and propose it to the user for review. Report to the user in this format:
+      ```text
+      Potential evolution candidate drafted:
+      - Topic: <short name>
+      - Type: <skill|rule|doc|hook>
+      - Draft Location: <path to candidate file>
+      - Next action: <ask user to review or activate skill-creator>
+      ```
 
 ## 7. Git Worktree Sync (Contextual Mobility)
 - **Objective**: Ensure intelligence flows between parallel development environments.
