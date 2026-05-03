@@ -59,6 +59,40 @@ When memory exceeds roughly 2000 tokens or the `Done` list becomes noisy:
 - Move historical detail to an archive file under `.agents/memory/` when useful.
 - During compression, identify repeated workflows that should become skills.
 
+## Skill Evolution Candidates
+
+During compression or explicit memory audits, look for repeated memory patterns that should be promoted out of memory. This is suggestion-only: do not create
+skills, rules, docs, hooks, or scripts unless the user explicitly asks.
+
+Classify candidates as:
+
+- `skill`: a repeatable task workflow with steps, inputs, outputs, and verification.
+- `rule`: an always-on behavior constraint that should apply across tasks.
+- `doc`: stable explanatory material that helps onboarding or architecture understanding.
+- `hook`: deterministic lifecycle automation that should run without agent judgment.
+- `none`: project state or a one-time lesson that should stay in memory.
+
+Use these signals:
+
+- The same operational sequence appears across multiple memory entries.
+- A lesson describes a stable decision rule rather than a single completed task.
+- A handoff item keeps recurring because no reusable workflow exists.
+- Compression needs to preserve long procedural detail that would be better as a skill or doc.
+- A reminder or validation pattern is deterministic enough to become a hook.
+
+Report candidates in this compact format:
+
+```text
+Potential evolution candidate:
+- Topic: <short name>
+- Type: <skill|rule|doc|hook>
+- Reason: <why memory should not remain the only home>
+- Suggested target: <path or surface>
+- Next action: <ask user approval, draft proposal, or keep in memory>
+```
+
+If there are no meaningful candidates, say so briefly instead of inventing one.
+
 ## Worktree Consolidation
 
 When finishing a worktree:

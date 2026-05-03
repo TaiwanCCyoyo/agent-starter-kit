@@ -18,5 +18,5 @@ agent must review and apply any final `.agents/memory/MEMORY.md` edits.
 2. Preserve the project mission, tech stack, current `Doing` items, active handoff notes, and recent high-signal `Done` entries.
 3. Merge duplicate lessons into generalized, reusable lessons.
 4. Summarize older completed work into a compact historical entry or move historical detail to an auxiliary memory file under `.agents/memory/` when useful.
-5. Identify repeated procedures that may deserve a future skill, but do not create new skills unless the user asks.
+5. Apply the "Skill Evolution Candidates" section from `memory-maintenance` to report repeated memory patterns that may deserve a future skill, rule, doc, or hook.
 6. Report what was compressed, what was preserved, and any follow-up recommendations.
