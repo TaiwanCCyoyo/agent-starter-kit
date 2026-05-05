@@ -9,21 +9,79 @@ This is a Codex-private skill. It is intentionally stored in `.codex/skills` and
 
 ## Core Rules
 
+- Treat `.agents/memory/MEMORY.md` as Hot Memory: a concise boot index, mission/constraints summary, compact current-state summary, and map to deeper memory.
 - Keep `.agents/memory/MEMORY.md` concise, current, and project-specific.
+- Keep `.agents/memory/` fully ignored as instantiated project memory. Commit the rules and automation that manage memory, not local memory content.
 - Prefer durable facts, architectural decisions, and lessons learned over task narration.
 - Do not save secrets or user-private data.
 - Use English for technical memory entries unless the existing section explicitly uses Traditional Chinese.
 - Treat repeated blockers, repeated workarounds, mistaken assumptions, hidden tradeoffs, and recurring user-assistance needs as memory-worthy process signals when they can prevent future recurrence.
+- Treat retrieval, search, RAG, or Graphify output as context until it is explicitly curated into the memory taxonomy.
+
+## Memory Layers
+
+### Hot Memory
+
+Always loaded or injected at session start:
+
+- `.agents/memory/MEMORY.md`
+- Tail of `.agents/memory/lessons.md` when present
+
+Use Hot Memory for:
+
+- Mission and non-negotiable constraints.
+- Compact current-state summary and handoff.
+- Official memory map.
+- Recent or frequently repeated lessons that prevent recurring mistakes.
+
+Keep auto-loaded lessons extremely concise. The bottom of `lessons.md` is highest priority because hooks may load only the last 50 lines.
+
+### Warm Memory
+
+Loaded on demand:
+
+- `.agents/memory/decisions.md`
+- `.agents/memory/lessons.md`
+- `.agents/memory/lessons-archive.md`
+- `.agents/memory/current-state.md`
+- `.agents/memory/user-preferences.md`
+- `.agents/memory/workflows.md`
+
+Use Warm Memory for curated durable knowledge that is useful but not always needed in the prompt.
+
+### Cold Memory
+
+Never loaded by default:
+
+- `.agents/memory/archive/`
+- `.agents/memory/runs/`
+- `.agents/memory/candidates/`
+
+Use Cold Memory for historical summaries, run evidence, detailed logs, and draft evolution candidates. Important run evidence may use both Markdown and JSONL.
+
+## Routing Rules
+
+- Mission, constraints, memory map, and compact current-state summary -> `MEMORY.md`.
+- Durable architectural decisions -> `decisions.md`.
+- Concise recurring lessons that should reduce repeated mistakes -> `lessons.md`.
+- Older or lower-frequency lessons -> `lessons-archive.md` or `archive/`.
+- Active handoff detail -> `current-state.md` or a short `MEMORY.md` pointer.
+- Stable user/project preferences -> `user-preferences.md`.
+- Reusable workflow notes not yet promoted to skills -> `workflows.md`.
+- Historical details -> `archive/`.
+- Important session evidence -> `runs/`, preferably Markdown plus JSONL when useful.
+- Draft future rules, skills, docs, or hooks -> `candidates/`.
+- Future user-facing plans requiring alignment -> `.agents/memory/*_PLAN.md`.
 
 ## Three-Phase Ritual
 
 ### 1. Pre-task
 
-Read `.agents/memory/MEMORY.md` before substantial work. Align with the mission, active `Doing` items, and handoff notes.
+Read `.agents/memory/MEMORY.md` before substantial work. Align with the mission, current-state summary, auto-loaded lessons, and relevant Warm files.
 
 ### 2. During Work
 
-For file-changing tasks, maintain a short session intent in `Doing` when the task is large or likely to span turns.
+For file-changing tasks, maintain a compact session intent in `MEMORY.md` or detailed active handoff in `current-state.md` when the task is large or likely to span turns.
 
 Escalate instead of normalizing friction:
 
@@ -36,19 +94,21 @@ Escalate instead of normalizing friction:
 
 After file-changing work:
 
-1. Move completed session intent from `Doing` to `Done`.
-2. Add high-signal lessons to `Lessons Learned`.
-3. Put unresolved follow-up in `Session Handover`.
-4. Keep the last entries readable and short.
+1. Move completed session intent from active state to completed state.
+2. Add high-signal lessons to `lessons.md` only when they are concise and recurring-risk oriented.
+3. Put older or lower-frequency lessons in `lessons-archive.md` or `archive/`.
+4. Put durable decisions in `decisions.md`.
+5. Put unresolved follow-up in `current-state.md` or a compact `MEMORY.md` summary.
+6. Keep the last entries readable and short.
 
 ## Memory Subagents
 
 Codex provides read-only memory support agents under `.codex/agents/`:
 
 - `memory_auditor`: use for delegated analysis of what should be saved after meaningful work.
-- `memory_compressor`: use for delegated compression drafts when `MEMORY.md` becomes verbose.
+- `memory_compressor`: use for delegated compression drafts when Hot or Warm memory becomes verbose.
 
-These agents may recommend or draft memory changes, but the main agent owns the final decision and file edit for `.agents/memory/MEMORY.md`.
+These agents may recommend or draft memory changes, but the main agent owns the final decision and file edits under `.agents/memory/`.
 
 ## Compression
 
@@ -56,7 +116,8 @@ When memory exceeds roughly 2000 tokens or the `Done` list becomes noisy:
 
 - Preserve project mission, tech stack, current state, and recent high-signal work.
 - Merge duplicate lessons.
-- Move historical detail to an archive file under `.agents/memory/` when useful.
+- Move historical detail to `archive/` when useful.
+- Move stale or low-frequency lessons out of `lessons.md` so the auto-loaded tail stays high-signal.
 - During compression, identify repeated workflows that should become skills.
 
 ## Skill Evolution Candidates (Active Discovery)

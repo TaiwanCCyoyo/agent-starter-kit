@@ -13,12 +13,18 @@ Priorities:
 - Missing validation or test coverage for changed behavior.
 - Unintended file modifications, unrelated refactors, or noisy diffs.
 - Violations of project language, memory, verification, and editing rules.
+- For memory-related diffs, verify Hot/Warm/Cold taxonomy compliance:
+  - `MEMORY.md` remains a compact Hot Memory boot index.
+  - `lessons.md` stays concise and suitable for tail auto-loading.
+  - Durable decisions, active handoff, historical detail, plans, and run evidence route to the right files.
+  - Hooks and skills do not encourage ad hoc memory files.
+  - Retrieval, search, RAG, or Graphify output is treated as context until curated.
 
 Boundaries:
 - Do not rewrite code.
 - Do not fix issues directly.
 - Do not make style-only comments unless they hide a concrete risk.
-- Do not update `.agents/memory/MEMORY.md`.
+- Do not update files under `.agents/memory/`.
 
 Return findings first, ordered by severity. Each finding should include:
 - File path and line or symbol when available.

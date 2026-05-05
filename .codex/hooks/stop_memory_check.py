@@ -6,7 +6,23 @@ from pathlib import Path
 MEMORY_REMINDER_INTERVAL = 3
 MEMORY_TOKEN_LIMIT = 2000
 MEMORY_LINE_LIMIT = 100
+LESSONS_LINE_LIMIT = 50
 STATE_FILE = Path(".agents/memory/.codex_stop_memory_state.json")
+APPROVED_MEMORY_FILES = {
+    "MEMORY.md",
+    "decisions.md",
+    "lessons.md",
+    "lessons-archive.md",
+    "current-state.md",
+    "user-preferences.md",
+    "workflows.md",
+    "MEMORY_RESTRUCTURE_PLAN.md",
+}
+APPROVED_MEMORY_DIRS = {"archive", "runs", "candidates"}
+
+
+def is_approved_plan_file(name: str) -> bool:
+    return "_PLAN" in name and name.endswith(".md")
 
 
 def repo_root(cwd: str) -> Path:
@@ -19,6 +35,10 @@ def repo_root(cwd: str) -> Path:
 
 def memory_path(root: Path) -> Path:
     return root / ".agents" / "memory" / "MEMORY.md"
+
+
+def lessons_path(root: Path) -> Path:
+    return root / ".agents" / "memory" / "lessons.md"
 
 
 def state_path(root: Path) -> Path:
@@ -70,6 +90,64 @@ def count_tokens(text: str) -> int:
     return len(text) // 4
 
 
+def memory_taxonomy_message(root: Path) -> str:
+    memory_dir = root / ".agents" / "memory"
+    if not memory_dir.exists():
+        return ""
+
+    unexpected: list[str] = []
+    for child in memory_dir.iterdir():
+        if child.name.startswith("."):
+            continue
+        if child.is_dir():
+            if child.name not in APPROVED_MEMORY_DIRS:
+                unexpected.append(child.name + "/")
+            continue
+        if child.suffix.lower() != ".md":
+            continue
+        if child.name not in APPROVED_MEMORY_FILES and not is_approved_plan_file(child.name):
+            unexpected.append(child.name)
+
+    if not unexpected:
+        return ""
+
+    return (
+        "Memory taxonomy reminder: unexpected memory files or directories found under `.agents/memory/`: "
+        + ", ".join(sorted(unexpected))
+        + ". Prefer the approved Hot/Warm/Cold taxonomy or record a plan under `*_PLAN.md` before adding new categories."
+    )
+
+
+def lessons_health_message(root: Path, state: dict) -> str:
+    path = lessons_path(root)
+    if not path.exists():
+        return ""
+
+    try:
+        content = path.read_text(encoding="utf-8")
+    except Exception as e:
+        return f"Lessons health check failed: {str(e)}"
+
+    current_mtime = path.stat().st_mtime
+    previous_mtime = float(state.get("lessons_mtime", 0.0))
+    state["lessons_mtime"] = current_mtime
+
+    if current_mtime <= previous_mtime:
+        return ""
+
+    lines = len(content.splitlines())
+    state["lessons_lines"] = lines
+
+    if lines <= LESSONS_LINE_LIMIT:
+        return ""
+
+    return (
+        f"Lessons pruning reminder: `.agents/memory/lessons.md` has {lines} lines, but session start auto-loads only the last "
+        f"{LESSONS_LINE_LIMIT} lines. Keep recent/repeated/high-impact lessons near the bottom and move stale or lower-priority "
+        "lessons to `lessons-archive.md` or `archive/`."
+    )
+
+
 def memory_health_message(root: Path, state: dict) -> str:
     path = memory_path(root)
     if not path.exists():
@@ -92,7 +170,8 @@ def memory_health_message(root: Path, state: dict) -> str:
 
     return (
         f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large ({tokens} approximate tokens, {lines} lines). "
-        "Use `compress-memory` to preserve current decisions and lessons while summarizing historical detail."
+        "Use `compress-memory` to keep `MEMORY.md` as Hot Memory, route decisions to `decisions.md`, keep concise recurring lessons in "
+        "`lessons.md`, and move historical detail to Warm/Cold memory."
     )
 
 
@@ -120,13 +199,12 @@ def memory_update_message(root: Path, state: dict) -> str:
     return (
         f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} Codex responses.\n"
         "Before finishing this task, you MUST:\n"
-        "1. Update `.agents/memory/MEMORY.md` (Done & Lessons Learned).\n"
-        "2. Append a session summary to `.agents/memory/SESSION_LOG.md` using this format:\n\n"
-        "### [YYYY-MM-DD] Session Summary\n"
-        "- **Goal**: [Brief statement]\n"
-        "- **Achievements**: [Concise bullets]\n"
-        "- **Pending**: [Remaining work/issues]\n\n"
-        "Note: Summaries must be in English. Discuss progress with the user in Traditional Chinese (zh-TW)."
+        "1. Update Hot Memory only when the boot index/current summary changed: `.agents/memory/MEMORY.md`.\n"
+        "2. Route durable decisions to `.agents/memory/decisions.md`.\n"
+        "3. Route concise recurring lessons to `.agents/memory/lessons.md`; move stale or lower-priority lessons to `lessons-archive.md` or `archive/`.\n"
+        "4. Route active handoff detail to `.agents/memory/current-state.md`.\n"
+        "5. Preserve important run evidence under `.agents/memory/runs/` as Markdown plus JSONL when useful.\n\n"
+        "Note: Technical memory should be concise and high-signal. Discuss progress with the user in Traditional Chinese (zh-TW)."
     )
 
 
@@ -146,6 +224,12 @@ def main() -> int:
     memory_message = memory_health_message(root, state)
     if memory_message:
         messages.append(memory_message)
+    lessons_message = lessons_health_message(root, state)
+    if lessons_message:
+        messages.append(lessons_message)
+    taxonomy_message = memory_taxonomy_message(root)
+    if taxonomy_message:
+        messages.append(taxonomy_message)
     write_state(root, state)
 
     if messages:

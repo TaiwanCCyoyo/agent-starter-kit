@@ -15,17 +15,20 @@ When creating a worktree:
 
 1. Create the branch and worktree with `git worktree add <path> <branch>`.
 2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Immediately define the worktree mission in the `Doing` section:
+3. Copy or initialize the official memory taxonomy when relevant: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, `archive/`, `runs/`, and `candidates/`.
+4. Immediately define the worktree mission in the Hot Memory current-state summary or active state:
    - Branch goal.
    - Definition of done.
    - Any constraints from the user request.
-4. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
+5. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
 
 ## Active Development
 
 - Use the local worktree memory for task progress.
 - Mark entries with the branch name when needed.
-- Keep unfinished work in `Session Handover`.
+- Keep compact branch status in `MEMORY.md`.
+- Keep detailed unfinished work in `current-state.md`.
+- Keep recurring branch lessons concise in `lessons.md`; move lower-frequency detail to `lessons-archive.md` or `archive/`.
 
 ## Finish
 
@@ -43,12 +46,13 @@ Before removing a worktree:
 
 When consolidating worktree memory:
 
-1. Identify the source memory file and destination `.agents/memory/MEMORY.md`.
-2. Read both files.
-3. Transfer only high-signal lessons, architectural decisions, and completed milestones.
-4. Avoid duplicate entries.
-5. Prefix branch-specific milestones when context matters.
-6. Report consolidated items and skipped duplicates.
+1. Identify source and destination memory directories.
+2. Read `MEMORY.md` plus relevant Warm files from both locations.
+3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
+4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
+5. Avoid duplicate entries.
+6. Prefix branch-specific milestones when context matters.
+7. Report consolidated items, target files, and skipped duplicates.
 
 ## Safety
 

@@ -14,6 +14,7 @@ Responsibilities:
 - Preserve Markdown structure, headings, lists, tables, links, and frontmatter.
 - Preserve code blocks exactly.
 - Preserve inline code, file paths, commands, config keys, API names, hook names, skill names, agent names, branch names, and environment variables.
+- Preserve memory architecture terms consistently when they appear: Hot Memory, Warm Memory, Cold Memory, canonical memory, retrieval layer, RAG, GraphRAG, and Graphify.
 - Keep technical meaning unchanged.
 - Return unclear terminology questions instead of guessing.
 

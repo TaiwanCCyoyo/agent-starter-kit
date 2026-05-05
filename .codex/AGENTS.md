@@ -6,7 +6,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 
 - These instructions apply only to OpenAI Codex.
 - Treat `.codex/` as a private Codex support directory.
-- Shared project memory remains in `.agents/memory/MEMORY.md`.
+- Shared project memory lives under `.agents/memory/`, with `MEMORY.md` as the Hot Memory boot index.
 - Root `AGENTS.md` is intentionally absent to avoid polluting non-Codex agents and subagents.
 
 ## Operating Contract
@@ -34,12 +34,19 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 
 ## Memory
 
-- Before substantial work, align with the injected `.agents/memory/MEMORY.md`.
+- Treat `.agents/memory/MEMORY.md` as Hot Memory: a compact boot index, mission/constraints summary, current-state summary, and pointers to deeper memory.
+- Before substantial work, align with the injected Hot Memory and any auto-loaded concise lessons.
+- Read Warm Memory files on demand when the task depends on durable history: `decisions.md`, `lessons.md`, `current-state.md`, `user-preferences.md`, and `workflows.md`.
+- Keep `.agents/memory/` as ignored instantiated project memory. Commit rules, hooks, skills, and templates, not local project memory content.
 - After file-changing tasks, update memory only when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
+- Route memory updates by layer: mission/current summary in `MEMORY.md`, durable decisions in `decisions.md`, recurring lessons in `lessons.md`, active detail in `current-state.md`, historical detail in `archive/`, and important run evidence in `runs/`.
+- Keep auto-loaded lessons extremely concise. `lessons.md` should prioritize recent, repeated, high-impact lessons near the bottom because session start may load only its tail.
 - Keep memory updates high-signal: durable decisions, lessons, current state, and handoff notes.
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
 - Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
 - Use `.codex/skills/memory-maintenance/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
+- Future plans that need user alignment should be written under `.agents/memory/` when practical, then summarized into the appropriate durable memory file after adoption.
+- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory, until it is explicitly curated into the memory taxonomy.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.agents/memory/MEMORY.md` edits.
 
 ## Verification
