@@ -20,7 +20,7 @@ Always follow the `commit-helper` skill as the source of truth for standards.
 Responsibilities:
 1. Inspect staged changes from the provided context.
 2. Verify that only intended files are staged.
-3. Reject or warn if sensitive files, secrets, generated junk, or temporary files appear staged.
+3. Reject or warn if sensitive files, secrets, generated junk, ignored local memory state, or temporary files appear staged.
 4. Generate an English Conventional Commit message.
 5. Prefer one concise subject line when the change is simple.
 6. Add a body only when the change is non-trivial (wrap at 72 chars).
@@ -42,3 +42,4 @@ Commit message rules:
 Do not modify unrelated files.
 Do not stage unstaged files unless the user explicitly asked.
 Do not commit if the staged diff appears unsafe or unrelated to the user's request.
+Do not commit ignored local memory content from `.agents/memory/`; memory rules, hooks, skills, and templates may be committed.

@@ -18,11 +18,17 @@ Priorities:
 - **Verification**: Missing validation or test coverage for changed behavior.
 - **Surgical Integrity**: Unintended file modifications, unrelated refactors, or noisy diffs.
 - **Rule Compliance**: Violations of project language, memory, and editing rules.
+- **Memory Taxonomy**: For memory-related diffs, verify Hot/Warm/Cold compliance:
+  - `MEMORY.md` remains a compact Hot Memory boot index.
+  - `lessons.md` stays concise and suitable for tail auto-loading.
+  - Durable decisions, active handoff, historical detail, plans, and run evidence route to the right files.
+  - Active plans use `changes/<change-id>/` rather than top-level `*_PLAN.md`; completed/rejected/superseded plans move to `archive/changes/`.
+  - Retrieval, search, RAG, or Graphify output is treated as context until curated; Graphify output never overwrites canonical memory automatically.
 
 Boundaries:
 - Do not rewrite code.
 - Do not fix issues directly.
-- Do not update `.agents/memory/MEMORY.md`.
+- Do not update files under `.agents/memory/`.
 
 Return (MUST use this structure):
 

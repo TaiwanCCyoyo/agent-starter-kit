@@ -1,11 +1,20 @@
 ---
 name: memory-maintenance
-description: Guide for high-quality, high-signal, and sustainable project memory maintenance. Use when initializing, updating (BEFORE/AFTER tasks), or auditing the project's long-term memory (.agents/memory/MEMORY.md).
+description: Guide for high-quality, high-signal, and sustainable layered project memory maintenance under `.agents/memory/`.
 ---
 
 # Memory Maintenance Skill
 
-This skill transforms the project's memory into a **Living Skill Guide**. It ensures that every session (personality) contributes to a structured, token-efficient, and highly readable "Soul" of the project.
+This skill keeps project memory structured, token-efficient, and readable across Hot, Warm, and Cold memory layers.
+
+## Core Rules
+
+- Treat `.agents/memory/MEMORY.md` as Hot Memory: a concise boot index, mission/constraints summary, compact current-state summary, and map to deeper memory.
+- Keep `.agents/memory/` fully ignored as instantiated project memory. Commit rules and automation, not local memory content.
+- Prefer durable facts, architectural decisions, and lessons learned over task narration.
+- Treat repeated blockers, workarounds, mistaken assumptions, hidden tradeoffs, and recurring user-assistance needs as memory-worthy process signals.
+- Treat OpenSpec as the model for plan lifecycle: active changes are self-contained folders, completed changes are archived, and permanent knowledge is consolidated into durable memory.
+- Treat retrieval, search, RAG, or Graphify output as context until explicitly curated into the memory taxonomy.
 
 ## Core Principles
 
@@ -20,31 +29,76 @@ This skill transforms the project's memory into a **Living Skill Guide**. It ens
   - **Action**: Follow all 3 phases (Pre-Task, Plan-Phase, Post-Task).
 - **Lightweight Sync (Read-Only)**:
   - **Applicability**: Recommended for **Inquiry** tasks (pure consultation, log retrieval, codebase exploration without modification).
-  - **Action**: Perform **Pre-Task only** (Read MEMORY.md to stay aligned). **Skip** writing to `Doing`/`Done` unless a critical `Lesson Learned` or architectural decision is produced.
+  - **Action**: Perform **Pre-Task only** (read Hot Memory to stay aligned). Skip writing unless a critical lesson, decision, or handoff is produced.
   - **Goal**: Minimize noise in `MEMORY.md` and save context tokens.
 
 ### 3. Progressive Disclosure
-- **Main Memory**: Keep only the most recent/critical insights (Mission, Tech Stack, Current State).
-- **Archive**: Move historical logs or resolved issues to sub-files (e.g., `ARCHIVE.md`) if a section exceeds 500 tokens.
-- **Links**: Use Markdown links to point to detailed documentation or scripts.
+- **Hot Memory**: Keep `MEMORY.md` limited to mission, constraints, compact current-state summary, and memory map.
+- **Warm Memory**: Store durable decisions, lessons, current-state detail, user preferences, workflows, and active changes in dedicated files/directories.
+- **Cold Memory**: Store archived changes, run evidence, references, and evolution candidates under approved Cold directories.
+- **Links**: Use Markdown links to point from Hot/Warm memory to detailed Cold files.
+
+## Memory Layers
+
+- **Hot**: `.agents/memory/MEMORY.md` plus the last 50 lines of `lessons.md` when present.
+- **Warm**: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, and active `changes/`.
+- **Cold**: `archive/`, `runs/`, `candidates/`.
+
+## Routing Rules
+
+- Mission, constraints, memory map, and compact current-state summary -> `MEMORY.md`.
+- Durable architectural decisions -> `decisions.md`.
+- Concise recurring lessons -> `lessons.md`.
+- Older or lower-frequency lessons -> `lessons-archive.md` or `archive/`.
+- Active handoff detail -> `current-state.md` or a short `MEMORY.md` pointer.
+- Stable user/project preferences -> `user-preferences.md`.
+- Reusable workflow notes not yet promoted to skills -> `workflows.md`.
+- Active change plans requiring user alignment -> `changes/<change-id>/proposal.md`, with optional `design.md`, `tasks.md`, and `specs/`.
+- Completed, rejected, or superseded change plans -> `archive/changes/YYYY-MM-DD-<change-id>/`.
+- Long-form reference material -> `archive/references/`.
+- Important session evidence -> `runs/`, preferably Markdown plus JSONL when useful.
+- Draft future rules, skills, docs, or hooks -> `candidates/`.
+
+## Change Plan Lifecycle
+
+```text
+.agents/memory/changes/<change-id>/
+├── proposal.md
+├── design.md
+├── tasks.md
+└── specs/
+```
+
+1. Create a change folder only when the work needs user alignment, multi-step design, or survives beyond one turn.
+2. Keep small active handoff notes in `current-state.md` instead of creating a change.
+3. During implementation, update `tasks.md` if it exists and keep `current-state.md` as the compact pointer.
+4. On completion, rejection, or supersession, consolidate durable facts into `decisions.md`, `lessons.md`, `workflows.md`, or `current-state.md`.
+5. Move the whole change folder to `archive/changes/YYYY-MM-DD-<change-id>/`.
+6. Do not leave top-level `*_PLAN.md`, `PROPOSAL_*.md`, `SESSION_LOG.md`, or ad hoc reference files in `.agents/memory/`.
+
+## Graphify Cold Retrieval
+
+- Index archive, runs, candidates, and selected archived changes when memory archaeology is needed.
+- Prefer output under `.agents/memory/runs/graphify-cold/` or an external `GRAPHIFY_OUT` path.
+- Read `GRAPH_REPORT.md` before deep Cold Memory searches when available.
+- Use graph queries for relationships and discovery, then curate confirmed insights into Hot or Warm memory.
+- Never let Graphify, RAG, or search output automatically overwrite `MEMORY.md`, `decisions.md`, `lessons.md`, or `current-state.md`.
 
 ## 4. The Sync Protocol (The 3-Phase Ritual)
 
 ### I. Pre-Task: Loading the Soul
-- **Action**: Read `.agents/memory/MEMORY.md` (and `MEMORY.example.md` if needed).
+- **Action**: Read `.agents/memory/MEMORY.md` and relevant Warm files when needed.
 - **Goal**: Align with the project's mission and pick up where the last session left off.
 - **Output**: Choose a short, distinct **Session Name**.
 
 ### II. Plan-Phase: Signaling Intent
-- **Action**: Update the `Doing` section.
-- **Format**: `- **[Session Name]**: [Action-led intent]`.
-- **Purpose**: Prevent conflict between concurrent sessions and establish presence.
+- **Action**: Keep compact active detail in `current-state.md`; create `changes/<change-id>/` only for plans that need user alignment or cross-session continuity.
 
 ### III. Post-Task: Harvesting Wisdom
 - **Action**:
-  1. Move your entry from `Doing` to `Done`.
-  2. Update `Lessons Learned` with high-signal insights to prevent regression.
-  3. Explicitly delegate unfinished sub-tasks in the `Handover` section.
+  1. Route durable decisions, lessons, handoff, run evidence, and plan updates into the correct memory layer.
+  2. Keep `lessons.md` terse and recurring-risk oriented.
+  3. Archive completed or superseded `changes/<change-id>/` folders after durable knowledge is consolidated.
 
 ## 5. Specialized Subagents (Specialized Intelligence)
 
@@ -60,7 +114,7 @@ This architecture leverages specialized subagents to ensure high-quality memory 
 This section defines how the Agent interacts with system-level hooks for seamless memory management.
 
 ### I. SessionStart: Context Alignment
-- **Behavior**: Upon startup, check for injected `additionalContext` containing Git branch and `MEMORY.md` content.
+- **Behavior**: Upon startup, check for injected `additionalContext` containing Git branch, Hot Memory, and lesson tail content.
 - **Action**: Immediately validate if the current `Doing` task aligns with the detected branch mission. If in a new Worktree, propose a goal alignment to the user.
 - **Goal**: Zero-manual loading of memory.
 
@@ -68,19 +122,20 @@ This section defines how the Agent interacts with system-level hooks for seamles
 - **Trigger**: System emits a nudge: `Detected changes. Please run save-memory`.
 - **Response Protocol**:
     1. **Acknowledge**: Briefly confirm the system's detection.
-    2. **Summarize**: Extract the key `Done` items and `Lessons Learned` from the *current* turn only.
-    3. **Execute**: Call the `save-memory` command (or the `write_file` equivalent) to update `.agents/memory/MEMORY.md`.
+    2. **Summarize**: Extract key completed work, durable lessons, decisions, and handoff from the *current* turn only.
+    3. **Execute**: Call the `save-memory` command or update the correct `.agents/memory/` target file.
 - **Priority**: System nudges are high-priority; do not ignore them unless there's a critical error.
 
 ### III. Intelligent Compression & Skill Evolution
 - **Thresholds**:
-    - Total `MEMORY.md` size > 2000 tokens.
-    - `Done` list entries > 15.
+    - Total `MEMORY.md` size > 2000 tokens or 100 lines.
+    - `lessons.md` exceeds the auto-loaded 50-line tail budget.
+    - Top-level `.agents/memory/` contains unexpected ad hoc Markdown files.
 - **Compression Strategy**:
-    - **Protect**: Mission, Tech Stack, and the last 3 `Done` entries.
-    - **Compress**: Summarize older `Done` entries into a "Milestones Archive" section.
+    - **Protect**: Mission, constraints, current-state summary, active handoff, and recent high-signal work.
+    - **Route**: Move durable decisions, lessons, active handoff, historical detail, references, runs, and plans into their approved files/directories.
 - **Skill Evolution Candidates (Active Discovery)**:
-    - **Detection**: During compression or explicit audits, scan `Lessons Learned` and `Handover` for repeated memory patterns (e.g., the same operational sequence appears 3+ times, or a lesson describes a stable decision rule).
+    - **Detection**: During compression or explicit audits, scan lessons, handoff, workflows, and archived changes for repeated memory patterns (e.g., the same operational sequence appears 3+ times, or a lesson describes a stable decision rule).
     - **Classification**: Classify the recurring pattern as one of:
       - `skill`: a repeatable task workflow with steps, inputs, outputs.
       - `rule`: an always-on behavior constraint (update `GEMINI.md`).
@@ -98,4 +153,4 @@ This section defines how the Agent interacts with system-level hooks for seamles
 
 ## 7. Git Worktree Sync (Contextual Mobility)
 - **Objective**: Ensure intelligence flows between parallel development environments.
-- **Action**: When tasking in a Worktree, mark entries with `[Worktree: branch-name]`. Upon merging/closing, use `consolidate-memory` (or manual transfer) to backfill critical `Lessons Learned` to the main branch memory.
+- **Action**: When tasking in a Worktree, keep compact branch status in Hot/Warm memory and branch-specific plans under `changes/<change-id>/`. Upon merging/closing, use `consolidate-memory` to backfill durable decisions, lessons, handoff, and meaningful milestones to the main branch memory.

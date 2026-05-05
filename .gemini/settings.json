@@ -13,7 +13,7 @@
         "hooks": [
           {
             "name": "memory-context-loader",
-            "description": "Auto-loads MEMORY.md and aligns with branch context.",
+            "description": "Auto-loads Hot Memory, lesson tail, and branch context.",
             "type": "command",
             "command": "uv run python ./.gemini/scripts/session_start.py"
           }
@@ -26,13 +26,13 @@
         "hooks": [
           {
             "name": "memory-nudger",
-            "description": "Nudges the agent to update memory if changes are detected.",
+            "description": "Nudges the agent to route layered memory updates if changes are detected.",
             "type": "command",
             "command": "uv run python ./.gemini/scripts/memory_nudger.py"
           },
           {
             "name": "memory-size-check",
-            "description": "Checks memory file size and warns if compression is needed.",
+            "description": "Checks Hot Memory size, lessons tail size, and memory taxonomy health.",
             "type": "command",
             "command": "uv run python ./.gemini/scripts/memory_compressor.py"
           }

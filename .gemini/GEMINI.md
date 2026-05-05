@@ -34,15 +34,20 @@ This document defines the foundational mandates and operational protocols for Ge
 
 ## 💾 Memory & State (The "Soul" Protocol)
 
-- **Mandatory Alignment**: Read `.agents/memory/MEMORY.md` before substantial work.
-- **Durable Updates**: Update memory ONLY when the change creates durable project state, decisions, lessons, or handoff notes.
+- **Hot Memory**: Treat `.agents/memory/MEMORY.md` as the compact boot index for mission, constraints, current-state summary, and pointers to deeper memory.
+- **Mandatory Alignment**: Read injected Hot Memory before substantial work. Read Warm Memory on demand: `decisions.md`, `lessons.md`, `current-state.md`, `user-preferences.md`, and `workflows.md`.
+- **Durable Updates**: Update memory ONLY when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
+- **Layered Routing**: Route mission/current summary to `MEMORY.md`, durable decisions to `decisions.md`, recurring lessons to `lessons.md`, active handoff to `current-state.md`, active change plans to `changes/<change-id>/`, historical detail to `archive/`, and run evidence to `runs/`.
+- **Plan Lifecycle**: Use the OpenSpec-inspired change lifecycle. Active proposals live in `.agents/memory/changes/<change-id>/` with `proposal.md`, optional `design.md`, `tasks.md`, and `specs/`; completed or superseded plans move to `.agents/memory/archive/changes/` after durable knowledge is consolidated.
+- **Retrieval Boundary**: Treat retrieval, search, RAG, or Graphify output as context, not canonical memory, until explicitly curated. Graphify may index Cold Memory for navigation, but it must not overwrite Hot or Warm memory automatically.
 - **Bypass Mandate**: You MUST explicitly bypass ignore patterns ONLY when accessing `.agents/memory/`.
     - **Read (Shell Override)**: Standard `read_file` honors `.gitignore`. To read memory, you MUST use `run_shell_command` with `Get-Content`.
         - **Command**: `run_shell_command(command="Get-Content .agents/memory/MEMORY.md")`
     - **Write**: Use `write_file` or `replace`. These tools bypass `.gitignore` restrictions for writing.
 - **Automated Lifecycle**:
-    1. **SessionStart**: Context is injected. Align with branch mission immediately.
-    2. **AfterAgent (Nudging)**: Stateful hooks monitor progress. If nudged, update `MEMORY.md`.
+    1. **SessionStart**: Context is injected. Align with branch mission and auto-loaded lessons immediately.
+    2. **AfterAgent (Nudging)**: Stateful hooks monitor progress. If nudged, route memory updates through the approved taxonomy.
+    3. **AfterAgent (Health)**: Memory health hooks check Hot Memory size, lessons tail size, and unexpected top-level memory files.
 
 ## ✅ Verification
 

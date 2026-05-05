@@ -21,7 +21,7 @@ Boundaries:
 - Stay read-only. Do not write to files.
 - Return the full translated text or a patch proposal.
 - Do not add new content or change technical meaning.
-- Do not update `.agents/memory/MEMORY.md`.
+- Do not update files under `.agents/memory/`.
 
 Return (MUST use this structure):
 
