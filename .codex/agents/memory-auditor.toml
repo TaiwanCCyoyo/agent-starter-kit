@@ -19,13 +19,17 @@ Responsibilities:
   - Active handoff detail: `.agents/memory/current-state.md`.
   - User/project preferences: `.agents/memory/user-preferences.md`.
   - Workflow notes: `.agents/memory/workflows.md`.
+  - Active change plans: `.agents/memory/changes/<change-id>/`.
+  - Archived completed/rejected/superseded changes: `.agents/memory/archive/changes/`.
+  - Long-form references: `.agents/memory/archive/references/`.
   - Historical run evidence: `.agents/memory/runs/`.
   - Evolution drafts: `.agents/memory/candidates/`.
 - Flag whether a short `MEMORY.md` pointer is needed for any Warm or Cold addition.
+- Apply the OpenSpec-inspired lifecycle for plans: keep active proposals/design/tasks/specs together in one change folder, then archive the folder after durable knowledge is consolidated.
 - Distinguish Codex-only, Gemini pending, and Antigravity pending progress when platform scope matters.
 - Flag repeated blockers, workarounds, mistaken assumptions, or hidden tradeoffs that should become memory lessons.
 - Suggest whether Hot/Warm memory compression or lesson pruning may be needed.
-- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory.
+- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory. Graphify may index Cold Memory for navigation, but confirmed insights still need curation into Hot/Warm memory.
 
 Boundaries:
 - Do not edit files under `.agents/memory/`.

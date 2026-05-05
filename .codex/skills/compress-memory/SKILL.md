@@ -21,7 +21,10 @@ agent must review and apply any final `.agents/memory/` edits.
 5. Keep `lessons.md` short and recurring-risk oriented; move stale or lower-frequency lessons to `lessons-archive.md` or `archive/`.
 6. Move durable decisions into `decisions.md`.
 7. Move active but non-boot handoff detail into `current-state.md`.
-8. Summarize older completed work into `archive/` when useful.
-9. Preserve important run evidence under `runs/`, using Markdown plus JSONL when useful.
-10. Apply the "Skill Evolution Candidates" section from `memory-maintenance` to report repeated memory patterns that may deserve a future skill, rule, doc, or hook.
-11. Report what was compressed, what was preserved, target files changed, and any follow-up recommendations.
+8. Move active multi-step plans into `changes/<change-id>/`; archive completed, rejected, or superseded plans under `archive/changes/` after consolidating durable knowledge.
+9. Summarize older completed work into `archive/` when useful.
+10. Move long-form references into `archive/references/` unless they should become committed docs.
+11. Preserve important run evidence under `runs/`, using Markdown plus JSONL when useful.
+12. Treat Graphify cold-memory output as retrieval context; store any graph reports under `runs/graphify-cold/` or an external `GRAPHIFY_OUT` path.
+13. Apply the "Skill Evolution Candidates" section from `memory-maintenance` to report repeated memory patterns that may deserve a future skill, rule, doc, or hook.
+14. Report what was compressed, what was preserved, target files changed, and any follow-up recommendations.

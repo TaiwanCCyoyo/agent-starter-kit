@@ -30,7 +30,15 @@ Record stable project or user collaboration preferences here.
 Record reusable workflow notes here until they are promoted to skills, rules, docs, or hooks.
 """,
 }
-MEMORY_DIRS = ["archive", "runs", "candidates"]
+MEMORY_DIRS = [
+    Path("changes"),
+    Path("archive"),
+    Path("archive") / "changes",
+    Path("archive") / "references",
+    Path("archive") / "plans",
+    Path("runs"),
+    Path("candidates"),
+]
 
 
 def repo_root() -> Path:
@@ -68,9 +76,10 @@ DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
 
 ## 3. Memory Map
 - **Hot**: `MEMORY.md` plus the last 50 lines of `lessons.md` when present.
-- **Warm**: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`.
+- **Warm**: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, and active `changes/`.
 - **Cold**: `archive/`, `runs/`, `candidates/`.
 - **Policy**: Keep `lessons.md` concise because its tail may be auto-loaded every session.
+- **Plans**: Put active change plans in `changes/<change-id>/`; archive completed or superseded changes under `archive/changes/`.
 
 ## 4. Current State & Unfinished Business
 
@@ -120,12 +129,12 @@ def initialize_memory_taxonomy(root_dir: Path, branch: str) -> str:
             path.write_text(template, encoding="utf-8")
             created.append(name)
 
-        for dirname in MEMORY_DIRS:
-            path = memory_dir / dirname
+        for relative_dir in MEMORY_DIRS:
+            path = memory_dir / relative_dir
             if path.exists():
                 continue
             path.mkdir(parents=True, exist_ok=True)
-            created.append(dirname + "/")
+            created.append(str(relative_dir).replace("\\", "/") + "/")
     except Exception as e:
         return f"Taxonomy initialization failed: {str(e)}"
 

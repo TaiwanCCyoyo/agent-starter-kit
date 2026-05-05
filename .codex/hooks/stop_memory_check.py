@@ -16,13 +16,8 @@ APPROVED_MEMORY_FILES = {
     "current-state.md",
     "user-preferences.md",
     "workflows.md",
-    "MEMORY_RESTRUCTURE_PLAN.md",
 }
-APPROVED_MEMORY_DIRS = {"archive", "runs", "candidates"}
-
-
-def is_approved_plan_file(name: str) -> bool:
-    return "_PLAN" in name and name.endswith(".md")
+APPROVED_MEMORY_DIRS = {"changes", "archive", "runs", "candidates"}
 
 
 def repo_root(cwd: str) -> Path:
@@ -105,7 +100,7 @@ def memory_taxonomy_message(root: Path) -> str:
             continue
         if child.suffix.lower() != ".md":
             continue
-        if child.name not in APPROVED_MEMORY_FILES and not is_approved_plan_file(child.name):
+        if child.name not in APPROVED_MEMORY_FILES:
             unexpected.append(child.name)
 
     if not unexpected:
@@ -114,7 +109,8 @@ def memory_taxonomy_message(root: Path) -> str:
     return (
         "Memory taxonomy reminder: unexpected memory files or directories found under `.agents/memory/`: "
         + ", ".join(sorted(unexpected))
-        + ". Prefer the approved Hot/Warm/Cold taxonomy or record a plan under `*_PLAN.md` before adding new categories."
+        + ". Prefer the approved Hot/Warm/Cold taxonomy. Put active plans in `.agents/memory/changes/<change-id>/` "
+        "and completed or superseded plans under `.agents/memory/archive/changes/` after consolidating durable knowledge."
     )
 
 
@@ -203,7 +199,8 @@ def memory_update_message(root: Path, state: dict) -> str:
         "2. Route durable decisions to `.agents/memory/decisions.md`.\n"
         "3. Route concise recurring lessons to `.agents/memory/lessons.md`; move stale or lower-priority lessons to `lessons-archive.md` or `archive/`.\n"
         "4. Route active handoff detail to `.agents/memory/current-state.md`.\n"
-        "5. Preserve important run evidence under `.agents/memory/runs/` as Markdown plus JSONL when useful.\n\n"
+        "5. Route active plans to `.agents/memory/changes/<change-id>/`; archive completed or superseded plans under `.agents/memory/archive/changes/`.\n"
+        "6. Preserve important run evidence under `.agents/memory/runs/` as Markdown plus JSONL when useful.\n\n"
         "Note: Technical memory should be concise and high-signal. Discuss progress with the user in Traditional Chinese (zh-TW)."
     )
 

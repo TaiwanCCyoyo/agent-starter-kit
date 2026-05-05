@@ -17,6 +17,7 @@ This is a Codex-private skill. It is intentionally stored in `.codex/skills` and
 - Use English for technical memory entries unless the existing section explicitly uses Traditional Chinese.
 - Treat repeated blockers, repeated workarounds, mistaken assumptions, hidden tradeoffs, and recurring user-assistance needs as memory-worthy process signals when they can prevent future recurrence.
 - Treat retrieval, search, RAG, or Graphify output as context until it is explicitly curated into the memory taxonomy.
+- Treat OpenSpec as the model for plan lifecycle: active changes are self-contained folders, completed changes are archived, and permanent knowledge is consolidated into durable memory.
 
 ## Memory Layers
 
@@ -46,8 +47,11 @@ Loaded on demand:
 - `.agents/memory/current-state.md`
 - `.agents/memory/user-preferences.md`
 - `.agents/memory/workflows.md`
+- `.agents/memory/changes/`
 
 Use Warm Memory for curated durable knowledge that is useful but not always needed in the prompt.
+
+Use `changes/` for active, reviewable change plans that need more structure than a `current-state.md` note.
 
 ### Cold Memory
 
@@ -57,7 +61,7 @@ Never loaded by default:
 - `.agents/memory/runs/`
 - `.agents/memory/candidates/`
 
-Use Cold Memory for historical summaries, run evidence, detailed logs, and draft evolution candidates. Important run evidence may use both Markdown and JSONL.
+Use Cold Memory for historical summaries, archived changes, run evidence, detailed logs, references, and draft evolution candidates. Important run evidence may use both Markdown and JSONL.
 
 ## Routing Rules
 
@@ -68,10 +72,43 @@ Use Cold Memory for historical summaries, run evidence, detailed logs, and draft
 - Active handoff detail -> `current-state.md` or a short `MEMORY.md` pointer.
 - Stable user/project preferences -> `user-preferences.md`.
 - Reusable workflow notes not yet promoted to skills -> `workflows.md`.
+- Active change plans requiring user alignment -> `changes/<change-id>/proposal.md`, with optional `design.md`, `tasks.md`, and `specs/`.
 - Historical details -> `archive/`.
+- Completed, rejected, or superseded change plans -> `archive/changes/YYYY-MM-DD-<change-id>/`.
+- Long-form reference material -> `archive/references/`.
 - Important session evidence -> `runs/`, preferably Markdown plus JSONL when useful.
 - Draft future rules, skills, docs, or hooks -> `candidates/`.
-- Future user-facing plans requiring alignment -> `.agents/memory/*_PLAN.md`.
+
+## Change Plan Lifecycle
+
+Plan structure follows the useful parts of OpenSpec without making memory a full spec system:
+
+```text
+.agents/memory/changes/<change-id>/
+├── proposal.md      # why, what, scope, success criteria
+├── design.md        # optional technical approach and tradeoffs
+├── tasks.md         # implementation checklist
+└── specs/           # optional capability deltas or requirements
+```
+
+Use this lifecycle:
+
+1. Create a change folder only when the work needs user alignment, multi-step design, or survives beyond one turn.
+2. Keep small active handoff notes in `current-state.md` instead of creating a change.
+3. During implementation, update `tasks.md` if it exists and keep `current-state.md` as the compact pointer.
+4. On completion, rejection, or supersession, consolidate durable facts into `decisions.md`, `lessons.md`, `workflows.md`, or `current-state.md`.
+5. Move the whole change folder to `archive/changes/YYYY-MM-DD-<change-id>/`.
+6. Do not leave top-level `*_PLAN.md`, `PROPOSAL_*.md`, `SESSION_LOG.md`, or ad hoc reference files in `.agents/memory/`.
+
+## Graphify Cold Retrieval
+
+Graphify can help navigate Cold Memory but is not canonical memory:
+
+- Index archive, runs, candidates, and selected long-form plans when memory archaeology is needed.
+- Prefer output under `.agents/memory/runs/graphify-cold/` or an external `GRAPHIFY_OUT` path.
+- Read `GRAPH_REPORT.md` before deep Cold Memory searches when available.
+- Use graph queries for relationships and discovery, then curate confirmed insights into Hot or Warm memory.
+- Never let Graphify, RAG, or search output automatically overwrite `MEMORY.md`, `decisions.md`, `lessons.md`, or `current-state.md`.
 
 ## Three-Phase Ritual
 
@@ -99,7 +136,8 @@ After file-changing work:
 3. Put older or lower-frequency lessons in `lessons-archive.md` or `archive/`.
 4. Put durable decisions in `decisions.md`.
 5. Put unresolved follow-up in `current-state.md` or a compact `MEMORY.md` summary.
-6. Keep the last entries readable and short.
+6. Archive completed or superseded `changes/<change-id>/` folders after durable knowledge is consolidated.
+7. Keep the last entries readable and short.
 
 ## Memory Subagents
 
@@ -116,7 +154,8 @@ When memory exceeds roughly 2000 tokens or the `Done` list becomes noisy:
 
 - Preserve project mission, tech stack, current state, and recent high-signal work.
 - Merge duplicate lessons.
-- Move historical detail to `archive/` when useful.
+- Move historical detail and stale plan files to `archive/` when useful.
+- Move completed, rejected, or superseded change folders to `archive/changes/`.
 - Move stale or low-frequency lessons out of `lessons.md` so the auto-loaded tail stays high-signal.
 - During compression, identify repeated workflows that should become skills.
 

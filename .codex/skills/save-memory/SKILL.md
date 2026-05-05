@@ -21,13 +21,17 @@ Follow `.codex/skills/memory-maintenance/SKILL.md` for quality rules.
    - Active handoff detail -> `.agents/memory/current-state.md` or a compact `MEMORY.md` pointer.
    - Stable user/project preferences -> `.agents/memory/user-preferences.md`.
    - Reusable workflow notes not yet promoted to skills -> `.agents/memory/workflows.md`.
+   - Active change plans requiring user alignment -> `.agents/memory/changes/<change-id>/proposal.md`, with optional `design.md`, `tasks.md`, and `specs/`.
    - Historical details -> `.agents/memory/archive/`.
+   - Completed, rejected, or superseded change plans -> `.agents/memory/archive/changes/YYYY-MM-DD-<change-id>/` after durable knowledge is consolidated.
+   - Long-form reference material -> `.agents/memory/archive/references/`.
    - Important session evidence -> `.agents/memory/runs/`, preferably Markdown plus JSONL when useful.
    - Draft future rules, skills, docs, or hooks -> `.agents/memory/candidates/`.
-   - Future user-facing plans requiring alignment -> `.agents/memory/*_PLAN.md`.
+   - Graphify cold-memory indexes or reports -> `.agents/memory/runs/graphify-cold/` or an external `GRAPHIFY_OUT` path.
 4. Keep entries concise and high-signal.
 5. Keep `lessons.md` especially terse because session start may auto-load only its last 50 lines.
 6. Use English unless the target section already uses Traditional Chinese.
 7. Avoid secrets, private user data, and low-value turn narration.
 8. Treat retrieval, search, RAG, or Graphify output as context until curated into the memory taxonomy.
-9. Report the saved location to the user in Traditional Chinese.
+9. Do not create top-level ad hoc plan files such as `*_PLAN.md`, `PROPOSAL_*.md`, or `SESSION_LOG.md`.
+10. Report the saved location to the user in Traditional Chinese.

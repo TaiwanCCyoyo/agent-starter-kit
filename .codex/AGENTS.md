@@ -39,14 +39,14 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Read Warm Memory files on demand when the task depends on durable history: `decisions.md`, `lessons.md`, `current-state.md`, `user-preferences.md`, and `workflows.md`.
 - Keep `.agents/memory/` as ignored instantiated project memory. Commit rules, hooks, skills, and templates, not local project memory content.
 - After file-changing tasks, update memory only when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
-- Route memory updates by layer: mission/current summary in `MEMORY.md`, durable decisions in `decisions.md`, recurring lessons in `lessons.md`, active detail in `current-state.md`, historical detail in `archive/`, and important run evidence in `runs/`.
+- Route memory updates by layer: mission/current summary in `MEMORY.md`, durable decisions in `decisions.md`, recurring lessons in `lessons.md`, active detail in `current-state.md`, active change plans in `changes/<change-id>/`, historical detail in `archive/`, and important run evidence in `runs/`.
 - Keep auto-loaded lessons extremely concise. `lessons.md` should prioritize recent, repeated, high-impact lessons near the bottom because session start may load only its tail.
 - Keep memory updates high-signal: durable decisions, lessons, current state, and handoff notes.
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
 - Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
 - Use `.codex/skills/memory-maintenance/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
-- Future plans that need user alignment should be written under `.agents/memory/` when practical, then summarized into the appropriate durable memory file after adoption.
-- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory, until it is explicitly curated into the memory taxonomy.
+- Follow the OpenSpec-inspired change lifecycle for plans: active proposals live in `.agents/memory/changes/<change-id>/` with `proposal.md`, optional `design.md`, `tasks.md`, and `specs/`; completed or superseded plans move to `.agents/memory/archive/changes/` after durable knowledge is consolidated.
+- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory, until it is explicitly curated into the memory taxonomy. Graphify may index Cold Memory for navigation, but it must not overwrite Hot or Warm memory automatically.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.agents/memory/MEMORY.md` edits.
 
 ## Verification

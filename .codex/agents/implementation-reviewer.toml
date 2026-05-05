@@ -17,8 +17,9 @@ Priorities:
   - `MEMORY.md` remains a compact Hot Memory boot index.
   - `lessons.md` stays concise and suitable for tail auto-loading.
   - Durable decisions, active handoff, historical detail, plans, and run evidence route to the right files.
+  - Active plans use `changes/<change-id>/` rather than top-level `*_PLAN.md`; completed/rejected/superseded plans move to `archive/changes/`.
   - Hooks and skills do not encourage ad hoc memory files.
-  - Retrieval, search, RAG, or Graphify output is treated as context until curated.
+  - Retrieval, search, RAG, or Graphify output is treated as context until curated; Graphify output never overwrites canonical memory automatically.
 
 Boundaries:
 - Do not rewrite code.
