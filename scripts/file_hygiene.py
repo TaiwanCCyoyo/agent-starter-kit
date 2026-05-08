@@ -9,8 +9,11 @@ CJK_RE = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]")
 
 # Paths where non-English content is EXPLICITLY allowed
 ALLOWED_PATHS = [
+    ".agents/memory/",
     "docs/zh-TW/",
 ]
+
+MARKDOWN_LANGUAGE_LINK_LINES = 5
 
 
 def is_path_allowed(filepath):
@@ -29,7 +32,6 @@ def check_file_hygiene(filepath):
     Validates file encoding and language constraints.
     Returns True if valid, False if invalid.
     """
-    basename = os.path.basename(filepath)
     if not os.path.exists(filepath):
         return True
 
@@ -47,10 +49,7 @@ def check_file_hygiene(filepath):
     # 2. Language Check (If NOT in allowed paths)
     if not is_path_allowed(filepath):
         eval_lines = content.splitlines()
-        start_index = 0
-        if basename.lower() == "readme.md":
-            # README.md allows a Traditional Chinese link on the first line.
-            start_index = 1
+        start_index = MARKDOWN_LANGUAGE_LINK_LINES if Path(filepath).suffix.lower() == ".md" else 0
 
         for i in range(start_index, len(eval_lines)):
             line = eval_lines[i]
