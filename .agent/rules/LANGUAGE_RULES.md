@@ -18,3 +18,8 @@ description: Rules for language preferences (Traditional Chinese for collaborati
 - **Default README**: The root `README.md` must be in **English**.
 - **Multilingual Support**: If a Traditional Chinese version is required, it must be placed at `docs/zh-TW/README.md`.
 - **Linking**: The English `README.md` should contain a link to the Traditional Chinese version at the top of the file for easy navigation.
+
+## 3. Encoding and File Path Integrity
+- **Encoding**: Save all repository files in **UTF-8 without BOM**.
+- **Chinese Content Boundary**: Traditional Chinese content is strictly restricted to `.agents/memory/`, `docs/zh-TW/`, `legacy/`, ignored local `tasks/` logs, and the Traditional Chinese translation link in the root `README.md`. No Chinese files or comments should be created in other code development paths.
+

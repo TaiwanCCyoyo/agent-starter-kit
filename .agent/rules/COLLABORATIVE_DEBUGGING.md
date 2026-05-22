@@ -26,3 +26,11 @@ Your escalation must be professional and include:
 2. **Efforts Made**: A summary of the 3 approaches you already attempted.
 3. **The Root Cause**: Your technical analysis of why these attempts failed.
 4. **Proposed Pivot**: A recommendation for a different approach or a specific request for human intervention if truly unsolvable.
+
+## 5. Explicit Tradeoffs
+Prefer explicit tradeoffs over hidden assumptions. State what you know, what you are assuming, and what decision or help is needed when the next step depends on user intent or environment ownership.
+
+## 6. Process Debugging
+Treat repeated confusion or blockers as a process bug. If the same blocker, workaround, wrong assumption, or confusion appears twice, surface the pattern to the user and propose whether it should become a memory note, skill update, instruction update, or follow-up task.
+
+

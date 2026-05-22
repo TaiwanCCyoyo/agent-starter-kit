@@ -1,58 +1,102 @@
 ---
 name: memory-maintenance
-description: Guide for high-quality, high-signal, and sustainable project memory maintenance. Use when initializing, updating (BEFORE/AFTER tasks), or auditing the project's long-term memory (.agents/memory/MEMORY.md).
+description: Use when initializing, reading, updating, auditing, compressing, or consolidating `.agents/memory/` for this repository. Enforces memory layers, OpenSpec lifecycle, and active discovery.
 ---
 
-# Memory Maintenance Skill
+# Skill: Memory Maintenance
 
-This skill transforms the project's memory into a **Living Skill Guide**. It ensures that every session (personality) contributes to a structured, token-efficient, and highly readable "Soul" of the project.
+This skill transforms the project's memory into a structured, token-efficient, and highly readable "Soul" of the project. It defines memory layers, routing rules, plan lifecycles, and guidelines for active discovery of rules and skills.
 
-## Core Principles
+---
 
-### 1. High-Signal vs. Noise
-- **Avoid**: "I fixed the bug where the user was seeing a weird error message in the console." (Too verbose)
-- **Prefer**: "Fixed: Regex greedy matching in `system-safe.toml`." (Concise & Direct)
-- **Tone**: Use imperative/infinitive forms. Focus on *what* and *why*, not the narrative.
+## 🧬 1. Memory Layers (記憶分層)
 
-### 2. Sync Strategies (The "Signal-to-Noise" Filter)
-- **Standard Sync (Full Ritual)**:
-  - **Applicability**: Mandatory for all **Directive** tasks (any file modification, code fix, or infrastructure change).
-  - **Action**: Follow all 3 phases (Pre-Task, Plan-Phase, Post-Task).
-- **Lightweight Sync (Read-Only)**:
-  - **Applicability**: Recommended for **Inquiry** tasks (pure consultation, log retrieval, codebase exploration without modification).
-  - **Action**: Perform **Pre-Task only** (Read MEMORY.md to stay aligned). **Skip** writing to `Doing`/`Done` unless a critical `Lesson Learned` or architectural decision is produced.
-  - **Goal**: Minimize noise in `MEMORY.md` and save context tokens.
+### Hot Memory (熱記憶 - 啟動即載入)
+*   **Files**: `.agents/memory/MEMORY.md` (and the tail of `lessons.md` when configured).
+*   **Purpose**: Contains the project mission, non-negotiable tech stack constraints, current state summary, active handoff, and the official memory map. Keep it extremely concise (target < 1000 tokens).
 
-### 3. Progressive Disclosure
-- **Main Memory**: Keep only the most recent/critical insights (Mission, Tech Stack, Current State).
-- **Archive**: Move historical logs or resolved issues to sub-files (e.g., `ARCHIVE.md`) if a section exceeds 500 tokens.
-- **Links**: Use Markdown links to point to detailed documentation or scripts.
+### Warm Memory (溫記憶 - 按需主動載入)
+*   **Files**:
+    *   `.agents/memory/decisions.md` (Durable architectural decisions)
+    *   `.agents/memory/lessons.md` (踩坑紀錄 - Concise recurring lessons)
+    *   `.agents/memory/lessons-archive.md` (Older lessons archive)
+    *   `.agents/memory/current-state.md` (Detailed active handoff notes)
+    *   `.agents/memory/user-preferences.md` (Stable user/project preferences)
+    *   `.agents/memory/workflows.md` (Temporary workflows not yet promoted to skills)
+    *   `.agents/memory/changes/` (Active change proposals)
+*   **Purpose**: Curated durable knowledge that is essential for task execution but doesn't need to bloat the initial session context.
 
-### 3. The Sync Protocol (The 3-Phase Ritual)
+### Cold Memory (冷記憶 - 不會自動載入)
+*   **Files**: `.agents/memory/archive/`, `.agents/memory/runs/`.
+*   **Purpose**: Contains historical logs, archived design proposals, run evidence, and detailed task execution records.
 
-#### I. Pre-Task: Loading the Soul
-- **Action**: Read `.agents/memory/MEMORY.md` (and `MEMORY.example.md` if needed).
-- **Goal**: Align with the project's mission and pick up where the last session left off.
-- **Output**: Choose a short, distinct **Session Name**.
+---
 
-#### II. Plan-Phase: Signaling Intent
-- **Action**: Update the `Doing` section.
-- **Format**: `- **[Session Name]**: [Action-led intent]`.
-- **Purpose**: Prevent conflict between concurrent sessions and establish presence.
+## 🗺️ 2. Routing Rules (記憶路由表)
 
-#### III. Post-Task: Harvesting Wisdom
-- **Action**:
-  1. Move your entry from `Doing` to `Done`.
-  2. Update `Lessons Learned` with high-signal insights to prevent regression.
-  3. Explicitly delegate unfinished sub-tasks in the `Handover` section.
+When updating the repository memory, route information to the correct layer:
+1.  **Mission & Constraints** ➡️ `MEMORY.md`
+2.  **Durable Architectural Decisions** ➡️ `decisions.md`
+3.  **Concise & Recurring Lessons (踩坑點)** ➡️ `lessons.md`
+4.  **Historical/Low-Frequency Lessons** ➡️ `lessons-archive.md`
+5.  **Active Turn Handoff Detail** ➡️ `current-state.md`
+6.  **User Preferences & Stylistic Guidelines** ➡️ `user-preferences.md`
+7.  **Temporary SOPs** ➡️ `workflows.md`
+8.  **Multi-step Plans requiring Alignment** ➡️ `changes/<change-id>/proposal.md`
+9.  **Completed/Rejected Change Plans** ➡️ `archive/changes/YYYY-MM-DD-<change-id>/`
 
-## Best Practices for Tables and Lists
-- **Consistency**: Keep tables (like Testing Status) updated and aligned.
-- **Evidence**: Always include evidence or notes (e.g., `[Verified]`, `[Blocked]`).
-- **Hierarchy**: Use Markdown headers to maintain a clear visual structure for the next Agent.
+---
 
-## Maintenance Checklist
-- [ ] Is the Mission statement up to date?
-- [ ] Are the Tech Stack constraints (Ruff, uv, etc.) accurately reflected?
-- [ ] Does `Lessons Learned` contain fluff or repetitive history? (If so, prune/archive).
-- [ ] Is the `Done` list getting too long? (Keep only the last ~5-10 entries).
+## 📋 3. Change Plan Lifecycle (變更計畫生命週期)
+
+For significant, multi-step engineering tasks, structure plans under `.agents/memory/changes/<change-id>/`:
+*   `proposal.md` (Goal, scope, background, success criteria)
+*   `design.md` (Technical architecture, API changes, tradeoffs)
+*   `tasks.md` (Detailed task checklist)
+
+### Lifecycle Flow:
+1.  **Creation**: Create a change folder when work spans multiple turns or needs explicit user alignment.
+2.  **Tracking**: Update `tasks.md` during execution, keeping `current-state.md` pointing to it.
+3.  **Completion**: Upon completion, extract durable decisions and lessons into `decisions.md`/`lessons.md`.
+4.  **Archive**: Move the entire change folder to `archive/changes/YYYY-MM-DD-<change-id>/`.
+
+---
+
+## 🔍 4. Active Discovery (技能/規則主動發現)
+
+During memory audits or compression, monitor patterns to detect reusable knowledge:
+*   **Detection Signal**:
+    *   A specific execution pattern or workaround appears across memory entries **3 or more times**.
+    *   A lesson defines a general behavioral constraint rather than a project-specific task fact.
+*   **Action**: Draft a candidate file and place it in `.agents/memory/candidates/` (e.g., `RULE_CANDIDATE.md` or `SKILL_CANDIDATE.md`).
+*   **Report**: Inform the user using the following format:
+    ```text
+    Potential evolution candidate drafted:
+    - Topic: <short name>
+    - Type: <skill | rule | doc | hook>
+    - Reason: <why memory should not remain the only home>
+    - Draft Location: <path to candidate file>
+    - Next action: <ask user to review or formally adopt>
+    ```
+
+---
+
+## 🔄 5. The 3-Phase Ritual
+
+### Phase 1: Pre-task (Read)
+*   Read `.agents/memory/MEMORY.md` before substantial work. Align with the mission, tech constraints, and relevant Warm memory files (such as `decisions.md` or `lessons.md`).
+
+### Phase 2: Plan-Phase (Do)
+*   Update your active status. For tasks spanning multiple sessions, log your intent in `current-state.md`.
+
+### Phase 3: Post-task (Harvest)
+*   Harvest wisdom after file-changing work:
+    1. Update the `Done` list and clear your entry from `Doing`.
+    2. Route new lessons to `lessons.md` (high-signal, short) and architectural decisions to `decisions.md`.
+    3. Document handovers in `current-state.md`.
+
+---
+
+## 📦 6. Compression & Worktree Consolidation
+*   **Compression**: When `MEMORY.md` exceeds ~2000 tokens, prune redundant task narration, compress the `Done` list to the last ~5 entries, merge duplicate lessons, and move older records to the `archive/`.
+*   **Worktree Consolidation**: When finishing a branch/worktree, transfer only durable lessons and decisions back to the main memory, avoiding duplicate entries.
