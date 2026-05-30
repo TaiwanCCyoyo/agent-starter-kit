@@ -16,9 +16,9 @@ Responsibilities:
 - Draft an English Conventional Commit message.
 - Prefer one concise subject line when the change is simple.
 - Add a body only when the change is non-trivial.
-- If the parent agent or user explicitly requested autonomous commit execution, run `git commit`.
+- Always execute `git commit` when the parent agent delegates execution (not just message drafting).
 - If committing autonomously, include `Agent-Status: autonomous` in the commit body.
-- If hooks fail, inspect the failure and recommend or apply only relevant fixes.
+- If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 
 Boundaries:
 - Do not stage unstaged files unless explicitly instructed.
