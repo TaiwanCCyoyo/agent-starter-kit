@@ -1,7 +1,7 @@
 [English Version](../../README.md)
 # AI Agent Starter Kit
 
-這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Gemini CLI、Codex、Antigravity 等工具。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
+這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Gemini CLI、Codex、Claude Code、Antigravity 等工具。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
 
 ## 核心理念
 
@@ -38,6 +38,7 @@
 
 - **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
 - **Codex**：使用 `.codex/skills/` 裡的 command-like skills；可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。
+- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/memory-maintenance`）。子代理人定義在 `.claude/agents/`。
 - **Antigravity**：使用 `.agent/workflows/` 與 `.agent/rules/`。
 
 ## 自動化 Hooks 與生命週期
@@ -53,6 +54,9 @@
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.codex/hooks/post_tool_use_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
+| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
+| **Claude Code** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，並檢查記憶大小。 | `.claude/hooks/stop_memory_check.py` |
 
 ### Hook 疑難排解
 
@@ -64,24 +68,29 @@
    ```
 2. Gemini CLI：檢查 `.gemini/settings.json` 的 matcher 與 command path。
 3. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
-4. 確認 Agent 已信任 project-local configuration layer。
+4. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
+5. 確認 Agent 已信任 project-local configuration layer。
 
 ## 權限與安全政策設定
 
-本專案為 Gemini CLI（以及未來的 Claude Code 等代理人，我會請他修改 README）定義了一套標準的基礎安全權限規則。
+各 Agent 層皆附有自己的權限設定。共通原則：自動允許安全的讀取與非破壞性操作；需確認才可執行發布動作（`git push`）；封鎖破壞性或會直接修改 `.git` 的指令。
 
-當代理人在此工作區啟動時，**在取得使用者的明確同意後**，代理人會自動將這些基本權限規則寫入至您本機的全域設定檔中。
+### Claude Code（`.claude/settings.json`）
 
-### 自動管理規則
-- **自動允許指令 (Allow)**：常用的讀取與非破壞性 Git 指令（例如 `ls`、`dir`、`Get-ChildItem`、`gci`、`git status`、`git diff`、`git commit`）。
-- **嚴格阻擋指令 (Deny)**：具風險或會更改遠端的指令，如 `git push`（防止意外推送到遠端）以及任何試圖刪除 `.git` 目錄的指令（例如 `rm -rf .git`、`Remove-Item .git` 等）。
+權限宣告在 `.claude/settings.json`，不需修改全域設定即可生效：
 
-### 全域設定檔位置
-若您需要手動檢查或調整設定，全域設定檔的存放路徑為：
-- **Windows**: `C:\Users\<USERNAME>\.gemini\antigravity-cli\settings.json`
-- **macOS / Linux**: `~/.gemini/antigravity-cli/settings.json`
+- **自動允許 (allow)**：workspace 內所有讀寫、常用 CLI 工具（`ls`、`cat`、`grep`、`find`、`diff`、`uv`、`ruff`、`pytest`、`npm`、`jq` 等），以及安全的 git 操作（`status`、`diff`、`log`、`add`、`commit`、`fetch`、`branch`、`merge` 等）。
+- **需要確認 (ask)**：`git push`，防止意外推送到遠端。
+- **封鎖 (deny)**：`git push --force`、`git push --force-with-lease`、任何刪除或修改 `.git` 目錄的指令（`rm -rf .git`、`rd /s`、`Remove-Item -Recurse … .git`），以及直接呼叫 `powershell`/`pwsh`（指令應直接執行，不透過殼層包裝）。
 
-### Codex
+### Gemini CLI（`.gemini/policies/system-safe.toml`）
+
+- **自動允許**：基本讀取指令與非破壞性 git 操作。`.agents/memory/` 路徑下的記憶編輯也自動批准。
+- **封鎖**：`git push`、`git branch -d/-D`。
+
+### Codex（`.codex/rules/git.rules`）
+
+- **需要確認**：`git push`、`git branch -d/-D`。
 
 針對 Codex 代理人，強烈建議使用**自動審核（Auto Mode / Auto Verification）**或自動批准機制，以確保工作流程的流暢執行，同時兼顧安全邊界。
 
@@ -95,6 +104,7 @@
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills。 |
+| `.claude/` | Claude Code settings、hooks、slash commands、subagents。 |
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 

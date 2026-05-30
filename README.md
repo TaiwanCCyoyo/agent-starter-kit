@@ -1,7 +1,7 @@
 [繁體中文](docs/zh-TW/README.md)
 # AI Agent Starter Kit
 
-A standardized, frictionless engineering infrastructure for multi-agent ecosystems such as Gemini CLI, Codex, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
+A standardized, frictionless engineering infrastructure for multi-agent ecosystems such as Gemini CLI, Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
 
 ## Core Philosophy
 
@@ -38,6 +38,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 
 - **Gemini CLI**: Uses `.gemini/commands/` and `.gemini/skills/`.
 - **Codex**: Uses command-like skills in `.codex/skills/`; these can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands.
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/memory-maintenance`). Subagents live in `.claude/agents/`.
 - **Antigravity**: Uses `.agent/workflows/` and `.agent/rules/`.
 
 ## Automated Hooks & Lifecycle
@@ -53,6 +54,9 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | Runs lint and file hygiene checks after file edits. | `.codex/hooks/post_tool_use_hygiene.py` |
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
+| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
+| **Claude Code** | `PostToolUse` | Runs lint and file hygiene checks after file edits. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes and checks memory size. | `.claude/hooks/stop_memory_check.py` |
 
 ### Troubleshooting Hooks
 
@@ -64,26 +68,31 @@ If hooks are not firing:
    ```
 2. For Gemini CLI, verify `.gemini/settings.json` has the correct matcher and command paths.
 3. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
-4. Confirm the agent trusts the project-local configuration layer.
+4. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
+5. Confirm the agent trusts the project-local configuration layer.
 
 ## Permissions Configuration
 
-This project establishes a standard suite of safe permission rules for Gemini CLI (and in the future, Claude Code, etc. will follow).
+Each agent layer ships with its own permission configuration. Rules follow a common pattern: auto-allow safe read and non-destructive operations; require confirmation for publishing (`git push`); deny destructive or `.git`-mutating commands.
 
-When an agent is initialized in this workspace, **with the user's explicit consent**, the agent will automatically update your global configuration file to apply these basic permission settings.
+### Claude Code (`.claude/settings.json`)
 
-### Automatically Managed Rules
-- **Auto-Allowed Commands (Allow)**: Basic read and non-destructive git commands (`ls`, `dir`, `Get-ChildItem`, `gci`, `git status`, `git diff`, `git commit`).
-- **Blocked Commands (Deny)**: Potentially harmful or remote-altering commands such as `git push` (to prevent accidental remote pushing) and any command aiming to delete the `.git` directory (`rm -rf .git`, `Remove-Item .git`, etc. on Windows/Linux).
+Permissions are declared in `.claude/settings.json` and take effect immediately without modifying global config. Key rules:
 
-### Global Configuration Locations
-If you need to manually inspect or configure your settings, the global configuration files are located at:
-- **Windows**: `C:\Users\<USERNAME>\.gemini\antigravity-cli\settings.json`
-- **macOS / Linux**: `~/.gemini/antigravity-cli/settings.json`
+- **Auto-Allowed**: All workspace reads/writes, common CLI tools (`ls`, `cat`, `grep`, `find`, `diff`, `uv`, `ruff`, `pytest`, `npm`, `jq`, …), and safe git operations (`status`, `diff`, `log`, `add`, `commit`, `fetch`, `branch`, `merge`, …).
+- **Requires Confirmation (ask)**: `git push` — prevents accidental remote publishing.
+- **Blocked (deny)**: `git push --force`, `git push --force-with-lease`, any command that deletes or mutates the `.git` directory (`rm -rf .git`, `rd /s`, `Remove-Item -Recurse … .git`), and direct `powershell`/`pwsh` invocations (commands should run directly, not wrapped).
 
-### Codex
+### Gemini CLI (`.gemini/policies/system-safe.toml`)
 
-For Codex, it is highly recommended to use **Auto Mode (Automatic Verification)** or auto-approval mechanisms to ensure seamless workflow execution without sacrificing safety boundaries.
+- **Auto-Allowed**: Basic read commands and non-destructive git operations. Memory path edits under `.agents/memory/` are also auto-approved.
+- **Blocked**: `git push`, `git branch -d/-D`.
+
+### Codex (`.codex/rules/git.rules`)
+
+- **Requires Confirmation**: `git push`, `git branch -d/-D`.
+
+For Codex, it is also recommended to use **Auto Mode** or auto-approval mechanisms to ensure seamless workflow execution without sacrificing safety boundaries.
 
 ## Template Usage
 
@@ -95,6 +104,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
 | `.codex/` | Codex instructions, hooks, and private command-like skills. |
+| `.claude/` | Claude Code settings, hooks, slash commands, and subagents. |
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
