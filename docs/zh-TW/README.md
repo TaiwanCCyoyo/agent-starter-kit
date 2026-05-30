@@ -66,6 +66,25 @@
 3. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
 4. 確認 Agent 已信任 project-local configuration layer。
 
+## 權限與安全政策設定
+
+本專案為 Gemini CLI（以及未來的 Claude Code 等代理人，我會請他修改 README）定義了一套標準的基礎安全權限規則。
+
+當代理人在此工作區啟動時，**在取得使用者的明確同意後**，代理人會自動將這些基本權限規則寫入至您本機的全域設定檔中。
+
+### 自動管理規則
+- **自動允許指令 (Allow)**：常用的讀取與非破壞性 Git 指令（例如 `ls`、`dir`、`Get-ChildItem`、`gci`、`git status`、`git diff`、`git commit`）。
+- **嚴格阻擋指令 (Deny)**：具風險或會更改遠端的指令，如 `git push`（防止意外推送到遠端）以及任何試圖刪除 `.git` 目錄的指令（例如 `rm -rf .git`、`Remove-Item .git` 等）。
+
+### 全域設定檔位置
+若您需要手動檢查或調整設定，全域設定檔的存放路徑為：
+- **Windows**: `C:\Users\<USERNAME>\.gemini\antigravity-cli\settings.json`
+- **macOS / Linux**: `~/.gemini/antigravity-cli/settings.json`
+
+### Codex
+
+針對 Codex 代理人，強烈建議使用**自動審核（Auto Mode / Auto Verification）**或自動批准機制，以確保工作流程的流暢執行，同時兼顧安全邊界。
+
 ## 模板使用方式
 
 套用到新專案時，依照支援的工具複製對應的 Agent 基礎設施：

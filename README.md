@@ -66,6 +66,25 @@ If hooks are not firing:
 3. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
 4. Confirm the agent trusts the project-local configuration layer.
 
+## Permissions Configuration
+
+This project establishes a standard suite of safe permission rules for Gemini CLI (and in the future, Claude Code, etc. will follow).
+
+When an agent is initialized in this workspace, **with the user's explicit consent**, the agent will automatically update your global configuration file to apply these basic permission settings.
+
+### Automatically Managed Rules
+- **Auto-Allowed Commands (Allow)**: Basic read and non-destructive git commands (`ls`, `dir`, `Get-ChildItem`, `gci`, `git status`, `git diff`, `git commit`).
+- **Blocked Commands (Deny)**: Potentially harmful or remote-altering commands such as `git push` (to prevent accidental remote pushing) and any command aiming to delete the `.git` directory (`rm -rf .git`, `Remove-Item .git`, etc. on Windows/Linux).
+
+### Global Configuration Locations
+If you need to manually inspect or configure your settings, the global configuration files are located at:
+- **Windows**: `C:\Users\<USERNAME>\.gemini\antigravity-cli\settings.json`
+- **macOS / Linux**: `~/.gemini/antigravity-cli/settings.json`
+
+### Codex
+
+For Codex, it is highly recommended to use **Auto Mode (Automatic Verification)** or auto-approval mechanisms to ensure seamless workflow execution without sacrificing safety boundaries.
+
 ## Template Usage
 
 When applying this starter kit to a new project, copy the agent infrastructure that matches your supported tools:
