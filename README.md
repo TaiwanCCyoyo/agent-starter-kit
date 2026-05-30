@@ -81,27 +81,26 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 After copying, replace `.agents/memory/MEMORY.md` with the target project's real mission, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check .`.
 
+### Superpowers Skills Integration (for Antigravity)
+
+To equip Antigravity agents with robust capabilities such as structured brainstorming and test-driven development, this repository has integrated a suite of skills adapted from the open-source [obra/superpowers](https://github.com/obra/superpowers) project. These copied skills reside directly under `.agent/skills/` and are fully compliant with the MIT License (Copyright (c) 2026 Jesse Vincent).
+
 ## Initialization
 
-**For humans**:
+To initialize this repository and set up verification tools:
 
-Prompt your AI assistant: "Please follow the README to initialize this repository."
-
-**For agents**:
-
-1. **Initialize Memory**
-   - **Gemini CLI**: First access automatically triggers `.gemini/scripts/session_start.py`, creating `.agents/memory/MEMORY.md` if it does not exist.
-   - **Codex**: First trusted session triggers `.codex/hooks/session_start.py`, injecting `.codex/AGENTS.md` and `.agents/memory/MEMORY.md`.
-   - **Other agents**: Manually create `.agents/memory/MEMORY.md` using the template in `.gemini/scripts/session_start.py` or ask a supported agent to initialize it.
-   - Populate the **Mission** section in `MEMORY.md` based on the target project.
-2. **Install Hooks**
+1. **Install Git Hooks**
    ```bash
    uv run pre-commit install
    ```
-3. **Verify Setup**
+2. **Verify Environment**
    ```bash
    uv run ruff check .
    ```
+
+### Initializing Memory for New Projects
+Once the repository is initialized:
+1. Ensure `.agents/memory/MEMORY.md` is populated with your specific project's **Mission**.
 
 ---
 

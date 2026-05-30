@@ -81,27 +81,26 @@
 
 複製後，請將 `.agents/memory/MEMORY.md` 替換成目標專案的真實 mission，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
 
+### 整合 Superpowers 技能（供 Antigravity 使用）
+
+為了提供 Antigravity 代理人強大的推理與任務執行能力（例如結構化需求釐清與測試驅動開發），本儲存庫整合了源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能。這些技能已複製至 `.agent/skills/` 底下，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
+
 ## 初始化
 
-**給人類使用者**：
+要初始化此儲存庫並設定驗證工具：
 
-請提示 AI assistant：「Please follow the README to initialize this repository.」
-
-**給 Agent**：
-
-1. **初始化記憶**
-   - **Gemini CLI**：首次存取時會自動觸發 `.gemini/scripts/session_start.py`，若 `.agents/memory/MEMORY.md` 不存在則建立它。
-   - **Codex**：首次 trusted session 會觸發 `.codex/hooks/session_start.py`，注入 `.codex/AGENTS.md` 與 `.agents/memory/MEMORY.md`。
-   - **其他 Agent**：手動使用 `.gemini/scripts/session_start.py` 中的模板建立 `.agents/memory/MEMORY.md`，或請支援的 Agent 協助初始化。
-   - 依照目標專案內容填寫 `MEMORY.md` 的 **Mission** 區塊。
-2. **安裝 Hooks**
+1. **安裝 Git Hooks**
    ```bash
    uv run pre-commit install
    ```
-3. **驗證設定**
+2. **驗證環境設定**
    ```bash
    uv run ruff check .
    ```
+
+### 為新專案初始化記憶
+儲存庫初始化完成後：
+1. 請確認 `.agents/memory/MEMORY.md` 中的專案 **Mission（任務）** 區塊已填寫完畢。
 
 ---
 
