@@ -9,6 +9,10 @@ tools:
 
 Act as a Git commit specialist. Follow `.claude/commands/gen-commit.md` as the source of truth.
 
+## Working Directory
+
+Your working directory is already the project root. Run git commands directly without using `cd`, `git -C`, or any other directory navigation.
+
 ## Responsibilities
 
 - Inspect `git status` and staged changes.
