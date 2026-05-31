@@ -17,42 +17,39 @@ def run(root: Path, args: list[str]) -> tuple[int, str, str]:
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
-def changed_files(root: Path) -> list[str]:
-    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True)
-    files: list[str] = []
-    for line in changed.stdout.splitlines():
-        if not line.strip():
-            continue
-        path = line[3:].strip()
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1].strip()
-        if path and (root / path).is_file():
-            files.append(path)
-    return files
-
-
 def main() -> int:
     try:
         event = json.load(sys.stdin)
     except Exception:
         return 0
 
-    root = repo_root(event.get("cwd") or ".")
+    cwd = event.get("cwd") or "."
+    root = repo_root(cwd)
     if not root.exists():
         return 0
 
+    file_path = event.get("tool_input", {}).get("file_path", "")
+    if not file_path:
+        return 0
+
+    # Normalise to relative path for file_hygiene.py (which matches against allowed prefixes)
+    try:
+        rel_path = Path(file_path).relative_to(root).as_posix()
+    except ValueError:
+        rel_path = Path(file_path).as_posix()
+
+    suffix = Path(file_path).suffix.lower()
     checks: list[str] = []
 
-    code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", "."])
-    if code != 0:
-        checks.append("`uv run ruff check .` failed.\n" + "\n".join(part for part in [stdout, stderr] if part))
-
-    files = changed_files(root)
-    text_files = [f for f in files if Path(f).suffix.lower() in {".md", ".py", ".toml", ".json", ".yaml", ".yml"}]
-    if text_files:
-        code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", *text_files])
+    if suffix == ".py":
+        code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", file_path])
         if code != 0:
-            checks.append("`uv run python scripts/file_hygiene.py --file ...` failed.\n" + "\n".join(part for part in [stdout, stderr] if part))
+            checks.append(f"`ruff check` failed on `{rel_path}`.\n" + "\n".join(p for p in [stdout, stderr] if p))
+
+    if suffix in {".md", ".py", ".toml", ".json", ".yaml", ".yml"}:
+        code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", rel_path])
+        if code != 0:
+            checks.append(f"`file_hygiene` failed on `{rel_path}`.\n" + "\n".join(p for p in [stdout, stderr] if p))
 
     if checks:
         print(json.dumps({"systemMessage": "\n\n".join(checks), "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}))
