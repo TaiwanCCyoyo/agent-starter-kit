@@ -40,14 +40,16 @@ def state_path(root: Path) -> Path:
     return root / STATE_FILE
 
 
-def read_state(root: Path) -> dict:
+def read_state(root: Path, session_id: str) -> dict:
     path = state_path(root)
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    if path.exists():
+        try:
+            state = json.loads(path.read_text(encoding="utf-8"))
+            if state.get("session_id") == session_id:
+                return state
+        except Exception:
+            pass
+    return {"session_id": session_id}
 
 
 def write_state(root: Path, state: dict) -> None:
@@ -210,8 +212,9 @@ def main() -> int:
         event = {}
 
     root = repo_root(event.get("cwd") or ".")
+    session_id = event.get("session_id", "")
 
-    state = read_state(root)
+    state = read_state(root, session_id)
     messages = []
     memory_update_reminder = memory_update_message(root, state)
     if memory_update_reminder:
