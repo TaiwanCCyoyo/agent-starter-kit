@@ -18,7 +18,7 @@ When the User runs `/consolidate-memory [source_path]` (or asks you to merge, sy
 ## Step 3: Route to Target Layers
 Following the **memory-maintenance** skill routing rules, merge the extracted insights into the MAIN repository's memory files:
 1.  **Durable Decisions** ➡️ Merged into `.agents/memory/decisions.md`.
-2.  **踩坑點 (lessons)** ➡️ Merged into `.agents/memory/lessons.md` (place high-impact, active lessons near the tail).
+2.  **Lessons** ➡️ Merged into `.agents/memory/lessons.md` (place high-impact, active lessons near the tail).
 3.  **Milestones / Done Items** ➡️ Merged into `.agents/memory/MEMORY.md` (Done list), prefixing the items with the branch/session context if relevant.
 4.  **Completed/Superseaded Change Plans** ➡️ Move the change plan folders from the source path's `changes/` to the main repository's `.agents/memory/archive/changes/YYYY-MM-DD-<change-id>/`.
 

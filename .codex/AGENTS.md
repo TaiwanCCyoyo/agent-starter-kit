@@ -25,6 +25,8 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
 - Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
 - For non-trivial implementation work, state a brief goal and verification approach before editing when the path is not obvious.
+- Use Codex's native planning flow for product and architecture planning; do not create or rely on a separate planner agent.
+- Keep shared hook and hygiene logic shell-neutral. Put cross-agent checks in Python scripts under `scripts/` rather than Bash, PowerShell, or agent-specific command fragments.
 
 ## Learning And Escalation
 
@@ -56,16 +58,20 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Run additional task-specific checks when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
 - Manually rerun hook-backed checks only when changing hook scripts, validating hook behavior, debugging an uncertain or failed hook, or performing an explicit commit/pre-commit workflow.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
+- Treat agent post-tool hooks as fast feedback and pre-commit/CI as commit-blocking gates.
+- Keep full-project `mypy .` in pre-commit or CI rather than Codex post-edit hooks.
 
 ## Skills
 
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
 - Revisit the official repo-scoped `.agents/skills` path before adding skills meant to be shared outside Codex.
+- Use `coding-standards` for architecture and implementation conventions, `python-testing` for Python verification, and `verification-loop` for iterative checks.
 
 ## Subagents
 
 - Codex project custom agents live in `.codex/agents/*.toml`.
-- Read-only subagents: `repo_explorer`, `implementation_reviewer`, `memory_auditor`, and `memory_compressor`.
+- Read-only subagents: `repo_explorer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
 - Write-capable subagents: `doc_translator` may edit only the explicit target translation file; `commit_specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
+- Specialist reviewer agents supplement the main Codex agent for review and analysis; they do not replace Codex's implementation or planning flow.

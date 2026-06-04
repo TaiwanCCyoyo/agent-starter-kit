@@ -37,7 +37,7 @@
 ### 3. Agent 工作流程
 
 - **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
-- **Codex**：使用 `.codex/skills/` 裡的 command-like skills；可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。
+- **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/plan`、`/code-review`、`/gen-commit`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/` 與 `.agent/rules/`。
 
@@ -52,7 +52,7 @@
 | **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `.gemini/scripts/memory_nudger.py` |
 | **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
-| **Codex** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.codex/hooks/post_tool_use_hygiene.py` |
+| **Codex** | `PostToolUse` | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene，並提醒 `print()` calls；文件與設定檔只跑 file hygiene。 | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
@@ -88,11 +88,11 @@
 - **自動允許**：基本讀取指令與非破壞性 git 操作。`.agents/memory/` 路徑下的記憶編輯也自動批准。
 - **封鎖**：`git push`、`git branch -d/-D`。
 
-### Codex（`.codex/rules/git.rules`）
+### Codex
 
-- **需要確認**：`git push`、`git branch -d/-D`。
+Codex 在本 starter kit 不提供 repository-local permission rules。Permission review 交由已設定的 approvals reviewer 處理，例如「代我審核」/ auto-review workflow，而不是 `.codex/rules/`。
 
-針對 Codex 代理人，強烈建議使用**自動審核（Auto Mode / Auto Verification）**或自動批准機制，以確保工作流程的流暢執行，同時兼顧安全邊界。
+Codex 的規劃由主 agent 透過 Plan Mode 承擔；本 starter kit 不新增獨立的 Codex planner agent。
 
 ## CI/CD Setup
 
@@ -169,7 +169,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `.agents/memory/` | 共用長期專案記憶位置。 |
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
-| `.codex/` | Codex instructions、hooks、private command-like skills。 |
+| `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
 | `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |

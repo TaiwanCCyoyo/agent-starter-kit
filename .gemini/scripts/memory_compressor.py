@@ -187,7 +187,7 @@ def main():
     write_state(root, state)
 
     if messages:
-        print(json.dumps({"systemMessage": "\n\n".join(messages)}))
+        sys.stdout.write(json.dumps({"systemMessage": "\n\n".join(messages)}) + "\n")
 
 
 if __name__ == "__main__":

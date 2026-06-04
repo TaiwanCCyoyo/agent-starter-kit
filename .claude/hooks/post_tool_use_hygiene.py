@@ -70,9 +70,9 @@ def main() -> int:
         msg = "\n\n".join(checks)
         if warnings:
             msg += "\n\n⚠️ Warnings:\n" + "\n".join(warnings)
-        print(json.dumps({"systemMessage": msg, "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}))
+        sys.stdout.write(json.dumps({"systemMessage": msg, "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}) + "\n")
     elif warnings:
-        print(json.dumps({"systemMessage": "⚠️ Warnings:\n" + "\n".join(warnings)}))
+        sys.stdout.write(json.dumps({"systemMessage": "Warnings:\n" + "\n".join(warnings)}) + "\n")
 
     return 0
 

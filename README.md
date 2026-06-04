@@ -37,7 +37,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 ### 3. Agent Workflows
 
 - **Gemini CLI**: Uses `.gemini/commands/` and `.gemini/skills/`.
-- **Codex**: Uses command-like skills in `.codex/skills/`; these can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands.
+- **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/plan`, `/code-review`, `/gen-commit`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/` and `.agent/rules/`.
 
@@ -52,7 +52,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `.gemini/scripts/memory_nudger.py` |
 | **Gemini CLI** | `AfterAgent` | Checks memory file size and warns if compression is needed. | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
-| **Codex** | `PostToolUse` | Runs lint and file hygiene checks after file edits. | `.codex/hooks/post_tool_use_hygiene.py` |
+| **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files are formatted, linted, checked for file hygiene, and warned on `print()` calls; docs and config files run file hygiene only. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
@@ -88,11 +88,11 @@ Permissions are declared in `.claude/settings.json` and take effect immediately 
 - **Auto-Allowed**: Basic read commands and non-destructive git operations. Memory path edits under `.agents/memory/` are also auto-approved.
 - **Blocked**: `git push`, `git branch -d/-D`.
 
-### Codex (`.codex/rules/git.rules`)
+### Codex
 
-- **Requires Confirmation**: `git push`, `git branch -d/-D`.
+Codex does not ship repository-local permission rules in this starter kit. Permission review is delegated to the configured approvals reviewer (for example, an auto-review / "review on my behalf" workflow) instead of `.codex/rules/`.
 
-For Codex, it is also recommended to use **Auto Mode** or auto-approval mechanisms to ensure seamless workflow execution without sacrificing safety boundaries.
+Codex planning is handled by the main agent through Plan Mode; this starter kit intentionally does not define a separate Codex planner agent.
 
 ## CI/CD Setup
 
@@ -169,7 +169,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `.agents/memory/` | Shared long-term project memory location. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
-| `.codex/` | Codex instructions, hooks, and private command-like skills. |
+| `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
 | `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |

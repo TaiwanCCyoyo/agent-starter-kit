@@ -124,7 +124,7 @@ def main():
                 "Note: Technical memory should be concise and high-signal. Discuss progress with the user in Traditional Chinese (zh-TW)."
             ),
         }
-        print(json.dumps(output))
+        sys.stdout.write(json.dumps(output) + "\n")
 
 
 if __name__ == "__main__":

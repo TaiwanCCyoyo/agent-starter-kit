@@ -1,8 +1,18 @@
 import argparse
+import logging
 import os
 import re
 import sys
 from pathlib import Path
+from typing import Any
+
+RichHandler: Any
+try:
+    from rich.logging import RichHandler
+except ImportError:
+    RichHandler = None
+
+LOGGER = logging.getLogger("file_hygiene")
 
 # CJK Unified Ideographs plus common CJK punctuation (indicates non-English content or Mojibake)
 CJK_RE = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]")
@@ -16,7 +26,7 @@ ALLOWED_PATHS = [
 MARKDOWN_LANGUAGE_LINK_LINES = 5
 
 
-def is_path_allowed(filepath):
+def is_path_allowed(filepath: str):
     """
     Checks if the given file path is in a directory allowed to contain non-English characters.
     """
@@ -27,7 +37,7 @@ def is_path_allowed(filepath):
     return False
 
 
-def check_file_hygiene(filepath):
+def check_file_hygiene(filepath: str):
     """
     Validates file encoding and language constraints.
     Returns True if valid, False if invalid.
@@ -40,10 +50,10 @@ def check_file_hygiene(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
     except UnicodeDecodeError:
-        print(f"Error: {filepath} is NOT valid UTF-8. Please ensure file encoding is UTF-8 (without BOM).")
+        LOGGER.error("Error: %s is NOT valid UTF-8. Please ensure file encoding is UTF-8 (without BOM).", filepath)
         return False
     except Exception as e:
-        print(f"Error reading {filepath}: {e}")
+        LOGGER.error("Error reading %s: %s", filepath, e)
         return False
 
     # 2. Language Check (If NOT in allowed paths)
@@ -56,9 +66,9 @@ def check_file_hygiene(filepath):
             if CJK_RE.search(line):
                 # Double-check: If the file IS actually allowed but prefix matching missed it,
                 # this would still trigger. But based on is_path_allowed, we skip this whole block.
-                print(f"Error: Non-English (CJK) character or Mojibake found in {filepath} at line {i + 1}:")
-                print(f"  > {line.strip()}")
-                print("Note: If this is intentional, move the content to an allowed path (docs/zh-TW/ or .agents/memory/).")
+                LOGGER.error("Error: Non-English (CJK) character or Mojibake found in %s at line %s:", filepath, i + 1)
+                LOGGER.error("  > %s", line.strip())
+                LOGGER.error("Note: If this is intentional, move the content to an allowed path (docs/zh-TW/ or .agents/memory/).")
                 return False
     else:
         # In allowed paths, we already did the UTF-8 encoding check above.
@@ -70,6 +80,17 @@ def check_file_hygiene(filepath):
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    handler: logging.Handler
+    if RichHandler is not None:
+        handler = RichHandler(markup=False, show_path=False, show_time=False)
+    else:
+        handler = logging.StreamHandler()
+    logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[handler])
+
     parser = argparse.ArgumentParser(description="File Hygiene Tool: Validates encoding, language, and cleanliness.")
     parser.add_argument("--file", nargs="+", dest="files", required=True, help="Specific files to check.")
     args = parser.parse_args()

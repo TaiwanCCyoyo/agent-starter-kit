@@ -22,4 +22,3 @@ description: Rules for language preferences (Traditional Chinese for collaborati
 ## 3. Encoding and File Path Integrity
 - **Encoding**: Save all repository files in **UTF-8 without BOM**.
 - **Chinese Content Boundary**: Traditional Chinese content is strictly restricted to `.agents/memory/`, `docs/zh-TW/`, `legacy/`, ignored local `tasks/` logs, and the Traditional Chinese translation link in the root `README.md`. No Chinese files or comments should be created in other code development paths.
-

@@ -9,16 +9,16 @@ This skill transforms the project's memory into a structured, token-efficient, a
 
 ---
 
-## 🧬 1. Memory Layers (記憶分層)
+## 🧬 1. Memory Layers
 
-### Hot Memory (熱記憶 - 啟動即載入)
+### Hot Memory (loaded at startup)
 *   **Files**: `.agents/memory/MEMORY.md` (and the tail of `lessons.md` when configured).
 *   **Purpose**: Contains the project mission, non-negotiable tech stack constraints, current state summary, active handoff, and the official memory map. Keep it extremely concise (target < 1000 tokens).
 
-### Warm Memory (溫記憶 - 按需主動載入)
+### Warm Memory (loaded on demand)
 *   **Files**:
     *   `.agents/memory/decisions.md` (Durable architectural decisions)
-    *   `.agents/memory/lessons.md` (踩坑紀錄 - Concise recurring lessons)
+    *   `.agents/memory/lessons.md` (concise recurring lessons)
     *   `.agents/memory/lessons-archive.md` (Older lessons archive)
     *   `.agents/memory/current-state.md` (Detailed active handoff notes)
     *   `.agents/memory/user-preferences.md` (Stable user/project preferences)
@@ -26,18 +26,18 @@ This skill transforms the project's memory into a structured, token-efficient, a
     *   `.agents/memory/changes/` (Active change proposals)
 *   **Purpose**: Curated durable knowledge that is essential for task execution but doesn't need to bloat the initial session context.
 
-### Cold Memory (冷記憶 - 不會自動載入)
+### Cold Memory (not auto-loaded)
 *   **Files**: `.agents/memory/archive/`, `.agents/memory/runs/`.
 *   **Purpose**: Contains historical logs, archived design proposals, run evidence, and detailed task execution records.
 
 ---
 
-## 🗺️ 2. Routing Rules (記憶路由表)
+## 🗺️ 2. Routing Rules
 
 When updating the repository memory, route information to the correct layer:
 1.  **Mission & Constraints** ➡️ `MEMORY.md`
 2.  **Durable Architectural Decisions** ➡️ `decisions.md`
-3.  **Concise & Recurring Lessons (踩坑點)** ➡️ `lessons.md`
+3.  **Concise & Recurring Lessons** ➡️ `lessons.md`
 4.  **Historical/Low-Frequency Lessons** ➡️ `lessons-archive.md`
 5.  **Active Turn Handoff Detail** ➡️ `current-state.md`
 6.  **User Preferences & Stylistic Guidelines** ➡️ `user-preferences.md`
@@ -47,7 +47,7 @@ When updating the repository memory, route information to the correct layer:
 
 ---
 
-## 📋 3. Change Plan Lifecycle (變更計畫生命週期)
+## 📋 3. Change Plan Lifecycle
 
 For significant, multi-step engineering tasks, structure plans under `.agents/memory/changes/<change-id>/`:
 *   `proposal.md` (Goal, scope, background, success criteria)
@@ -62,7 +62,7 @@ For significant, multi-step engineering tasks, structure plans under `.agents/me
 
 ---
 
-## 🔍 4. Active Discovery (技能/規則主動發現)
+## 🔍 4. Active Discovery
 
 During memory audits or compression, monitor patterns to detect reusable knowledge:
 *   **Detection Signal**:

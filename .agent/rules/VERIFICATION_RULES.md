@@ -20,4 +20,3 @@ description: Core Rule - Verification-First Approach
    - **Evidence**: [Provide the key terminal output, log snippet, or reference the specific test result that proves success. If none, write "None".]
    - **Exemption Justification**: [If and ONLY IF no verification was executed, you must explicitly state the reason here. Acceptable reasons: "purely markdown/documentation updates". UNACCEPTABLE reasons: "the code change was simple/minor".]
    - **Residual Risk**: [If verification is skipped or hook coverage is insufficient, explicitly state the residual risk here. Otherwise, write "None".]
-

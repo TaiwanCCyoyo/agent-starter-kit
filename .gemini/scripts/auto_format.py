@@ -13,7 +13,7 @@ def main() -> int:
     try:
         event = json.load(sys.stdin)
     except Exception:
-        print(json.dumps({}))
+        sys.stdout.write(json.dumps({}) + "\n")
         return 0
 
     file_path = hook_file_path(event)
@@ -21,7 +21,7 @@ def main() -> int:
     if file_path and file_path.endswith(".py") and not tool_response.get("error") and Path(file_path).exists():
         subprocess.run(["uv", "run", "python", "./scripts/auto_format.py", file_path], check=False)
 
-    print(json.dumps({}))
+    sys.stdout.write(json.dumps({}) + "\n")
     return 0
 
 

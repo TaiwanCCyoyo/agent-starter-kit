@@ -1,10 +1,25 @@
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
 
+try:
+    from rich.logging import RichHandler
+except ImportError:
+    RichHandler = None
 
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
+LOGGER = logging.getLogger("gemini_file_hygiene")
+
+
+def configure_logging() -> None:
+    handler: logging.Handler
+    if RichHandler is not None:
+        handler = RichHandler(markup=False, show_path=False, show_time=False)
+    else:
+        handler = logging.StreamHandler()
+    logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[handler])
 
 
 def hook_file_path(event: dict) -> str:
@@ -69,7 +84,7 @@ def clean_trailing_whitespace(path: Path) -> None:
 
     if modified:
         path.write_text("".join(cleaned_lines), encoding="utf-8", newline="")
-        print(f"Hygiene: Removed trailing whitespace in {path}")
+        LOGGER.info("Hygiene: Removed trailing whitespace in %s", path)
 
 
 def print_sync_alert(filepath: str) -> None:
@@ -77,19 +92,22 @@ def print_sync_alert(filepath: str) -> None:
     if not targets:
         return
 
-    print("\n" + "!" * 60)
-    print(f">>> [SYNC ALERT] '{filepath}' was modified.")
-    print(">>> Please ensure the following related files are updated:")
+    LOGGER.warning("")
+    LOGGER.warning("%s", "!" * 60)
+    LOGGER.warning(">>> [SYNC ALERT] '%s' was modified.", filepath)
+    LOGGER.warning(">>> Please ensure the following related files are updated:")
     for target in targets:
-        print(f"    [ ] {target}")
-    print("!" * 60 + "\n")
+        LOGGER.warning("    [ ] %s", target)
+    LOGGER.warning("%s", "!" * 60)
+    LOGGER.warning("")
 
 
 def main() -> int:
+    configure_logging()
     try:
         event = json.load(sys.stdin)
     except Exception:
-        print(json.dumps({}))
+        sys.stdout.write(json.dumps({}) + "\n")
         return 0
 
     file_path = hook_file_path(event)
@@ -101,7 +119,7 @@ def main() -> int:
         return_code = result.returncode
         print_sync_alert(file_path)
 
-    print(json.dumps({}))
+    sys.stdout.write(json.dumps({}) + "\n")
     return return_code
 
 

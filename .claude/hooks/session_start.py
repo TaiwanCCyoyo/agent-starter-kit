@@ -244,7 +244,7 @@ def copy_memory_tree(source_dir: Path, target_dir: Path) -> list[str]:
     return copied
 
 
-def get_branch_purpose(branch):
+def get_branch_purpose(branch: str):
     if branch.startswith("feat/") or "feature" in branch:
         return "New Feature Development"
     if branch.startswith("fix/") or "bugfix" in branch:
@@ -315,7 +315,7 @@ Please check the Claude instructions, Hot Memory, and auto-loaded lesson tail be
 *Note: This context was automatically injected by the Claude Code SessionStart hook.*
 """
 
-    print(additional_context)
+    sys.stdout.write(additional_context + "\n")
 
 
 if __name__ == "__main__":

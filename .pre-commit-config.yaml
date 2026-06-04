@@ -24,6 +24,17 @@ repos:
         language: system
         types: [text]
         exclude: ^(uv\.lock|.*\.json)$  # Optional: exclude specific auto-generated files if needed
+      - id: python-no-print
+        name: Python Hygiene (No print Calls)
+        entry: uv run python scripts/python_hygiene.py --no-print
+        language: system
+        types: [python]
+      - id: mypy
+        name: Mypy (Project Type Check)
+        entry: uv run mypy .
+        language: system
+        pass_filenames: false
+        types: [python]
 
   # Ruff (Python Linter & Formatter)
   - repo: https://github.com/astral-sh/ruff-pre-commit

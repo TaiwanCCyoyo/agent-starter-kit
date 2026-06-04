@@ -273,7 +273,7 @@ def copy_memory_tree(source_dir: Path, target_dir: Path) -> list[str]:
     return copied
 
 
-def get_branch_purpose(branch):
+def get_branch_purpose(branch: str):
     """Infer the purpose of the branch from its name."""
     if branch.startswith("feat/") or "feature" in branch:
         return "New Feature Development"
@@ -341,7 +341,7 @@ Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 *Note: This context was automatically injected by the Gemini SessionStart hook.*
 """
 
-    print(additional_context)
+    sys.stdout.write(additional_context + "\n")
 
 
 if __name__ == "__main__":

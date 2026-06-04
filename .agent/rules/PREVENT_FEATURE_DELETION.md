@@ -17,4 +17,3 @@ Prefer the smallest change that satisfies the verified goal. Touch only files an
 
 ## 3. Cleanup Boundaries
 Clean up unused imports, variables, functions, or files created by the current change. Do not touch or delete pre-existing unrelated dead code; instead, report it to the user if noticed.
-
