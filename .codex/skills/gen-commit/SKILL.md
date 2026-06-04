@@ -1,6 +1,6 @@
 ---
 name: gen-commit
-description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; enforces staged-change review, secret checks, Conventional Commits, English metadata, hook failure handling, and autonomous commit trailers when needed.
+description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; enforces staged-change review, secret checks, Conventional Commits, English metadata, hook failure handling, and agent identity trailers.
 ---
 
 # Gen Commit
@@ -29,7 +29,26 @@ Delegate staged-change analysis, commit-message drafting, commit execution, and 
 - Do not end the subject with a period.
 - Keep the subject under 50 characters when practical.
 - Use the body to explain why and how for complex changes.
-- Autonomous commits must include `Agent-Status: autonomous` in the commit body.
+
+## Agent Commit Trailers
+
+- Every commit drafted or executed by Codex must include `Agent: Codex`.
+- Every agent-created commit must include exactly one `Agent-Status` trailer:
+  - `Agent-Status: autonomous` when Codex staged and committed without manual review of the final staged diff.
+  - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
+- Place trailers after a blank line following the body, or after the subject if there is no body.
+- Do not use `Co-Authored-By` as the primary agent identity marker. Use it only when the user explicitly wants GitHub co-author attribution.
+- If multiple agents materially contributed before the commit, add one `Agent:` trailer per agent in contribution order and one shared `Agent-Status:` trailer for the commit execution mode.
+- Example:
+
+```text
+feat(codex): add targeted hygiene checks
+
+Add file-scoped hook checks and repository-level Python gates.
+
+Agent: Codex
+Agent-Status: autonomous
+```
 
 ## Safety
 

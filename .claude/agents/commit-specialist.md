@@ -24,7 +24,7 @@ Your working directory is already the project root. Run git commands directly wi
 - Prefer one concise subject line when the change is simple.
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
-- If committing autonomously, include `Agent-Status: autonomous` in the commit body.
+- Include the required `Agent:` and `Agent-Status:` trailers from `.claude/skills/commit-helper/SKILL.md`.
 - If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 
 ## Boundaries
@@ -45,6 +45,9 @@ Your working directory is already the project root. Run git commands directly wi
 - Start the description with lowercase.
 - Do not end the subject with a period.
 - Keep the subject under 50 characters when practical.
+- Include `Agent: Claude`.
+- Include exactly one `Agent-Status: autonomous` or `Agent-Status: assisted` trailer.
+- Do not add `Co-Authored-By` unless the user explicitly requests GitHub co-author attribution.
 
 ## Return
 
