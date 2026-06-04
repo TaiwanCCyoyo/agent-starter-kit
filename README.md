@@ -38,7 +38,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 
 - **Gemini CLI**: Uses `.gemini/commands/` and `.gemini/skills/`.
 - **Codex**: Uses command-like skills in `.codex/skills/`; these can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands.
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/memory-maintenance`). Subagents live in `.claude/agents/`.
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/plan`, `/code-review`, `/gen-commit`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/` and `.agent/rules/`.
 
 ## Automated Hooks & Lifecycle
@@ -55,7 +55,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex** | `PostToolUse` | Runs lint and file hygiene checks after file edits. | `.codex/hooks/post_tool_use_hygiene.py` |
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | Runs lint and file hygiene checks after file edits. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes and checks memory size. | `.claude/hooks/stop_memory_check.py` |
 
 ### Troubleshooting Hooks
@@ -94,6 +94,72 @@ Permissions are declared in `.claude/settings.json` and take effect immediately 
 
 For Codex, it is also recommended to use **Auto Mode** or auto-approval mechanisms to ensure seamless workflow execution without sacrificing safety boundaries.
 
+## CI/CD Setup
+
+Agents enforce quality locally via hooks, but a CI pipeline catches issues on every push and makes quality gates visible to the whole team. This section provides a minimal starting point.
+
+### Recommended GitHub Actions Workflow
+
+Create `.github/workflows/ci.yml` in your project:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install uv && uv sync --group dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Type check
+        run: uv run mypy .
+
+      - name: Test
+        run: uv run pytest
+
+      - name: Secret scan
+        run: uv run pre-commit run detect-secrets --all-files
+```
+
+Adjust the `pytest` step to match your project's test directory and the Python version to match `.python-version`.
+
+### When to Use the `github-ops` Skill
+
+Once CI is configured, use the `github-ops` skill (via Claude Code) for operational tasks:
+
+| Task | Command |
+| :--- | :--- |
+| View failed run logs | `gh run view <run-id> --log-failed` |
+| Re-run failed steps | `gh run rerun <run-id> --failed` |
+| List recent failures | `gh run list --status failure --limit 10` |
+| Check Dependabot alerts | `gh api repos/{owner}/{repo}/dependabot/alerts` |
+
+Requires `gh` CLI installed and authenticated (`gh auth login`).
+
+### Troubleshooting CI Failures
+
+1. **Reproduce locally first** — run the same commands the workflow runs (`ruff check .`, `mypy .`, `pytest`) before investigating remotely.
+2. **Read the full log** — `gh run view <run-id> --log-failed` shows only the failing step output.
+3. **Check for environment differences** — Python version, missing env vars, or missing `uv sync` are the most common causes.
+4. **Distinguish flaky from real** — if the same test passes locally and fails remotely consistently, it is usually an environment issue, not a flaky test.
+
 ## Template Usage
 
 When applying this starter kit to a new project, copy the agent infrastructure that matches your supported tools:
@@ -104,7 +170,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
 | `.codex/` | Codex instructions, hooks, and private command-like skills. |
-| `.claude/` | Claude Code settings, hooks, slash commands, and subagents. |
+| `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
@@ -122,7 +188,11 @@ To initialize this repository and set up verification tools:
    ```bash
    uv run pre-commit install
    ```
-2. **Verify Environment**
+2. **Install Dev Dependencies** (includes mypy for type checking)
+   ```bash
+   uv sync --group dev
+   ```
+3. **Verify Environment**
    ```bash
    uv run ruff check .
    ```

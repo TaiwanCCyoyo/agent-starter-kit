@@ -2,3 +2,6 @@ line-length = 160
 
 [format]
 preview = true
+
+[lint]
+select = ["ANN001", "I"]

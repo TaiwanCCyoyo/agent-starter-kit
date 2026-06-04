@@ -38,7 +38,7 @@
 
 - **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
 - **Codex**：使用 `.codex/skills/` 裡的 command-like skills；可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。
-- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/memory-maintenance`）。子代理人定義在 `.claude/agents/`。
+- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/plan`、`/code-review`、`/gen-commit`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/` 與 `.agent/rules/`。
 
 ## 自動化 Hooks 與生命週期
@@ -55,7 +55,7 @@
 | **Codex** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.codex/hooks/post_tool_use_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | 檔案編輯後執行 lint 與檔案衛生檢查。 | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，並檢查記憶大小。 | `.claude/hooks/stop_memory_check.py` |
 
 ### Hook 疑難排解
@@ -94,6 +94,72 @@
 
 針對 Codex 代理人，強烈建議使用**自動審核（Auto Mode / Auto Verification）**或自動批准機制，以確保工作流程的流暢執行，同時兼顧安全邊界。
 
+## CI/CD Setup
+
+Agent 透過 hooks 在本地端執行品質把關，但 CI pipeline 能在每次推送時捕捉問題，並讓整個團隊看到品質閘道的狀態。本節提供一個最精簡的起點。
+
+### 建議的 GitHub Actions Workflow
+
+在你的專案中建立 `.github/workflows/ci.yml`：
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install uv && uv sync --group dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Type check
+        run: uv run mypy .
+
+      - name: Test
+        run: uv run pytest
+
+      - name: Secret scan
+        run: uv run pre-commit run detect-secrets --all-files
+```
+
+請調整 `pytest` 步驟以符合你的專案測試目錄，並將 Python 版本調整為與 `.python-version` 一致。
+
+### 何時使用 `github-ops` 技能
+
+CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日常操作：
+
+| 任務 | 指令 |
+| :--- | :--- |
+| 查看失敗執行的日誌 | `gh run view <run-id> --log-failed` |
+| 重新執行失敗步驟 | `gh run rerun <run-id> --failed` |
+| 列出最近的失敗記錄 | `gh run list --status failure --limit 10` |
+| 檢查 Dependabot 警示 | `gh api repos/{owner}/{repo}/dependabot/alerts` |
+
+需先安裝 `gh` CLI 並完成驗證（`gh auth login`）。
+
+### CI 失敗疑難排解
+
+1. **先在本地重現** — 在遠端調查之前，先執行 workflow 所使用的相同指令（`ruff check .`、`mypy .`、`pytest`）。
+2. **閱讀完整日誌** — `gh run view <run-id> --log-failed` 只會顯示失敗步驟的輸出。
+3. **檢查環境差異** — Python 版本不符、缺少環境變數或未執行 `uv sync` 是最常見的原因。
+4. **區分偶發性失敗與真實錯誤** — 若同一個測試在本地通過但在遠端持續失敗，通常是環境問題，而非偶發性不穩定測試。
+
 ## 模板使用方式
 
 套用到新專案時，依照支援的工具複製對應的 Agent 基礎設施：
@@ -104,7 +170,7 @@
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills。 |
-| `.claude/` | Claude Code settings、hooks、slash commands、subagents。 |
+| `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 
@@ -122,7 +188,11 @@
    ```bash
    uv run pre-commit install
    ```
-2. **驗證環境設定**
+2. **安裝開發相依套件**（包含 mypy 型別檢查器）
+   ```bash
+   uv sync --group dev
+   ```
+3. **驗證環境設定**
    ```bash
    uv run ruff check .
    ```

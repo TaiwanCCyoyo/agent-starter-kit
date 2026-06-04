@@ -40,11 +40,26 @@ def main() -> int:
 
     suffix = Path(file_path).suffix.lower()
     checks: list[str] = []
+    warnings: list[str] = []
 
     if suffix == ".py":
+        # 1. Auto-format (ruff format modifies the file in place; non-zero only on error)
+        run(root, ["uv", "run", "ruff", "format", file_path])
+
+        # 2. Lint
         code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", file_path])
         if code != 0:
             checks.append(f"`ruff check` failed on `{rel_path}`.\n" + "\n".join(p for p in [stdout, stderr] if p))
+
+        # 3. Type check
+        code, stdout, stderr = run(root, ["uv", "run", "mypy", file_path, "--ignore-missing-imports"])
+        if code != 0:
+            checks.append(f"`mypy` failed on `{rel_path}`.\n" + "\n".join(p for p in [stdout, stderr] if p))
+
+        # 4. Warn on print() usage (project uses logging); exclude comments and string literals
+        code, stdout, _ = run(root, ["grep", "-nE", r"(^|[^.#\w])print\(", file_path])
+        if code == 0 and stdout:
+            warnings.append(f"`print()` found in `{rel_path}` — use `logging` instead:\n{stdout}")
 
     if suffix in {".md", ".py", ".toml", ".json", ".yaml", ".yml"}:
         code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", rel_path])
@@ -52,7 +67,12 @@ def main() -> int:
             checks.append(f"`file_hygiene` failed on `{rel_path}`.\n" + "\n".join(p for p in [stdout, stderr] if p))
 
     if checks:
-        print(json.dumps({"systemMessage": "\n\n".join(checks), "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}))
+        msg = "\n\n".join(checks)
+        if warnings:
+            msg += "\n\n⚠️ Warnings:\n" + "\n".join(warnings)
+        print(json.dumps({"systemMessage": msg, "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}))
+    elif warnings:
+        print(json.dumps({"systemMessage": "⚠️ Warnings:\n" + "\n".join(warnings)}))
 
     return 0
 

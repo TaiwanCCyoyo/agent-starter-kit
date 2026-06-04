@@ -16,6 +16,7 @@
       "Bash(tail *)",
       "Bash(echo *)",
       "Bash(type *)",
+      "Bash(test *)",
       "Bash(pwd)",
       "Bash(cd *)",
       "Bash(find *)",
