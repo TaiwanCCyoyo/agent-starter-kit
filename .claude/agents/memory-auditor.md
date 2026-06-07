@@ -13,21 +13,16 @@ Audit memory needs without modifying files.
 ## Responsibilities
 
 - Read `.agents/memory/MEMORY.md`, relevant Warm memory files, and the relevant repository diff or task summary.
-- Identify durable decisions, lessons learned, current-state changes, and handoff notes worth preserving.
+- Identify durable decisions, lessons learned, and handoff notes worth preserving.
 - Classify each memory candidate as Hot, Warm, Cold, or Do Not Save.
-- Recommend the exact target file for saved memory:
-  - Hot boot/current summary: `.agents/memory/MEMORY.md`.
+- Recommend the exact target file for saved memory (Hermes-aligned taxonomy):
+  - Hot (boot/current state): `.agents/memory/MEMORY.md` (≤ 2,200 chars).
+  - User preferences: `.agents/memory/USER.md` (≤ 500 chars).
   - Durable decisions: `.agents/memory/decisions.md`.
-  - Concise recurring lessons: `.agents/memory/lessons.md`.
-  - Older or lower-frequency lessons: `.agents/memory/lessons-archive.md` or `.agents/memory/archive/`.
-  - Active handoff detail: `.agents/memory/current-state.md`.
-  - User/project preferences: `.agents/memory/user-preferences.md`.
-  - Workflow notes: `.agents/memory/workflows.md`.
+  - Concise recurring lessons: `.agents/memory/lessons.md` (≤ 50 lines; graduate stale → `memory.db`).
   - Active change plans: `.agents/memory/changes/<change-id>/`.
-  - Archived completed/rejected/superseded changes: `.agents/memory/archive/changes/`.
-  - Long-form references: `.agents/memory/archive/references/`.
-  - Historical run evidence: `.agents/memory/runs/`.
-  - Evolution drafts: `.agents/memory/candidates/`.
+  - Completed change plans: `.agents/memory/archive/`.
+  - Graduated/archived entries (stale lessons, decisions, skill candidates): `memory.db` via `/memory-sql` (`type='lesson'|'decision'|'candidate'`).
 - Flag whether a short `MEMORY.md` pointer is needed for any Warm or Cold addition.
 - Flag repeated blockers, workarounds, mistaken assumptions, or hidden tradeoffs that should become memory lessons.
 - Suggest whether Hot/Warm memory compression or lesson pruning may be needed.

@@ -5,31 +5,76 @@ description: Use when the user says /worktree, worktree create, worktree finish,
 
 # Worktree Manager
 
-This is a Claude Code agent-internal skill. It is invoked through the `/worktree` slash command in `.claude/commands/worktree.md`.
+Two modes serve different needs. Choose based on task duration and memory requirements.
 
-## Creation
+## Mode Selection
 
-When creating a worktree:
+| Dimension | Mode A: Quick Isolation | Mode B: Feature Branch |
+|-----------|------------------------|----------------------|
+| **Duration** | Single session, hours | Multi-session, days |
+| **Memory** | No dedicated memory needed | Scoped MEMORY.md + full taxonomy |
+| **Branching** | Auto (built-in tool manages) | Manual branch strategy |
+| **Cleanup** | `ExitWorktree(remove)` | Full finish workflow |
+| **Use when** | Experiments, isolated fixes, subagent tasks | Features, refactors requiring handoff |
 
-1. Create the branch and worktree with `git worktree add <path> <branch>`.
-2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Copy or initialize the official memory taxonomy when relevant: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, `changes/`, `archive/`, `runs/`, and `candidates/`.
-4. Immediately define the worktree mission in the Hot Memory current-state summary or active state:
+---
+
+## Mode A: Quick Isolation
+
+Uses Claude Code's built-in `EnterWorktree` / `ExitWorktree` tools. The built-in tool creates the worktree inside `.claude/worktrees/` and switches the session CWD automatically.
+
+### Start
+
+```
+EnterWorktree(name="<task-slug>")
+```
+
+- Creates a new branch and worktree at `.claude/worktrees/<task-slug>/`.
+- Session CWD switches to the worktree; system prompt, memory files, and plans reload from the new CWD.
+- `worktree.baseRef` in settings controls branching: `fresh` (from origin default branch) or `head` (from current HEAD).
+
+### Work
+
+- Make changes in the isolated environment.
+- No separate memory management needed — keep notes in the conversation or in temporary files.
+
+### Finish
+
+```
+ExitWorktree(action="keep")    # keep branch and files for later review
+ExitWorktree(action="remove")  # discard worktree (confirm no needed changes first)
+```
+
+`action: "remove"` with `discard_changes: true` force-removes even with uncommitted work — use only when explicitly authorized.
+
+After exit, run `/learn-eval` if the session produced non-obvious techniques worth saving.
+
+---
+
+## Mode B: Feature Branch
+
+Uses `git worktree add` directly for long-lived branches with dedicated memory and formal handoff.
+
+### Creation
+
+1. Create the branch and worktree: `git worktree add <path> <branch>`.
+2. Ensure `.agents/memory/MEMORY.md` exists in the worktree (the `session_start.py` hook copies it automatically on first open).
+3. Immediately define the worktree mission in Hot Memory:
    - Branch goal.
    - Definition of done.
    - Any constraints from the user request.
-5. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
+4. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
 
-## Active Development
+### Active Development
 
 - Use the local worktree memory for task progress.
 - Mark entries with the branch name when needed.
 - Keep compact branch status in `MEMORY.md`.
-- Keep detailed unfinished work in `current-state.md`.
-- Keep recurring branch lessons concise in `lessons.md`; move lower-frequency detail to `lessons-archive.md` or `archive/`.
+- Keep compact branch status in `MEMORY.md`; put detailed handoff in an active `changes/<id>/` plan.
+- Keep recurring branch lessons concise in `lessons.md`; graduate stale lessons to `memory.db` via `/memory-sql` or `archive/`.
 - Keep branch-specific multi-step plans under `changes/<change-id>/` and consolidate/archive them before worktree removal.
 
-## Finish
+### Finish
 
 Before removing a worktree:
 
@@ -37,11 +82,12 @@ Before removing a worktree:
 2. Run relevant tests or checks.
 3. Read the worktree memory and main repository memory.
 4. Consolidate durable lessons and meaningful completed milestones into the main memory.
-5. Merge the branch into the target branch.
-6. Remove the worktree.
-7. Delete the branch only after the merge succeeds.
+5. Run `/learn-eval` — check whether patterns from this branch deserve skill extraction.
+6. Merge the branch into the target branch.
+7. Remove the worktree: `git worktree remove <path>`.
+8. Delete the branch only after the merge succeeds.
 
-## Consolidation
+### Consolidation
 
 When consolidating worktree memory:
 
@@ -54,8 +100,11 @@ When consolidating worktree memory:
 7. Prefix branch-specific milestones when context matters.
 8. Report consolidated items, target files, archived change folders, and skipped duplicates.
 
-## Safety
+---
+
+## Safety (Both Modes)
 
 - Do not delete a worktree with uncommitted work unless the user explicitly authorizes it.
-- Do not discard branch-specific memory before consolidation.
+- Do not discard branch-specific memory before consolidation (Mode B).
 - Do not force-delete branches unless explicitly requested.
+- For Mode A with `ExitWorktree(remove)`: confirm no changes are needed before removing.

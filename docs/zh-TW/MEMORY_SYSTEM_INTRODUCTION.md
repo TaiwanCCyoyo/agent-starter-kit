@@ -18,13 +18,19 @@
 
 | 元件 | 用途 |
 | :--- | :--- |
-| `.agents/memory/MEMORY.md` | 共用長期專案狀態。 |
-| SessionStart hooks | 在工作開始前注入專案記憶、分支上下文與 worktree 上下文。 |
-| Stop/AfterAgent reminders | 在 pending changes 持續一段時間後提醒 Agent 更新記憶。 |
-| `save-memory` | 保存已完成工作、決策與交接筆記。 |
-| `compress-memory` | 當記憶變得冗長時彙整歷史細節。 |
-| `memory-maintenance` | 定義記憶初始化、稽核、更新與整合方式。 |
-| Worktree sync | 在第一次 session 開始前，將有用的記憶上下文複製到新 worktree。 |
+| `.agents/memory/MEMORY.md` | 跨 Agent 熱記憶：任務、約束、目前狀態。≤ 2,200 chars。 |
+| `.agents/memory/USER.md` | 跨 Agent 使用者偏好：溝通語言、工作風格。≤ 500 chars。 |
+| `.agents/memory/decisions.md` | 暖記憶：活躍的持久架構決策。 |
+| `.agents/memory/lessons.md` | 暖記憶：簡潔的重複性教訓（尾部由 Claude 自動載入）。 |
+| `.agents/memory/changes/` | 活躍多步驟變更計畫（proposal、design、tasks）。 |
+| `.agents/memory/memory.db` | 冷記憶：SQLite FTS5，儲存已畢業的教訓、決策與 session 元資料（僅 Claude Code MCP）。 |
+| `.agents/memory/archive/` | 冷記憶：已完成的變更計畫與歷史參考資料。 |
+| SessionStart hooks | 在 session 開始時注入一次 `MEMORY.md` + `USER.md`（凍結快照），同時為 Claude 注入 `lessons.md` 尾部。 |
+| Stop/AfterAgent reminders | 在有程式碼變更後提醒更新記憶；超過 5 次回覆後提示技能審查。 |
+| `memory-maintenance` / `memory-manager` | 完整記憶結構的路由規則、生命週期與健康標準。 |
+| `memory-sql` | Claude Code MCP skill，透過 `memory-db` MCP server 查詢和寫入 `memory.db`。 |
+| `learn-eval` / `skill-curator` | session 模式萃取的品質門，確認後才寫入 skill 檔案。 |
+| Worktree sync | 在第一次 session 時從主 repo 複製記憶到新 worktree。 |
 
 ## Agent 整合
 
@@ -84,6 +90,27 @@ Antigravity 主要使用 `.agent/workflows/` 與 `.agent/rules/` 作為指令和
 - 當歷史細節開始掩蓋目前狀態時壓縮記憶。
 - 明確標記平台特定進度，例如 `Codex-only`、`Gemini pending` 或 `Antigravity pending`。
 
+## 技能演進迴圈（Claude Code）
+
+除了把事實存入記憶檔之外，Claude Code 還能把 session 模式萃取為可重用的 skill 檔案：
+
+1. Stop hook（`stop_memory_check.py`）計算有程式碼變更的回覆次數。超過 5 次後提示執行 `/learn-eval`。
+2. `/learn-eval` 遵循 `.claude/skills/skill-curator/SKILL.md` 的完整流程：
+   - 識別值得保存的信號（使用者糾錯、非顯而易見的技巧、可重用 workflow）。
+   - 以清單確認與既有 skills 的重疊程度（品質門）。
+   - 發出整體判定：Save / Improve then Save / Absorb into existing / Drop。
+   - 僅在使用者核准後儲存。
+3. Skills 存放於 `.claude/skills/learned/`（專案特定）或 `~/.claude/skills/learned/`（跨專案）。
+4. `skill-curator` skill 也管理生命週期：skills 隨時間推移經歷 active → stale → archived 狀態。
+
+此迴圈為手動觸發並需使用者確認——不會在未經核准的情況下寫入 skill 檔案。
+
+## 記憶寫入模型
+
+**凍結快照**：Hot Memory（`MEMORY.md`）在 session 開始時注入一次。工具寫入立即生效於磁碟，但不會更新正在執行的 session 的系統提示——下一個 session 才會讀取更新後的檔案。這可保留 LLM 前綴快取。
+
+**§ 分隔符**：當記憶區塊包含多個原子條目時，以單獨一行的 `§` 分隔，便於可靠解析。
+
 ## 提醒行為
 
 記憶更新提醒和記憶壓縮提醒是分開的。
@@ -91,6 +118,8 @@ Antigravity 主要使用 `.agent/workflows/` 與 `.agent/rules/` 作為指令和
 更新提醒只應在 repository changes 持續 pending 多個 Agent responses，且記憶尚未更新時出現。
 
 壓縮提醒只應在 memory 大到需要行動時出現，或在明確的記憶稽核與壓縮 workflow 中出現。
+
+技能審查提醒每個 session 只出現一次（超過最低程式碼變更回覆次數後），不會重複出現。
 
 GUI 不應在每次回覆後重複顯示「不需要壓縮」訊息。
 

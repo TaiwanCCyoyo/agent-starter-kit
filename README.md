@@ -56,7 +56,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes and checks memory size. | `.claude/hooks/stop_memory_check.py` |
+| **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes, checks memory size, and prompts skill review after substantial sessions. | `.claude/hooks/stop_memory_check.py` |
 
 ### Troubleshooting Hooks
 

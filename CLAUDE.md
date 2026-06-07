@@ -34,19 +34,29 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 ## Memory
 
-- Treat `.agents/memory/MEMORY.md` as Hot Memory: a compact boot index, mission/constraints summary, current-state summary, and pointers to deeper memory.
-- Before substantial work, align with the injected Hot Memory and any auto-loaded concise lessons.
-- Read Warm Memory files on demand when the task depends on durable history: `decisions.md`, `lessons.md`, `current-state.md`, `user-preferences.md`, and `workflows.md`.
-- Keep `.agents/memory/` as ignored instantiated project memory. Commit rules, hooks, commands, and templates, not local project memory content.
-- After file-changing tasks, update memory only when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
-- Route memory updates by layer: mission/current summary in `MEMORY.md`, durable decisions in `decisions.md`, recurring lessons in `lessons.md`, active detail in `current-state.md`, active change plans in `changes/<change-id>/`, historical detail in `archive/`, and important run evidence in `runs/`.
-- Keep auto-loaded lessons extremely concise. `lessons.md` should prioritize recent, repeated, high-impact lessons near the bottom because session start may load only its tail.
-- Keep memory updates high-signal: durable decisions, lessons, current state, and handoff notes.
-- Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
-- Mark platform-specific progress clearly, such as Claude-only, Gemini pending, or Codex pending.
-- Use `/memory-maintenance` for memory initialization, updates, audits, compression, and consolidation.
-- Follow the OpenSpec-inspired change lifecycle for plans: active proposals live in `.agents/memory/changes/<change-id>/` with `proposal.md`, optional `design.md`, `tasks.md`, and `specs/`; completed or superseded plans move to `.agents/memory/archive/changes/` after durable knowledge is consolidated.
-- When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.agents/memory/MEMORY.md` edits.
+`.agents/memory/` is cross-agent shared state (Claude Code, Gemini, Codex, Antigravity). Keep it small and high-signal.
+
+**Structure (Hermes-aligned):**
+- **Hot** (injected at session start): `MEMORY.md` (mission, constraints, current state — ≤ 2,200 chars) + `USER.md` (user preferences — ≤ 500 chars).
+- **Warm** (on demand): `decisions.md`, `lessons.md` (tail auto-loaded), active `changes/<id>/`.
+- **Cold** (never auto-loaded): `memory.db` (SQLite FTS5, Claude Code MCP via `/memory-sql`), `archive/`.
+
+**Routing:**
+- Mission, constraints, current state → `MEMORY.md`.
+- User preferences, communication style → `USER.md`.
+- Durable decisions (active) → `decisions.md`; when stale → graduate to `memory.db`.
+- Recurring lessons → `lessons.md`; when stale → graduate to `memory.db`.
+- Active change plans → `changes/<id>/proposal.md` (+ optional `design.md`, `tasks.md`).
+- Completed or superseded plans → `archive/` after consolidation.
+- Skill candidates → `/learn-eval` or `memory.db` (`type='candidate'`).
+
+**Policy:**
+- Keep MEMORY.md under 2,200 chars; USER.md under 500 chars; lessons.md under 50 lines.
+- Graduate stale entries to `memory.db` instead of creating more files.
+- `MEMORY.md` follows the frozen-snapshot pattern — writes take effect at the next session start.
+- Use `/memory-maintenance` for audits, compression, and consolidation.
+- Use `/learn-eval` after meaningful sessions to extract reusable patterns as skills.
+- When delegating memory analysis, use `memory_auditor` (save recommendations) or `memory_compressor` (compression drafts); the main agent owns final edits.
 
 ## Verification
 
@@ -68,7 +78,9 @@ Available slash commands and their corresponding skills:
 | Command | Skill |
 | :--- | :--- |
 | `/gen-commit` | `.claude/skills/commit-helper/SKILL.md` |
-| `/memory-maintenance` | `.claude/skills/memory-maintenance/SKILL.md` |
+| `/learn-eval` | `.claude/skills/skill-curator/SKILL.md` |
+| `/memory-maintenance` | `.claude/skills/memory-manager/SKILL.md` |
+| `/memory-sql` | `.claude/skills/memory-sql/SKILL.md` |
 | `/compress-memory` | — (command only) |
 | `/save-memory` | — (command only) |
 | `/worktree` | `.claude/skills/worktree-manager/SKILL.md` |

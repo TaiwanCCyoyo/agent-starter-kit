@@ -5,39 +5,22 @@ from pathlib import Path
 
 MEMORY_REL_DIR = Path(".agents") / "memory"
 MEMORY_FILE_TEMPLATES = {
+    "USER.md": """# User
+
+Stable cross-agent user context: communication language, review style, working preferences, and collaboration conventions. Keep under ~500 chars so all agents can load it cheaply.
+""",
     "decisions.md": """# Decisions
 
-Record durable architectural decisions here.
+Record durable architectural decisions here. Graduate old entries to `memory.db` via `/memory-sql` when this file grows.
 """,
     "lessons.md": """# Lessons
 
-Keep this file concise. Session start auto-loads only the last 50 lines, so the bottom should contain the most recent, repeated, and high-impact lessons.
-""",
-    "lessons-archive.md": """# Lessons Archive
-
-Move stale or lower-frequency lessons here when `lessons.md` needs pruning.
-""",
-    "current-state.md": """# Current State
-
-Record active handoff detail here. Keep `MEMORY.md` limited to a compact current-state summary.
-""",
-    "user-preferences.md": """# User Preferences
-
-Record stable project or user collaboration preferences here.
-""",
-    "workflows.md": """# Workflows
-
-Record reusable workflow notes here until they are promoted to commands, rules, docs, or hooks.
+Keep this file concise. Session start auto-loads only the last 50 lines. Graduate stale lessons to `memory.db` rather than accumulating here.
 """,
 }
 MEMORY_DIRS = [
     Path("changes"),
     Path("archive"),
-    Path("archive") / "changes",
-    Path("archive") / "references",
-    Path("archive") / "plans",
-    Path("runs"),
-    Path("candidates"),
 ]
 
 
@@ -62,22 +45,21 @@ def get_git_info():
 
 DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
 
-*(Agent Note: This is Hot Memory: the concise boot index for mission, constraints, current-state summary, and memory map. All files in `.agents/memory/` are git-ignored instantiated project memory.)*
+*(Agent Note: Hot Memory — injected once at session start. Keep MEMORY.md under ~2,200 chars. All files in `.agents/memory/` are git-ignored instantiated project memory.)*
 
 ## 1. Project Mission & Long-term Goals
 [Define the ultimate goal of this project and architectural rules here]
 
-## 2. Current State Summary
-[Keep this compact. Put detailed active handoff in `.agents/memory/current-state.md`.]
+## 2. Current State
+[What is happening right now? Keep compact — one paragraph max. Detail goes in active `changes/` plans.]
 
 ## 3. Memory Map
-- **Hot**: `MEMORY.md` plus the last 50 lines of `lessons.md` when present.
-- **Warm**: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, and active `changes/`.
-- **Cold**: `archive/`, `runs/`, `candidates/`.
-- **Policy**: Keep `lessons.md` concise because its tail may be auto-loaded every session.
-- **Plans**: Put active change plans in `changes/<change-id>/`; archive completed or superseded changes under `archive/changes/`.
+- **Hot**: `MEMORY.md` (mission, current state) + `USER.md` (user preferences) — injected at session start.
+- **Warm**: `decisions.md`, `lessons.md` (tail auto-loaded), active `changes/<id>/`.
+- **Cold**: `memory.db` (SQLite FTS5, Claude Code MCP), `archive/`.
+- **Policy**: Keep MEMORY.md under ~2,200 chars. Graduate lessons/decisions to `memory.db` instead of accumulating files.
 
-## 4. Current State & Unfinished Business
+## 4. Active Work
 
 | Feature | Status | Evidence/Notes |
 | :--- | :--- | :--- |
@@ -158,23 +140,23 @@ def read_lessons_tail(root_dir: Path, line_limit: int = 50):
     return prefix + "\n".join(tail)
 
 
+def read_user_md(root_dir: Path) -> str:
+    user_path = root_dir / ".agents" / "memory" / "USER.md"
+    if not user_path.exists():
+        return ""
+    try:
+        content = user_path.read_text(encoding="utf-8").strip()
+        return content if content else ""
+    except Exception:
+        return ""
+
+
 def read_memory(root_dir: Path, branch: str):
     memory_dir = root_dir / MEMORY_REL_DIR
     memory_path = memory_dir / "MEMORY.md"
 
-    is_new = False
-    if not memory_path.exists():
-        is_new = True
-        try:
-            initialize_memory_taxonomy(root_dir, branch)
-        except Exception as e:
-            return f"Error initializing memory: {str(e)}"
-
     try:
-        content = memory_path.read_text(encoding="utf-8")
-        if is_new:
-            return f"*(Initialized new memory for branch `{branch}`)*\n\n" + content
-        return content
+        return memory_path.read_text(encoding="utf-8")
     except Exception as e:
         return f"Error reading memory: {str(e)}"
 
@@ -267,6 +249,7 @@ def main():
     purpose = get_branch_purpose(branch)
     claude_instructions = read_claude_instructions(root_dir)
     memory_content = read_memory(root_dir, branch)
+    user_md_content = read_user_md(root_dir)
     lessons_tail = read_lessons_tail(root_dir)
 
     mission_alert = ""
@@ -284,7 +267,7 @@ def main():
 > [!NOTE]
 > **WORKTREE MEMORY INITIALIZATION**
 > Ignored memory is copied from the main repository without overwriting local worktree memory.
-> Review `MEMORY.md` and `current-state.md` for branch-specific goals before starting implementation.
+> Review `MEMORY.md` and active `changes/` plans for branch-specific goals before starting implementation.
 """
 
     additional_context = f"""
@@ -307,7 +290,7 @@ Please check the Claude instructions, Hot Memory, and auto-loaded lesson tail be
 
 ### [Project Hot Memory: MEMORY.md]
 {memory_content}
-
+{f"### [User Context: USER.md]{chr(10)}{user_md_content}{chr(10)}" if user_md_content else ""}
 ### [Auto-loaded Lessons: lessons.md Tail]
 {lessons_tail}
 

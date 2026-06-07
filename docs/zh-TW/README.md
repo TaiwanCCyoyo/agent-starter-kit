@@ -56,7 +56,7 @@
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，並檢查記憶大小。 | `.claude/hooks/stop_memory_check.py` |
+| **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，檢查記憶大小，並在 session 達到一定規模後提示技能審查。 | `.claude/hooks/stop_memory_check.py` |
 
 ### Hook 疑難排解
 

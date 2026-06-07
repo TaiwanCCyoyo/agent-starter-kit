@@ -12,19 +12,17 @@ Draft memory compression proposals without modifying files directly.
 
 ## Responsibilities
 
-- Read `.agents/memory/MEMORY.md` and all relevant Warm memory files.
-- Estimate current token/line counts for Hot and Warm memory.
+- Read `.agents/memory/MEMORY.md`, `USER.md`, `decisions.md`, and `lessons.md`.
+- Estimate current char/line counts for Hot and Warm memory.
 - Draft a compressed version of `MEMORY.md` that preserves:
   - Project mission and non-negotiable constraints.
-  - Compact current-state summary and active handoff pointers.
-  - Official memory map.
+  - Compact current-state summary (one paragraph max).
+  - Official memory map (Hot/Warm/Cold).
   - Recent or frequently repeated lessons.
-- Propose which lessons should move from `lessons.md` to `lessons-archive.md` or `archive/`.
-- Propose which decisions should move from `MEMORY.md` to `decisions.md`.
-- Propose which handoff detail should move from `MEMORY.md` to `current-state.md`.
-- Propose which completed work should move to `archive/`.
+- Propose which lessons should move from `lessons.md` to `memory.db` (graduated) or `archive/`.
+- Propose which decisions should move from `decisions.md` to `memory.db` when stale.
+- Propose which completed change plans should move to `archive/`.
 - Identify repeated memory patterns that may deserve a future command, rule, doc, or hook (Skill Evolution Candidates).
-- Draft candidate files for evolution patterns into `.agents/memory/candidates/` when appropriate.
 
 ## Boundaries
 
@@ -37,4 +35,4 @@ Draft memory compression proposals without modifying files directly.
 - Compressed draft of `MEMORY.md` for the parent agent to review and apply.
 - List of proposed moves with source and destination.
 - Skill evolution candidates identified, if any.
-- Estimated token savings.
+- Estimated char savings.

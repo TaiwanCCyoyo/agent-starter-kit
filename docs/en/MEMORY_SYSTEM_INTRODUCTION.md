@@ -19,13 +19,19 @@ Memory is intentionally git-ignored by default. It is local project state, not t
 
 | Component | Purpose |
 | :--- | :--- |
-| `.agents/memory/MEMORY.md` | Shared long-term project state. |
-| SessionStart hooks | Inject project memory, branch context, and worktree context before work starts. |
-| Stop/AfterAgent reminders | Nudge agents to update memory after sustained work with pending changes. |
-| `save-memory` | Persist completed work, decisions, and handoff notes. |
-| `compress-memory` | Summarize historical detail when memory becomes verbose. |
-| `memory-maintenance` | Defines how to initialize, audit, update, and consolidate memory. |
-| Worktree sync | Copies useful memory context into new worktrees before the first session starts. |
+| `.agents/memory/MEMORY.md` | Cross-agent hot memory: mission, constraints, current state. ≤ 2,200 chars. |
+| `.agents/memory/USER.md` | Cross-agent user preferences: communication language, working style. ≤ 500 chars. |
+| `.agents/memory/decisions.md` | Warm memory: active durable architectural decisions. |
+| `.agents/memory/lessons.md` | Warm memory: concise recurring lessons (tail auto-loaded by Claude). |
+| `.agents/memory/changes/` | Active multi-step change plans (proposal, design, tasks). |
+| `.agents/memory/memory.db` | Cold memory: SQLite FTS5 for graduated lessons, decisions, session metadata (Claude Code MCP only). |
+| `.agents/memory/archive/` | Cold memory: completed change plans, historical reference. |
+| SessionStart hooks | Inject `MEMORY.md` + `USER.md` once at session start (frozen snapshot). Also injects the `lessons.md` tail for Claude. |
+| Stop/AfterAgent reminders | Nudge agents to update memory after code changes; prompt skill review after 5+ response turns. |
+| `memory-maintenance` / `memory-manager` | Routing rules, lifecycle, and health criteria for the full memory structure. |
+| `memory-sql` | Claude Code MCP skill for querying and writing `memory.db` via the `memory-db` MCP server. |
+| `learn-eval` / `skill-curator` | Quality gate for extracting session patterns into reusable skills. |
+| Worktree sync | Copies memory from main repo into new worktrees on first session. |
 
 ## Agent Integration
 
@@ -85,6 +91,27 @@ After copying:
 - Compress memory when historical detail starts hiding current state.
 - Mark platform-specific progress clearly, such as `Codex-only`, `Gemini pending`, or `Antigravity pending`.
 
+## Skill Evolution Loop (Claude Code)
+
+Beyond storing facts in memory files, Claude Code can extract session patterns as reusable skill files:
+
+1. The Stop hook (`stop_memory_check.py`) counts responses with code changes. After 5 responses, it prompts the agent to run `/learn-eval`.
+2. `/learn-eval` follows the full procedure in `.claude/skills/skill-curator/SKILL.md`:
+   - Identifies signals worth saving (user corrections, non-obvious techniques, reusable workflows).
+   - Checks for overlap with existing skills (checklist-based quality gate).
+   - Issues a holistic verdict: Save / Improve then Save / Absorb into existing / Drop.
+   - Saves only after user approval.
+3. Skills live in `.claude/skills/learned/` (project-specific) or `~/.claude/skills/learned/` (cross-project).
+4. The skill-curator skill also manages lifecycle: skills transition active → stale → archived as they age.
+
+This loop is manual and user-confirmed — it does not write skill files without approval.
+
+## Memory Write Model
+
+**Frozen snapshot**: Hot Memory (`MEMORY.md`) is injected once at session start. Tool writes go to disk immediately but do not update the running session's system prompt — the next session reads the updated file. This preserves the LLM prefix cache.
+
+**§ delimiter**: When a memory section contains multiple atomic entries, separate them with `§` on its own line for reliable parsing.
+
 ## Reminder Behavior
 
 Memory update reminders and compression reminders are separate.
@@ -92,6 +119,8 @@ Memory update reminders and compression reminders are separate.
 Update reminders should appear only when repository changes are pending for several agent responses and memory has not been updated.
 
 Compression reminders should appear only when memory is large enough to need action, or during explicit memory audit/compression workflows.
+
+Skill review reminders appear once per session after a minimum number of code-change responses; they do not repeat.
 
 The GUI should not show repeated "no compression needed" messages after every response.
 

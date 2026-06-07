@@ -4,14 +4,16 @@ description: Create, manage, finish, merge, or clean up Git worktrees while pres
 
 # Worktree Manager
 
+Follow `.claude/skills/worktree-manager/SKILL.md` for the full dual-mode procedure and safety rules.
+
 ## Creation
 
-When creating a worktree:
+When creating a worktree (Mode B — Feature Branch):
 
 1. Create the branch and worktree with `git worktree add <path> <branch>`.
 2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Copy or initialize the official memory taxonomy when relevant: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, `changes/`, `archive/`, `runs/`, and `candidates/`.
-4. Immediately define the worktree mission in the Hot Memory current-state summary or active state:
+3. Copy or initialize the Hermes-aligned memory taxonomy when relevant: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, `archive/`.
+4. Immediately define the worktree mission in Hot Memory:
    - Branch goal.
    - Definition of done.
    - Any constraints from the user request.
@@ -22,8 +24,8 @@ When creating a worktree:
 - Use the local worktree memory for task progress.
 - Mark entries with the branch name when needed.
 - Keep compact branch status in `MEMORY.md`.
-- Keep detailed unfinished work in `current-state.md`.
-- Keep recurring branch lessons concise in `lessons.md`; move lower-frequency detail to `lessons-archive.md` or `archive/`.
+- Keep detailed handoff in an active `changes/<id>/` plan.
+- Keep recurring branch lessons concise in `lessons.md`; graduate stale lessons to `memory.db` via `/memory-sql` or `archive/`.
 - Keep branch-specific multi-step plans under `changes/<change-id>/` and consolidate/archive them before worktree removal.
 
 ## Finish
@@ -46,7 +48,7 @@ When consolidating worktree memory:
 2. Read `MEMORY.md` plus relevant Warm files from both locations.
 3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
 4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
-5. Move completed, rejected, or superseded worktree change plans to `archive/changes/` after consolidation.
+5. Move completed, rejected, or superseded worktree change plans to `archive/` after consolidation.
 6. Avoid duplicate entries.
 7. Prefix branch-specific milestones when context matters.
 8. Report consolidated items, target files, archived change folders, and skipped duplicates.

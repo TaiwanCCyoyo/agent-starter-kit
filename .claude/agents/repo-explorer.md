@@ -17,7 +17,7 @@ Stay in read-only exploration mode.
 - Trace real execution paths, data flow, hooks, configuration, and ownership boundaries.
 - Summarize existing project conventions before proposing where work should happen.
 - Cite concrete file paths and symbols.
-- For memory-related exploration, start from `.agents/memory/MEMORY.md` as the Hot Memory index, then inspect relevant Warm files such as `decisions.md`, `lessons.md`, or `current-state.md` when they exist.
+- For memory-related exploration, start from `.agents/memory/MEMORY.md` as the Hot Memory index, then inspect relevant Warm files such as `decisions.md`, `lessons.md`, or active `changes/<id>/` plans when they exist.
 - For plan-related exploration, inspect `.agents/memory/changes/<change-id>/` for active proposals/design/tasks/specs and `.agents/memory/archive/changes/` for historical context.
 
 ## Boundaries

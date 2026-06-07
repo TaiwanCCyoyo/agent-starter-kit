@@ -60,7 +60,9 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 |---|---|
 | `/compress-memory` | 當 `.agents/memory/` 過大時進行壓縮 |
 | `/gen-commit` | 透過 `commit-specialist` 產生符合 Conventional Commits 格式的訊息 |
+| `/learn-eval` | 以整體品質門評估 session 模式；核准後萃取為 skills |
 | `/memory-maintenance` | 初始化、更新、審查或整合專案記憶體 |
+| `/memory-sql` | 透過 memory-db MCP server 查詢或寫入 `.agents/memory/memory.db`（SQLite FTS5） |
 | `/save-memory` | 將教訓、決策或交接筆記儲存至 `.agents/memory/` |
 | `/worktree` | 建立、管理並合併 Git worktree，同時保留記憶體 |
 
@@ -82,7 +84,8 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 |---|---|
 | `/pr`、`/review-pr` | 不需要 PR 工作流程 |
 | `/multi-*`（共 5 個指令） | 多代理協作尚未成熟 |
-| `/learn`、`/skill-create`、`/evolve` | 依賴完整的 ECC 安裝 |
+| `/learn`、`/skill-create` | 依賴 ECC observation hooks 與完整 instinct pipeline；由 `/learn-eval` 取代 |
+| `/evolve` | 由 `/learn-eval` 中的 skill-curator 生命週期取代 |
 | `/hookify-*`（共 4 個指令） | ECC 內部 hook 管理 |
 | `/sessions`、`/save-session`、`/resume-session` | 已由 `.agents/memory/` 系統取代 |
 | 語言專屬的建構／測試／審查指令 | Go/Rust/Kotlin/Java 等語言未使用 |
@@ -100,8 +103,10 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | Skill | 用途 |
 |---|---|
 | `commit-helper` | Conventional Commits 格式、pre-commit 檢查清單 |
-| `memory-maintenance` | 讀取、更新、壓縮專案記憶體的完整流程 |
-| `worktree-manager` | Worktree 建立／完成／合併，並整合記憶體 |
+| `memory-maintenance` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型與 § 分隔符慣例 |
+| `memory-sql` | SQLite FTS5 冷記憶：schema、session 記錄、搜尋查詢與層級路由規則 |
+| `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
+| `worktree-manager` | Worktree 建立／完成／合併，並整合記憶體；雙模式：Mode A 使用內建 `EnterWorktree`/`ExitWorktree`，Mode B 使用 git worktree 搭配完整生命週期 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
@@ -137,16 +142,16 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 | Hook | 觸發時機 | 執行內容 |
 |---|---|---|
-| `session_start.py` | 工作階段開始 | 將 `CLAUDE.md` 與 `.agents/memory/MEMORY.md` 注入到上下文中 |
+| `session_start.py` | 工作階段開始 | 以凍結快照模式將 `CLAUDE.md` 與 `.agents/memory/MEMORY.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
 | `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
-| `stop_memory_check.py` | 工作階段結束 | 若完成了重大工作，則提示進行記憶體更新 |
+| `stop_memory_check.py` | 每次回覆後 | 若有重大工作則提示記憶更新；在 5 次以上有程式碼變更的回覆後，每 session 提示一次技能審查（`/learn-eval`） |
 
 ### 已注意但未從 ECC 移植的 hook 概念
 
-| 概念 | 注意原因 |
-|---|---|
-| PostToolUse 持續學習 | ECC 會自動從工作階段觀察中產生 skills——與我們的 `lessons.md` 方法一致；未來可作為強化 `stop_memory_check.py` 提示的靈感 |
-| Stop 治理捕捉 | ECC 在工作階段結束時記錄安全事件——若專案發展到包含自主交易代理時將有其相關性 |
+| 概念 | 狀態 | 原因 |
+|---|---|---|
+| PostToolUse 持續學習 | **部分實作** | 已在 `stop_memory_check.py` 加入技能審查觸發器；完整 hook 觀察管線（instinct YAML、背景 Haiku agent）未移植——在沒有持久程序的情況下過於重量級 |
+| Stop 治理捕捉 | 延後 | ECC 在 session 結束時記錄安全事件——若專案發展到包含自主交易代理時將有其相關性 |
 
 ---
 
@@ -172,8 +177,21 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 | 項目 | 類型 | 前提條件 |
 |---|---|---|
+| **冷記憶搜尋（SQLite FTS5）** | Hermes 移植 | 見下方說明 |
 | `deep-research` skill | ECC 移植 | 先設定 firecrawl + exa MCP |
 | `marketing-agent` agent | ECC 移植 | 確認短片製作規劃啟動 |
 | `uvm-patterns` skill | 自訂建置 | UVM 專案啟動 |
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
 | README 中的 CI/CD 指引 | 文件更新 | 整合穩定後進行 |
+
+### 冷記憶搜尋——SQLite FTS5（延後）
+
+**Hermes** 將所有 session 訊息儲存在本機 SQLite 資料庫（`~/.hermes/state.db`），搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。
+
+**為什麼尚未實作**：Claude Code Stop hook 的 event 中只有 `session_id` 和 `cwd`，沒有對話內容。然而，Claude Code 的 transcript 本身以 JSONL 格式儲存於磁碟（`~/.claude/projects/<hash>/<session_id>.jsonl`），Stop hook 理論上可在 session 結束後讀取它。實作需要：
+1. Stop hook 讀取目前 session 的 JSONL transcript。
+2. 解析工具呼叫與助手訊息，萃取有意義內容。
+3. 寫入 `.agents/memory/sessions.db`（FTS5 虛擬表，git-ignored）。
+4. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。
+
+**啟動條件**：確認 JSONL transcript 格式與路徑，並決定是否要在 Stop hook 加入磁碟讀取步驟。

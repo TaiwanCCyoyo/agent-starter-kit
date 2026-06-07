@@ -10,14 +10,12 @@ LESSONS_LINE_LIMIT = 50
 STATE_FILE = Path(".agents/memory/.claude_stop_memory_state.json")
 APPROVED_MEMORY_FILES = {
     "MEMORY.md",
+    "USER.md",
     "decisions.md",
     "lessons.md",
-    "lessons-archive.md",
-    "current-state.md",
-    "user-preferences.md",
-    "workflows.md",
 }
-APPROVED_MEMORY_DIRS = {"changes", "archive", "runs", "candidates"}
+APPROVED_MEMORY_DIRS = {"changes", "archive"}
+SKILL_REVIEW_INTERVAL = 5
 
 
 def repo_root(cwd: str) -> Path:
@@ -85,6 +83,19 @@ def count_tokens(text: str) -> int:
     return len(text) // 4
 
 
+def is_gitignored(path: Path, root: Path) -> bool:
+    try:
+        rel = path.relative_to(root)
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", str(rel)],
+            cwd=root,
+            capture_output=True,
+        )
+        return result.returncode == 0
+    except Exception:
+        return False
+
+
 def memory_taxonomy_message(root: Path) -> str:
     memory_dir = root / ".agents" / "memory"
     if not memory_dir.exists():
@@ -95,7 +106,7 @@ def memory_taxonomy_message(root: Path) -> str:
         if child.name.startswith("."):
             continue
         if child.is_dir():
-            if child.name not in APPROVED_MEMORY_DIRS:
+            if child.name not in APPROVED_MEMORY_DIRS and not is_gitignored(child, root):
                 unexpected.append(child.name + "/")
             continue
         if child.suffix.lower() != ".md":
@@ -139,8 +150,8 @@ def lessons_health_message(root: Path, state: dict) -> str:
 
     return (
         f"Lessons pruning reminder: `.agents/memory/lessons.md` has {lines} lines, but session start auto-loads only the last "
-        f"{LESSONS_LINE_LIMIT} lines. Keep recent/repeated/high-impact lessons near the bottom and move stale or lower-priority "
-        "lessons to `lessons-archive.md` or `archive/`."
+        f"{LESSONS_LINE_LIMIT} lines. Keep recent/repeated/high-impact lessons near the bottom and graduate stale or lower-priority "
+        "lessons to `memory.db` via `/memory-sql` or move to `archive/`."
     )
 
 
@@ -195,13 +206,26 @@ def memory_update_message(root: Path, state: dict) -> str:
     return (
         f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} Claude responses.\n"
         "Before finishing this task, you MUST:\n"
-        "1. Update Hot Memory only when the boot index/current summary changed: `.agents/memory/MEMORY.md`.\n"
+        "1. Update Hot Memory only when mission/state summary changed: `.agents/memory/MEMORY.md` (≤ 2,200 chars).\n"
         "2. Route durable decisions to `.agents/memory/decisions.md`.\n"
-        "3. Route concise recurring lessons to `.agents/memory/lessons.md`; move stale or lower-priority lessons to `lessons-archive.md` or `archive/`.\n"
-        "4. Route active handoff detail to `.agents/memory/current-state.md`.\n"
-        "5. Route active plans to `.agents/memory/changes/<change-id>/`; archive completed or superseded plans under `.agents/memory/archive/changes/`.\n"
-        "6. Preserve important run evidence under `.agents/memory/runs/` as Markdown plus JSONL when useful.\n\n"
+        "3. Route concise recurring lessons to `.agents/memory/lessons.md` (≤ 50 lines); graduate stale entries to `memory.db` via `/memory-sql`.\n"
+        "4. Route active multi-step change plans to `.agents/memory/changes/<change-id>/`; move completed plans to `archive/`.\n"
+        "5. If the memory-db MCP is connected: upsert this session in `sessions` and graduate stale lessons/decisions to `memory_entries` via write_query. See `.claude/skills/memory-sql/SKILL.md`.\n\n"
         "Note: Technical memory should be concise and high-signal. Discuss progress with the user in Traditional Chinese (zh-TW)."
+    )
+
+
+def skill_review_message(state: dict) -> str:
+    if state.get("skill_review_prompted"):
+        return ""
+    response_count = int(state.get("response_count", 0))
+    if response_count < SKILL_REVIEW_INTERVAL:
+        return ""
+    state["skill_review_prompted"] = True
+    return (
+        f"[System] Skill Review Reminder: {response_count} responses with code changes this session. "
+        "Run `/learn-eval` to check whether any non-obvious techniques or reusable workflows "
+        "from this session deserve skill extraction. See `.claude/skills/skill-curator/SKILL.md`."
     )
 
 
@@ -219,6 +243,9 @@ def main() -> int:
     memory_update_reminder = memory_update_message(root, state)
     if memory_update_reminder:
         messages.append(memory_update_reminder)
+    skill_reminder = skill_review_message(state)
+    if skill_reminder:
+        messages.append(skill_reminder)
     memory_message = memory_health_message(root, state)
     if memory_message:
         messages.append(memory_message)

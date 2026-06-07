@@ -60,7 +60,9 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 |---|---|
 | `/compress-memory` | Compress `.agents/memory/` when it grows too large |
 | `/gen-commit` | Generate a Conventional Commit message via `commit-specialist` |
+| `/learn-eval` | Evaluate session patterns through a holistic quality gate; extract as skills after approval |
 | `/memory-maintenance` | Initialize, update, audit, or consolidate project memory |
+| `/memory-sql` | Query or write to `.agents/memory/memory.db` (SQLite FTS5) via the memory-db MCP server |
 | `/save-memory` | Save lessons, decisions, or handoff notes to `.agents/memory/` |
 | `/worktree` | Create, manage, and merge Git worktrees with memory preservation |
 
@@ -82,7 +84,8 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 |---|---|
 | `/pr`, `/review-pr` | PR workflow not needed |
 | `/multi-*` (5 commands) | Multi-agent orchestration premature |
-| `/learn`, `/skill-create`, `/evolve` | Depend on full ECC installation |
+| `/learn`, `/skill-create` | Depend on ECC observation hooks and full instinct pipeline; replaced by `/learn-eval` |
+| `/evolve` | Replaced by skill-curator lifecycle in `/learn-eval` |
 | `/hookify-*` (4 commands) | ECC-internal hook management |
 | `/sessions`, `/save-session`, `/resume-session` | Replaced by `.agents/memory/` system |
 | Language-specific build/test/review | Go/Rust/Kotlin/Java etc. not in use |
@@ -100,8 +103,10 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | Skill | Purpose |
 |---|---|
 | `commit-helper` | Conventional Commits format, pre-commit checklist |
-| `memory-maintenance` | Full procedure for reading, updating, compressing project memory |
-| `worktree-manager` | Worktree create/finish/merge with memory consolidation |
+| `memory-maintenance` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model and § delimiter convention |
+| `memory-sql` | SQLite FTS5 cold memory: schema, session recording, search queries, and layer routing rules |
+| `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
+| `worktree-manager` | Worktree create/finish/merge with memory consolidation; dual-mode: Mode A uses built-in `EnterWorktree`/`ExitWorktree`, Mode B uses git worktree with full lifecycle |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
@@ -137,16 +142,16 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 
 | Hook | Trigger | What it does |
 |---|---|---|
-| `session_start.py` | Session start | Injects `CLAUDE.md` and `.agents/memory/MEMORY.md` into context |
+| `session_start.py` | Session start | Injects `CLAUDE.md` and `.agents/memory/MEMORY.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies memory taxonomy into new worktrees. |
 | `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
-| `stop_memory_check.py` | Session end | Nudges memory update if significant work was done |
+| `stop_memory_check.py` | After each response | Nudges memory update if significant work was done; prompts skill review via `/learn-eval` after 5+ responses with code changes (once per session) |
 
 ### ECC hook concepts noted but not ported
 
-| Concept | Why noted |
-|---|---|
-| PostToolUse continuous learning | ECC automatically generates skills from session observations — aligns with our `lessons.md` approach; future inspiration for more structured `stop_memory_check.py` prompts |
-| Stop governance capture | ECC logs security events at session end — relevant if project grows to include autonomous trading agents |
+| Concept | Status | Why |
+|---|---|---|
+| PostToolUse continuous learning | **Partially implemented** | Skill review trigger added to `stop_memory_check.py`; full hook-based observation pipeline (instinct YAML, background Haiku agent) not ported — too heavyweight without a persistent process |
+| Stop governance capture | Deferred | ECC logs security events at session end — relevant if project grows to include autonomous trading agents |
 
 ---
 
@@ -172,8 +177,26 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 | Item | Type | Condition |
 |---|---|---|
+| **Cold memory search (SQLite FTS5)** | Hermes port | See below |
 | `deep-research` skill | ECC port | Configure firecrawl + exa MCP first |
 | `marketing-agent` agent | ECC port | Short-form video planning confirmed |
 | `uvm-patterns` skill | Custom build | UVM project starts |
 | `rules/systemverilog/` | Custom build | UVM project starts |
 | CI/CD guidance in README | Docs update | After integration stabilises |
+
+### Cold Memory Search — SQLite FTS5 (Deferred)
+
+**Hermes** stores all session messages in a local SQLite database (`~/.hermes/state.db`) with FTS5 full-text search, enabling ~20ms recall of any past conversation without LLM summarization.
+
+**Why not implemented yet**: Claude Code's Stop hook receives only a session_id event — it does not receive conversation messages directly. Implementing session recording would require:
+1. Intercepting every PostToolUse event to capture tool input/output.
+2. Writing a persistent SQLite writer at `.agents/memory/sessions.db` (or a user-level path to avoid git exposure).
+3. A `/session-search <query>` slash command backed by an FTS5 query.
+
+**What would change when implemented**:
+- Cold memory layer gains a searchable session corpus (complements the existing `runs/` markdown approach).
+- Stop hook gains a session archival step.
+- `/memory-maintenance` audit workflow gains a "search sessions" step.
+- A new `session-search` command would be added to the commands table.
+
+**Status: Implemented.** The `memory-db` MCP server (`npx @modelcontextprotocol/server-sqlite`) is configured in `.claude/mcp.json` with a Python path-resolver launcher at `.claude/scripts/start_memory_mcp.py`. Claude writes to the database explicitly via MCP `write_query` calls — the Stop hook prompts Claude to upsert the session record and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.
