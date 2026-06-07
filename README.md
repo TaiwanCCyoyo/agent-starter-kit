@@ -10,7 +10,7 @@ A standardized, frictionless engineering infrastructure for multi-agent ecosyste
 3. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
 4. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
 5. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
-6. **Verification-First Execution**: Agents must provide tangible validation evidence before marking tasks as complete.
+6. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
 
 ## Memory Management Workflow
 

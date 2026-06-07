@@ -103,7 +103,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | Skill | 用途 |
 |---|---|
 | `commit-helper` | Conventional Commits 格式、pre-commit 檢查清單 |
-| `memory-maintenance` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型與 § 分隔符慣例 |
+| `memory-manager` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型、Hermes 對齊路由規則與大小健康標準 |
 | `memory-sql` | SQLite FTS5 冷記憶：schema、session 記錄、搜尋查詢與層級路由規則 |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
 | `worktree-manager` | Worktree 建立／完成／合併，並整合記憶體；雙模式：Mode A 使用內建 `EnterWorktree`/`ExitWorktree`，Mode B 使用 git worktree 搭配完整生命週期 |
@@ -194,4 +194,4 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 3. 寫入 `.agents/memory/sessions.db`（FTS5 虛擬表，git-ignored）。
 4. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。
 
-**啟動條件**：確認 JSONL transcript 格式與路徑，並決定是否要在 Stop hook 加入磁碟讀取步驟。
+**狀態：已實作。** `memory-db` MCP server（`uvx mcp-server-sqlite`）已配置在 `.claude/mcp.json`（透過 `uv run python .claude/scripts/start_memory_mcp.py` 啟動）。Claude 透過 MCP `write_query` 明確寫入資料庫——Stop hook 會提示 Claude upsert session 記錄並歸檔已畢業的條目。Schema 與查詢範例請參考 `.claude/skills/memory-sql/SKILL.md`。

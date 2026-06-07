@@ -103,7 +103,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | Skill | Purpose |
 |---|---|
 | `commit-helper` | Conventional Commits format, pre-commit checklist |
-| `memory-maintenance` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model and § delimiter convention |
+| `memory-manager` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model, Hermes-aligned routing rules, and size health criteria |
 | `memory-sql` | SQLite FTS5 cold memory: schema, session recording, search queries, and layer routing rules |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
 | `worktree-manager` | Worktree create/finish/merge with memory consolidation; dual-mode: Mode A uses built-in `EnterWorktree`/`ExitWorktree`, Mode B uses git worktree with full lifecycle |
@@ -199,4 +199,4 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 - `/memory-maintenance` audit workflow gains a "search sessions" step.
 - A new `session-search` command would be added to the commands table.
 
-**Status: Implemented.** The `memory-db` MCP server (`npx @modelcontextprotocol/server-sqlite`) is configured in `.claude/mcp.json` with a Python path-resolver launcher at `.claude/scripts/start_memory_mcp.py`. Claude writes to the database explicitly via MCP `write_query` calls — the Stop hook prompts Claude to upsert the session record and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.
+**Status: Implemented.** The `memory-db` MCP server (`uvx mcp-server-sqlite`) is configured in `.claude/mcp.json` (launched via `uv run python .claude/scripts/start_memory_mcp.py`). Claude writes to the database explicitly via MCP `write_query` calls — the Stop hook prompts Claude to upsert the session record and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.

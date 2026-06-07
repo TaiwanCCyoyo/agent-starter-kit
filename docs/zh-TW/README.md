@@ -10,7 +10,7 @@
 3. **自動化維護**：格式化、lint、檔案衛生檢查與記憶提醒由 Agent hooks 與 repository 驗證腳本執行。
 4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
 5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
-6. **驗證優先**：Agent 必須提供具體驗證結果，才能宣告任務完成。
+6. **驗證優先**：Agent 在進行非瑣碎變更前須先說明驗證計畫，修改後執行驗證，並提供結果作為完成的證據。
 
 ## 記憶管理流程
 
