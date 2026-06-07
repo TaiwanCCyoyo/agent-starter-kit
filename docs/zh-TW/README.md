@@ -180,6 +180,14 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 為了提供 Antigravity 代理人強大的推理與任務執行能力（例如結構化需求釐清與測試驅動開發），本儲存庫整合了源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能。這些技能已複製至 `.agent/skills/` 底下，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
 
+## 設計來源
+
+本 starter kit 的架構設計受到兩個開源專案的啟發：
+
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。開發用 agents（planner、code-reviewer、tdd-guide、security-reviewer 等）、斜線指令（/plan、/build-fix、/code-review、/test-coverage）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。
+
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 定義了 Hot/Warm/Cold 記憶分層模型，驅動整個 `.agents/memory/` 目錄結構。`MEMORY.md` + `USER.md`（Hot）、`decisions.md` + `lessons.md` + `changes/`（Warm）、以及 SQLite FTS5 的 `memory.db`（Cold），均遵循 Hermes 架構設計。
+
 ## 初始化
 
 要初始化此儲存庫並設定驗證工具：

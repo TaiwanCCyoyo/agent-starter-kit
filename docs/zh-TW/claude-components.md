@@ -3,8 +3,9 @@
 本文件列出 `.claude/` 目錄中所有啟用的 agents、commands、skills、hooks 與 rules。
 適用對象：Python 及 SystemVerilog/UVM 開發者。
 
-**ECC 來源版本**：v2.0.0-rc.1
-**整合日期**：2026-06-02
+**ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
+**ECC 整合日期**：2026-06-02
+**記憶分層**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) Hot/Warm/Cold 模型
 
 ---
 
@@ -186,7 +187,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 ### 冷記憶搜尋——SQLite FTS5（延後）
 
-**Hermes** 將所有 session 訊息儲存在本機 SQLite 資料庫（`~/.hermes/state.db`），搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。
+**[Hermes](https://github.com/NousResearch/hermes-agent)** 將所有 session 訊息儲存在本機 SQLite 資料庫（`~/.hermes/state.db`），搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。
 
 **為什麼尚未實作**：Claude Code Stop hook 的 event 中只有 `session_id` 和 `cwd`，沒有對話內容。然而，Claude Code 的 transcript 本身以 JSONL 格式儲存於磁碟（`~/.claude/projects/<hash>/<session_id>.jsonl`），Stop hook 理論上可在 session 結束後讀取它。實作需要：
 1. Stop hook 讀取目前 session 的 JSONL transcript。

@@ -3,8 +3,9 @@
 This document lists all agents, commands, skills, hooks, and rules active in the `.claude/` directory.
 Intended for Python and SystemVerilog/UVM developers.
 
-**ECC source version**: v2.0.0-rc.1
-**Integration date**: 2026-06-02
+**ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
+**ECC integration date**: 2026-06-02
+**Memory taxonomy**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) Hot/Warm/Cold model
 
 ---
 
@@ -186,7 +187,7 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 ### Cold Memory Search — SQLite FTS5 (Deferred)
 
-**Hermes** stores all session messages in a local SQLite database (`~/.hermes/state.db`) with FTS5 full-text search, enabling ~20ms recall of any past conversation without LLM summarization.
+**[Hermes](https://github.com/NousResearch/hermes-agent)** stores all session messages in a local SQLite database (`~/.hermes/state.db`) with FTS5 full-text search, enabling ~20ms recall of any past conversation without LLM summarization.
 
 **Why not implemented yet**: Claude Code's Stop hook receives only a session_id event — it does not receive conversation messages directly. Implementing session recording would require:
 1. Intercepting every PostToolUse event to capture tool input/output.

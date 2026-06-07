@@ -180,6 +180,14 @@ After copying, replace `.agents/memory/MEMORY.md` with the target project's real
 
 To equip Antigravity agents with robust capabilities such as structured brainstorming and test-driven development, this repository has integrated a suite of skills adapted from the open-source [obra/superpowers](https://github.com/obra/superpowers) project. These copied skills reside directly under `.agent/skills/` and are fully compliant with the MIT License (Copyright (c) 2026 Jesse Vincent).
 
+## Design Influences
+
+This starter kit is shaped by two open-source projects:
+
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The development agents (planner, code-reviewer, tdd-guide, security-reviewer, etc.), slash commands (/plan, /build-fix, /code-review, /test-coverage), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are all ported or adapted from ECC v2.0.0-rc.1.
+
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Defines the Hot/Warm/Cold memory taxonomy that drives the `.agents/memory/` layout. `MEMORY.md` + `USER.md` (Hot), `decisions.md` + `lessons.md` + `changes/` (Warm), and `memory.db` with SQLite FTS5 (Cold) all follow the Hermes architecture.
+
 ## Initialization
 
 To initialize this repository and set up verification tools:
