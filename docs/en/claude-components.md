@@ -5,7 +5,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 **ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC integration date**: 2026-06-02
-**Memory taxonomy**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) Hot/Warm/Cold model
+**Memory design influence**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent); this project defines its own Hot/Warm/Cold taxonomy
 
 ---
 
@@ -178,26 +178,18 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 | Item | Type | Condition |
 |---|---|---|
-| **Cold memory search (SQLite FTS5)** | Hermes port | See below |
+| **Automatic transcript capture + FTS5 session search** | Hermes port | Claude Code Stop hook receives only session_id, not conversation content |
 | `deep-research` skill | ECC port | Configure firecrawl + exa MCP first |
 | `marketing-agent` agent | ECC port | Short-form video planning confirmed |
 | `uvm-patterns` skill | Custom build | UVM project starts |
 | `rules/systemverilog/` | Custom build | UVM project starts |
 | CI/CD guidance in README | Docs update | After integration stabilises |
 
-### Cold Memory Search — SQLite FTS5 (Deferred)
+### Cold Memory — SQLite FTS5
 
-**[Hermes](https://github.com/NousResearch/hermes-agent)** stores all session messages in a local SQLite database (`~/.hermes/state.db`) with FTS5 full-text search, enabling ~20ms recall of any past conversation without LLM summarization.
+**What is implemented**: The `memory-db` MCP server is configured at `.mcp.json` and launched directly with `uvx mcp-server-sqlite`, using `${CLAUDE_PROJECT_DIR:-.}` to resolve the database path from any project subdirectory. Claude writes curated entries — graduated lessons, decisions, and session metadata — explicitly via MCP `write_query` calls. The Stop hook prompts Claude to upsert session records and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.
 
-**Why not implemented yet**: Claude Code's Stop hook receives only a session_id event — it does not receive conversation messages directly. Implementing session recording would require:
+**What remains deferred — automatic transcript search**: [Hermes](https://github.com/NousResearch/hermes-agent) stores all session messages automatically in a local SQLite database with FTS5 full-text search, enabling ~20ms recall of any past conversation without LLM summarization. This project provides curated entries only — automatic capture remains deferred because Claude Code's Stop hook receives only a session_id event, not conversation content. Implementing automatic recording would require:
 1. Intercepting every PostToolUse event to capture tool input/output.
 2. Writing a persistent SQLite writer at `.agents/memory/sessions.db` (or a user-level path to avoid git exposure).
 3. A `/session-search <query>` slash command backed by an FTS5 query.
-
-**What would change when implemented**:
-- Cold memory layer gains a searchable session corpus (complements the existing `runs/` markdown approach).
-- Stop hook gains a session archival step.
-- `/memory-maintenance` audit workflow gains a "search sessions" step.
-- A new `session-search` command would be added to the commands table.
-
-**Status: Implemented.** The `memory-db` MCP server (`uvx mcp-server-sqlite`) is configured in `.claude/mcp.json` (launched via `uv run python .claude/scripts/start_memory_mcp.py`). Claude writes to the database explicitly via MCP `write_query` calls — the Stop hook prompts Claude to upsert the session record and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.

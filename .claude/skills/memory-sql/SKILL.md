@@ -7,7 +7,7 @@ description: Use when querying or writing to the project's SQLite cold memory da
 
 The `memory-db` MCP server exposes `.agents/memory/memory.db` (SQLite with FTS5) as the **Cold Memory** layer. Unlike the file-based Hot/Warm layers (loaded at session start), this database is queried on demand and never auto-loaded into context — making it suitable for high-volume historical data.
 
-The MCP server is launched via `.claude/scripts/start_memory_mcp.py` which resolves the project root and starts `uvx mcp-server-sqlite --db-path` at the correct database path.
+The MCP server is configured in root `.mcp.json` and launched directly with `uvx mcp-server-sqlite`. Its database path uses `${CLAUDE_PROJECT_DIR:-.}` so it resolves correctly when Claude Code starts from a project subdirectory.
 
 ---
 

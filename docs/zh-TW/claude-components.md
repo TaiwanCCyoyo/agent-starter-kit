@@ -5,7 +5,7 @@
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC 整合日期**：2026-06-02
-**記憶分層**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) Hot/Warm/Cold 模型
+**記憶設計來源**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；本專案另行定義 Hot/Warm/Cold taxonomy
 
 ---
 
@@ -178,21 +178,18 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 | 項目 | 類型 | 前提條件 |
 |---|---|---|
-| **冷記憶搜尋（SQLite FTS5）** | Hermes 移植 | 見下方說明 |
+| **自動 transcript 捕捉 + FTS5 session 搜尋** | Hermes 移植 | Claude Code Stop hook 只接收 session_id，不接收對話內容 |
 | `deep-research` skill | ECC 移植 | 先設定 firecrawl + exa MCP |
 | `marketing-agent` agent | ECC 移植 | 確認短片製作規劃啟動 |
 | `uvm-patterns` skill | 自訂建置 | UVM 專案啟動 |
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
 | README 中的 CI/CD 指引 | 文件更新 | 整合穩定後進行 |
 
-### 冷記憶搜尋——SQLite FTS5（延後）
+### 冷記憶——SQLite FTS5
 
-**[Hermes](https://github.com/NousResearch/hermes-agent)** 將所有 session 訊息儲存在本機 SQLite 資料庫（`~/.hermes/state.db`），搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。
+**已實作**：`memory-db` MCP server 已配置在 `.mcp.json`，並直接以 `uvx mcp-server-sqlite` 啟動；資料庫路徑使用 `${CLAUDE_PROJECT_DIR:-.}`，因此可從專案內任何子目錄正確解析。Claude 透過 MCP `write_query` 明確寫入精選條目——已畢業的 lessons、decisions 與 session metadata。Stop hook 會提示 Claude upsert session 記錄並歸檔已畢業的條目。Schema 與查詢範例請參考 `.claude/skills/memory-sql/SKILL.md`。
 
-**為什麼尚未實作**：Claude Code Stop hook 的 event 中只有 `session_id` 和 `cwd`，沒有對話內容。然而，Claude Code 的 transcript 本身以 JSONL 格式儲存於磁碟（`~/.claude/projects/<hash>/<session_id>.jsonl`），Stop hook 理論上可在 session 結束後讀取它。實作需要：
-1. Stop hook 讀取目前 session 的 JSONL transcript。
-2. 解析工具呼叫與助手訊息，萃取有意義內容。
-3. 寫入 `.agents/memory/sessions.db`（FTS5 虛擬表，git-ignored）。
-4. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。
-
-**狀態：已實作。** `memory-db` MCP server（`uvx mcp-server-sqlite`）已配置在 `.claude/mcp.json`（透過 `uv run python .claude/scripts/start_memory_mcp.py` 啟動）。Claude 透過 MCP `write_query` 明確寫入資料庫——Stop hook 會提示 Claude upsert session 記錄並歸檔已畢業的條目。Schema 與查詢範例請參考 `.claude/skills/memory-sql/SKILL.md`。
+**仍延後——自動 transcript 搜尋**：[Hermes](https://github.com/NousResearch/hermes-agent) 會自動將所有 session 訊息儲存在本機 SQLite 資料庫，搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。本專案僅提供精選條目——自動捕捉仍延後，因為 Claude Code Stop hook 只接收 session_id，無法取得對話內容。實作自動記錄需要：
+1. 攔截每次 PostToolUse event 以捕捉工具輸入/輸出。
+2. 在 `.agents/memory/sessions.db`（git-ignored）寫入持久化 SQLite。
+3. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。

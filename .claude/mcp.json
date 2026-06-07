@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "memory-db": {
-      "command": "uv",
-      "args": ["run", "python", ".claude/scripts/start_memory_mcp.py"],
-      "env": {}
-    }
-  }
-}

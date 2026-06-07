@@ -1,7 +1,9 @@
 # Ignore agent instantiated memory to prevent committing project-specific state to the starter kit
 .agents/memory/*
 
-# Ignore temporary files
+# Ignore local reference clones and disposable workspace files
+.references/
+.tmp/
 .agent/temp/*
 
 agent-testbed/*

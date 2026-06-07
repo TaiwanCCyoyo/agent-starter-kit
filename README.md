@@ -186,7 +186,7 @@ This starter kit is shaped by two open-source projects:
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The development agents (planner, code-reviewer, tdd-guide, security-reviewer, etc.), slash commands (/plan, /build-fix, /code-review, /test-coverage), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are all ported or adapted from ECC v2.0.0-rc.1.
 
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Defines the Hot/Warm/Cold memory taxonomy that drives the `.agents/memory/` layout. `MEMORY.md` + `USER.md` (Hot), `decisions.md` + `lessons.md` + `changes/` (Warm), and `memory.db` with SQLite FTS5 (Cold) all follow the Hermes architecture.
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's persistent-memory design through bounded `MEMORY.md` and `USER.md` stores, frozen prompt snapshots, and SQLite FTS5 session recall. This starter kit adapts those mechanisms into its own Hot/Warm/Cold taxonomy; it is not a direct port of a Hermes-defined taxonomy.
 
 ## Initialization
 

@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 
 MEMORY_REMINDER_INTERVAL = 3
-MEMORY_TOKEN_LIMIT = 2000
+MEMORY_CHAR_LIMIT = 2200
 MEMORY_LINE_LIMIT = 100
+USER_CHAR_LIMIT = 500
 LESSONS_LINE_LIMIT = 50
 STATE_FILE = Path(".agents/memory/.claude_stop_memory_state.json")
 APPROVED_MEMORY_FILES = {
@@ -28,6 +29,10 @@ def repo_root(cwd: str) -> Path:
 
 def memory_path(root: Path) -> Path:
     return root / ".agents" / "memory" / "MEMORY.md"
+
+
+def user_path(root: Path) -> Path:
+    return root / ".agents" / "memory" / "USER.md"
 
 
 def lessons_path(root: Path) -> Path:
@@ -79,23 +84,6 @@ def changed_non_memory_files(root: Path) -> list[str]:
     return changed_files
 
 
-def count_tokens(text: str) -> int:
-    return len(text) // 4
-
-
-def is_gitignored(path: Path, root: Path) -> bool:
-    try:
-        rel = path.relative_to(root)
-        result = subprocess.run(
-            ["git", "check-ignore", "-q", str(rel)],
-            cwd=root,
-            capture_output=True,
-        )
-        return result.returncode == 0
-    except Exception:
-        return False
-
-
 def memory_taxonomy_message(root: Path) -> str:
     memory_dir = root / ".agents" / "memory"
     if not memory_dir.exists():
@@ -106,7 +94,7 @@ def memory_taxonomy_message(root: Path) -> str:
         if child.name.startswith("."):
             continue
         if child.is_dir():
-            if child.name not in APPROVED_MEMORY_DIRS and not is_gitignored(child, root):
+            if child.name not in APPROVED_MEMORY_DIRS:
                 unexpected.append(child.name + "/")
             continue
         if child.suffix.lower() != ".md":
@@ -163,22 +151,40 @@ def memory_health_message(root: Path, state: dict) -> str:
     current_memory_mtime = memory_mtime(root)
     previous_health_mtime = float(state.get("health_memory_mtime", 0.0))
     content = path.read_text(encoding="utf-8")
-    tokens = count_tokens(content)
+    chars = len(content)
     lines = len(content.splitlines())
     state["health_memory_mtime"] = current_memory_mtime
-    state["health_tokens"] = tokens
+    state["health_chars"] = chars
     state["health_lines"] = lines
 
     if current_memory_mtime <= previous_health_mtime:
         return ""
 
-    if tokens <= MEMORY_TOKEN_LIMIT and lines <= MEMORY_LINE_LIMIT:
+    if chars <= MEMORY_CHAR_LIMIT and lines <= MEMORY_LINE_LIMIT:
         return ""
 
     return (
-        f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large ({tokens} approximate tokens, {lines} lines). "
+        f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large "
+        f"({chars} chars, {lines} lines; limit {MEMORY_CHAR_LIMIT} chars / {MEMORY_LINE_LIMIT} lines). "
         "Use `/compress-memory` to keep `MEMORY.md` as Hot Memory, route decisions to `decisions.md`, keep concise recurring lessons in "
         "`lessons.md`, and move historical detail to Warm/Cold memory."
+    )
+
+
+def user_health_message(root: Path) -> str:
+    path = user_path(root)
+    if not path.exists():
+        return ""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except Exception as e:
+        return f"USER.md health check failed: {str(e)}"
+    chars = len(content)
+    if chars <= USER_CHAR_LIMIT:
+        return ""
+    return (
+        f"USER.md size reminder: `.agents/memory/USER.md` has {chars} chars (limit {USER_CHAR_LIMIT} chars). "
+        "Trim to the most essential user preferences and communication style."
     )
 
 
@@ -249,6 +255,9 @@ def main() -> int:
     memory_message = memory_health_message(root, state)
     if memory_message:
         messages.append(memory_message)
+    user_message = user_health_message(root)
+    if user_message:
+        messages.append(user_message)
     lessons_message = lessons_health_message(root, state)
     if lessons_message:
         messages.append(lessons_message)

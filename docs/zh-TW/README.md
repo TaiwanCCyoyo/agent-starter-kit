@@ -186,7 +186,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。開發用 agents（planner、code-reviewer、tdd-guide、security-reviewer 等）、斜線指令（/plan、/build-fix、/code-review、/test-coverage）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。
 
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 定義了 Hot/Warm/Cold 記憶分層模型，驅動整個 `.agents/memory/` 目錄結構。`MEMORY.md` + `USER.md`（Hot）、`decisions.md` + `lessons.md` + `changes/`（Warm）、以及 SQLite FTS5 的 `memory.db`（Cold），均遵循 Hermes 架構設計。
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot，以及 SQLite FTS5 session recall 機制，進一步整理成 starter kit 自訂的 Hot/Warm/Cold 分層；這套 taxonomy 並非 Hermes 原生定義，也不是直接移植。
 
 ## 初始化
 
