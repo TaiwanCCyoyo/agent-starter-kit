@@ -21,6 +21,7 @@
       "Bash(cd *)",
       "Bash(find *)",
       "Bash(grep *)",
+      "Bash(sed *)",
       "Bash(rg *)",
       "Bash(fd *)",
       "Bash(mkdir *)",
