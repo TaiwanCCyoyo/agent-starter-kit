@@ -53,7 +53,7 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 - **Codex**: migrated to `.memories/` and `memory_store.db`.
 - **Claude Code**: migrated to `.memories/` and `memory_store.db`.
 - **Gemini CLI**: migration pending.
-- **Antigravity**: migration pending.
+- **Antigravity**: adapter implemented; runtime validation pending.
 
 ## Codex Lifecycle
 
@@ -70,5 +70,13 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 - `.claude/skills/memory-manager/SKILL.md` defines routing.
 - `.claude/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
 - `.mcp.json` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
+
+## Antigravity Lifecycle
+
+- `.agent/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
+- `.agent/hooks/stop_memory_check.py` validates bounded-file limits and the strict taxonomy.
+- `.agent/skills/memory-manager/SKILL.md` defines routing.
+- `.agent/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
+- Antigravity requires its `memory-db` MCP server to be configured in the platform-supported global configuration.
 
 Retrieved database output is context until explicitly curated. Never store secrets, private credentials, or raw task narration.

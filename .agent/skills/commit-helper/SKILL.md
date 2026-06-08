@@ -17,7 +17,7 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Sensitive Data**: Never commit `.env` files, private keys, tokens, passwords, or credentials.
 2. **No Junk**: Reject or warn if generated binaries, temporary build artifacts, unrelated `__pycache__` files, or local settings are staged.
-3. **Memory Safety**: Never include ignored local state from `.agents/memory/`.
+3. **Memory Safety**: Never include ignored local state from `.memories/`.
 4. **Surgical Changes**: Ensure changes are relevant to the requested task. Reject unrelated cleanup or noisy diffs unless requested.
 
 ## Commit Message Standard

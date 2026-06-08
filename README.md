@@ -39,7 +39,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 - **Gemini CLI**: Uses `.gemini/commands/` and `.gemini/skills/`.
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/plan`, `/code-review`, `/gen-commit`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
-- **Antigravity**: Uses `.agent/workflows/` and `.agent/rules/`.
+- **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
 
@@ -57,6 +57,9 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes, checks memory size, and prompts skill review after substantial sessions. | `.claude/hooks/stop_memory_check.py` |
+| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files. | `.agent/hooks/session_start.py` |
+| **Antigravity** | `PostToolUse` | Runs targeted Ruff, mypy, and file-hygiene checks. | `.agent/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `Stop` | Checks bounded-file limits and rejects legacy memory taxonomy. | `.agent/hooks/stop_memory_check.py` |
 
 ### Troubleshooting Hooks
 
@@ -69,7 +72,8 @@ If hooks are not firing:
 2. For Gemini CLI, verify `.gemini/settings.json` has the correct matcher and command paths.
 3. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
 4. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
-5. Confirm the agent trusts the project-local configuration layer.
+5. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
+6. Confirm the agent trusts the project-local configuration layer.
 
 ## Permissions Configuration
 
@@ -204,6 +208,9 @@ To initialize this repository and set up verification tools:
    ```bash
    uv run ruff check .
    ```
+4. **Antigravity MCP Setup**
+
+   If you are using Antigravity, note that it requires MCP servers to be configured globally. Please configure your SQLite memory-db MCP server in your home directory (e.g., `~/.mcp.json`).
 
 ### Initializing Memory for New Projects
 Once the repository is initialized:

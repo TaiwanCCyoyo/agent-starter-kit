@@ -10,6 +10,6 @@ description: Core Rule - Security, Secrets Scanning, and Dynamic Evolution
    - **Installation Requirement**: You MUST ensure hooks are locally installed. If `.git/hooks/pre-commit` is missing, you MUST execute `uv run pre-commit install` immediately.
 4. **ACTIVE EVOLUTION**: You have the responsibility to update and evolve `.pre-commit-config.yaml` as the project grows.
    - If you add Python code, ensure Ruff or a proper linting step is configured.
-   - Always reference `.agents/memory/MEMORY.md` to track which checks are currently active.
+   - Always reference `.memories/memories/MEMORY.md` to track which checks are currently active.
 5. **ENVIRONMENTAL ISOLATION**: Sensitive data belongs in `.env` or `.env.local` (which must be in `.gitignore`). Use `.env.example` for templates.
-*(Agent Note: Reference `.agents/memory/MEMORY.md` to track which checks are currently active.)*
+*(Agent Note: Reference `.memories/memories/MEMORY.md` to track which checks are currently active.)*

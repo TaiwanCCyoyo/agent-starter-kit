@@ -39,7 +39,7 @@
 - **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/plan`、`/code-review`、`/gen-commit`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
-- **Antigravity**：使用 `.agent/workflows/` 與 `.agent/rules/`。
+- **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 
 ## 自動化 Hooks 與生命週期
 
@@ -57,6 +57,9 @@
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，檢查記憶大小，並在 session 達到一定規模後提示技能審查。 | `.claude/hooks/stop_memory_check.py` |
+| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。 | `.agent/hooks/session_start.py` |
+| **Antigravity** | `PostToolUse` | 針對修改檔案執行 Ruff、mypy 與 file hygiene。 | `.agent/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `Stop` | 檢查 bounded-file 限制與嚴格 memory taxonomy。 | `.agent/hooks/stop_memory_check.py` |
 
 ### Hook 疑難排解
 
@@ -69,7 +72,8 @@
 2. Gemini CLI：檢查 `.gemini/settings.json` 的 matcher 與 command path。
 3. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
 4. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
-5. 確認 Agent 已信任 project-local configuration layer。
+5. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
+6. 確認 Agent 已信任 project-local configuration layer。
 
 ## 權限與安全政策設定
 
@@ -85,7 +89,7 @@
 
 ### Gemini CLI（`.gemini/policies/system-safe.toml`）
 
-- **自動允許**：基本讀取指令與非破壞性 git 操作。`.agents/memory/` 路徑下的記憶編輯也自動批准。
+- **自動允許**：基本讀取指令與非破壞性 git 操作。`.memories/` 路徑下的記憶編輯也自動批准。
 - **封鎖**：`git push`、`git branch -d/-D`。
 
 ### Codex
@@ -205,6 +209,9 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
    ```bash
    uv run ruff check .
    ```
+4. **設定 Antigravity MCP**
+
+   Antigravity 的 SQLite `memory-db` MCP server 必須設定在平台支援的全域設定中，例如使用者家目錄下的 `~/.mcp.json`。
 
 ### 為新專案初始化記憶
 儲存庫初始化完成後：

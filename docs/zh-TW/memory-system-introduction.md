@@ -53,4 +53,12 @@ Hermes 的 `SOUL.md` 與 `state.db` 不在本契約內。Agent identity 繼續�
 - **Codex**：已遷移至 `.memories/` 與 `memory_store.db`。
 - **Claude Code**：已遷移至 `.memories/` 與 `memory_store.db`。
 - **Gemini CLI**：尚待遷移。
-- **Antigravity**：尚待遷移。
+- **Antigravity**：adapter 已實作，尚待 runtime 驗證。
+
+## Antigravity 生命週期
+
+- `.agent/hooks/session_start.py` 會初始化 bounded files 與 SQLite schema、複製 worktree 缺少的記憶，並注入 `MEMORY.md` 與 `USER.md`。
+- `.agent/hooks/stop_memory_check.py` 會檢查 bounded-file 限制與嚴格 taxonomy。
+- `.agent/skills/memory-manager/SKILL.md` 定義記憶路由。
+- `.agent/skills/memory-sql/SKILL.md` 定義 SQLite 查詢與寫入流程。
+- Antigravity 的 `memory-db` MCP server 必須設定在平台支援的全域設定中。

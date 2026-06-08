@@ -1,33 +1,26 @@
 ---
-description: Manage Git worktrees while preserving project memory and context.
+description: Manage Git worktrees while preserving shared project memory.
 ---
 
-# Git Worktree Management SOP
+# Git Worktree Management
 
-When the User runs `/worktree [action] [arguments]` (or asks you to manage worktrees), follow these precise steps, leveraging the `worktree-manager` skill.
+Use the `worktree-manager` skill for `/worktree [action] [arguments]`.
 
-## Step 1: Parse requested Action
-Analyze the user command to determine the operation:
-*   **Create**: Parse the target path and branch name (e.g., `/worktree create <path> <branch>`).
-*   **Finish**: Parse the worktree path to teardown (e.g., `/worktree finish <path>`).
+## Create
 
-## Step 2: Execute Create Action (Phase 1)
-If the action is `create`:
-1.  **Create Worktree**: Run `git worktree add <path> <branch>` to set up the physical environment.
-2.  **Inject Memory taxonomy**: Copy the entire contents of the main repository's `.agents/memory/` directory to the newly created worktree path's `.agents/memory/` directory.
-3.  **Define Goals**: Immediately open the `.agents/memory/MEMORY.md` (or `current-state.md`) in the **new worktree** and append:
-    -   **Branch Goal**: Specify the exact mission for this branch.
-    -   **Definition of Done (DoD)**: List the requirements for completing this branch.
-4.  **Confirm**: Report the successful creation and branch goal configuration to the user in **Traditional Chinese (zh-TW)**.
+1. Create the branch and worktree with `git worktree add`.
+2. Copy only missing `.memories/` items from the main workspace.
+3. Ensure `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db` exist.
+4. Confirm the branch goal and definition of done through planning or user alignment.
+5. Report the created path and branch in Traditional Chinese.
 
-## Step 3: Execute Finish Action (Phase 3)
-If the action is `finish`:
-1.  **Validate DoD**: Navigate to the worktree path, inspect the local `current-state.md` and check if all Definition of Done items are met.
-2.  **Consolidate Memory**:
-    -   Invoke the **consolidate-memory** workflow to merge the worktree's lessons learned, decisions, and completed tasks into the main repository's memory files.
-3.  **Merge Branch**:
-    -   Checkout the main branch.
-    -   Merge the worktree's branch: `git merge <branch_name>`.
-4.  **Remove Worktree**: Run `git worktree remove <worktree_path>`.
-5.  **Delete Branch**: Run `git branch -d <branch_name>`.
-6.  **Confirm**: Report the consolidation details, merged branch, and cleanup status to the user in **Traditional Chinese (zh-TW)**.
+## Finish
+
+1. Verify the branch changes and definition of done.
+2. Consolidate only durable, non-duplicate facts and verified problem resolutions.
+3. Do not overwrite newer main-workspace memory.
+4. Merge the branch only when requested.
+5. Remove the worktree and delete the branch only when requested.
+6. Report verification, consolidation, merge, and cleanup results in Traditional Chinese.
+
+Ignored memory is local state and must not be treated as Git merge content.
