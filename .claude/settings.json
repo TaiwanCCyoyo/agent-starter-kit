@@ -127,7 +127,13 @@
       "Bash(rm -rf .git *)",
       "Bash(rm -rf .git)",
       "Bash(rm -r .git *)",
-      "Bash(rm -r .git)"
+      "Bash(rm -r .git)",
+      "Read(/tmp/*)",
+      "Write(/tmp/*)",
+      "Edit(/tmp/*)",
+      "Read(/var/tmp/*)",
+      "Write(/var/tmp/*)",
+      "Edit(/var/tmp/*)"
     ],
     "additionalDirectories": [
       "~/.claude"
