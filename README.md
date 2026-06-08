@@ -1,7 +1,7 @@
 [繁體中文](docs/zh-TW/README.md)
 # AI Agent Starter Kit
 
-A standardized, frictionless engineering infrastructure for multi-agent ecosystems such as Gemini CLI, Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
+A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
 
 ## Core Philosophy
 
@@ -28,7 +28,7 @@ For a detailed architecture, setup model, and copy checklist, see [Memory System
 
 When working with multiple worktrees, memories can diverge. To bring insights back to the main repository:
 
-1. Use the Gemini CLI command:
+1. Use the active agent's worktree workflow:
    ```bash
    /worktree finish <path/to/worktree>
    ```
@@ -36,7 +36,6 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 
 ### 3. Agent Workflows
 
-- **Gemini CLI**: Uses `.gemini/commands/` and `.gemini/skills/`.
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/plan`, `/code-review`, `/gen-commit`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
@@ -47,10 +46,6 @@ This repository uses agent-native hooks to maintain system integrity:
 
 | Agent | Hook Type | Purpose | Script |
 | :--- | :--- | :--- | :--- |
-| **Gemini CLI** | `SessionStart` | Loads project memory and branch context. | `.gemini/scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | Formats code and validates file hygiene. | `.gemini/scripts/auto_format.py`, `.gemini/scripts/file_hygiene.py` |
-| **Gemini CLI** | `AfterAgent` | Nudges the agent to update memory after file changes. | `.gemini/scripts/memory_nudger.py` |
-| **Gemini CLI** | `AfterAgent` | Checks memory file size and warns if compression is needed. | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files are formatted, linted, checked for file hygiene, and warned on `print()` calls; docs and config files run file hygiene only. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
@@ -69,11 +64,10 @@ If hooks are not firing:
    ```bash
    uv run pre-commit install
    ```
-2. For Gemini CLI, verify `.gemini/settings.json` has the correct matcher and command paths.
-3. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
-4. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
-5. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
-6. Confirm the agent trusts the project-local configuration layer.
+2. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
+3. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
+4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
+5. Confirm the agent trusts the project-local configuration layer.
 
 ## Permissions Configuration
 
@@ -86,11 +80,6 @@ Permissions are declared in `.claude/settings.json` and take effect immediately 
 - **Auto-Allowed**: All workspace reads/writes, common CLI tools (`ls`, `cat`, `grep`, `find`, `diff`, `uv`, `ruff`, `pytest`, `npm`, `jq`, …), and safe git operations (`status`, `diff`, `log`, `add`, `commit`, `fetch`, `branch`, `merge`, …).
 - **Requires Confirmation (ask)**: `git push` — prevents accidental remote publishing.
 - **Blocked (deny)**: `git push --force`, `git push --force-with-lease`, any command that deletes or mutates the `.git` directory (`rm -rf .git`, `rd /s`, `Remove-Item -Recurse … .git`), and direct `powershell`/`pwsh` invocations (commands should run directly, not wrapped).
-
-### Gemini CLI (`.gemini/policies/system-safe.toml`)
-
-- **Auto-Allowed**: Basic read commands and non-destructive git operations. Agent-specific permission layers may allow memory operations under `.memories/`.
-- **Blocked**: `git push`, `git branch -d/-D`.
 
 ### Codex
 
@@ -172,7 +161,6 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | :--- | :--- |
 | `.memories/` | Git-ignored instantiated memory: bounded files and SQLite store. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
-| `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
 | `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
 | `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |

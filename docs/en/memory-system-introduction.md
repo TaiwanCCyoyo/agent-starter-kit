@@ -52,7 +52,6 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 
 - **Codex**: migrated to `.memories/` and `memory_store.db`.
 - **Claude Code**: migrated to `.memories/` and `memory_store.db`.
-- **Gemini CLI**: migration pending.
 - **Antigravity**: adapter implemented; runtime validation pending.
 
 ## Codex Lifecycle

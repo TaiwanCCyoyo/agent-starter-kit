@@ -1,7 +1,7 @@
 [English Version](../../README.md)
 # AI Agent Starter Kit
 
-這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Gemini CLI、Codex、Claude Code、Antigravity 等工具。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
+這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Codex、Claude Code 與 Antigravity。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
 
 ## 核心理念
 
@@ -28,7 +28,7 @@
 
 使用多個 worktree 時，各 worktree 的記憶可能逐漸分歧。要把洞見合併回主 repository：
 
-1. 使用 Gemini CLI 指令：
+1. 使用目前 Agent 的 worktree workflow：
    ```bash
    /worktree finish <path/to/worktree>
    ```
@@ -36,7 +36,6 @@
 
 ### 3. Agent 工作流程
 
-- **Gemini CLI**：使用 `.gemini/commands/` 與 `.gemini/skills/`。
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/plan`、`/code-review`、`/gen-commit`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
@@ -47,10 +46,6 @@
 
 | Agent | Hook 類型 | 用途 | Script |
 | :--- | :--- | :--- | :--- |
-| **Gemini CLI** | `SessionStart` | 載入專案記憶與分支上下文。 | `.gemini/scripts/session_start.py` |
-| **Gemini CLI** | `AfterTool` | 格式化程式碼並驗證檔案衛生。 | `.gemini/scripts/after_tool_auto_format.py`, `.gemini/scripts/after_tool_file_hygiene.py` |
-| **Gemini CLI** | `AfterAgent` | 檔案變更後提醒 Agent 更新記憶。 | `.gemini/scripts/memory_nudger.py` |
-| **Gemini CLI** | `AfterAgent` | 檢查記憶檔案大小，必要時提醒壓縮。 | `.gemini/scripts/memory_compressor.py` |
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene，並提醒 `print()` calls；文件與設定檔只跑 file hygiene。 | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
@@ -69,11 +64,10 @@
    ```bash
    uv run pre-commit install
    ```
-2. Gemini CLI：檢查 `.gemini/settings.json` 的 matcher 與 command path。
-3. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
-4. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
-5. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
-6. 確認 Agent 已信任 project-local configuration layer。
+2. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
+3. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
+4. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
+5. 確認 Agent 已信任 project-local configuration layer。
 
 ## 權限與安全政策設定
 
@@ -86,11 +80,6 @@
 - **自動允許 (allow)**：workspace 內所有讀寫、常用 CLI 工具（`ls`、`cat`、`grep`、`find`、`diff`、`uv`、`ruff`、`pytest`、`npm`、`jq` 等），以及安全的 git 操作（`status`、`diff`、`log`、`add`、`commit`、`fetch`、`branch`、`merge` 等）。
 - **需要確認 (ask)**：`git push`，防止意外推送到遠端。
 - **封鎖 (deny)**：`git push --force`、`git push --force-with-lease`、任何刪除或修改 `.git` 目錄的指令（`rm -rf .git`、`rd /s`、`Remove-Item -Recurse … .git`），以及直接呼叫 `powershell`/`pwsh`（指令應直接執行，不透過殼層包裝）。
-
-### Gemini CLI（`.gemini/policies/system-safe.toml`）
-
-- **自動允許**：基本讀取指令與非破壞性 git 操作。`.memories/` 路徑下的記憶編輯也自動批准。
-- **封鎖**：`git push`、`git branch -d/-D`。
 
 ### Codex
 
@@ -173,7 +162,6 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `.memories/` | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。 |
 | `.agents/` | 可提交至 Git 的共用 Agent 基礎設施。 |
 | `.agent/` | Antigravity rules、skills、workflows。 |
-| `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
 | `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |

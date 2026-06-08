@@ -58,7 +58,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Do not duplicate bounded file entries in `memory_store.db` unless the database entry adds structured evidence, lifecycle, trust, or retrieval value.
 - `MEMORY.md` and `USER.md` are frozen session snapshots: disk changes affect the next session's injected context.
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
-- Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
+- Mark platform-specific progress clearly, such as Codex-only or Antigravity pending.
 - Use `.codex/skills/memory-manager/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
 - Keep plans outside the memory taxonomy: use Codex native planning state, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.

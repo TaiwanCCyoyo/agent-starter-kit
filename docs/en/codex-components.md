@@ -59,7 +59,7 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 - Schema and write tools: prompt for approval
 - Startup failure: non-fatal (`required = false`)
 
-Codex and Claude Code are migrated. The Antigravity adapter is implemented but still requires runtime validation; Gemini CLI remains pending.
+Codex and Claude Code are migrated. The Antigravity adapter is implemented but still requires runtime validation.
 
 ## ECC Adaptation
 

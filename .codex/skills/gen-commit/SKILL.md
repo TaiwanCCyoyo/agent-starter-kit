@@ -5,7 +5,7 @@ description: Use when the user says /gen-commit, gen-commit, generate commit, cr
 
 # Gen Commit
 
-This is a command-like Codex skill. It replaces Gemini-style `/gen-commit` with a skill trigger that can be invoked by plain text.
+This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
 
 Delegate staged-change analysis, commit-message drafting, commit execution, and hook failure handling to the `commit_specialist` subagent. The main agent is responsible for confirming user intent and staged scope only.
 

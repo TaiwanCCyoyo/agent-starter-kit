@@ -45,7 +45,7 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 ## Memory
 
-`.memories/` is the git-ignored instantiated memory root shared by all agents (Claude Code, Gemini, Codex, Antigravity). Keep it small and high-signal.
+`.memories/` is the git-ignored instantiated memory root shared by Claude Code, Codex, and Antigravity. Keep it small and high-signal.
 
 **Storage and loading:**
 - **Session-start context**: `.memories/memories/MEMORY.md` (stable project facts; ≤ 2,200 chars) and `.memories/memories/USER.md` (user preferences; ≤ 500 chars).

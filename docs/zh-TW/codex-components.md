@@ -59,7 +59,7 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 - Schema 與寫入工具需要提示核准
 - 啟動失敗不會阻止 Codex 啟動
 
-Codex 與 Claude Code 已完成遷移。Antigravity adapter 已實作但尚待 runtime 驗證；Gemini CLI 仍待遷移。
+Codex 與 Claude Code 已完成遷移。Antigravity adapter 已實作但尚待 runtime 驗證。
 
 ## ECC 對應
 

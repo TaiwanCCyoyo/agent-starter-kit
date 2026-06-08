@@ -52,7 +52,6 @@ Hermes 的 `SOUL.md` 與 `state.db` 不在本契約內。Agent identity 繼續�
 
 - **Codex**：已遷移至 `.memories/` 與 `memory_store.db`。
 - **Claude Code**：已遷移至 `.memories/` 與 `memory_store.db`。
-- **Gemini CLI**：尚待遷移。
 - **Antigravity**：adapter 已實作，尚待 runtime 驗證。
 
 ## Antigravity 生命週期

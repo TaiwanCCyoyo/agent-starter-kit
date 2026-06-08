@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
-PRINT_WARNING_EXCLUDED_PREFIXES = (".claude/hooks/", ".codex/hooks/", ".gemini/scripts/")
+PRINT_WARNING_EXCLUDED_PREFIXES = (".claude/hooks/", ".codex/hooks/")
 PRINT_WARNING_EXCLUDED_FILES = {"scripts/auto_format.py", "scripts/file_hygiene.py"}
 
 
