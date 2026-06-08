@@ -5,7 +5,7 @@
       "args": [
         "mcp-server-sqlite",
         "--db-path",
-        "${CLAUDE_PROJECT_DIR:-.}/.agents/memory/memory.db"
+        "${CLAUDE_PROJECT_DIR:-.}/.memories/memory_store.db"
       ],
       "env": {}
     }

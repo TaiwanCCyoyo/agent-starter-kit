@@ -12,7 +12,7 @@ Two modes serve different needs. Choose based on task duration and memory requir
 | Dimension | Mode A: Quick Isolation | Mode B: Feature Branch |
 |-----------|------------------------|----------------------|
 | **Duration** | Single session, hours | Multi-session, days |
-| **Memory** | No dedicated memory needed | Scoped `MEMORY.md` plus the approved memory layout |
+| **Memory** | No dedicated memory needed | Scoped `MEMORY.md` plus bounded memory layout |
 | **Branching** | Auto (built-in tool manages) | Manual branch strategy |
 | **Cleanup** | `ExitWorktree(remove)` | Full finish workflow |
 | **Use when** | Experiments, isolated fixes, subagent tasks | Features, refactors requiring handoff |
@@ -55,50 +55,27 @@ After exit, run `/learn-eval` if the session produced non-obvious techniques wor
 
 Uses `git worktree add` directly for long-lived branches with dedicated memory and formal handoff.
 
-### Creation
+### Start
 
-1. Create the branch and worktree: `git worktree add <path> <branch>`.
-2. Ensure `.agents/memory/MEMORY.md` exists in the worktree (the `session_start.py` hook copies it automatically on first open).
-3. Immediately define the worktree mission in the session-start project context:
-   - Branch goal.
-   - Definition of done.
-   - Any constraints from the user request.
-4. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
+1. Identify the main repository and target worktree.
+2. Copy missing `.memories/` items from the main workspace without overwriting worktree-local memory.
+3. Ensure `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db` exist.
+4. Confirm the branch goal through user alignment before starting implementation.
 
-### Active Development
+### During Work
 
-- Use the local worktree memory for task progress.
-- Mark entries with the branch name when needed.
-- Keep compact branch status in `MEMORY.md`.
-- Keep compact branch status in `MEMORY.md`; put detailed handoff in an active `changes/<id>/` plan.
-- Keep recurring branch lessons concise in `lessons.md`; graduate stale lessons to `memory.db` via `/memory-sql` or `archive/`.
-- Keep branch-specific multi-step plans under `changes/<change-id>/` and consolidate/archive them before worktree removal.
+- Keep stable cross-session facts in the bounded files.
+- Query and update structured facts or recurring-problem history through `/memory-sql`.
+- Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`.
 
 ### Finish
 
-Before removing a worktree:
-
-1. Verify the definition of done.
-2. Run relevant tests or checks.
-3. Read the worktree memory and main repository memory.
-4. Consolidate durable lessons and meaningful completed milestones into the main memory.
-5. Run `/learn-eval` — check whether patterns from this branch deserve skill extraction.
-6. Merge the branch into the target branch.
-7. Remove the worktree: `git worktree remove <path>`.
-8. Delete the branch only after the merge succeeds.
-
-### Consolidation
-
-When consolidating worktree memory:
-
-1. Identify source and destination memory directories.
-2. Read `MEMORY.md` plus relevant on-demand files from both locations.
-3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
-4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
-5. Move completed, rejected, or superseded worktree change plans to `archive/changes/` after consolidation.
-6. Avoid duplicate entries.
-7. Prefix branch-specific milestones when context matters.
-8. Report consolidated items, target files, archived change folders, and skipped duplicates.
+1. Verify the branch changes and run relevant checks.
+2. Consolidate only durable, non-duplicate facts and verified problem resolutions.
+3. Do not overwrite newer main-workspace memory.
+4. Merge the branch, then remove the worktree only when explicitly requested.
+5. Delete the branch only after the merge succeeds.
+6. Run `/learn-eval` — check whether patterns from this branch deserve skill extraction.
 
 ---
 
@@ -107,4 +84,4 @@ When consolidating worktree memory:
 - Do not delete a worktree with uncommitted work unless the user explicitly authorizes it.
 - Do not discard branch-specific memory before consolidation (Mode B).
 - Do not force-delete branches unless explicitly requested.
-- For Mode A with `ExitWorktree(remove)`: confirm no changes are needed before removing.
+- Never treat ignored memory as Git merge content.

@@ -7,16 +7,13 @@ MEMORY_REMINDER_INTERVAL = 3
 MEMORY_CHAR_LIMIT = 2200
 MEMORY_LINE_LIMIT = 100
 USER_CHAR_LIMIT = 500
-LESSONS_LINE_LIMIT = 50
-STATE_FILE = Path(".agents/memory/.claude_stop_memory_state.json")
-APPROVED_MEMORY_FILES = {
-    "MEMORY.md",
-    "USER.md",
-    "decisions.md",
-    "lessons.md",
-}
-APPROVED_MEMORY_DIRS = {"changes", "archive"}
 SKILL_REVIEW_INTERVAL = 5
+MEMORY_ROOT = Path(".memories")
+MEMORY_DIR = MEMORY_ROOT / "memories"
+STATE_FILE = MEMORY_ROOT / ".claude_stop_memory_state.json"
+APPROVED_ROOT_FILES = {"memory_store.db"}
+APPROVED_ROOT_DIRS = {"memories"}
+APPROVED_MEMORY_FILES = {"MEMORY.md", "USER.md"}
 
 
 def repo_root(cwd: str) -> Path:
@@ -28,15 +25,11 @@ def repo_root(cwd: str) -> Path:
 
 
 def memory_path(root: Path) -> Path:
-    return root / ".agents" / "memory" / "MEMORY.md"
+    return root / MEMORY_DIR / "MEMORY.md"
 
 
 def user_path(root: Path) -> Path:
-    return root / ".agents" / "memory" / "USER.md"
-
-
-def lessons_path(root: Path) -> Path:
-    return root / ".agents" / "memory" / "lessons.md"
+    return root / MEMORY_DIR / "USER.md"
 
 
 def state_path(root: Path) -> Path:
@@ -77,69 +70,40 @@ def changed_non_memory_files(root: Path) -> list[str]:
         path = line[3:].strip()
         if " -> " in path:
             path = path.split(" -> ", 1)[1].strip()
-        normalized = path.replace("\\", "/")
-        if normalized.startswith(".agents/memory/"):
-            continue
-        changed_files.append(path)
+        if not path.replace("\\", "/").startswith(".memories/"):
+            changed_files.append(path)
     return changed_files
 
 
 def memory_taxonomy_message(root: Path) -> str:
-    memory_dir = root / ".agents" / "memory"
-    if not memory_dir.exists():
+    memory_root = root / MEMORY_ROOT
+    if not memory_root.exists():
         return ""
 
     unexpected: list[str] = []
-    for child in memory_dir.iterdir():
+    for child in memory_root.iterdir():
         if child.name.startswith("."):
             continue
         if child.is_dir():
-            if child.name not in APPROVED_MEMORY_DIRS:
+            if child.name not in APPROVED_ROOT_DIRS:
                 unexpected.append(child.name + "/")
-            continue
-        if child.suffix.lower() != ".md":
-            continue
-        if child.name not in APPROVED_MEMORY_FILES:
+        elif child.name not in APPROVED_ROOT_FILES:
             unexpected.append(child.name)
+
+    memory_dir = memory_root / "memories"
+    if memory_dir.exists():
+        for child in memory_dir.iterdir():
+            relative = f"memories/{child.name}"
+            if child.is_dir() or child.name not in APPROVED_MEMORY_FILES:
+                unexpected.append(relative + ("/" if child.is_dir() else ""))
 
     if not unexpected:
         return ""
-
     return (
-        "Memory taxonomy reminder: unexpected memory files or directories found under `.agents/memory/`: "
+        "Memory taxonomy reminder: unexpected files or directories under `.memories/`: "
         + ", ".join(sorted(unexpected))
-        + ". Use only the approved memory files and directories. Put active plans in `.agents/memory/changes/<change-id>/` "
-        "and completed or superseded plans under `.agents/memory/archive/changes/` after consolidating durable knowledge."
-    )
-
-
-def lessons_health_message(root: Path, state: dict) -> str:
-    path = lessons_path(root)
-    if not path.exists():
-        return ""
-
-    try:
-        content = path.read_text(encoding="utf-8")
-    except Exception as e:
-        return f"Lessons health check failed: {str(e)}"
-
-    current_mtime = path.stat().st_mtime
-    previous_mtime = float(state.get("lessons_mtime", 0.0))
-    state["lessons_mtime"] = current_mtime
-
-    if current_mtime <= previous_mtime:
-        return ""
-
-    lines = len(content.splitlines())
-    state["lessons_lines"] = lines
-
-    if lines <= LESSONS_LINE_LIMIT:
-        return ""
-
-    return (
-        f"Lessons pruning reminder: `.agents/memory/lessons.md` has {lines} lines, but session start auto-loads only the last "
-        f"{LESSONS_LINE_LIMIT} lines. Keep recent/repeated/high-impact lessons near the bottom and graduate stale or lower-priority "
-        "lessons to `memory.db` via `/memory-sql` or move to `archive/`."
+        + ". Approved items are `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db`. "
+        "Keep plans and disposable artifacts under agent-native planning state, `.tmp/`, or maintained `docs/`."
     )
 
 
@@ -164,10 +128,9 @@ def memory_health_message(root: Path, state: dict) -> str:
         return ""
 
     return (
-        f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large "
+        f"Memory compression reminder: `.memories/memories/MEMORY.md` is getting large "
         f"({chars} chars, {lines} lines; limit {MEMORY_CHAR_LIMIT} chars / {MEMORY_LINE_LIMIT} lines). "
-        "Use `/compress-memory` to keep `MEMORY.md` as compact session-start context, route decisions to `decisions.md`, keep concise "
-        "recurring lessons in `lessons.md`, and move historical detail to `memory.db` or `archive/`."
+        "Use `/compress-memory`; move searchable durable facts and problem history to `memory_store.db` with `/memory-sql`."
     )
 
 
@@ -183,8 +146,8 @@ def user_health_message(root: Path) -> str:
     if chars <= USER_CHAR_LIMIT:
         return ""
     return (
-        f"USER.md size reminder: `.agents/memory/USER.md` has {chars} chars (limit {USER_CHAR_LIMIT} chars). "
-        "Trim to the most essential user preferences and communication style."
+        f"USER.md size reminder: `.memories/memories/USER.md` has {chars} chars (limit {USER_CHAR_LIMIT} chars). "
+        "Keep only essential communication and collaboration preferences."
     )
 
 
@@ -210,14 +173,15 @@ def memory_update_message(root: Path, state: dict) -> str:
         return ""
 
     return (
-        f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} Claude responses.\n"
-        "Before finishing this task, you MUST:\n"
-        "1. Update session-start project context only when mission/state summary changed: `.agents/memory/MEMORY.md` (≤ 2,200 chars).\n"
-        "2. Route durable decisions to `.agents/memory/decisions.md`.\n"
-        "3. Route concise recurring lessons to `.agents/memory/lessons.md` (≤ 50 lines); graduate stale entries to `memory.db` via `/memory-sql`.\n"
-        "4. Route active multi-step change plans to `.agents/memory/changes/<change-id>/`; move completed plans to `archive/`.\n"
-        "5. If the memory-db MCP is connected: upsert this session in `sessions` and graduate stale lessons/decisions to `memory_entries` via write_query. See `.claude/skills/memory-sql/SKILL.md`.\n\n"
-        "Note: Technical memory should be concise and high-signal. Discuss progress with the user in Traditional Chinese (zh-TW)."
+        f"[System] Memory reminder: {len(non_memory_changes)} files changed over {response_count} Claude responses.\n"
+        "Before finishing:\n"
+        "1. Update `.memories/memories/MEMORY.md` only for stable project facts needed in most future sessions (limit 2,200 chars).\n"
+        "2. Put stable user preferences in `.memories/memories/USER.md` (limit 500 chars).\n"
+        "3. Put searchable decisions, lessons, workflows, tool facts, and environment facts in `memory_store.db`.\n"
+        "4. If a blocker, workaround, mistaken assumption, or confusion recurred, query `problem_patterns` and `problem_occurrences`, "
+        "stop repeating an unverified workaround, and record a root cause plus verified resolution or explicit external blocker.\n"
+        "5. Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`; plans are not long-term memory.\n"
+        "Keep technical memory concise and discuss progress with the user in Traditional Chinese."
     )
 
 
@@ -258,9 +222,6 @@ def main() -> int:
     user_message = user_health_message(root)
     if user_message:
         messages.append(user_message)
-    lessons_message = lessons_health_message(root, state)
-    if lessons_message:
-        messages.append(lessons_message)
     taxonomy_message = memory_taxonomy_message(root)
     if taxonomy_message:
         messages.append(taxonomy_message)

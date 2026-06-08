@@ -1,193 +1,65 @@
 ---
 name: memory-sql
-description: Use when querying or writing to the project's searchable SQLite memory database (.agents/memory/memory.db) via the memory-db MCP server. Covers schema setup, session recording, FTS5 search, and its relationship to file-based project context.
+description: Use when querying or writing to the Holographic-compatible SQLite store at .memories/memory_store.db via the memory-db MCP server.
 ---
 
 # Memory SQL
 
-The `memory-db` MCP server exposes `.agents/memory/memory.db` (SQLite with FTS5) as searchable project history. Unlike the compact files injected at session start, this database is queried on demand and never auto-loaded into context, making it suitable for higher-volume historical data.
+Claude Code accesses `.memories/memory_store.db` through the `memory-db` SQLite MCP server configured in `.mcp.json`.
 
-The MCP server is configured in root `.mcp.json` and launched directly with `uvx mcp-server-sqlite`. Its database path uses `${CLAUDE_PROJECT_DIR:-.}` so it resolves correctly when Claude Code starts from a project subdirectory.
+## Use It For
 
----
+- Searching or storing curated facts, decisions, lessons, workflows, tool facts, and environment facts.
+- Recording recurring problem patterns and concrete occurrences.
+- Maintaining root causes and verified resolutions.
+- Reviewing trust, retrieval, and helpfulness metadata.
 
-## Storage And Loading
+Do not store raw transcripts, temporary plans, task narration, secrets, or duplicate bounded file entries.
 
-```
-SESSION-START  MEMORY.md (≤2,200 chars)   ← injected at session start (frozen snapshot)
-               USER.md (≤500 chars)        ← cross-agent user preferences
-ON DEMAND      decisions.md, lessons.md, changes/<id>/
-SEARCHABLE     memory.db (SQLite FTS5)    ← query on demand via memory-db MCP
-               archive/
-```
+## Core Tables
 
-**Write to `memory.db` when:**
-- Graduating a stale lesson or decision out of active files
-- Recording a skill candidate for later `/learn-eval` review
-- Closing out a session record (session_id + cwd)
+Holographic-compatible tables:
 
-**Do NOT duplicate** content already in `MEMORY.md` or active on-demand files into the database.
+- `facts`
+- `entities`
+- `fact_entities`
+- `memory_banks`
+- `facts_fts`
 
----
+Starter-kit problem lifecycle tables:
 
-## Schema Setup
+- `problem_patterns`
+- `problem_occurrences`
+- `resolutions`
 
-Run these once to initialize the database (use `create_table` or `write_query` via the MCP):
+The schema is initialized by `scripts.memory_store.initialize_memory_store`.
 
-```sql
--- Searchable memory entries archived from the file layer
-CREATE TABLE IF NOT EXISTS memory_entries (
-    id          INTEGER PRIMARY KEY,
-    session_id  TEXT NOT NULL,
-    cwd         TEXT NOT NULL,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    type        TEXT NOT NULL CHECK(type IN ('lesson','decision','workflow','run-note','candidate')),
-    tags        TEXT,           -- comma-separated keywords
-    summary     TEXT NOT NULL,  -- one-liner title / tl;dr
-    body        TEXT NOT NULL   -- full markdown content
-);
+## Workflow
 
--- FTS5 virtual table (searches summary + body)
-CREATE VIRTUAL TABLE IF NOT EXISTS memory_fts USING fts5(
-    summary,
-    body,
-    content='memory_entries',
-    content_rowid='id'
-);
+1. Use `list_tables` or `describe_table` before assuming schema state.
+2. Search `facts_fts` and relevant problem tables before every insert.
+3. Ask for approval before database writes when tool policy requires it.
+4. Store one concise fact per row with an accurate category, tags, and trust score.
+5. Use a stable semantic fingerprint for recurring problems, not a raw error string.
+6. On recurrence, insert an occurrence, update the pattern count and timestamps, then investigate root cause.
+7. Mark a resolution `verified` only with concrete verification evidence.
 
--- Triggers keep FTS index in sync automatically
-CREATE TRIGGER IF NOT EXISTS memory_ai AFTER INSERT ON memory_entries BEGIN
-    INSERT INTO memory_fts(rowid, summary, body)
-    VALUES (new.id, new.summary, new.body);
-END;
-
-CREATE TRIGGER IF NOT EXISTS memory_ad AFTER DELETE ON memory_entries BEGIN
-    INSERT INTO memory_fts(memory_fts, rowid, summary, body)
-    VALUES ('delete', old.id, old.summary, old.body);
-END;
-
-CREATE TRIGGER IF NOT EXISTS memory_au AFTER UPDATE ON memory_entries BEGIN
-    INSERT INTO memory_fts(memory_fts, rowid, summary, body)
-    VALUES ('delete', old.id, old.summary, old.body);
-    INSERT INTO memory_fts(rowid, summary, body)
-    VALUES (new.id, new.summary, new.body);
-END;
-
--- Session metadata (Stop hook has session_id + cwd)
-CREATE TABLE IF NOT EXISTS sessions (
-    session_id  TEXT PRIMARY KEY,
-    cwd         TEXT NOT NULL,
-    started_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    stopped_at  TEXT
-);
-```
-
----
-
-## Core Operations
-
-### Record a session (Stop hook prompt → Claude writes)
+Example fact search:
 
 ```sql
--- Open or upsert session record
-INSERT INTO sessions (session_id, cwd)
-VALUES ('<session_id>', '<cwd>')
-ON CONFLICT(session_id) DO NOTHING;
-
--- Close session at end
-UPDATE sessions SET stopped_at = datetime('now')
-WHERE session_id = '<session_id>';
-```
-
-### Archive a memory entry
-
-```sql
-INSERT INTO memory_entries (session_id, cwd, type, tags, summary, body)
-VALUES (
-    '<session_id>',
-    '<cwd>',
-    'lesson',                        -- lesson | decision | workflow | run-note | candidate
-    'hook,stop,memory',              -- comma-separated tags
-    'Stop hook fires per-response, not once at session end',
-    'The Claude Code Stop hook fires after every Claude response (each turn), not once when the session closes. Use response_count in state to throttle reminders.'
-);
-```
-
-### FTS5 full-text search
-
-```sql
--- Find entries mentioning a topic
-SELECT e.created_at, e.type, e.summary, e.body
-FROM memory_fts f
-JOIN memory_entries e ON f.rowid = e.id
-WHERE memory_fts MATCH 'FTS5 OR sqlite OR search'
-ORDER BY e.created_at DESC
+SELECT f.fact_id, f.category, f.tags, f.trust_score, f.content
+FROM facts_fts x
+JOIN facts f ON f.fact_id = x.rowid
+WHERE facts_fts MATCH '<keywords>'
+ORDER BY f.trust_score DESC, f.updated_at DESC
 LIMIT 20;
 ```
 
-### Structured filters
+Example problem lookup:
 
 ```sql
--- All decisions for this repo
-SELECT created_at, summary FROM memory_entries
-WHERE type = 'decision' AND cwd = '<repo_root>'
-ORDER BY created_at DESC;
-
--- Skill candidates not yet promoted
-SELECT created_at, summary, body FROM memory_entries
-WHERE type = 'candidate'
-ORDER BY created_at ASC;
-
--- Entries tagged 'hook' from last 30 days
-SELECT created_at, type, summary FROM memory_entries
-WHERE tags LIKE '%hook%'
-  AND created_at >= datetime('now', '-30 days')
-ORDER BY created_at DESC;
-
--- Sessions with the most entries
-SELECT s.session_id, s.cwd, COUNT(e.id) AS entries
-FROM sessions s
-LEFT JOIN memory_entries e USING (session_id)
-GROUP BY s.session_id
-ORDER BY entries DESC
-LIMIT 10;
+SELECT p.*, r.solution, r.verification, r.status AS resolution_status
+FROM problem_patterns p
+LEFT JOIN resolutions r ON r.resolution_id = p.resolution_id
+WHERE p.fingerprint = '<stable-fingerprint>';
 ```
-
-### Deduplication check before inserting
-
-```sql
--- Check if a near-identical lesson already exists before writing
-SELECT id, summary FROM memory_entries
-WHERE type = 'lesson'
-  AND id IN (SELECT rowid FROM memory_fts WHERE memory_fts MATCH '<keyword>')
-LIMIT 5;
-```
-
----
-
-## When to Use (vs File Layer)
-
-| Situation | Use SQL | Use file layer |
-|-----------|---------|----------------|
-| Need to search across months of sessions | ✓ | |
-| Loading context at session start | | ✓ MEMORY.md |
-| Archiving an old lesson out of lessons.md | ✓ | |
-| Active handoff note for current task | | ✓ changes/<id>/ or MEMORY.md |
-| Storing a skill candidate for /learn-eval | ✓ type='candidate' | |
-| Durable architectural decision | ✓ (archive copy) | ✓ decisions.md (active) |
-
----
-
-## MCP Tool Reference
-
-The `memory-db` MCP server exposes these tools:
-
-| Tool | Use |
-|------|-----|
-| `read_query` | SELECT queries |
-| `write_query` | INSERT / UPDATE / DELETE |
-| `create_table` | CREATE TABLE / virtual table |
-| `list_tables` | See all tables |
-| `describe_table` | Get column schema |
-
-The database is auto-created at `.agents/memory/memory.db` when the MCP server starts. Schema must be initialized manually (see **Schema Setup** above) on first use.

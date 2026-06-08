@@ -23,7 +23,9 @@ STOP_HOOKS = {
     "codex": load_module("codex_stop_memory_check", ROOT / ".codex" / "hooks" / "stop_memory_check.py"),
 }
 CODEX_STOP_HOOK = STOP_HOOKS["codex"]
+CLAUDE_STOP_HOOK = STOP_HOOKS["claude"]
 CODEX_SESSION_START = load_module("codex_session_start", ROOT / ".codex" / "hooks" / "session_start.py")
+CLAUDE_SESSION_START = load_module("claude_session_start", ROOT / ".claude" / "hooks" / "session_start.py")
 
 
 class HookContractTests(unittest.TestCase):
@@ -119,6 +121,118 @@ class CodexSessionStartTests(unittest.TestCase):
         (memory_dir / "USER.md").write_text("# User\nTraditional Chinese", encoding="utf-8")
         result = CODEX_SESSION_START.read_text(memory_dir / "USER.md")
         self.assertIn("Traditional Chinese", result)
+
+
+class ClaudeHookContractTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmpdir = TemporaryDirectory()
+        self.root = Path(self._tmpdir.name)
+        self.memory_root = self.root / ".memories"
+        self.memory_dir = self.memory_root / "memories"
+        self.memory_dir.mkdir(parents=True)
+
+    def tearDown(self) -> None:
+        self._tmpdir.cleanup()
+
+    def populate_approved(self) -> None:
+        (self.memory_dir / "MEMORY.md").write_text("Project memory\n", encoding="utf-8")
+        (self.memory_dir / "USER.md").write_text("User preference\n", encoding="utf-8")
+        (self.memory_root / "memory_store.db").touch()
+
+    def test_approved_layout_produces_no_warning(self) -> None:
+        self.populate_approved()
+        self.assertEqual(CLAUDE_STOP_HOOK.memory_taxonomy_message(self.root), "")
+
+    def test_legacy_and_unknown_items_are_flagged(self) -> None:
+        for directory in ("changes", "archive", "unknown-repo"):
+            with self.subTest(directory=directory):
+                self.populate_approved()
+                path = self.memory_root / directory
+                path.mkdir(exist_ok=True)
+                if directory == "unknown-repo":
+                    (path / ".git").mkdir()
+                self.assertIn(directory + "/", CLAUDE_STOP_HOOK.memory_taxonomy_message(self.root))
+                path.rmdir() if not any(path.iterdir()) else (path / ".git").rmdir()
+                if path.exists():
+                    path.rmdir()
+        legacy = self.memory_dir / "lessons.md"
+        legacy.write_text("legacy", encoding="utf-8")
+        self.assertIn(
+            "memories/lessons.md",
+            CLAUDE_STOP_HOOK.memory_taxonomy_message(self.root),
+        )
+
+    def test_memory_character_boundary(self) -> None:
+        limit = CLAUDE_STOP_HOOK.MEMORY_CHAR_LIMIT
+        memory = self.memory_dir / "MEMORY.md"
+        memory.write_text("x" * limit, encoding="utf-8")
+        self.assertEqual(CLAUDE_STOP_HOOK.memory_health_message(self.root, {}), "")
+        memory.write_text("x" * (limit + 1), encoding="utf-8")
+        result = CLAUDE_STOP_HOOK.memory_health_message(self.root, {})
+        self.assertIn("getting large", result)
+        self.assertIn(str(limit), result)
+
+    def test_user_character_boundary(self) -> None:
+        limit = CLAUDE_STOP_HOOK.USER_CHAR_LIMIT
+        user = self.memory_dir / "USER.md"
+        user.write_text("x" * limit, encoding="utf-8")
+        self.assertEqual(CLAUDE_STOP_HOOK.user_health_message(self.root), "")
+        user.write_text("x" * (limit + 1), encoding="utf-8")
+        result = CLAUDE_STOP_HOOK.user_health_message(self.root)
+        self.assertIn("USER.md size reminder", result)
+        self.assertIn(str(limit), result)
+
+    def test_missing_memory_and_user_behavior(self) -> None:
+        self.assertIn("No MEMORY.md", CLAUDE_STOP_HOOK.memory_health_message(self.root, {}))
+        self.assertEqual(CLAUDE_STOP_HOOK.user_health_message(self.root), "")
+
+    def test_state_resets_between_sessions(self) -> None:
+        CLAUDE_STOP_HOOK.write_state(self.root, {"session_id": "old", "response_count": 9})
+        self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
+        self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
+
+
+class ClaudeSessionStartTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmpdir = TemporaryDirectory()
+        self.root = Path(self._tmpdir.name)
+
+    def tearDown(self) -> None:
+        self._tmpdir.cleanup()
+
+    def test_initializes_only_approved_taxonomy(self) -> None:
+        result = CLAUDE_SESSION_START.initialize_memory_taxonomy(self.root, "feat/test")
+        memory_root = self.root / ".memories"
+        memory_dir = memory_root / "memories"
+        self.assertIn("MEMORY.md", result)
+        self.assertEqual({path.name for path in memory_dir.iterdir()}, {"MEMORY.md", "USER.md"})
+        self.assertTrue((memory_root / "memory_store.db").exists())
+        self.assertIn("feat/test", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
+        self.assertNotIn("# ", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
+
+    def test_user_context_can_be_read_for_injection(self) -> None:
+        memory_dir = self.root / ".memories" / "memories"
+        memory_dir.mkdir(parents=True)
+        (memory_dir / "USER.md").write_text("# User\nTraditional Chinese", encoding="utf-8")
+        result = CLAUDE_SESSION_START.read_text(memory_dir / "USER.md")
+        self.assertIn("Traditional Chinese", result)
+
+
+class ClaudeMCPConfigTests(unittest.TestCase):
+    def test_memory_store_is_project_scoped(self) -> None:
+        import json
+
+        config = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
+        server = config["mcpServers"]["memory-db"]
+        self.assertEqual(server["command"], "uvx")
+        self.assertIn(".memories/memory_store.db", server["args"][-1])
+
+    def test_claude_targets_holographic_compatible_store(self) -> None:
+        import json
+
+        config = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
+        args = config["mcpServers"]["memory-db"]["args"]
+        self.assertIn("memory_store.db", args[-1])
 
 
 class CodexMCPConfigTests(unittest.TestCase):

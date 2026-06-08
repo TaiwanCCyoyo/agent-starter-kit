@@ -12,21 +12,19 @@ Draft memory compression proposals without modifying files directly.
 
 ## Responsibilities
 
-- Read `.agents/memory/MEMORY.md`, `USER.md`, `decisions.md`, and `lessons.md`.
-- Estimate current char/line counts for automatically loaded and on-demand memory.
+- Read `.memories/memories/MEMORY.md` and `.memories/memories/USER.md`.
+- Estimate current char counts for bounded memory files.
 - Draft a compressed version of `MEMORY.md` that preserves:
-  - Project mission and non-negotiable constraints.
-  - Compact current-state summary (one paragraph max).
-  - Official storage and loading map.
-  - Recent or frequently repeated lessons.
-- Propose which lessons should move from `lessons.md` to `memory.db` (graduated) or `archive/`.
-- Propose which decisions should move from `decisions.md` to `memory.db` when stale.
-- Propose which completed change plans should move to `archive/`.
-- Identify repeated memory patterns that may deserve a future command, rule, doc, or hook (Skill Evolution Candidates).
+  - Stable project mission and non-negotiable constraints.
+  - Stable environment, tool, and workflow facts needed in most sessions.
+  - Entries that influence behavior across multiple future sessions.
+- Propose which entries should move from `MEMORY.md` to `facts` in `memory_store.db` (graduated).
+- Propose which recurring-problem evidence and resolutions are missing or stale.
+- Identify repeated memory patterns that may deserve a future skill, rule, doc, or hook update.
 
 ## Boundaries
 
-- Do not edit files under `.agents/memory/`.
+- Do not edit files under `.memories/`.
 - Do not delete or discard memory without explicit user approval via the parent agent.
 - Do not include secrets or user-private data.
 

@@ -7,14 +7,14 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 - These instructions apply only to Claude Code.
 - Treat `.claude/` as a private Claude Code support directory.
-- Shared project memory lives under `.agents/memory/`, with `MEMORY.md` as the compact session-start project index.
+- Shared instantiated memory lives under the git-ignored `.memories/` root. Tracked cross-agent infrastructure remains under `.agents/`.
 
 ## Operating Contract
 
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, skill documents, and technical docs.
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
-- Keep Traditional Chinese content only in `.agents/memory/` and `docs/zh-TW/`.
+- Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/` and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - Treat `.references/` as read-only upstream reference clones. Do not edit or commit its contents.
@@ -45,26 +45,26 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 ## Memory
 
-`.agents/memory/` is cross-agent shared state (Claude Code, Gemini, Codex, Antigravity). Keep it small and high-signal.
+`.memories/` is the git-ignored instantiated memory root shared by all agents (Claude Code, Gemini, Codex, Antigravity). Keep it small and high-signal.
 
 **Storage and loading:**
-- **Session-start context**: `MEMORY.md` (mission, constraints, current state; ≤ 2,200 chars), `USER.md` (user preferences; ≤ 500 chars), and the last 50 lines of `lessons.md`.
-- **Read on demand**: `decisions.md`, the full `lessons.md`, and active `changes/<id>/`.
-- **Search or inspect when needed**: `memory.db` (SQLite FTS5 through `/memory-sql`) and `archive/`.
+- **Session-start context**: `.memories/memories/MEMORY.md` (stable project facts; ≤ 2,200 chars) and `.memories/memories/USER.md` (user preferences; ≤ 500 chars).
+- **Search or inspect when needed**: `.memories/memory_store.db` (SQLite Holographic schema through `/memory-sql`).
 
 **Routing:**
-- Mission, constraints, current state → `MEMORY.md`.
-- User preferences, communication style → `USER.md`.
-- Durable decisions (active) → `decisions.md`; when stale → graduate to `memory.db`.
-- Recurring lessons → `lessons.md`; when stale → graduate to `memory.db`.
-- Active change plans → `changes/<id>/proposal.md` (+ optional `design.md`, `tasks.md`).
-- Completed or superseded plans → `archive/` after consolidation.
-- Skill candidates → `/learn-eval` or `memory.db` (`type='candidate'`).
+- Stable project, environment, and tool facts → `MEMORY.md`.
+- Stable user preferences, communication style → `USER.md`.
+- Searchable decisions, lessons, workflows, tool facts → `facts` table in `memory_store.db`.
+- Recurring problem identity → `problem_patterns`; evidence per occurrence → `problem_occurrences`.
+- Verified root causes and fixes → `resolutions`.
+- Skill candidates → `/learn-eval` or `facts` (`category='candidate'`).
 
 **Policy:**
-- Keep MEMORY.md under 2,200 chars; USER.md under 500 chars; lessons.md under 50 lines.
-- Graduate stale entries to `memory.db` instead of creating more files.
+- Keep MEMORY.md under 2,200 chars; USER.md under 500 chars.
+- Use atomic entries separated by `§` in bounded Markdown files.
+- Graduate lower-frequency knowledge to `memory_store.db` instead of expanding files.
 - `MEMORY.md` is injected as a session-start snapshot; writes affect automatic context at the next session start.
+- Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`; plans are not long-term memory.
 - Use `/memory-maintenance` for audits, compression, and consolidation.
 - Use `/learn-eval` after meaningful sessions to extract reusable patterns as skills.
 - When delegating memory analysis, use `memory_auditor` (save recommendations) or `memory_compressor` (compression drafts); the main agent owns final edits.

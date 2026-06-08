@@ -51,8 +51,6 @@ Hermes 的 `SOUL.md` 與 `state.db` 不在本契約內。Agent identity 繼續�
 ## 目前平台狀態
 
 - **Codex**：已遷移至 `.memories/` 與 `memory_store.db`。
-- **Claude Code**：尚待遷移。
+- **Claude Code**：已遷移至 `.memories/` 與 `memory_store.db`。
 - **Gemini CLI**：尚待遷移。
 - **Antigravity**：尚待遷移。
-
-其他平台完成遷移前，只有 Codex 可被假設使用此 layout。

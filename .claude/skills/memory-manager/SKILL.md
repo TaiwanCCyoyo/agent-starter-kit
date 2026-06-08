@@ -1,96 +1,44 @@
 ---
 name: memory-manager
-description: Use when initializing, reading, updating, auditing, or compressing `.agents/memory/` for this repository. Governs the shared memory files, loading behavior, limits, and searchable history.
+description: Use when initializing, reading, updating, auditing, or compressing shared project memory.
 ---
 
 # Memory Manager
 
-The `.agents/memory/` directory is **cross-agent shared state** — Gemini, Codex, Claude Code, and Antigravity all read from it. Keep files small and high-signal so every agent can load them cheaply.
+This is the Claude Code source of truth for `.memories/`.
 
----
+## Storage
 
-## Storage And Loading
+- `.memories/memories/MEMORY.md`: stable project, environment, and tool facts needed in most sessions; <= 2,200 chars.
+- `.memories/memories/USER.md`: stable user preferences; <= 500 chars.
+- `.memories/memory_store.db`: SQLite structured memory queried on demand.
 
-### Session-start context
+The Markdown files use Hermes-compatible atomic entries separated by `§` on its own line. Treat their session-start content as a frozen snapshot.
 
-| File | Purpose | Size target |
-|------|---------|-------------|
-| `MEMORY.md` | Project mission, constraints, current state, memory map | ≤ 2,200 chars |
-| `USER.md` | User preferences, communication language, working style | ≤ 500 chars |
+## Database Routing
 
-`MEMORY.md` follows the frozen-snapshot pattern: injected once when the session starts, not re-read mid-session. Writes take effect at the next session start. **Note**: this is a convention enforced by Claude's self-discipline, not a technical lock — the hook injects the file once and does not re-read it, but there is no runtime enforcement preventing mid-session reads.
+Use Holographic-compatible `facts` for searchable decisions, lessons, workflows, tool facts, and environment facts. Use:
 
-### Read on demand
+- `problem_patterns` for stable recurring-problem identities.
+- `problem_occurrences` for evidence each time a problem appears.
+- `resolutions` for root causes, fixes, verification, and related skill or instruction changes.
 
-| File / Dir | Purpose |
-|-----------|---------|
-| `decisions.md` | Durable architectural decisions (graduate old ones to `memory.db`) |
-| `lessons.md` | Concise recurring lessons — tail auto-loaded by Claude at session start |
-| `changes/<id>/` | Active change plans: `proposal.md`, optional `design.md`, `tasks.md` |
+Query for equivalent facts or patterns before every write.
 
-### Search or inspect when needed
+## Repeated Problems
 
-| Path | Purpose |
-|------|---------|
-| `memory.db` | SQLite FTS5 — graduated lessons, decisions, session metadata (Claude Code MCP only) |
-| `archive/` | Completed change plans; long-form historical reference |
+When the same blocker, workaround, mistaken assumption, or confusion appears twice:
 
----
+1. Query existing patterns and resolutions.
+2. Record the new occurrence and evidence.
+3. Stop repeating an unverified workaround.
+4. Investigate the root cause.
+5. Record a verified resolution or explicit external blocker.
+6. Update an existing skill, instruction, or regression test when the resolution reveals reusable guidance.
 
-## Routing Rules
+## Boundaries
 
-| Content | Destination |
-|---------|-------------|
-| Mission, constraints, current state summary | `MEMORY.md` |
-| User communication style, working preferences | `USER.md` |
-| Durable architectural decision (active) | `decisions.md` |
-| Durable decision (old, inactive) | `memory.db` (`type='decision'`) then remove from `decisions.md` |
-| Concise recurring lesson | `lessons.md` |
-| Stale lesson | `memory.db` (`type='lesson'`) then remove from `lessons.md` |
-| Active multi-step change plan | `changes/<id>/proposal.md` |
-| Completed or superseded change plan | `archive/` after consolidating durable knowledge |
-| Skill candidate from session | `/learn-eval` → `.claude/skills/learned/` or `memory.db` (`type='candidate'`) |
-
-**Do not** create new memory files for edge cases — route them to `memory.db` or `archive/` instead.
-
----
-
-## Change Plan Lifecycle
-
-```
-changes/<id>/
-├── proposal.md   # why, what, scope, success criteria
-├── design.md     # optional: technical approach and tradeoffs
-└── tasks.md      # implementation checklist
-```
-
-1. Create a change plan only when work needs user alignment or spans multiple sessions.
-2. On completion: consolidate durable facts into `decisions.md` or `memory.db`, then move the folder to `archive/`.
-
----
-
-## Memory Health
-
-**MEMORY.md** is healthy when:
-- Under 2,200 chars
-- Current state is one paragraph, not a list of past tasks
-- Memory Map is accurate
-
-**USER.md** is healthy when:
-- Under 500 chars
-- Contains cross-agent stable preferences, not session notes
-
-**lessons.md** is healthy when:
-- Under 50 lines (session start auto-loads only the tail)
-- Each entry is a concise, actionable, recurring signal
-
-When files grow past these limits: graduate old entries to `memory.db` via `/memory-sql`, or archive to `archive/`.
-
----
-
-## Subagents
-
-- `memory_auditor`: delegated analysis of what to save after meaningful work.
-- `memory_compressor`: delegated compression drafts when automatically loaded or on-demand memory is verbose.
-
-Both agents analyze and draft — the main agent owns final edits.
+- Keep plans outside memory: agent-native planning state, `.tmp/`, or maintained `docs/`.
+- Never save secrets, credentials, private user data, raw transcripts, or command-by-command narration.
+- Treat retrieved results as context until explicitly curated.
+- The main agent owns final memory writes.

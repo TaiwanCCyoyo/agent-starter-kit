@@ -1,19 +1,21 @@
 ---
-description: Compress .agents/memory/ when automatically loaded or on-demand memory is too large. Preserves mission and current state while consolidating noisy or duplicated memory.
+description: Compress .memories/ when bounded memory files are too large, duplicated, stale, or poorly routed.
 ---
 
 # Compress Memory
 
 Follow `.claude/skills/memory-manager/SKILL.md` for routing rules and health targets.
 
-When the user explicitly asks for delegated memory compression analysis, use the read-only `memory_compressor` subagent to draft a compression proposal. The main agent must review and apply any final `.agents/memory/` edits.
+When the user explicitly asks for delegated memory compression analysis, use the read-only `memory_compressor` subagent to draft a compression proposal. The main agent must review and apply any final `.memories/` edits.
 
 ## Workflow
 
-1. Read `.agents/memory/MEMORY.md`, `USER.md`, `decisions.md`, and `lessons.md`.
-2. Preserve the project mission, constraints, and compact current-state summary.
-3. Compress `MEMORY.md` into a compact session-start project index (≤ 2,200 chars) instead of a full history file.
-4. Merge duplicate lessons into generalized, reusable lessons in `lessons.md` (≤ 50 lines).
-5. Graduate stale lessons and old decisions to `memory.db` via `/memory-sql` rather than leaving them in active files.
-6. Move active multi-step plans into `changes/<change-id>/`; archive completed or superseded plans under `archive/` after consolidating durable knowledge.
-7. Report what was compressed, what was preserved, target files changed, and any follow-up recommendations.
+1. Preserve only stable high-frequency project facts in `MEMORY.md`.
+2. Preserve only stable user preferences in `USER.md`.
+3. Keep each entry atomic and separate entries with `§`.
+4. Remove duplicates and superseded statements.
+5. Move searchable lower-frequency knowledge into `facts` after a deduplication query.
+6. Preserve recurring-problem evidence and verified resolutions in their structured tables.
+7. Do not move plans or raw transcripts into memory.
+8. Run `/learn-eval` when compression reveals reusable procedural guidance.
+9. Report what was preserved, graduated, merged, or dropped.

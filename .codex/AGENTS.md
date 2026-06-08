@@ -16,7 +16,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, `SKILL.md`, workflow documents, and technical docs.
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
-- Keep Traditional Chinese content only in `.memories/` and `docs/zh-TW/`.
+- Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/` and  and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 

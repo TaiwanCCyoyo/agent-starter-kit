@@ -51,11 +51,9 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 ## Current Platform Status
 
 - **Codex**: migrated to `.memories/` and `memory_store.db`.
-- **Claude Code**: migration pending.
+- **Claude Code**: migrated to `.memories/` and `memory_store.db`.
 - **Gemini CLI**: migration pending.
 - **Antigravity**: migration pending.
-
-Until those migrations are implemented, only Codex should be assumed to use this layout.
 
 ## Codex Lifecycle
 
@@ -64,5 +62,13 @@ Until those migrations are implemented, only Codex should be assumed to use this
 - `.codex/skills/memory-manager/SKILL.md` defines routing.
 - `.codex/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
 - `.codex/config.toml` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
+
+## Claude Code Lifecycle
+
+- `.claude/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
+- `.claude/hooks/stop_memory_check.py` validates limits and taxonomy, reminds Claude to curate durable memory, and enforces the repeated-problem loop.
+- `.claude/skills/memory-manager/SKILL.md` defines routing.
+- `.claude/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
+- `.mcp.json` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
 
 Retrieved database output is context until explicitly curated. Never store secrets, private credentials, or raw task narration.
