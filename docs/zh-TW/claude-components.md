@@ -59,12 +59,12 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 
 | Command | 用途 |
 |---|---|
-| `/compress-memory` | 當 `.agents/memory/` 過大時進行壓縮 |
+| `/compress-memory` | 當 bounded memory 過大時進行壓縮 |
 | `/gen-commit` | 透過 `commit-specialist` 產生符合 Conventional Commits 格式的訊息 |
 | `/learn-eval` | 以整體品質門評估 session 模式；核准後萃取為 skills |
 | `/memory-maintenance` | 初始化、更新、審查或整合專案記憶體 |
-| `/memory-sql` | 透過 memory-db MCP server 查詢或寫入 `.agents/memory/memory.db`（SQLite FTS5） |
-| `/save-memory` | 將教訓、決策或交接筆記儲存至 `.agents/memory/` |
+| `/memory-sql` | 透過 memory-db MCP server 查詢或寫入 `.memories/memory_store.db` |
+| `/save-memory` | 將長期事實儲存至適當的 bounded file 或 SQLite store |
 | `/worktree` | 建立、管理並合併 Git worktree，同時保留記憶體 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
@@ -88,7 +88,7 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `/learn`、`/skill-create` | 依賴 ECC observation hooks 與完整 instinct pipeline；由 `/learn-eval` 取代 |
 | `/evolve` | 由 `/learn-eval` 中的 skill-curator 生命週期取代 |
 | `/hookify-*`（共 4 個指令） | ECC 內部 hook 管理 |
-| `/sessions`、`/save-session`、`/resume-session` | 已由 `.agents/memory/` 系統取代 |
+| `/sessions`、`/save-session`、`/resume-session` | 已由 `.memories/` 系統取代 |
 | 語言專屬的建構／測試／審查指令 | Go/Rust/Kotlin/Java 等語言未使用 |
 | `/cost-report`、`/model-route` | 有需要時再新增 |
 | `/jira`、`/prp-*`、`/plan-prd` | 未規劃 PM 整合 |
@@ -143,7 +143,7 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 | Hook | 觸發時機 | 執行內容 |
 |---|---|---|
-| `session_start.py` | 工作階段開始 | 以凍結快照模式將 `CLAUDE.md` 與 `.agents/memory/MEMORY.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
+| `session_start.py` | 工作階段開始 | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
 | `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
 | `stop_memory_check.py` | 每次回覆後 | 若有重大工作則提示記憶更新；在 5 次以上有程式碼變更的回覆後，每 session 提示一次技能審查（`/learn-eval`） |
 
@@ -191,5 +191,5 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 **仍延後——自動 transcript 搜尋**：[Hermes](https://github.com/NousResearch/hermes-agent) 會自動將所有 session 訊息儲存在本機 SQLite 資料庫，搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。本專案僅提供精選條目——自動捕捉仍延後，因為 Claude Code Stop hook 只接收 session_id，無法取得對話內容。實作自動記錄需要：
 1. 攔截每次 PostToolUse event 以捕捉工具輸入/輸出。
-2. 在 `.agents/memory/sessions.db`（git-ignored）寫入持久化 SQLite。
+2. 在 git-ignored 的 `.memories/` 根目錄下，將 session 記錄寫入專用資料表或資料庫。
 3. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。
