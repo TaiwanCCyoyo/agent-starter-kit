@@ -101,6 +101,8 @@ Available slash commands and their corresponding skills:
 | `/save-memory` | — (command only) |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
+Plans approved via Native Plan Mode can be copied to `.claude/plans/{kebab-name}.plan.md` (gitignored) for same-machine cross-session visibility. If the output is worth keeping long-term, the user archives it separately.
+
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 
 ## Subagents

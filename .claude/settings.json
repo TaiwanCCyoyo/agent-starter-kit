@@ -113,7 +113,9 @@
       "Skill(security-review)",
       "Bash(code *)",
       "Bash(cat .git/COMMIT_EDITMSG)",
-      "Bash(cat .git/HEAD)"
+      "Bash(cat .git/HEAD)",
+      "mcp__memory-db__read_query",
+      "mcp__memory-db__write_query"
     ],
     "deny": [
       "Bash(powershell *)",
@@ -184,5 +186,8 @@
   },
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true
-  }
+  },
+  "enabledMcpjsonServers": [
+    "memory-db"
+  ]
 }

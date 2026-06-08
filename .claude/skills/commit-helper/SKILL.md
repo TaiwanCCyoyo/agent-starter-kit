@@ -67,3 +67,7 @@ Agent-Status: assisted
 - Commit execution is delegated to the `commit_specialist` subagent, including running `git commit`, reading hook output, and retrying after fixes.
 - If `git commit` fails due to hooks, enter Fix Mode: read the specific error output, apply the minimal fix, re-stage changed files, and retry.
 - Do not bypass hooks unless the user explicitly authorizes it.
+
+## Post-Commit Memory Check
+
+After a successful commit: if the session included non-obvious decisions, newly discovered patterns, environment constraints, or lessons learned, prompt the user to run `/save-memory` or `/memory-maintenance` before closing the session.

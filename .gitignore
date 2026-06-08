@@ -4,6 +4,7 @@
 # Ignore local reference clones and disposable workspace files
 .references/
 .tmp/
+.claude/plans/
 .agent/temp/*
 
 agent-testbed/*
