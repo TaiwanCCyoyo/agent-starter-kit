@@ -135,12 +135,12 @@
       "Write(/var/tmp/*)",
       "Edit(/var/tmp/*)"
     ],
-    "additionalDirectories": [
-      "~/.claude"
-    ],
     "ask": [
       "Bash(git push *)",
       "Bash(git push)"
+    ],
+    "additionalDirectories": [
+      "~/.claude"
     ]
   },
   "hooks": {
@@ -181,5 +181,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }
