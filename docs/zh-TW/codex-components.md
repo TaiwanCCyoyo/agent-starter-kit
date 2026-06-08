@@ -7,7 +7,7 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 | Claude／ECC 概念 | Codex 實作 |
 | :--- | :--- |
 | `/plan` 與 planner agent | 原生 Plan Mode 與 `<proposed_plan>` |
-| Loop operator | `verification-loop` skill |
+| TDD、除錯、worktree 與完成前驗證 | 已安裝的 Superpowers plugin |
 | GitHub operations skill | 已安裝的 GitHub plugin |
 | Slash commands | 自然語言觸發 skills |
 | `memory-db` MCP | `.codex/config.toml` 專案級 server |
@@ -29,15 +29,12 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 
 | Skill | 用途 |
 | :--- | :--- |
-| `coding-standards` | Codex 原生架構與限縮實作判斷 |
-| `python-testing` | 聚焦 Python 回歸與靜態檢查 |
-| `tdd-workflow` | 從 ECC 改編的風險導向 RED-GREEN-REFACTOR |
-| `verification-loop` | 精簡的實作、檢查、修正循環 |
+| `python-testing` | 專案特有的 Python、hook、Windows path、ruff 與 mypy 要求 |
 | `gen-commit` | Commit 審查與 Conventional Commit workflow |
 | `memory-manager`、`save-memory`、`compress-memory` | 共用專案記憶生命週期 |
 | `memory-sql` | 與 Holographic 相容的 SQLite facts 與重複問題 workflow |
 | `skill-review` | ECC 萃取品質門與手動 Hermes 式技能整理 |
-| `worktree-manager` | 含記憶整合的 worktree 生命週期 |
+| `worktree-memory-sync` | 跨 worktree 的 ignored memory 初始化與整合 |
 
 ## Hooks 與 Gates
 
@@ -65,15 +62,15 @@ Codex 與 Claude Code 已完成遷移。Antigravity adapter 已實作但尚待 r
 
 已移植或改編：
 
-- Coding、Python testing、TDD、verification、security、performance 與 review 原則。
+- 專案特有的 Python testing、security、performance 與 review 原則。
 - Prompt Defense baseline。
 - Hook 或 script 修改必須包含 functional test。
 - Session skill-review 品質門。
 
-由 Codex 原生功能取代：
+由已安裝 plugins 或 Codex 原生功能提供：
 
 - Planner agent 與 `/plan`。
-- Loop operator。
+- 透過 Superpowers 提供 TDD、systematic debugging、worktree 生命週期與完成前驗證。
 - GitHub operations workflow。
 - Claude slash-command wrappers。
 

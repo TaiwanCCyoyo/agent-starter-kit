@@ -1,27 +1,22 @@
 ---
 name: python-testing
-description: Plan and verify Python changes with focused tests, mypy awareness, ruff compatibility, and regression-oriented scenarios.
+description: Apply repository-specific verification requirements to Python scripts, hooks, and tooling.
 ---
 
 # Python Testing
 
-Use this skill when Python behavior, scripts, hooks, or reusable tooling changes.
+Use this skill when Python scripts, hooks, or reusable tooling change.
 
-## Test Selection
+## Repository Checks
 
-- Prefer focused tests around changed behavior and failure modes.
-- For hook scripts, validate representative JSON stdin or CLI arguments.
-- For hygiene scripts, use small fixtures that cover positive and negative cases.
-- Include Windows path behavior when scripts are used by agent hooks.
-
-## Static Checks
-
+- Run Python commands through the project-managed environment with `uv run`.
 - Use `uv run ruff check .` for lint verification.
 - Use `uv run mypy .` as the full-project type gate.
-- Avoid relying on single-file mypy as final evidence because project context can matter.
+- Do not treat single-file mypy results as final evidence because project context can affect type checking.
 
-## Acceptance
+## Hook And Script Coverage
 
-- The changed behavior is covered by direct tests or equivalent scripted checks.
-- Formatting and linting pass.
-- Failure output is readable and does not require a specific shell.
+- For hook scripts, test representative JSON stdin and CLI arguments.
+- For hygiene scripts, use small positive and negative fixtures.
+- Cover Windows path behavior when scripts are used by agent hooks.
+- Keep failure output readable and independent of a specific shell.

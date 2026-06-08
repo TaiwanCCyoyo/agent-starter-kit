@@ -7,7 +7,7 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 | Claude/ECC concept | Codex implementation |
 | :--- | :--- |
 | `/plan` and planner agent | Native Plan Mode and `<proposed_plan>` |
-| Loop operator | `verification-loop` skill |
+| TDD, debugging, worktrees, and completion verification | Installed Superpowers plugin |
 | GitHub operations skill | Installed GitHub plugin |
 | Slash commands | Natural-language skill triggers |
 | `memory-db` MCP | Project-scoped `.codex/config.toml` server |
@@ -29,15 +29,12 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 
 | Skill | Purpose |
 | :--- | :--- |
-| `coding-standards` | Codex-native architecture and scoped implementation judgment |
-| `python-testing` | Focused Python regression and static-check strategy |
-| `tdd-workflow` | Risk-based RED-GREEN-REFACTOR workflow adapted from ECC |
-| `verification-loop` | Concise implement-check-fix workflow |
+| `python-testing` | Repository-specific Python, hook, Windows-path, ruff, and mypy requirements |
 | `gen-commit` | Commit review and Conventional Commit workflow |
 | `memory-manager`, `save-memory`, `compress-memory` | Shared project memory lifecycle |
 | `memory-sql` | Holographic-compatible SQLite fact and recurring-problem workflows |
 | `skill-review` | ECC-style extraction quality gate and manual Hermes-style curation |
-| `worktree-manager` | Worktree lifecycle with memory consolidation |
+| `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees |
 
 ## Hooks And Gates
 
@@ -65,15 +62,15 @@ Codex and Claude Code are migrated. The Antigravity adapter is implemented but s
 
 Ported or adapted:
 
-- Coding, Python testing, TDD, verification, security, performance, and review principles.
+- Repository-specific Python testing, security, performance, and review principles.
 - Prompt Defense baseline.
 - Functional-test requirement for hook or script changes.
 - Session skill-review quality gate.
 
-Replaced by Codex-native capability:
+Provided by installed plugins or Codex-native capability:
 
 - Planner agent and `/plan` command.
-- Loop operator.
+- TDD, systematic debugging, worktree lifecycle, and completion verification through Superpowers.
 - GitHub operations workflow.
 - Claude slash-command wrappers.
 

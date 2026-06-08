@@ -81,7 +81,8 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
 - Revisit the official repo-scoped `.agents/skills` path before adding skills meant to be shared outside Codex.
-- Use `coding-standards` for architecture, `python-testing` for Python verification, `tdd-workflow` when RED/GREEN adds value, `verification-loop` for iterative checks, `memory-sql` for searchable history, and `skill-review` after meaningful sessions.
+- Use the installed Superpowers plugin for general brainstorming, planning, TDD, systematic debugging, worktree lifecycle, and completion verification.
+- Use `python-testing` for repository-specific Python gates, `worktree-memory-sync` for ignored memory state across worktrees, `memory-sql` for searchable history, and `skill-review` after meaningful sessions.
 
 ## Subagents
 
