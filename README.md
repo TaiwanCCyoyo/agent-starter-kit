@@ -16,7 +16,7 @@ A standardized, frictionless engineering infrastructure for multi-agent ecosyste
 
 This project uses a proactive memory system to maintain long-term context across sessions and worktrees.
 
-For a detailed architecture, setup model, and copy checklist, see [Memory System Introduction](docs/en/MEMORY_SYSTEM_INTRODUCTION.md).
+For a detailed architecture, setup model, and copy checklist, see [Memory System Introduction](docs/en/memory-system-introduction.md).
 
 ### 1. Daily Usage
 
@@ -186,7 +186,7 @@ This starter kit is shaped by two open-source projects:
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The development agents (planner, code-reviewer, tdd-guide, security-reviewer, etc.), slash commands (/plan, /build-fix, /code-review, /test-coverage), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are all ported or adapted from ECC v2.0.0-rc.1.
 
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's persistent-memory design through bounded `MEMORY.md` and `USER.md` stores, frozen prompt snapshots, and SQLite FTS5 session recall. This starter kit adapts those mechanisms into its own Hot/Warm/Cold taxonomy; it is not a direct port of a Hermes-defined taxonomy.
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's bounded `MEMORY.md` and `USER.md`, frozen prompt snapshots, SQLite FTS5 session recall, and learning-loop design. This starter kit adapts those mechanisms rather than directly porting Hermes.
 
 ## Initialization
 

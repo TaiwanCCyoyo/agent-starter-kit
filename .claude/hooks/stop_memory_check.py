@@ -108,7 +108,7 @@ def memory_taxonomy_message(root: Path) -> str:
     return (
         "Memory taxonomy reminder: unexpected memory files or directories found under `.agents/memory/`: "
         + ", ".join(sorted(unexpected))
-        + ". Prefer the approved Hot/Warm/Cold taxonomy. Put active plans in `.agents/memory/changes/<change-id>/` "
+        + ". Use only the approved memory files and directories. Put active plans in `.agents/memory/changes/<change-id>/` "
         "and completed or superseded plans under `.agents/memory/archive/changes/` after consolidating durable knowledge."
     )
 
@@ -166,8 +166,8 @@ def memory_health_message(root: Path, state: dict) -> str:
     return (
         f"Memory compression reminder: `.agents/memory/MEMORY.md` is getting large "
         f"({chars} chars, {lines} lines; limit {MEMORY_CHAR_LIMIT} chars / {MEMORY_LINE_LIMIT} lines). "
-        "Use `/compress-memory` to keep `MEMORY.md` as Hot Memory, route decisions to `decisions.md`, keep concise recurring lessons in "
-        "`lessons.md`, and move historical detail to Warm/Cold memory."
+        "Use `/compress-memory` to keep `MEMORY.md` as compact session-start context, route decisions to `decisions.md`, keep concise "
+        "recurring lessons in `lessons.md`, and move historical detail to `memory.db` or `archive/`."
     )
 
 
@@ -212,7 +212,7 @@ def memory_update_message(root: Path, state: dict) -> str:
     return (
         f"[System] Memory & Session Log Reminder: {len(non_memory_changes)} files changed over {response_count} Claude responses.\n"
         "Before finishing this task, you MUST:\n"
-        "1. Update Hot Memory only when mission/state summary changed: `.agents/memory/MEMORY.md` (≤ 2,200 chars).\n"
+        "1. Update session-start project context only when mission/state summary changed: `.agents/memory/MEMORY.md` (≤ 2,200 chars).\n"
         "2. Route durable decisions to `.agents/memory/decisions.md`.\n"
         "3. Route concise recurring lessons to `.agents/memory/lessons.md` (≤ 50 lines); graduate stale entries to `memory.db` via `/memory-sql`.\n"
         "4. Route active multi-step change plans to `.agents/memory/changes/<change-id>/`; move completed plans to `archive/`.\n"

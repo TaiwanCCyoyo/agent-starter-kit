@@ -5,7 +5,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 **ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC integration date**: 2026-06-02
-**Memory design influence**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent); this project defines its own Hot/Warm/Cold taxonomy
+**Memory design influence**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent); this project adapts bounded session context, searchable SQLite history, and a learning review loop
 
 ---
 
@@ -21,7 +21,7 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `doc-translator` | sonnet | Read, Write, Edit | Translate `docs/en/` files to `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | Read-only code review: correctness, style, security |
 | `memory-auditor` | sonnet | Read, Grep, Glob | Recommend memory updates after significant work |
-| `memory-compressor` | sonnet | Read, Grep, Glob | Draft compression proposals for Hot/Warm memory |
+| `memory-compressor` | sonnet | Read, Grep, Glob | Draft compression proposals for automatically loaded and on-demand memory |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies |
 
 ### Development (ported from ECC v2.0.0-rc.1)
@@ -105,7 +105,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 |---|---|
 | `commit-helper` | Conventional Commits format, pre-commit checklist |
 | `memory-manager` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model, Hermes-aligned routing rules, and size health criteria |
-| `memory-sql` | SQLite FTS5 cold memory: schema, session recording, search queries, and layer routing rules |
+| `memory-sql` | SQLite FTS5 searchable history: schema, session recording, search queries, and routing rules |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
 | `worktree-manager` | Worktree create/finish/merge with memory consolidation; dual-mode: Mode A uses built-in `EnterWorktree`/`ExitWorktree`, Mode B uses git worktree with full lifecycle |
 
@@ -143,7 +143,7 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 
 | Hook | Trigger | What it does |
 |---|---|---|
-| `session_start.py` | Session start | Injects `CLAUDE.md` and `.agents/memory/MEMORY.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies memory taxonomy into new worktrees. |
+| `session_start.py` | Session start | Injects `CLAUDE.md` and `.agents/memory/MEMORY.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies the approved memory layout into new worktrees. |
 | `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
 | `stop_memory_check.py` | After each response | Nudges memory update if significant work was done; prompts skill review via `/learn-eval` after 5+ responses with code changes (once per session) |
 
@@ -185,7 +185,7 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | `rules/systemverilog/` | Custom build | UVM project starts |
 | CI/CD guidance in README | Docs update | After integration stabilises |
 
-### Cold Memory — SQLite FTS5
+### Searchable Memory — SQLite FTS5
 
 **What is implemented**: The `memory-db` MCP server is configured at `.mcp.json` and launched directly with `uvx mcp-server-sqlite`, using `${CLAUDE_PROJECT_DIR:-.}` to resolve the database path from any project subdirectory. Claude writes curated entries — graduated lessons, decisions, and session metadata — explicitly via MCP `write_query` calls. The Stop hook prompts Claude to upsert session records and archive graduated entries. See `.claude/skills/memory-sql/SKILL.md` for schema and query examples.
 

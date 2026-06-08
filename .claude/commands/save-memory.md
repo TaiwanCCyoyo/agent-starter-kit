@@ -8,9 +8,9 @@ Follow `.claude/skills/memory-manager/SKILL.md` for routing rules and quality st
 
 ## Workflow
 
-1. Read `.agents/memory/MEMORY.md` and any existing Warm file that matches the update type.
+1. Read `.agents/memory/MEMORY.md` and any existing on-demand file that matches the update type.
 2. Extract only project-specific facts, decisions, completed work, lessons learned, and unresolved follow-up.
-3. Route the update to the best memory layer (Hermes-aligned taxonomy):
+3. Route the update to the exact destination defined by the approved memory layout:
    - Mission, constraints, memory map, and compact current-state summary → `.agents/memory/MEMORY.md` (≤ 2,200 chars).
    - Cross-agent user preferences and working style → `.agents/memory/USER.md` (≤ 500 chars).
    - Durable architectural decisions → `.agents/memory/decisions.md`.

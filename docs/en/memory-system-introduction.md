@@ -5,6 +5,8 @@ The memory system keeps long-running agent work aligned across sessions, support
 It is designed for project state that should outlive a single chat: project goals, durable decisions, lessons learned, active handoff notes, and unfinished
 follow-up work.
 
+Hermes inspired the bounded `MEMORY.md` and `USER.md` stores, frozen prompt snapshots, full-session search, and learning-loop concepts. This starter kit describes each store by its actual loading and retention behavior rather than adding a separate tier vocabulary.
+
 ## Mental Model
 
 The system has three layers:
@@ -19,17 +21,17 @@ Memory is intentionally git-ignored by default. It is local project state, not t
 
 | Component | Purpose |
 | :--- | :--- |
-| `.agents/memory/MEMORY.md` | Cross-agent hot memory: mission, constraints, current state. ≤ 2,200 chars. |
+| `.agents/memory/MEMORY.md` | Session-start project context: mission, constraints, current state. ≤ 2,200 chars. |
 | `.agents/memory/USER.md` | Cross-agent user preferences: communication language, working style. ≤ 500 chars. |
-| `.agents/memory/decisions.md` | Warm memory: active durable architectural decisions. |
-| `.agents/memory/lessons.md` | Warm memory: concise recurring lessons (tail auto-loaded by Claude). |
+| `.agents/memory/decisions.md` | On-demand active durable architectural decisions. |
+| `.agents/memory/lessons.md` | On-demand concise recurring lessons (tail auto-loaded by Claude and Codex). |
 | `.agents/memory/changes/` | Active multi-step change plans (proposal, design, tasks). |
-| `.agents/memory/memory.db` | Cold memory: SQLite FTS5 for graduated lessons, decisions, session metadata (Claude Code MCP only). |
-| `.agents/memory/archive/` | Cold memory: completed change plans, historical reference. |
+| `.agents/memory/memory.db` | Shared searchable history: SQLite FTS5 for graduated lessons, decisions, workflows, candidates, and session metadata (Claude Code and Codex MCP). |
+| `.agents/memory/archive/` | File-based history: completed change plans and references. |
 | SessionStart hooks | Inject `MEMORY.md` + `USER.md` once at session start (frozen snapshot). Also injects the `lessons.md` tail for Claude. |
 | Stop/AfterAgent reminders | Nudge agents to update memory after code changes; prompt skill review after 5+ response turns. |
-| `memory-maintenance` / `memory-manager` | Routing rules, lifecycle, and health criteria for the full memory structure. |
-| `memory-sql` | Claude Code MCP skill for querying and writing `memory.db` via the `memory-db` MCP server. |
+| `memory-manager` | Routing rules, lifecycle, and health criteria for the full memory structure. |
+| `memory-sql` | Claude Code and Codex skills for querying and writing the shared `memory.db` through platform-specific MCP configuration. |
 | `learn-eval` / `skill-curator` | Quality gate for extracting session patterns into reusable skills. |
 | Worktree sync | Copies memory from main repo into new worktrees on first session. |
 
@@ -41,7 +43,7 @@ Codex uses:
 
 - `.codex/hooks/session_start.py` to inject `.codex/AGENTS.md`, branch context, and `.agents/memory/MEMORY.md`.
 - `.codex/hooks/stop_memory_check.py` to issue low-noise memory update and compression reminders.
-- `.codex/skills/save-memory/SKILL.md`, `.codex/skills/compress-memory/SKILL.md`, and `.codex/skills/memory-maintenance/SKILL.md`.
+- `.codex/skills/save-memory/SKILL.md`, `.codex/skills/compress-memory/SKILL.md`, and `.codex/skills/memory-manager/SKILL.md`.
 
 Codex-specific progress should be recorded as Codex-specific when the matching Gemini or Antigravity behavior has not been updated.
 
@@ -108,9 +110,11 @@ This loop is manual and user-confirmed — it does not write skill files without
 
 ## Memory Write Model
 
-**Frozen snapshot**: Hot Memory (`MEMORY.md`) is injected once at session start. Tool writes go to disk immediately but do not update the running session's system prompt — the next session reads the updated file. This preserves the LLM prefix cache.
+**Frozen snapshot**: `MEMORY.md` and `USER.md` are injected once at session start. Tool writes go to disk immediately but do not update the running session's system prompt — the next session reads the updated files. This preserves the LLM prefix cache.
 
 **§ delimiter**: When a memory section contains multiple atomic entries, separate them with `§` on its own line for reliable parsing.
+
+**Transcript capture is separate from memory curation**: Hermes stores and indexes every user, assistant, and tool message so `session_search` can return exact historical messages. This is not automatic extraction of important facts. Important facts are separately curated into bounded memory or skills. This starter kit currently stores curated entries, not the complete message stream.
 
 ## Reminder Behavior
 

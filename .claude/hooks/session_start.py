@@ -45,7 +45,7 @@ def get_git_info():
 
 DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
 
-*(Agent Note: Hot Memory — injected once at session start. Keep MEMORY.md under ~2,200 chars. All files in `.agents/memory/` are git-ignored instantiated project memory.)*
+*(Agent Note: Session-start project context. Keep MEMORY.md under ~2,200 chars. All files in `.agents/memory/` are git-ignored instantiated project memory.)*
 
 ## 1. Project Mission & Long-term Goals
 [Define the ultimate goal of this project and architectural rules here]
@@ -54,9 +54,9 @@ DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
 [What is happening right now? Keep compact — one paragraph max. Detail goes in active `changes/` plans.]
 
 ## 3. Memory Map
-- **Hot**: `MEMORY.md` (mission, current state) + `USER.md` (user preferences) — injected at session start.
-- **Warm**: `decisions.md`, `lessons.md` (tail auto-loaded), active `changes/<id>/`.
-- **Cold**: `memory.db` (SQLite FTS5, Claude Code MCP), `archive/`.
+- **Session-start context**: `MEMORY.md` (mission, current state), `USER.md` (user preferences), and the recent lesson tail.
+- **Read on demand**: `decisions.md`, the full `lessons.md`, and active `changes/<id>/`.
+- **Search or inspect when needed**: `memory.db` (SQLite FTS5 through Claude Code MCP) and `archive/`.
 - **Policy**: Keep MEMORY.md under ~2,200 chars. Graduate lessons/decisions to `memory.db` instead of accumulating files.
 
 ## 4. Active Work
@@ -283,12 +283,12 @@ def main():
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 **Context Clue (Last Commit)**: `{last_msg}`
 
-Please check the Claude instructions, Hot Memory, and auto-loaded lesson tail below before repository work.
+Please check the Claude instructions, project context, and auto-loaded lesson tail below before repository work.
 
 ### [Claude Repository Instructions: CLAUDE.md]
 {claude_instructions}
 
-### [Project Hot Memory: MEMORY.md]
+### [Project Context: MEMORY.md]
 {memory_content}
 {f"### [User Context: USER.md]{chr(10)}{user_md_content}{chr(10)}" if user_md_content else ""}
 ### [Auto-loaded Lessons: lessons.md Tail]

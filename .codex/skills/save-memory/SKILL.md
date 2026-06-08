@@ -1,37 +1,16 @@
 ---
 name: save-memory
-description: Use when the user says /save-memory, save-memory, save memory, update memory, persist memory, write memory, or asks Codex to record completed work, lessons learned, decisions, current state, plans, or handoff notes under `.agents/memory/`.
+description: Use when the user asks Codex to save project state, decisions, lessons, preferences, plans, or handoff notes.
 ---
 
 # Save Memory
 
-This is a command-like Codex skill. It replaces Gemini-style `/save-memory` with a skill trigger that can be invoked by plain text.
+Follow `memory-manager`.
 
-Follow `.codex/skills/memory-maintenance/SKILL.md` for quality rules.
-
-## Workflow
-
-1. Read `.agents/memory/MEMORY.md` and any existing Warm file that matches the update type.
-2. Extract only project-specific facts, decisions, completed work, lessons learned, and unresolved follow-up.
-3. Route the update to the best memory layer:
-   - Mission, constraints, memory map, and compact current-state summary -> `.agents/memory/MEMORY.md`.
-   - Durable architectural decisions -> `.agents/memory/decisions.md`.
-   - Concise recurring lessons that should reduce repeated mistakes -> `.agents/memory/lessons.md`.
-   - Older or lower-frequency lessons -> `.agents/memory/lessons-archive.md` or `.agents/memory/archive/`.
-   - Active handoff detail -> `.agents/memory/current-state.md` or a compact `MEMORY.md` pointer.
-   - Stable user/project preferences -> `.agents/memory/user-preferences.md`.
-   - Reusable workflow notes not yet promoted to skills -> `.agents/memory/workflows.md`.
-   - Active change plans requiring user alignment -> `.agents/memory/changes/<change-id>/proposal.md`, with optional `design.md`, `tasks.md`, and `specs/`.
-   - Historical details -> `.agents/memory/archive/`.
-   - Completed, rejected, or superseded change plans -> `.agents/memory/archive/changes/YYYY-MM-DD-<change-id>/` after durable knowledge is consolidated.
-   - Long-form reference material -> `.agents/memory/archive/references/`.
-   - Important session evidence -> `.agents/memory/runs/`, preferably Markdown plus JSONL when useful.
-   - Draft future rules, skills, docs, or hooks -> `.agents/memory/candidates/`.
-   - Graphify cold-memory indexes or reports -> `.agents/memory/runs/graphify-cold/` or an external `GRAPHIFY_OUT` path.
-4. Keep entries concise and high-signal.
-5. Keep `lessons.md` especially terse because session start may auto-load only its last 50 lines.
-6. Use English unless the target section already uses Traditional Chinese.
-7. Avoid secrets, private user data, and low-value turn narration.
-8. Treat retrieval, search, RAG, or Graphify output as context until curated into the memory taxonomy.
-9. Do not create top-level ad hoc plan files such as `*_PLAN.md`, `PROPOSAL_*.md`, or `SESSION_LOG.md`.
-10. Report the saved location to the user in Traditional Chinese.
+1. Read the target layer before editing.
+2. Route mission/state to `MEMORY.md`, preferences to `USER.md`, active decisions to `decisions.md`, recurring lessons to `lessons.md`, and active plans to `changes/<id>/`.
+3. Use `memory-sql` for graduated searchable entries and session metadata.
+4. Put completed non-searchable history in `archive/`.
+5. Search for duplicates before adding content.
+6. Keep entries concise, project-specific, and free of secrets or raw transcript narration.
+7. Report the saved location in Traditional Chinese.

@@ -1,32 +1,32 @@
 ---
 name: memory-sql
-description: Use when querying or writing to the project's SQLite cold memory database (.agents/memory/memory.db) via the memory-db MCP server. Covers schema setup, session recording, FTS5 search, and the relationship to file-based memory layers.
+description: Use when querying or writing to the project's searchable SQLite memory database (.agents/memory/memory.db) via the memory-db MCP server. Covers schema setup, session recording, FTS5 search, and its relationship to file-based project context.
 ---
 
 # Memory SQL
 
-The `memory-db` MCP server exposes `.agents/memory/memory.db` (SQLite with FTS5) as the **Cold Memory** layer. Unlike the file-based Hot/Warm layers (loaded at session start), this database is queried on demand and never auto-loaded into context — making it suitable for high-volume historical data.
+The `memory-db` MCP server exposes `.agents/memory/memory.db` (SQLite with FTS5) as searchable project history. Unlike the compact files injected at session start, this database is queried on demand and never auto-loaded into context, making it suitable for higher-volume historical data.
 
 The MCP server is configured in root `.mcp.json` and launched directly with `uvx mcp-server-sqlite`. Its database path uses `${CLAUDE_PROJECT_DIR:-.}` so it resolves correctly when Claude Code starts from a project subdirectory.
 
 ---
 
-## Layer Relationship
+## Storage And Loading
 
 ```
-HOT   MEMORY.md (≤2,200 chars)   ← injected at session start (frozen snapshot)
-      USER.md (≤500 chars)        ← cross-agent user preferences
-WARM  decisions.md, lessons.md, changes/<id>/
-COLD  memory.db (SQLite FTS5)    ← query on demand via memory-db MCP
-      archive/
+SESSION-START  MEMORY.md (≤2,200 chars)   ← injected at session start (frozen snapshot)
+               USER.md (≤500 chars)        ← cross-agent user preferences
+ON DEMAND      decisions.md, lessons.md, changes/<id>/
+SEARCHABLE     memory.db (SQLite FTS5)    ← query on demand via memory-db MCP
+               archive/
 ```
 
 **Write to `memory.db` when:**
-- Graduating a stale lesson or decision out of the Warm layer
+- Graduating a stale lesson or decision out of active files
 - Recording a skill candidate for later `/learn-eval` review
 - Closing out a session record (session_id + cwd)
 
-**Do NOT duplicate** content already in MEMORY.md or active Warm files into the database.
+**Do NOT duplicate** content already in `MEMORY.md` or active on-demand files into the database.
 
 ---
 

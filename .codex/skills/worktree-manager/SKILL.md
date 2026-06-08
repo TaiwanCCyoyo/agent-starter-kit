@@ -1,63 +1,31 @@
 ---
 name: worktree-manager
-description: Use when the user says /worktree, worktree, worktree create, worktree finish, create branch worktree, merge worktree, consolidate worktree memory, or asks Codex to create, manage, finish, merge, or clean up Git worktrees while preserving project memory.
+description: Use when creating, managing, finishing, merging, or cleaning up Git worktrees while preserving shared project memory.
 ---
 
 # Worktree Manager
 
-This is a Codex-private skill. It is intentionally stored in `.codex/skills` and loaded through `.codex/AGENTS.md`, not through the default `.agents/skills` discovery path.
-
-This is also a command-like Codex skill. It replaces Gemini-style `/worktree` with a skill trigger that can be invoked by plain text.
-
 ## Creation
 
-When creating a worktree:
+1. Create the branch and worktree with `git worktree add`.
+2. Copy missing ignored memory from the main workspace without overwriting local worktree memory.
+3. Ensure the approved taxonomy exists: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, and `archive/`.
+4. Define the branch goal and definition of done in `MEMORY.md`.
 
-1. Create the branch and worktree with `git worktree add <path> <branch>`.
-2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Copy or initialize the official memory taxonomy when relevant: `decisions.md`, `lessons.md`, `lessons-archive.md`, `current-state.md`, `user-preferences.md`, `workflows.md`, `changes/`, `archive/`, `runs/`, and `candidates/`.
-4. Immediately define the worktree mission in the Hot Memory current-state summary or active state:
-   - Branch goal.
-   - Definition of done.
-   - Any constraints from the user request.
-5. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
+## Active Work
 
-## Active Development
-
-- Use the local worktree memory for task progress.
-- Mark entries with the branch name when needed.
 - Keep compact branch status in `MEMORY.md`.
-- Keep detailed unfinished work in `current-state.md`.
-- Keep recurring branch lessons concise in `lessons.md`; move lower-frequency detail to `lessons-archive.md` or `archive/`.
-- Keep branch-specific multi-step plans under `changes/<change-id>/` and consolidate/archive them before worktree removal.
+- Keep detailed multi-step plans under `changes/<id>/`.
+- Keep active decisions and recurring lessons concise.
+- Query shared searchable history with `memory-sql` when historical context is needed.
 
 ## Finish
 
-Before removing a worktree:
+1. Verify the definition of done and run relevant checks.
+2. Compare worktree and main memory.
+3. Consolidate only durable, non-duplicate state, decisions, and lessons.
+4. Graduate stale searchable entries through `memory-sql`; move completed plan history to `archive/`.
+5. Merge the branch, then remove the worktree.
+6. Delete the branch only after the merge succeeds.
 
-1. Verify the definition of done.
-2. Run relevant tests or checks.
-3. Read the worktree memory and main repository memory.
-4. Consolidate durable lessons and meaningful completed milestones into the main memory.
-5. Merge the branch into the target branch.
-6. Remove the worktree.
-7. Delete the branch only after the merge succeeds.
-
-## Consolidation
-
-When consolidating worktree memory:
-
-1. Identify source and destination memory directories.
-2. Read `MEMORY.md` plus relevant Warm files from both locations.
-3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
-4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
-5. Move completed, rejected, or superseded worktree change plans to `archive/changes/` after consolidation.
-6. Avoid duplicate entries.
-7. Prefix branch-specific milestones when context matters.
-8. Report consolidated items, target files, archived change folders, and skipped duplicates.
-
-## Safety
-
-- Do not delete a worktree with uncommitted work unless the user explicitly authorizes it.
-- Do not discard branch-specific memory before consolidation.
-- Do not force-delete branches unless explicitly requested.
+Never discard uncommitted work or branch-specific memory without explicit authorization.

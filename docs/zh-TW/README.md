@@ -16,7 +16,7 @@
 
 本專案使用主動式記憶系統，維持跨 session 與 worktree 的長期上下文。
 
-詳細架構、設定模型與複製清單請參考 [記憶系統介紹](MEMORY_SYSTEM_INTRODUCTION.md)。
+詳細架構、設定模型與複製清單請參考 [記憶系統介紹](memory-system-introduction.md)。
 
 ### 1. 日常使用
 
@@ -186,7 +186,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。開發用 agents（planner、code-reviewer、tdd-guide、security-reviewer 等）、斜線指令（/plan、/build-fix、/code-review、/test-coverage）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。
 
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot，以及 SQLite FTS5 session recall 機制，進一步整理成 starter kit 自訂的 Hot/Warm/Cold 分層；這套 taxonomy 並非 Hermes 原生定義，也不是直接移植。
+- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot、SQLite FTS5 session recall 與 learning loop，再依 starter kit 需求改編，而不是直接移植 Hermes。
 
 ## 初始化
 

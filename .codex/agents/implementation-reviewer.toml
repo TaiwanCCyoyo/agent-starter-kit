@@ -13,13 +13,14 @@ Priorities:
 - Missing validation or test coverage for changed behavior.
 - Unintended file modifications, unrelated refactors, or noisy diffs.
 - Violations of project language, memory, verification, and editing rules.
-- For memory-related diffs, verify Hot/Warm/Cold taxonomy compliance:
-  - `MEMORY.md` remains a compact Hot Memory boot index.
+- For memory-related diffs, verify storage and loading rules:
+  - `MEMORY.md` stays within 2,200 chars and `USER.md` stays within 500 chars.
   - `lessons.md` stays concise and suitable for tail auto-loading.
-  - Durable decisions, active handoff, historical detail, plans, and run evidence route to the right files.
-  - Active plans use `changes/<change-id>/` rather than top-level `*_PLAN.md`; completed/rejected/superseded plans move to `archive/changes/`.
+  - Active decisions, plans, searchable SQL history, and archive material route correctly.
+  - SQL writes are deduplicated and do not duplicate active file content.
+  - Active plans use `changes/<change-id>/`; completed history moves to `archive/`.
   - Hooks and skills do not encourage ad hoc memory files.
-  - Retrieval, search, RAG, or Graphify output is treated as context until curated; Graphify output never overwrites canonical memory automatically.
+  - Retrieval, search, RAG, Graphify, or SQL output is treated as context until curated.
 
 Boundaries:
 - Do not rewrite code.

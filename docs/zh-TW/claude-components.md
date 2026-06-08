@@ -5,7 +5,7 @@
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC 整合日期**：2026-06-02
-**記憶設計來源**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；本專案另行定義 Hot/Warm/Cold taxonomy
+**記憶設計來源**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；本專案改編其有限 session context、SQLite 可搜尋歷史與學習檢查循環
 
 ---
 
@@ -21,7 +21,7 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `doc-translator` | sonnet | Read, Write, Edit | 將 `docs/en/` 檔案翻譯為 `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | 唯讀程式碼審查：正確性、風格、安全性 |
 | `memory-auditor` | sonnet | Read, Grep, Glob | 在重大工作完成後建議記憶體更新 |
-| `memory-compressor` | sonnet | Read, Grep, Glob | 草擬熱記憶體／暖記憶體的壓縮提案 |
+| `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 session-start context 與按需記憶的壓縮提案 |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
@@ -105,7 +105,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 |---|---|
 | `commit-helper` | Conventional Commits 格式、pre-commit 檢查清單 |
 | `memory-manager` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型、Hermes 對齊路由規則與大小健康標準 |
-| `memory-sql` | SQLite FTS5 冷記憶：schema、session 記錄、搜尋查詢與層級路由規則 |
+| `memory-sql` | SQLite FTS5 可搜尋歷史：schema、session 記錄、搜尋查詢與路由規則 |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
 | `worktree-manager` | Worktree 建立／完成／合併，並整合記憶體；雙模式：Mode A 使用內建 `EnterWorktree`/`ExitWorktree`，Mode B 使用 git worktree 搭配完整生命週期 |
 
@@ -185,7 +185,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
 | README 中的 CI/CD 指引 | 文件更新 | 整合穩定後進行 |
 
-### 冷記憶——SQLite FTS5
+### 可搜尋記憶——SQLite FTS5
 
 **已實作**：`memory-db` MCP server 已配置在 `.mcp.json`，並直接以 `uvx mcp-server-sqlite` 啟動；資料庫路徑使用 `${CLAUDE_PROJECT_DIR:-.}`，因此可從專案內任何子目錄正確解析。Claude 透過 MCP `write_query` 明確寫入精選條目——已畢業的 lessons、decisions 與 session metadata。Stop hook 會提示 Claude upsert session 記錄並歸檔已畢業的條目。Schema 與查詢範例請參考 `.claude/skills/memory-sql/SKILL.md`。
 

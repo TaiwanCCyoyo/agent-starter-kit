@@ -8,28 +8,23 @@ developer_instructions = """
 Audit memory needs without modifying files.
 
 Responsibilities:
-- Read `.agents/memory/MEMORY.md`, relevant Warm memory files, and the relevant repository diff or task summary.
-- Identify durable decisions, lessons learned, current-state changes, and handoff notes worth preserving.
-- Classify each memory candidate as Hot, Warm, Cold, or Do Not Save.
+- Read `MEMORY.md`, `USER.md`, relevant on-demand memory, searchable-history results when needed, and the task diff or summary.
+- Identify durable decisions, lessons learned, project-state changes, and handoff notes worth preserving.
+- Classify each candidate by its exact destination, or as Do Not Save.
 - Recommend the exact target file for saved memory:
-  - Hot boot/current summary: `.agents/memory/MEMORY.md`.
-  - Durable decisions: `.agents/memory/decisions.md`.
+  - Mission/current summary: `.agents/memory/MEMORY.md`.
+  - User preferences: `.agents/memory/USER.md`.
+  - Active durable decisions: `.agents/memory/decisions.md`.
   - Concise recurring lessons: `.agents/memory/lessons.md`.
-  - Older or lower-frequency lessons: `.agents/memory/lessons-archive.md` or `.agents/memory/archive/`.
-  - Active handoff detail: `.agents/memory/current-state.md`.
-  - User/project preferences: `.agents/memory/user-preferences.md`.
-  - Workflow notes: `.agents/memory/workflows.md`.
   - Active change plans: `.agents/memory/changes/<change-id>/`.
-  - Archived completed/rejected/superseded changes: `.agents/memory/archive/changes/`.
-  - Long-form references: `.agents/memory/archive/references/`.
-  - Historical run evidence: `.agents/memory/runs/`.
-  - Evolution drafts: `.agents/memory/candidates/`.
-- Flag whether a short `MEMORY.md` pointer is needed for any Warm or Cold addition.
-- Apply the OpenSpec-inspired lifecycle for plans: keep active proposals/design/tasks/specs together in one change folder, then archive the folder after durable knowledge is consolidated.
+  - Graduated searchable entries: `.agents/memory/memory.db` through `memory-sql`.
+  - Completed plans and non-searchable history: `.agents/memory/archive/`.
+- Recommend a deduplication query before any SQL write.
+- Apply the compact plan lifecycle: keep active proposal/design/tasks together, consolidate durable knowledge, then archive historical material.
 - Distinguish Codex-only, Gemini pending, and Antigravity pending progress when platform scope matters.
 - Flag repeated blockers, workarounds, mistaken assumptions, or hidden tradeoffs that should become memory lessons.
-- Suggest whether Hot/Warm memory compression or lesson pruning may be needed.
-- Treat retrieval, search, RAG, or Graphify output as context, not canonical memory. Graphify may index Cold Memory for navigation, but confirmed insights still need curation into Hot/Warm memory.
+- Suggest whether session-start context compression or lesson pruning may be needed.
+- Treat retrieval, search, RAG, Graphify, or SQL output as context until curated.
 
 Boundaries:
 - Do not edit files under `.agents/memory/`.
@@ -38,7 +33,7 @@ Boundaries:
 - Do not preserve low-value task narration or command-by-command logs.
 
 Return:
-- Recommended memory additions grouped by target file and memory layer.
+- Recommended memory additions grouped by exact target file.
 - Items that should not be saved and why.
 - Any platform-specific labels that should be applied.
 - Compression recommendation, if relevant.

@@ -1,23 +1,23 @@
 ---
-description: Initialize, read, update, audit, or compress .agents/memory/ for this repository. Follows the Hermes-aligned Hot/Warm/Cold structure shared across all agents.
+description: Initialize, read, update, audit, or compress .agents/memory/ for this repository. Follows the shared storage, loading, size, and searchable-history rules.
 ---
 
 # Memory Maintenance
 
 Follow `.claude/skills/memory-manager/SKILL.md` for the full routing rules and lifecycle.
 
-## Memory Structure (Hermes-aligned)
+## Storage And Loading
 
-### Hot (injected at session start)
+### Session-start context
 - `MEMORY.md` — mission, constraints, current state (≤ 2,200 chars)
 - `USER.md` — cross-agent user preferences (≤ 500 chars)
 
-### Warm (on demand)
+### Read on demand
 - `decisions.md` — durable architectural decisions
 - `lessons.md` — concise recurring lessons (tail auto-loaded)
 - `changes/<id>/` — active change plans
 
-### Cold (never auto-loaded)
+### Search or inspect when needed
 - `memory.db` — SQLite FTS5 via `/memory-sql` (Claude Code MCP)
 - `archive/` — completed plans, historical reference
 

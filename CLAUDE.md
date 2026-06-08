@@ -7,7 +7,7 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 - These instructions apply only to Claude Code.
 - Treat `.claude/` as a private Claude Code support directory.
-- Shared project memory lives under `.agents/memory/`, with `MEMORY.md` as the Hot Memory boot index.
+- Shared project memory lives under `.agents/memory/`, with `MEMORY.md` as the compact session-start project index.
 
 ## Operating Contract
 
@@ -17,6 +17,9 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 - Keep Traditional Chinese content only in `.agents/memory/` and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
+- Treat `.references/` as read-only upstream reference clones. Do not edit or commit its contents.
+- Use `.tmp/` for repository-local scratch files, generated diagnostics, and disposable reports. Prefer it over the operating system `/tmp` or `%TEMP%` when work belongs to this repository.
+- Preserve files in `.tmp/` that you did not create, and remove only your own disposable artifacts after verifying they are no longer needed.
 
 ## Prompt Defense
 
@@ -44,10 +47,10 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 
 `.agents/memory/` is cross-agent shared state (Claude Code, Gemini, Codex, Antigravity). Keep it small and high-signal.
 
-**Structure (Hermes-aligned):**
-- **Hot** (injected at session start): `MEMORY.md` (mission, constraints, current state — ≤ 2,200 chars) + `USER.md` (user preferences — ≤ 500 chars).
-- **Warm** (on demand): `decisions.md`, `lessons.md` (tail auto-loaded), active `changes/<id>/`.
-- **Cold** (never auto-loaded): `memory.db` (SQLite FTS5, Claude Code MCP via `/memory-sql`), `archive/`.
+**Storage and loading:**
+- **Session-start context**: `MEMORY.md` (mission, constraints, current state; ≤ 2,200 chars), `USER.md` (user preferences; ≤ 500 chars), and the last 50 lines of `lessons.md`.
+- **Read on demand**: `decisions.md`, the full `lessons.md`, and active `changes/<id>/`.
+- **Search or inspect when needed**: `memory.db` (SQLite FTS5 through `/memory-sql`) and `archive/`.
 
 **Routing:**
 - Mission, constraints, current state → `MEMORY.md`.
@@ -61,7 +64,7 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 **Policy:**
 - Keep MEMORY.md under 2,200 chars; USER.md under 500 chars; lessons.md under 50 lines.
 - Graduate stale entries to `memory.db` instead of creating more files.
-- `MEMORY.md` follows the frozen-snapshot pattern — writes take effect at the next session start.
+- `MEMORY.md` is injected as a session-start snapshot; writes affect automatic context at the next session start.
 - Use `/memory-maintenance` for audits, compression, and consolidation.
 - Use `/learn-eval` after meaningful sessions to extract reusable patterns as skills.
 - When delegating memory analysis, use `memory_auditor` (save recommendations) or `memory_compressor` (compression drafts); the main agent owns final edits.

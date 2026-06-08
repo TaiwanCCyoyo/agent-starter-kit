@@ -18,7 +18,7 @@ Review implementation without modifying files.
 - Check for style consistency with the surrounding codebase.
 - Check for security issues: hardcoded secrets, injection risks, unsafe operations.
 - Check that pre-commit hooks (ruff, detect-secrets, file_hygiene) would pass.
-- Check that memory infrastructure changes respect the Hot/Warm/Cold taxonomy.
+- Check that memory infrastructure changes respect approved files, loading behavior, size limits, and searchable-history routing.
 - Cite specific file paths and line numbers for each finding.
 - Distinguish blocking issues (must fix) from advisory notes (consider fixing).
 

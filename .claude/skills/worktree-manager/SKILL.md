@@ -12,7 +12,7 @@ Two modes serve different needs. Choose based on task duration and memory requir
 | Dimension | Mode A: Quick Isolation | Mode B: Feature Branch |
 |-----------|------------------------|----------------------|
 | **Duration** | Single session, hours | Multi-session, days |
-| **Memory** | No dedicated memory needed | Scoped MEMORY.md + full taxonomy |
+| **Memory** | No dedicated memory needed | Scoped `MEMORY.md` plus the approved memory layout |
 | **Branching** | Auto (built-in tool manages) | Manual branch strategy |
 | **Cleanup** | `ExitWorktree(remove)` | Full finish workflow |
 | **Use when** | Experiments, isolated fixes, subagent tasks | Features, refactors requiring handoff |
@@ -59,7 +59,7 @@ Uses `git worktree add` directly for long-lived branches with dedicated memory a
 
 1. Create the branch and worktree: `git worktree add <path> <branch>`.
 2. Ensure `.agents/memory/MEMORY.md` exists in the worktree (the `session_start.py` hook copies it automatically on first open).
-3. Immediately define the worktree mission in Hot Memory:
+3. Immediately define the worktree mission in the session-start project context:
    - Branch goal.
    - Definition of done.
    - Any constraints from the user request.
@@ -92,7 +92,7 @@ Before removing a worktree:
 When consolidating worktree memory:
 
 1. Identify source and destination memory directories.
-2. Read `MEMORY.md` plus relevant Warm files from both locations.
+2. Read `MEMORY.md` plus relevant on-demand files from both locations.
 3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
 4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
 5. Move completed, rejected, or superseded worktree change plans to `archive/changes/` after consolidation.

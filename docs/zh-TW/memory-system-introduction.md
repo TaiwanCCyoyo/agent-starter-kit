@@ -1,5 +1,7 @@
 # 記憶系統介紹
 
+Hermes 提供的靈感是有限容量的 `MEMORY.md`／`USER.md`、凍結 prompt snapshot、完整 session 搜尋與 learning loop。本 starter kit 直接依各儲存位置的載入與保留行為描述用途，不另外增加分層術語。
+
 記憶系統讓長期 Agent 工作能在不同 session、支援的 Agent 與 Git worktree 之間維持一致。
 
 它用來保存應該超越單一對話的專案狀態：專案目標、持久決策、經驗教訓、目前交接狀態與未完成的後續工作。
@@ -18,17 +20,17 @@
 
 | 元件 | 用途 |
 | :--- | :--- |
-| `.agents/memory/MEMORY.md` | 跨 Agent 熱記憶：任務、約束、目前狀態。≤ 2,200 chars。 |
+| `.agents/memory/MEMORY.md` | Session-start 專案上下文：任務、約束、目前狀態。≤ 2,200 chars。 |
 | `.agents/memory/USER.md` | 跨 Agent 使用者偏好：溝通語言、工作風格。≤ 500 chars。 |
-| `.agents/memory/decisions.md` | 暖記憶：活躍的持久架構決策。 |
-| `.agents/memory/lessons.md` | 暖記憶：簡潔的重複性教訓（尾部由 Claude 自動載入）。 |
+| `.agents/memory/decisions.md` | 需要時讀取的活躍持久架構決策。 |
+| `.agents/memory/lessons.md` | 需要時讀取的簡潔重複性教訓（尾部由 Claude 與 Codex 自動載入）。 |
 | `.agents/memory/changes/` | 活躍多步驟變更計畫（proposal、design、tasks）。 |
-| `.agents/memory/memory.db` | 冷記憶：SQLite FTS5，儲存已畢業的教訓、決策與 session 元資料（僅 Claude Code MCP）。 |
-| `.agents/memory/archive/` | 冷記憶：已完成的變更計畫與歷史參考資料。 |
+| `.agents/memory/memory.db` | 共用可搜尋歷史：SQLite FTS5，儲存已畢業的教訓、決策、workflow、candidate 與 session 元資料（Claude Code 與 Codex MCP）。 |
+| `.agents/memory/archive/` | 檔案式歷史：已完成的變更計畫與參考資料。 |
 | SessionStart hooks | 在 session 開始時注入一次 `MEMORY.md` + `USER.md`（凍結快照），同時為 Claude 注入 `lessons.md` 尾部。 |
 | Stop/AfterAgent reminders | 在有程式碼變更後提醒更新記憶；超過 5 次回覆後提示技能審查。 |
-| `memory-maintenance` / `memory-manager` | 完整記憶結構的路由規則、生命週期與健康標準。 |
-| `memory-sql` | Claude Code MCP skill，透過 `memory-db` MCP server 查詢和寫入 `memory.db`。 |
+| `memory-manager` | 完整記憶結構的路由規則、生命週期與健康標準。 |
+| `memory-sql` | Claude Code 與 Codex skills，透過各平台原生 MCP 設定查詢和寫入共用 `memory.db`。 |
 | `learn-eval` / `skill-curator` | session 模式萃取的品質門，確認後才寫入 skill 檔案。 |
 | Worktree sync | 在第一次 session 時從主 repo 複製記憶到新 worktree。 |
 
@@ -40,7 +42,7 @@ Codex 使用：
 
 - `.codex/hooks/session_start.py` 注入 `.codex/AGENTS.md`、分支上下文與 `.agents/memory/MEMORY.md`。
 - `.codex/hooks/stop_memory_check.py` 發出低噪音的記憶更新與壓縮提醒。
-- `.codex/skills/save-memory/SKILL.md`、`.codex/skills/compress-memory/SKILL.md` 與 `.codex/skills/memory-maintenance/SKILL.md`。
+- `.codex/skills/save-memory/SKILL.md`、`.codex/skills/compress-memory/SKILL.md` 與 `.codex/skills/memory-manager/SKILL.md`。
 
 當 Gemini 或 Antigravity 尚未同步對應行為時，Codex-specific 進度應明確記錄為 Codex-specific。
 
@@ -107,9 +109,11 @@ Antigravity 主要使用 `.agent/workflows/` 與 `.agent/rules/` 作為指令和
 
 ## 記憶寫入模型
 
-**凍結快照**：Hot Memory（`MEMORY.md`）在 session 開始時注入一次。工具寫入立即生效於磁碟，但不會更新正在執行的 session 的系統提示——下一個 session 才會讀取更新後的檔案。這可保留 LLM 前綴快取。
+**凍結快照**：`MEMORY.md` 與 `USER.md` 在 session 開始時注入一次。工具寫入立即生效於磁碟，但不會更新正在執行的 session 系統提示；下一個 session 才會讀取更新後的檔案。這可保留 LLM 前綴快取。
 
 **§ 分隔符**：當記憶區塊包含多個原子條目時，以單獨一行的 `§` 分隔，便於可靠解析。
+
+**Transcript capture 與記憶整理是兩件事**：Hermes 會保存並索引每一則 user、assistant 與 tool message，讓 `session_search` 能回傳實際歷史訊息。這不代表自動挑選重要內容；重要事實仍需另外整理到有限容量 memory 或 skills。本 starter kit 目前保存精選條目，沒有保存完整訊息串。
 
 ## 提醒行為
 

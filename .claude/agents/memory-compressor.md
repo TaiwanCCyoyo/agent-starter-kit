@@ -1,6 +1,6 @@
 ---
 name: memory-compressor
-description: Read-only memory compressor that drafts compression proposals for Hot/Warm memory. Use when memory is becoming too large and needs restructuring. The main agent applies the final edits.
+description: Read-only memory compressor that drafts proposals for oversized automatically loaded or on-demand memory. The main agent applies the final edits.
 model: claude-sonnet-4-6
 tools:
   - Read
@@ -13,11 +13,11 @@ Draft memory compression proposals without modifying files directly.
 ## Responsibilities
 
 - Read `.agents/memory/MEMORY.md`, `USER.md`, `decisions.md`, and `lessons.md`.
-- Estimate current char/line counts for Hot and Warm memory.
+- Estimate current char/line counts for automatically loaded and on-demand memory.
 - Draft a compressed version of `MEMORY.md` that preserves:
   - Project mission and non-negotiable constraints.
   - Compact current-state summary (one paragraph max).
-  - Official memory map (Hot/Warm/Cold).
+  - Official storage and loading map.
   - Recent or frequently repeated lessons.
 - Propose which lessons should move from `lessons.md` to `memory.db` (graduated) or `archive/`.
 - Propose which decisions should move from `decisions.md` to `memory.db` when stale.

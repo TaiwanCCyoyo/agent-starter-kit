@@ -12,8 +12,8 @@ When creating a worktree (Mode B — Feature Branch):
 
 1. Create the branch and worktree with `git worktree add <path> <branch>`.
 2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Copy or initialize the Hermes-aligned memory taxonomy when relevant: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, `archive/`.
-4. Immediately define the worktree mission in Hot Memory:
+3. Copy or initialize the approved memory layout when relevant: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, `archive/`.
+4. Immediately define the worktree mission in the session-start project context:
    - Branch goal.
    - Definition of done.
    - Any constraints from the user request.
@@ -45,7 +45,7 @@ Before removing a worktree:
 When consolidating worktree memory:
 
 1. Identify source and destination memory directories.
-2. Read `MEMORY.md` plus relevant Warm files from both locations.
+2. Read `MEMORY.md` plus relevant on-demand files from both locations.
 3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
 4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
 5. Move completed, rejected, or superseded worktree change plans to `archive/` after consolidation.

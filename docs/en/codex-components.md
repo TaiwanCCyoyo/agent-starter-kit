@@ -1,53 +1,101 @@
 # Codex Components Reference
 
-This document describes the Codex-specific layer in this starter kit. Codex does not mirror Claude Code slash commands one-to-one; it uses native planning, repo-scoped skills, specialist reviewer agents, and lightweight hooks.
+This document describes the Codex-specific layer. Codex uses native Plan Mode, repo-scoped skills, specialist subagents, project hooks, plugins, and project-scoped MCP servers rather than mirroring Claude Code slash commands.
 
-## Native Planning
+## Native Equivalents
 
-Codex planning is handled by the main agent through Plan Mode and `<proposed_plan>` output. This repository intentionally does not define a separate `planner` agent or a Claude-style command layer for Codex.
-
-Use planning when the task needs product intent, architecture tradeoffs, migration shape, or a decision-complete implementation handoff.
+| Claude/ECC concept | Codex implementation |
+| :--- | :--- |
+| `/plan` and planner agent | Native Plan Mode and `<proposed_plan>` |
+| Loop operator | `verification-loop` skill |
+| GitHub operations skill | Installed GitHub plugin |
+| Slash commands | Natural-language skill triggers |
+| `memory-db` MCP | Project-scoped `.codex/config.toml` server |
 
 ## Agents
 
 | Agent | Purpose |
 | :--- | :--- |
-| `repo_explorer` | Read-only repository orientation and codebase discovery. |
-| `implementation_reviewer` | General correctness, regression, test coverage, and unintended-diff review. |
-| `python_reviewer` | Python typing, ruff, logging, tests, and maintainability review. |
-| `security_reviewer` | Secrets, unsafe commands, injection risks, dependency surfaces, and permission boundaries. |
-| `performance_reviewer` | Targeted latency, throughput, memory, algorithmic, and tooling-cost review. |
-| `commit_specialist` | Staged-change review, Conventional Commit drafting, and explicit commit execution. |
-| `doc_translator` | Bounded translation edits for explicit target documents. |
-| `memory_auditor` / `memory_compressor` | Read-only memory maintenance analysis and compression drafts. |
-
-Specialist reviewers are optional analysis tools. They supplement the main Codex agent and do not replace Codex's implementation or planning flow.
+| `repo_explorer` | Read-only repository orientation and dependency tracing |
+| `implementation_reviewer` | Correctness, regression, test coverage, and unintended-diff review |
+| `python_reviewer` | Python typing, ruff, logging, tests, and maintainability review |
+| `security_reviewer` | Secrets, unsafe commands, injection, dependency, and permission review |
+| `performance_reviewer` | Targeted latency, throughput, memory, complexity, and tooling-cost review |
+| `commit_specialist` | Staged-change review and explicit commit execution from the repository root |
+| `doc_translator` | Bounded translation edits |
+| `memory_auditor` / `memory_compressor` | Read-only memory recommendations and compression drafts |
 
 ## Skills
 
 | Skill | Purpose |
 | :--- | :--- |
-| `coding-standards` | Codex-native architecture judgment, scoped implementation, and review readiness. |
-| `python-testing` | Focused Python test and static-check strategy. |
-| `verification-loop` | Concise implement-check-fix workflow without a separate loop operator agent. |
-| `gen-commit` | Commit review and Conventional Commit workflow. |
-| `memory-maintenance`, `save-memory`, `compress-memory` | Shared memory lifecycle operations. |
-| `worktree-manager` | Worktree creation, finish, and memory consolidation workflow. |
+| `coding-standards` | Codex-native architecture and scoped implementation judgment |
+| `python-testing` | Focused Python regression and static-check strategy |
+| `tdd-workflow` | Risk-based RED-GREEN-REFACTOR workflow adapted from ECC |
+| `verification-loop` | Concise implement-check-fix workflow |
+| `gen-commit` | Commit review and Conventional Commit workflow |
+| `memory-manager`, `save-memory`, `compress-memory` | Shared project memory lifecycle |
+| `memory-sql` | Shared SQLite FTS5 history queries and curated writes |
+| `skill-review` | ECC-style extraction quality gate and manual Hermes-style curation |
+| `worktree-manager` | Worktree lifecycle with memory consolidation |
 
 ## Hooks And Gates
 
 | Layer | Responsibility |
 | :--- | :--- |
-| `.codex/hooks/session_start.py` | Injects Codex instructions, memory, branch, and worktree context. |
-| `.codex/hooks/post_tool_use_hygiene.py` | Fast targeted feedback after edits. Python files are formatted, linted, checked for file hygiene, and warned on `print()` calls. Text/config files run file hygiene only. |
-| `.codex/hooks/stop_memory_check.py` | Nudges memory updates and checks memory size after sustained work. |
-| `.pre-commit-config.yaml` | Repository-level commit gate for file hygiene, secrets, ruff, no-print Python hygiene, and full-project mypy. |
+| `.codex/hooks/session_start.py` | Initializes the approved taxonomy and injects `MEMORY.md`, `USER.md`, and the lesson tail |
+| `.codex/hooks/post_tool_use_hygiene.py` | Runs targeted formatting, lint, file hygiene, and Python print checks |
+| `.codex/hooks/stop_memory_check.py` | Enforces memory limits, strict taxonomy, session-scoped reminders, SQL graduation guidance, and one-time skill review |
+| `.pre-commit-config.yaml` | Repository commit gate for hygiene, secrets, ruff, no-print checks, and mypy |
 
-Shared hygiene logic belongs in `scripts/` so it works from PowerShell, Bash, Git Bash, and CI.
+## Searchable Memory MCP
 
-## Design Notes
+`.codex/config.toml` defines `memory-db` as a project-scoped stdio MCP server:
 
-- No Codex `planner` agent: native Plan Mode owns planning.
-- No Codex `loop-operator` agent: iterative verification lives in the `verification-loop` skill.
-- No Codex slash-command layer: command-like behavior is represented by skills and natural-language triggers.
-- Full-project `mypy .` belongs in pre-commit and CI, not the post-edit hook.
+- Command: `uvx mcp-server-sqlite`
+- Database: `.agents/memory/memory.db`
+- Working directory: repository root through `cwd = ".."`
+- Read tools: automatic approval
+- Schema and write tools: prompt for approval
+- Startup failure: non-fatal (`required = false`)
+
+Claude and Codex target the same ignored database. Both use the same schema and FTS5 triggers, but each platform has its own configuration format.
+
+## ECC Adaptation
+
+Ported or adapted:
+
+- Coding, Python testing, TDD, verification, security, performance, and review principles.
+- Prompt Defense baseline.
+- Functional-test requirement for hook or script changes.
+- Session skill-review quality gate.
+
+Replaced by Codex-native capability:
+
+- Planner agent and `/plan` command.
+- Loop operator.
+- GitHub operations workflow.
+- Claude slash-command wrappers.
+
+Not ported:
+
+- ECC observation/instinct pipeline and background learning process.
+- Hookify and harness-internal tooling.
+- Language/domain workflows not used by this starter kit.
+
+## Hermes Adaptation
+
+Implemented:
+
+- Bounded `MEMORY.md` and `USER.md`.
+- Frozen session-start snapshots.
+- Compact session-start files, on-demand files, and SQLite FTS5 searchable history.
+- Curated, deduplicated graduation from active files into searchable history.
+- Manual skill review and lifecycle decisions.
+
+Not implemented:
+
+- Automatic capture of every conversation message.
+- Transparent transcript recall.
+- Hermes background skill curator.
+- A persistent asynchronous memory process.
