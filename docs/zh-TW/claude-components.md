@@ -33,16 +33,16 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | 在保留行為的前提下簡化程式碼結構 |
 | `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | 監控自主循環並安全介入 |
 | `performance-optimizer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | 識別瓶頸、最佳化演算法與查詢 |
-| `planner` | opus | Read, Grep, Glob | 建立詳細實作計畫；確認後才開始撰寫程式碼 |
 | `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python 專屬審查：型別提示、安全性、Pythonic 慣例 |
 | `security-reviewer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | OWASP Top 10、機密偵測、交易安全性 |
 | `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | 尋找被吞掉的例外、錯誤的 fallback、遺漏的錯誤傳播 |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | 強制執行 Red-Green-Refactor；目標涵蓋率 80%+ |
+| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | 可委派的 TDD 子 agent；遵循 `superpowers:test-driven-development` 工作流程；目標涵蓋率 80%+ |
 
 ### 未從 ECC 移植（含原因）
 
 | Agent | 原因 |
 |---|---|
+| `planner` | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代 |
 | `refactor-cleaner` | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python |
 | `harness-optimizer` | 需要 ECC 內部的 `/harness-audit`；無法移植 |
 | 所有 `*-build-resolver`（共 11 個 agents） | 未使用非 Python 語言 |
@@ -107,21 +107,26 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `memory-manager` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型、Hermes 對齊路由規則與大小健康標準 |
 | `memory-sql` | SQLite FTS5 可搜尋歷史：schema、session 記錄、搜尋查詢與路由規則 |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
-| `worktree-manager` | Worktree 建立／完成／合併，並整合記憶體；雙模式：Mode A 使用內建 `EnterWorktree`/`ExitWorktree`，Mode B 使用 git worktree 搭配完整生命週期 |
+| `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期由 Superpowers 提供。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
 | Skill | 用途 |
 |---|---|
-| `coding-standards` | 跨語言基準：KISS/DRY/YAGNI、命名規範、錯誤處理 |
 | `cost-aware-llm-pipeline` | LLM 成本控制：模型路由、預算追蹤、提示快取 |
-| `eval-harness` | Claude Code 工作階段的正式評估框架 |
-| `git-workflow` | 分支策略、commit 慣例、衝突解決 |
+| `eval-harness` | Claude Code 工作階段的正式評估框架（EDD、pass@k） |
 | `github-ops` | CI/CD 除錯、版本管理、Dependabot 監控 |
 | `llm-trading-agent-security` | 交易代理安全性：消費上限、斷路器、金鑰處理 |
-| `python-testing` | pytest、fixtures、mocking、parametrization、涵蓋率 |
-| `tdd-workflow` | Red-Green-Refactor 循環，目標涵蓋率 80%+ |
-| `verification-loop` | 執行 → 分析 → 修正的迭代流程 |
+| `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。通用 TDD 由 Superpowers 提供。 |
+
+### 已移除（2026-06-08 清理——Superpowers 現已涵蓋這些功能）
+
+| Skill | 原因 |
+|---|---|
+| `coding-standards` | Superpowers + 縮減後的 `coding-style` rule 已涵蓋 |
+| `tdd-workflow` | 由 `superpowers:test-driven-development` 取代 |
+| `verification-loop` | 由 Superpowers TDD/debugging/completion-verification 取代 |
+| `git-workflow` | 716 行 Git 教科書；repo 提交規範已在 `git-workflow` rule + `commit-helper` skill |
 
 ### 未從 ECC 移植（含原因）
 

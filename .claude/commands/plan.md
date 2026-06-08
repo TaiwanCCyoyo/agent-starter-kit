@@ -181,7 +181,7 @@ If you want changes, respond with:
 ## Integration with Other Commands
 
 After planning:
-- Use the `tdd-workflow` skill to implement with test-driven development
+- Use `superpowers: test-driven-development` to implement with test-driven development
 - Use `/build-fix` if build errors occur
 - Use `/code-review` to review completed implementation
 - Use `/pr` or `/prp-pr` to open a pull request
@@ -189,12 +189,3 @@ After planning:
 > **Need requirements first?** Use `/plan-prd` for a lean PRD at `.claude/prds/{name}.prd.md`.
 >
 > **Need the legacy PRP flow?** Use `/prp-plan` for deep PRP planning with `.claude/PRPs/` artifacts. Use `/prp-implement` to execute those plans with rigorous validation loops.
-
-## Optional Planner Agent
-
-ECC also provides a `planner` agent for manual installs that include agent files. Use it only when the local runtime already exposes that subagent and the user explicitly asks you to delegate planning.
-
-If the `planner` subagent is unavailable, continue planning inline instead of surfacing an "Agent type 'planner' not found" error.
-
-For manual installs, the source file lives at:
-`agents/planner.md`

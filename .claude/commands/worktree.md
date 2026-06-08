@@ -4,7 +4,7 @@ description: Create, manage, finish, merge, or clean up Git worktrees while pres
 
 # Worktree Manager
 
-Follow `.claude/skills/worktree-manager/SKILL.md` for the full dual-mode procedure and safety rules.
+Follow `.claude/skills/worktree-memory-sync/SKILL.md` for the repository-specific `.memories/` synchronization rules. Worktree lifecycle (creation, branching, setup, finish, cleanup) is provided by Superpowers.
 
 ## Creation
 

@@ -31,7 +31,7 @@ Write a failing test that describes the expected behavior.
 
 ### 2. Run Test -- Verify it FAILS
 ```bash
-npm test
+uv run python -m pytest
 ```
 
 ### 3. Write Minimal Implementation (GREEN)
@@ -44,7 +44,7 @@ Remove duplication, improve names, optimize -- tests must stay green.
 
 ### 6. Verify Coverage
 ```bash
-npm run test:coverage
+uv run python -m pytest --cov
 # Required: 80%+ branches, functions, lines, statements
 ```
 
@@ -86,7 +86,7 @@ npm run test:coverage
 - [ ] Assertions are specific and meaningful
 - [ ] Coverage is 80%+
 
-For detailed mocking patterns and framework-specific examples, see `skill: tdd-workflow`.
+For the TDD workflow protocol, follow `superpowers: test-driven-development`. For repository-specific test commands, see `skill: python-testing`.
 
 ## v1.8 Eval-Driven TDD Addendum
 

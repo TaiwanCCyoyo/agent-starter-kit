@@ -99,7 +99,7 @@ Available slash commands and their corresponding skills:
 | `/memory-sql` | `.claude/skills/memory-sql/SKILL.md` |
 | `/compress-memory` | — (command only) |
 | `/save-memory` | — (command only) |
-| `/worktree` | `.claude/skills/worktree-manager/SKILL.md` |
+| `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 

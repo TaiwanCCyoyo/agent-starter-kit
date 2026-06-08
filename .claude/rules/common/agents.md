@@ -2,50 +2,43 @@
 
 ## Available Agents
 
-Located in `~/.claude/agents/`:
+Located in `.claude/agents/`:
 
 | Agent | Purpose | When to Use |
 |-------|---------|-------------|
-| planner | Implementation planning | Complex features, refactoring |
 | architect | System design | Architectural decisions |
 | tdd-guide | Test-driven development | New features, bug fixes |
 | code-reviewer | Code review | After writing code |
-| security-reviewer | Security analysis | Before commits |
-| build-error-resolver | Fix build errors | When build fails |
-| e2e-runner | E2E testing | Critical user flows |
-| refactor-cleaner | Dead code cleanup | Code maintenance |
-| doc-updater | Documentation | Updating docs |
-| rust-reviewer | Rust code review | Rust projects |
-| harmonyos-app-resolver | HarmonyOS app development | HarmonyOS/ArkTS projects |
+| code-simplifier | Simplify and refine code | After implementation |
+| python-reviewer | Python-specific review | Python code changes |
+| security-reviewer | Security analysis | Before commits with auth/input/API changes |
+| performance-optimizer | Performance analysis | Bottlenecks, slow code |
+| silent-failure-hunter | Swallowed errors, bad fallbacks | Reliability concerns |
+| loop-operator | Autonomous loop monitoring | Long-running agent loops |
+| repo-explorer | Codebase exploration | Finding files and patterns |
+| implementation-reviewer | Read-only code review | Pre-commit correctness check |
+| commit-specialist | Commit message drafting | Generating Conventional Commits |
+| doc-translator | EN→zh-TW translation | `docs/en/` → `docs/zh-TW/` |
+| memory-auditor | Memory audit (read-only) | After meaningful sessions |
+| memory-compressor | Memory compression drafts | When bounded files are too large |
 
-## Immediate Agent Usage
+## When to Use Agents
 
-No user prompt needed:
-1. Complex feature requests - Use **planner** agent
-2. Code just written/modified - Use **code-reviewer** agent
-3. Bug fix or new feature - Use **tdd-guide** agent
-4. Architectural decision - Use **architect** agent
+- Complex feature or refactor → use **Native Plan Mode** (`/plan`), not an agent
+- Code just written → **code-reviewer**
+- New feature or bug fix → **tdd-guide**
+- Architectural decision → **architect**
+- Security-sensitive change → **security-reviewer**
 
-## Parallel Task Execution
+## Parallel Execution
 
-ALWAYS use parallel Task execution for independent operations:
+Run independent agents in parallel (single message, multiple Agent tool calls):
 
-```markdown
-# GOOD: Parallel execution
-Launch 3 agents in parallel:
-1. Agent 1: Security analysis of auth module
-2. Agent 2: Performance review of cache system
-3. Agent 3: Type checking of utilities
-
-# BAD: Sequential when unnecessary
-First agent 1, then agent 2, then agent 3
 ```
+# GOOD: parallel
+Agent 1: security analysis of auth module
+Agent 2: performance review of cache layer
 
-## Multi-Perspective Analysis
-
-For complex problems, use split role sub-agents:
-- Factual reviewer
-- Senior engineer
-- Security expert
-- Consistency reviewer
-- Redundancy checker
+# BAD: sequential when not needed
+First agent 1, then agent 2
+```

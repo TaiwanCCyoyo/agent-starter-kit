@@ -33,16 +33,16 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | Simplify code structure while preserving behavior |
 | `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | Monitor and safely intervene in autonomous loops |
 | `performance-optimizer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | Identify bottlenecks, optimize algorithms and queries |
-| `planner` | opus | Read, Grep, Glob | Create detailed implementation plans; waits for confirmation before coding |
 | `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python-specific review: type hints, security, Pythonic idioms |
 | `security-reviewer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | OWASP Top 10, secrets detection, trading security |
 | `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | Find swallowed exceptions, bad fallbacks, missing error propagation |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | Enforce Red-Green-Refactor; target 80%+ coverage |
+| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | Delegatable TDD subagent; follows `superpowers:test-driven-development` workflow; targets 80%+ coverage |
 
 ### Not ported from ECC (with reasons)
 
 | Agent | Reason |
 |---|---|
+| `planner` | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`) |
 | `refactor-cleaner` | Depends on Node.js tools (knip, depcheck, ts-prune); Python project |
 | `harness-optimizer` | Requires ECC-internal `/harness-audit`; not portable |
 | All `*-build-resolver` (11 agents) | Non-Python languages not in use |
@@ -107,21 +107,26 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `memory-manager` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model, Hermes-aligned routing rules, and size health criteria |
 | `memory-sql` | SQLite FTS5 searchable history: schema, session recording, search queries, and routing rules |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
-| `worktree-manager` | Worktree create/finish/merge with memory consolidation; dual-mode: Mode A uses built-in `EnterWorktree`/`ExitWorktree`, Mode B uses git worktree with full lifecycle |
+| `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle is provided by Superpowers. |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
 | Skill | Purpose |
 |---|---|
-| `coding-standards` | Cross-language baseline: KISS/DRY/YAGNI, naming, error handling |
 | `cost-aware-llm-pipeline` | LLM cost control: model routing, budget tracking, prompt caching |
-| `eval-harness` | Formal evaluation framework for Claude Code sessions |
-| `git-workflow` | Branching strategies, commit conventions, conflict resolution |
+| `eval-harness` | Formal evaluation framework for Claude Code sessions (EDD, pass@k) |
 | `github-ops` | CI/CD debugging, release management, Dependabot monitoring |
 | `llm-trading-agent-security` | Trading agent security: spend limits, circuit breakers, key handling |
-| `python-testing` | pytest, fixtures, mocking, parametrization, coverage |
-| `tdd-workflow` | Red-Green-Refactor cycle, 80%+ coverage target |
-| `verification-loop` | Run → analyze → fix iteration |
+| `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. General TDD provided by Superpowers. |
+
+### Removed (2026-06-08 cleanup — Superpowers now covers these)
+
+| Skill | Reason |
+|---|---|
+| `coding-standards` | Superpowers + narrowed `coding-style` rule cover this |
+| `tdd-workflow` | Replaced by `superpowers:test-driven-development` |
+| `verification-loop` | Replaced by Superpowers TDD/debugging/completion-verification |
+| `git-workflow` | 716-line Git textbook; repo commit policy is in the `git-workflow` rule + `commit-helper` skill |
 
 ### Not ported from ECC (with reasons)
 
