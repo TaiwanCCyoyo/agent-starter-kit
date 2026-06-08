@@ -22,6 +22,7 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | 唯讀程式碼審查：正確性、風格、安全性 |
 | `memory-auditor` | sonnet | Read, Grep, Glob | 在重大工作完成後建議記憶體更新 |
 | `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 session-start context 與按需記憶的壓縮提案 |
+| `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）

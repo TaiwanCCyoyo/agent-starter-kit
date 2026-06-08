@@ -22,6 +22,7 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | Read-only code review: correctness, style, security |
 | `memory-auditor` | sonnet | Read, Grep, Glob | Recommend memory updates after significant work |
 | `memory-compressor` | sonnet | Read, Grep, Glob | Draft compression proposals for automatically loaded and on-demand memory |
+| `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies |
 
 ### Development (ported from ECC v2.0.0-rc.1)
