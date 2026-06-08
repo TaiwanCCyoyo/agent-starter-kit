@@ -169,9 +169,13 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
 
-### 整合 Superpowers 技能（供 Antigravity 使用）
+### 整合 Superpowers 技能
 
-為了提供 Antigravity 代理人強大的推理與任務執行能力（例如結構化需求釐清與測試驅動開發），本儲存庫整合了源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能。這些技能已複製至 `.agent/skills/` 底下，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
+本儲存庫在三個 Agent 中均整合了 superpowers 能力：
+
+- **Claude Code**：官方外掛 `superpowers@claude-plugins-official` 已於 `.claude/settings.json` 啟用，無需手動安裝，自動生效。
+- **Antigravity**：源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能已複製至 `.agent/skills/`，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
+- **Codex**：尚未預先設定 superpowers，請依照 [obra/superpowers](https://github.com/obra/superpowers) 的說明自行安裝。
 
 ## 設計來源
 
