@@ -1,13 +1,14 @@
 # Testing Requirements
 
-## Minimum Coverage: 80%
+## Coverage Target: 80%
 
-All three test types are required:
+Unit and integration tests are the baseline. Add E2E tests for critical user flows when the project warrants it.
+
 1. **Unit** — individual functions and utilities
-2. **Integration** — API endpoints, database operations
-3. **E2E** — critical user flows
+2. **Integration** — component boundaries, data access
+3. **E2E** — critical flows only, added when the project reaches that scale
 
-TDD workflow is provided by `superpowers: test-driven-development`. Repository-specific test commands are in `skill: python-testing`.
+TDD workflow is provided by `superpowers: test-driven-development`. Repository-specific test commands and coverage tooling are in `skill: python-testing`.
 
 ## Test Structure (AAA Pattern)
 
