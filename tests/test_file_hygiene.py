@@ -11,6 +11,10 @@ class FileHygieneLanguageTests(unittest.TestCase):
         self.assertTrue(is_path_allowed(".references/hermes-agent/README.zh-CN.md"))
         self.assertTrue(is_path_allowed(".tmp/reports/implementation-report.zh-TW.md"))
 
+    def test_memory_paths_allow_cjk(self) -> None:
+        self.assertTrue(is_path_allowed(".memories/memories/USER.md"))
+        self.assertTrue(is_path_allowed(".memories/memories/MEMORY.md"))
+
     def test_regular_english_path_does_not_allow_cjk(self) -> None:
         self.assertFalse(is_path_allowed("docs/en/example.md"))
 

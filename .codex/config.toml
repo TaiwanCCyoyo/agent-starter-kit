@@ -7,7 +7,7 @@ max_depth = 1
 
 [mcp_servers.memory-db]
 command = "uvx"
-args = ["mcp-server-sqlite", "--db-path", ".agents/memory/memory.db"]
+args = ["mcp-server-sqlite", "--db-path", ".memories/memory_store.db"]
 cwd = ".."
 enabled = true
 required = false

@@ -1,16 +1,15 @@
 ---
 name: save-memory
-description: Use when the user asks Codex to save project state, decisions, lessons, preferences, plans, or handoff notes.
+description: Use when the user asks Codex to save durable project facts, user preferences, recurring problems, or verified resolutions.
 ---
 
 # Save Memory
 
-Follow `memory-manager`.
-
-1. Read the target layer before editing.
-2. Route mission/state to `MEMORY.md`, preferences to `USER.md`, active decisions to `decisions.md`, recurring lessons to `lessons.md`, and active plans to `changes/<id>/`.
-3. Use `memory-sql` for graduated searchable entries and session metadata.
-4. Put completed non-searchable history in `archive/`.
-5. Search for duplicates before adding content.
-6. Keep entries concise, project-specific, and free of secrets or raw transcript narration.
-7. Report the saved location in Traditional Chinese.
+1. Read the current bounded files and query `memory_store.db` for duplicates.
+2. Route stable project facts needed in most sessions to `MEMORY.md`.
+3. Route stable user preferences to `USER.md`.
+4. Route searchable facts and decisions to Holographic-compatible `facts`.
+5. Route repeated blockers and evidence to `problem_patterns` and `problem_occurrences`.
+6. Save root causes and fixes to `resolutions`; use `verified` only after concrete checks pass.
+7. Keep plans, transcripts, and task narration outside memory.
+8. Recheck file limits and database consistency.

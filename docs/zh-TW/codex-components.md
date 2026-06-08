@@ -35,7 +35,7 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 | `verification-loop` | 精簡的實作、檢查、修正循環 |
 | `gen-commit` | Commit 審查與 Conventional Commit workflow |
 | `memory-manager`、`save-memory`、`compress-memory` | 共用專案記憶生命週期 |
-| `memory-sql` | 共用 SQLite FTS5 可搜尋歷史查詢與精選寫入 |
+| `memory-sql` | 與 Holographic 相容的 SQLite facts 與重複問題 workflow |
 | `skill-review` | ECC 萃取品質門與手動 Hermes 式技能整理 |
 | `worktree-manager` | 含記憶整合的 worktree 生命週期 |
 
@@ -43,7 +43,7 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 
 | 元件 | 用途 |
 | :--- | :--- |
-| `.codex/hooks/session_start.py` | 初始化核准 taxonomy，注入 `MEMORY.md`、`USER.md` 與 lessons 尾部 |
+| `.codex/hooks/session_start.py` | 初始化 `.memories/` 與 SQLite schema，並注入 `MEMORY.md`、`USER.md` |
 | `.codex/hooks/post_tool_use_hygiene.py` | 執行聚焦格式化、lint、檔案 hygiene 與 Python print 檢查 |
 | `.codex/hooks/stop_memory_check.py` | 容量、嚴格 taxonomy、session 隔離提醒、SQL 畢業指引與一次性 skill review |
 | `.pre-commit-config.yaml` | Hygiene、secrets、ruff、no-print 與 mypy commit gate |
@@ -53,13 +53,13 @@ Codex 使用原生 Plan Mode、repo skills、專用 subagents、project hooks、
 `.codex/config.toml` 將 `memory-db` 定義為專案級 stdio MCP：
 
 - 使用 `uvx mcp-server-sqlite`
-- 資料庫為 `.agents/memory/memory.db`
+- 資料庫為 `.memories/memory_store.db`
 - 透過 `cwd = ".."` 從 repo root 啟動
 - 讀取工具自動核准
 - Schema 與寫入工具需要提示核准
 - 啟動失敗不會阻止 Codex 啟動
 
-Claude 與 Codex 指向同一個被 gitignore 的資料庫，使用相同 schema 與 FTS5 triggers，但各自採用平台原生設定格式。
+目前遷移僅完成 Codex；Claude Code、Gemini CLI 與 Antigravity 仍需各自遷移 adapter。
 
 ## ECC 對應
 
@@ -89,8 +89,8 @@ Claude 與 Codex 指向同一個被 gitignore 的資料庫，使用相同 schema
 
 - 有容量上限的 `MEMORY.md` 與 `USER.md`。
 - SessionStart 凍結快照。
-- 精簡的 session-start 檔案、按需讀取檔案，以及 SQLite FTS5 可搜尋歷史。
-- 去重後，將精選內容移入可搜尋歷史的流程。
+- 與 Hermes 相容的有界檔案與凍結 session-start snapshot。
+- 與 Holographic 相容的 SQLite facts、FTS5、entities、trust metadata、重複問題 occurrences 與已驗證 resolutions。
 - 手動 skill review 與生命週期判斷。
 
 尚未實作：

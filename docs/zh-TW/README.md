@@ -5,7 +5,7 @@
 
 ## 核心理念
 
-1. **長期記憶持久化**：Agent 透過 `.agents/memory/MEMORY.md` 保存專案目標與經驗，降低跨 session 的上下文流失。
+1. **長期記憶持久化**：Codex 透過 `.memories/memories/MEMORY.md` 與 `.memories/memory_store.db` 保存跨 session 的專案記憶。
 2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層，但共用同一份專案記憶。
 3. **自動化維護**：格式化、lint、檔案衛生檢查與記憶提醒由 Agent hooks 與 repository 驗證腳本執行。
 4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
@@ -20,7 +20,7 @@
 
 ### 1. 日常使用
 
-- **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.agents/memory/MEMORY.md`。
+- **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.memories/memories/MEMORY.md` 或 `.memories/memory_store.db`。
 - **自動提醒**：當 Agent 已經進行多輪工作且仍有 pending changes 時，hook 會提醒更新記憶。
 - **記憶壓縮**：當 `MEMORY.md` 過大時，系統會提醒進行壓縮。
 
@@ -166,7 +166,8 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 | Path | 用途 |
 | :--- | :--- |
-| `.agents/memory/` | 共用長期專案記憶位置。 |
+| `.memories/` | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。 |
+| `.agents/` | 可提交至 Git 的共用 Agent 基礎設施。 |
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.gemini/` | Gemini CLI commands、policies、hooks、skills。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
@@ -174,7 +175,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 
-複製後，請將 `.agents/memory/MEMORY.md` 替換成目標專案的真實 mission，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
+複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
 
 ### 整合 Superpowers 技能（供 Antigravity 使用）
 
@@ -207,8 +208,8 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 ### 為新專案初始化記憶
 儲存庫初始化完成後：
-1. 請確認 `.agents/memory/MEMORY.md` 中的專案 **Mission（任務）** 區塊已填寫完畢。
+1. 請確認 `.memories/memories/MEMORY.md` 已記錄必要的專案長期資訊。
 
 ---
 
-本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/` 與 `.agents/memory/`。
+本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/` 與 `.memories/`。

@@ -5,27 +5,24 @@ description: Use when creating, managing, finishing, merging, or cleaning up Git
 
 # Worktree Manager
 
-## Creation
+## Start
 
-1. Create the branch and worktree with `git worktree add`.
-2. Copy missing ignored memory from the main workspace without overwriting local worktree memory.
-3. Ensure the approved taxonomy exists: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, and `archive/`.
-4. Define the branch goal and definition of done in `MEMORY.md`.
+1. Identify the main repository and target worktree.
+2. Copy missing `.memories/` items from the main workspace without overwriting worktree-local memory.
+3. Ensure `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db` exist.
+4. Confirm the branch goal through Codex native planning or user alignment.
 
-## Active Work
+## During Work
 
-- Keep compact branch status in `MEMORY.md`.
-- Keep detailed multi-step plans under `changes/<id>/`.
-- Keep active decisions and recurring lessons concise.
-- Query shared searchable history with `memory-sql` when historical context is needed.
+- Keep stable cross-session facts in the bounded files.
+- Query and update structured facts or recurring-problem history through `memory-sql`.
+- Keep plans in Codex planning state, `.tmp/`, or maintained `docs/`.
 
 ## Finish
 
-1. Verify the definition of done and run relevant checks.
-2. Compare worktree and main memory.
-3. Consolidate only durable, non-duplicate state, decisions, and lessons.
-4. Graduate stale searchable entries through `memory-sql`; move completed plan history to `archive/`.
-5. Merge the branch, then remove the worktree.
-6. Delete the branch only after the merge succeeds.
+1. Verify the branch changes.
+2. Consolidate only durable, non-duplicate facts and verified problem resolutions.
+3. Do not overwrite newer main-workspace memory.
+4. Merge or clean up the worktree only when explicitly requested.
 
-Never discard uncommitted work or branch-specific memory without explicit authorization.
+Never treat ignored memory as Git merge content.

@@ -5,7 +5,7 @@ A standardized, frictionless engineering infrastructure for multi-agent ecosyste
 
 ## Core Philosophy
 
-1. **Long-Term Memory Persistence**: Agents track project goals and lessons learned in `.agents/memory/MEMORY.md`, reducing context loss across sessions.
+1. **Long-Term Memory Persistence**: Codex uses bounded files under `.memories/memories/` plus a Holographic-compatible SQLite `memory_store.db`.
 2. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer while sharing the same project memory.
 3. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
 4. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
@@ -20,7 +20,7 @@ For a detailed architecture, setup model, and copy checklist, see [Memory System
 
 ### 1. Daily Usage
 
-- **Save Memory**: When you finish a meaningful sub-task, update `.agents/memory/MEMORY.md` through the relevant agent workflow.
+- **Save Memory**: Curate stable high-frequency facts in `.memories/memories/MEMORY.md`; store searchable facts and recurring-problem history in `.memories/memory_store.db`.
 - **Auto-Nudge**: Hooks remind agents to update memory after sustained work with pending changes.
 - **Compression**: If `MEMORY.md` grows too large, the system suggests memory compression.
 
@@ -85,7 +85,7 @@ Permissions are declared in `.claude/settings.json` and take effect immediately 
 
 ### Gemini CLI (`.gemini/policies/system-safe.toml`)
 
-- **Auto-Allowed**: Basic read commands and non-destructive git operations. Memory path edits under `.agents/memory/` are also auto-approved.
+- **Auto-Allowed**: Basic read commands and non-destructive git operations. Agent-specific permission layers may allow memory operations under `.memories/`.
 - **Blocked**: `git push`, `git branch -d/-D`.
 
 ### Codex
@@ -166,7 +166,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 | Path | Purpose |
 | :--- | :--- |
-| `.agents/memory/` | Shared long-term project memory location. |
+| `.memories/` | Git-ignored instantiated memory: bounded files and SQLite store. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.gemini/` | Gemini CLI commands, policies, hooks, and skills. |
 | `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
@@ -174,7 +174,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
-After copying, replace `.agents/memory/MEMORY.md` with the target project's real mission, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check .`.
+After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check .`.
 
 ### Superpowers Skills Integration (for Antigravity)
 
@@ -207,8 +207,8 @@ To initialize this repository and set up verification tools:
 
 ### Initializing Memory for New Projects
 Once the repository is initialized:
-1. Ensure `.agents/memory/MEMORY.md` is populated with your specific project's **Mission**.
+1. Ensure `.memories/memories/MEMORY.md` contains the target project's stable mission and constraints.
 
 ---
 
-This project enforces UTF-8 without BOM and English for source code, technical documentation, workflows, and configuration. Traditional Chinese content belongs in `docs/zh-TW/` and `.agents/memory/`.
+This project enforces UTF-8 without BOM and English for source code, technical documentation, workflows, and configuration. Traditional Chinese content belongs in `docs/zh-TW/` and `.memories/`.

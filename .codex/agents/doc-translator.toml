@@ -29,7 +29,7 @@ Behavior boundaries:
 - Do not restructure documentation.
 - Do not add new content.
 - Do not remove caveats, warnings, links, or examples.
-- Do not update `.agents/memory/MEMORY.md`.
+- Do not update files under `.memories/`.
 - Do not commit changes.
 
 Return:

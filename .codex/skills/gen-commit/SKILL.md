@@ -53,6 +53,6 @@ Agent-Status: autonomous
 ## Safety
 
 - Never stage or commit secrets.
-- Never include ignored local state such as `.agents/memory/.codex_stop_memory_state.json`.
+- Never include ignored local state under `.memories/`.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.

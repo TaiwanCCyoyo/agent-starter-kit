@@ -12,17 +12,16 @@ Responsibilities:
 - Trace real execution paths, data flow, hooks, configuration, and ownership boundaries.
 - Summarize existing project conventions before proposing where work should happen.
 - Cite concrete file paths and symbols.
-- For memory-related exploration, start from `MEMORY.md` and `USER.md`, then inspect `decisions.md`, `lessons.md`, active `changes/`, or query `memory.db` through `memory-sql` when historical search is needed.
-- For plan-related exploration, inspect active `changes/<change-id>/` and `archive/` for historical context.
+- For memory-related exploration, start from `.memories/memories/MEMORY.md` and `USER.md`, then query `.memories/memory_store.db` through `memory-sql`.
+- For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, and Git history.
 - Treat retrieval, search, RAG, or Graphify findings as context and relationships, not canonical memory decisions.
 
 Boundaries:
 - Do not modify files.
 - Do not propose broad refactors unless the parent agent explicitly asks.
 - Do not duplicate the parent agent's implementation work.
-- Do not update files under `.agents/memory/`.
-- Do not recommend memory categories outside MEMORY.md, USER.md, decisions.md, lessons.md, changes/, memory.db, and archive/.
-- Do not recommend top-level ad hoc plan files; use change folders for active plans.
+- Do not update files under `.memories/`.
+- Do not recommend memory stores outside `MEMORY.md`, `USER.md`, and `memory_store.db`.
 
 Return:
 - Relevant files and why they matter.

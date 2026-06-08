@@ -3,22 +3,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-MEMORY_REL_DIR = Path(".agents") / "memory"
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from scripts.memory_store import initialize_memory_store
+
+MEMORY_ROOT_REL_DIR = Path(".memories")
+MEMORY_REL_DIR = MEMORY_ROOT_REL_DIR / "memories"
+MEMORY_STORE_REL_PATH = MEMORY_ROOT_REL_DIR / "memory_store.db"
 MEMORY_FILE_TEMPLATES = {
-    "USER.md": """# User
-
-Stable cross-agent user context: communication language, review style, working preferences, and collaboration conventions. Keep under 500 chars so all agents can load it cheaply.
-""",
-    "decisions.md": """# Decisions
-
-Record active durable architectural decisions here. Graduate stale entries to `memory.db` with the `memory-sql` skill when this file grows.
-""",
-    "lessons.md": """# Lessons
-
-Keep this file concise. Session start auto-loads only the last 50 lines. Graduate stale lessons to `memory.db` rather than accumulating files.
-""",
+    "USER.md": "Stable user preferences belong here as atomic entries separated by §.\n",
 }
-MEMORY_DIRS = [Path("changes"), Path("archive")]
 
 
 def repo_root() -> Path:
@@ -55,33 +51,11 @@ def get_git_info() -> tuple[str, bool, str]:
         return f"unknown (error: {exc})", False, "No history found"
 
 
-DEFAULT_MEMORY_TEMPLATE = """# Long-term Project Memory & State
-
-*(Agent Note: Session-start project context. Keep MEMORY.md under 2,200 chars. All files in `.agents/memory/` are git-ignored instantiated project memory.)*
-
-## 1. Project Mission & Long-term Goals
-[Define the ultimate goal of this project and architectural rules here]
-
-## 2. Current State
-[What is happening right now? Keep this to one compact paragraph. Put detailed multi-step work in active `changes/` plans.]
-
-## 3. Memory Map
-- **Session-start context**: `MEMORY.md` (mission and current state), `USER.md` (user preferences), and the recent lesson tail.
-- **Read on demand**: `decisions.md`, the full `lessons.md`, and active `changes/<id>/`.
-- **Search or inspect when needed**: `memory.db` (SQLite FTS5 through Claude and Codex MCP) and `archive/`.
-- **Policy**: Keep MEMORY.md under 2,200 chars. Graduate stale lessons and decisions to `memory.db`.
-
-## 4. Active Work
-
-| Feature | Status | Evidence/Notes |
-| :--- | :--- | :--- |
-| **Initial Setup** | [ ] | Base project structure |
-
-### Doing
-- **[Session Name]**: [MISSION REQUIRED] Define the branch goal and definition of done here.
-
-### Done
-- [Record completed tasks here]
+DEFAULT_MEMORY_TEMPLATE = """[MISSION REQUIRED] Define the durable project mission and constraints for branch `{branch}`.
+§
+Store only stable project, environment, tool, decision, lesson, or workflow facts that should influence most future sessions.
+§
+Use memory_store.db for searchable structured facts, recurring problem occurrences, root causes, and verified resolutions.
 """
 
 
@@ -94,14 +68,12 @@ def branch_mission_prompt(branch: str) -> str:
 
 
 def memory_template_for_branch(branch: str) -> str:
-    return DEFAULT_MEMORY_TEMPLATE.replace(
-        "- **[Session Name]**: [MISSION REQUIRED] Define the branch goal and definition of done here.",
-        branch_mission_prompt(branch),
-    )
+    return DEFAULT_MEMORY_TEMPLATE.format(branch=branch)
 
 
 def initialize_memory_taxonomy(root_dir: Path, branch: str) -> str:
     memory_dir = root_dir / MEMORY_REL_DIR
+    store_path = root_dir / MEMORY_STORE_REL_PATH
     created: list[str] = []
 
     try:
@@ -117,11 +89,10 @@ def initialize_memory_taxonomy(root_dir: Path, branch: str) -> str:
                 path.write_text(template, encoding="utf-8")
                 created.append(name)
 
-        for relative_dir in MEMORY_DIRS:
-            path = memory_dir / relative_dir
-            if not path.exists():
-                path.mkdir(parents=True, exist_ok=True)
-                created.append(relative_dir.as_posix() + "/")
+        store_existed = store_path.exists()
+        initialize_memory_store(store_path)
+        if not store_existed:
+            created.append("memory_store.db")
     except Exception as exc:
         return f"Taxonomy initialization failed: {exc}"
 
@@ -137,24 +108,8 @@ def read_text(path: Path, missing: str = "") -> str:
         return f"Error reading {path.name}: {exc}"
 
 
-def read_lessons_tail(root_dir: Path, line_limit: int = 50) -> str:
-    lessons_path = root_dir / MEMORY_REL_DIR / "lessons.md"
-    if not lessons_path.exists():
-        return "No `.agents/memory/lessons.md` found."
-    try:
-        lines = lessons_path.read_text(encoding="utf-8").splitlines()
-    except Exception as exc:
-        return f"Error reading lessons tail: {exc}"
-    if not lines:
-        return "`lessons.md` exists but is empty."
-    prefix = ""
-    if len(lines) > line_limit:
-        prefix = f"*(Showing last {line_limit} of {len(lines)} lines. Keep the bottom recent and high-signal.)*\n\n"
-    return prefix + "\n".join(lines[-line_limit:])
-
-
 def sync_memory_if_needed(current_root: Path) -> str:
-    target_dir = current_root / MEMORY_REL_DIR
+    target_dir = current_root / MEMORY_ROOT_REL_DIR
     try:
         common_dir = subprocess.check_output(
             ["git", "rev-parse", "--git-common-dir"],
@@ -164,7 +119,7 @@ def sync_memory_if_needed(current_root: Path) -> str:
         main_root = Path(common_dir).resolve().parent
         if main_root == current_root:
             return "Main repository (no memory copy needed)"
-        source_dir = main_root / MEMORY_REL_DIR
+        source_dir = main_root / MEMORY_ROOT_REL_DIR
         if not source_dir.exists():
             return "No source memory directory found"
         copied = copy_memory_tree(source_dir, target_dir)
@@ -221,7 +176,6 @@ def main() -> None:
     taxonomy_status = initialize_memory_taxonomy(root_dir, branch)
     memory_content = read_text(root_dir / MEMORY_REL_DIR / "MEMORY.md")
     user_content = read_text(root_dir / MEMORY_REL_DIR / "USER.md")
-    lessons_tail = read_lessons_tail(root_dir)
     codex_instructions = read_text(
         root_dir / ".codex" / "AGENTS.md",
         "Codex instructions not found at `.codex/AGENTS.md`.",
@@ -241,7 +195,7 @@ def main() -> None:
 > [!NOTE]
 > **WORKTREE MEMORY INITIALIZATION**
 > Ignored memory is copied from the main repository without overwriting local memory.
-> Review `MEMORY.md` and active `changes/` plans before implementation.
+> Review `MEMORY.md`, `USER.md`, and relevant facts or problem history in `memory_store.db`.
 """
 
     user_section = f"\n### [User Context: USER.md]\n{user_content}\n" if user_content else ""
@@ -264,8 +218,6 @@ Focus on: **{get_branch_purpose(branch)}**.
 ### [Project Context: MEMORY.md]
 {memory_content}
 {user_section}
-### [Auto-loaded Lessons: lessons.md Tail]
-{lessons_tail}
 
 ---
 *This context was automatically injected by the Codex SessionStart hook.*

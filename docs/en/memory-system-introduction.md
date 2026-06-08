@@ -1,152 +1,68 @@
 # Memory System Introduction
 
-The memory system keeps long-running agent work aligned across sessions, supported agents, and Git worktrees.
+The project memory system separates tracked agent infrastructure from local instantiated memory.
 
-It is designed for project state that should outlive a single chat: project goals, durable decisions, lessons learned, active handoff notes, and unfinished
-follow-up work.
+## Layout
 
-Hermes inspired the bounded `MEMORY.md` and `USER.md` stores, frozen prompt snapshots, full-session search, and learning-loop concepts. This starter kit describes each store by its actual loading and retention behavior rather than adding a separate tier vocabulary.
+```text
+.agents/                         # Tracked cross-agent infrastructure
+.memories/                       # Fully git-ignored instantiated memory
+├── memories/
+│   ├── MEMORY.md
+│   └── USER.md
+└── memory_store.db
+```
 
-## Mental Model
+`MEMORY.md` and `USER.md` follow Hermes's bounded atomic-entry format. Entries are separated by `§` on its own line and are injected as frozen session-start snapshots.
 
-The system has three layers:
+`memory_store.db` is SQLite. It uses the Hermes Holographic fact-store schema plus project-specific recurring-problem tables.
 
-1. `.agents/memory/MEMORY.md` is the durable project memory.
-2. Agent hooks load, remind, and validate memory-related state at lifecycle boundaries.
-3. Agent skills or commands provide controlled workflows for saving, compressing, and consolidating memory.
+## Responsibilities
 
-Memory is intentionally git-ignored by default. It is local project state, not template source code.
-
-## Components
-
-| Component | Purpose |
+| Store | Purpose |
 | :--- | :--- |
-| `.agents/memory/MEMORY.md` | Session-start project context: mission, constraints, current state. ≤ 2,200 chars. |
-| `.agents/memory/USER.md` | Cross-agent user preferences: communication language, working style. ≤ 500 chars. |
-| `.agents/memory/decisions.md` | On-demand active durable architectural decisions. |
-| `.agents/memory/lessons.md` | On-demand concise recurring lessons (tail auto-loaded by Claude and Codex). |
-| `.agents/memory/changes/` | Active multi-step change plans (proposal, design, tasks). |
-| `.agents/memory/memory.db` | Shared searchable history: SQLite FTS5 for graduated lessons, decisions, workflows, candidates, and session metadata (Claude Code and Codex MCP). |
-| `.agents/memory/archive/` | File-based history: completed change plans and references. |
-| SessionStart hooks | Inject `MEMORY.md` + `USER.md` once at session start (frozen snapshot). Also injects the `lessons.md` tail for Claude. |
-| Stop/AfterAgent reminders | Nudge agents to update memory after code changes; prompt skill review after 5+ response turns. |
-| `memory-manager` | Routing rules, lifecycle, and health criteria for the full memory structure. |
-| `memory-sql` | Claude Code and Codex skills for querying and writing the shared `memory.db` through platform-specific MCP configuration. |
-| `learn-eval` / `skill-curator` | Quality gate for extracting session patterns into reusable skills. |
-| Worktree sync | Copies memory from main repo into new worktrees on first session. |
+| `MEMORY.md` | Stable project, environment, and tool facts needed in most future sessions; <= 2,200 chars |
+| `USER.md` | Stable user preferences and collaboration expectations; <= 500 chars |
+| `facts` | Searchable decisions, lessons, workflows, tool facts, and environment facts |
+| `entities`, `fact_entities`, `memory_banks`, `facts_fts` | Holographic-compatible entity, retrieval, and FTS5 support |
+| `problem_patterns` | Stable identities for recurring blockers, workarounds, mistaken assumptions, or confusion |
+| `problem_occurrences` | Concrete evidence each time a problem recurs |
+| `resolutions` | Root causes, fixes, verification evidence, and related skill or instruction changes |
 
-## Agent Integration
+Plans, completed plans, raw transcripts, and arbitrary historical documents are not long-term memory. Use agent-native planning state, `.tmp/`, maintained `docs/`, and Git history.
 
-### Codex
+## Repeated-Problem Loop
 
-Codex uses:
+When a problem appears twice:
 
-- `.codex/hooks/session_start.py` to inject `.codex/AGENTS.md`, branch context, and `.agents/memory/MEMORY.md`.
-- `.codex/hooks/stop_memory_check.py` to issue low-noise memory update and compression reminders.
-- `.codex/skills/save-memory/SKILL.md`, `.codex/skills/compress-memory/SKILL.md`, and `.codex/skills/memory-manager/SKILL.md`.
+1. Query existing facts, patterns, occurrences, and resolutions.
+2. Record the new occurrence and evidence.
+3. Stop repeating an unverified workaround.
+4. Investigate the root cause.
+5. Record a verified resolution or explicit external blocker.
+6. Update an existing skill, instruction, or regression test when needed.
 
-Codex-specific progress should be recorded as Codex-specific when the matching Gemini or Antigravity behavior has not been updated.
+## Hermes Compatibility
 
-### Gemini CLI
+The bounded file format is compatible with Hermes `memories/MEMORY.md` and `memories/USER.md`. The SQLite schema begins with the Holographic provider tables, so a future Hermes integration can point Holographic at the same `memory_store.db`.
 
-Gemini uses:
+Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent identity remains in native instruction files, and current hooks do not expose the complete message lifecycle required for reliable transcript persistence.
 
-- `.gemini/scripts/session_start.py` for startup memory context.
-- `.gemini/scripts/memory_nudger.py` for memory update reminders.
-- `.gemini/scripts/memory_compressor.py` for memory size checks.
-- `.gemini/commands/save-memory.toml`, `.gemini/commands/compress-memory.toml`, and `.gemini/skills/memory-maintenance/SKILL.md`.
+## Current Platform Status
 
-Gemini behavior may intentionally lag Codex behavior during Codex-only experiments. Mark that explicitly in memory.
+- **Codex**: migrated to `.memories/` and `memory_store.db`.
+- **Claude Code**: migration pending.
+- **Gemini CLI**: migration pending.
+- **Antigravity**: migration pending.
 
-### Antigravity
+Until those migrations are implemented, only Codex should be assumed to use this layout.
 
-Antigravity uses `.agent/workflows/` and `.agent/rules/` as its primary instruction and workflow layer.
+## Codex Lifecycle
 
-When Codex or Gemini changes introduce new memory behavior, mirror the concept into Antigravity only after the design is stable.
+- `.codex/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
+- `.codex/hooks/stop_memory_check.py` validates limits and taxonomy, reminds Codex to curate durable memory, and enforces the repeated-problem loop.
+- `.codex/skills/memory-manager/SKILL.md` defines routing.
+- `.codex/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
+- `.codex/config.toml` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
 
-## Copy Checklist For New Projects
-
-When reusing this starter kit, copy only the agent layers you need.
-
-| Path | Copy When | Customize |
-| :--- | :--- | :--- |
-| `.agents/memory/` | You want shared memory state. | Replace `MEMORY.md` with the target project mission. |
-| `.codex/` | You want Codex support. | Review hooks, skills, and `.codex/AGENTS.md`. |
-| `.gemini/` | You want Gemini CLI support. | Review settings, commands, and scripts. |
-| `.agent/` | You want Antigravity support. | Review rules, skills, and workflows. |
-| `scripts/` | You want repository-level hygiene scripts. | Keep Git-facing baseline scripts and route agent-specific logic through agent adapters. |
-| `.pre-commit-config.yaml` | You want repository-level checks. | Install with `uv run pre-commit install`. |
-
-After copying:
-
-1. Define the new project mission in `.agents/memory/MEMORY.md`.
-2. Remove unsupported agent layers.
-3. Install hooks where needed.
-4. Run the repository verification command, usually `uv run ruff check .`.
-
-## Operating Rules
-
-- Save memory after meaningful file-changing work.
-- Record durable decisions, lessons learned, and handoff notes.
-- Do not store secrets, tokens, API keys, or user-private data.
-- Do not store low-value narration such as every command attempted.
-- Compress memory when historical detail starts hiding current state.
-- Mark platform-specific progress clearly, such as `Codex-only`, `Gemini pending`, or `Antigravity pending`.
-
-## Skill Evolution Loop (Claude Code)
-
-Beyond storing facts in memory files, Claude Code can extract session patterns as reusable skill files:
-
-1. The Stop hook (`stop_memory_check.py`) counts responses with code changes. After 5 responses, it prompts the agent to run `/learn-eval`.
-2. `/learn-eval` follows the full procedure in `.claude/skills/skill-curator/SKILL.md`:
-   - Identifies signals worth saving (user corrections, non-obvious techniques, reusable workflows).
-   - Checks for overlap with existing skills (checklist-based quality gate).
-   - Issues a holistic verdict: Save / Improve then Save / Absorb into existing / Drop.
-   - Saves only after user approval.
-3. Skills live in `.claude/skills/learned/` (project-specific) or `~/.claude/skills/learned/` (cross-project).
-4. The skill-curator skill also manages lifecycle: skills transition active → stale → archived as they age.
-
-This loop is manual and user-confirmed — it does not write skill files without approval.
-
-## Memory Write Model
-
-**Frozen snapshot**: `MEMORY.md` and `USER.md` are injected once at session start. Tool writes go to disk immediately but do not update the running session's system prompt — the next session reads the updated files. This preserves the LLM prefix cache.
-
-**§ delimiter**: When a memory section contains multiple atomic entries, separate them with `§` on its own line for reliable parsing.
-
-**Transcript capture is separate from memory curation**: Hermes stores and indexes every user, assistant, and tool message so `session_search` can return exact historical messages. This is not automatic extraction of important facts. Important facts are separately curated into bounded memory or skills. This starter kit currently stores curated entries, not the complete message stream.
-
-## Reminder Behavior
-
-Memory update reminders and compression reminders are separate.
-
-Update reminders should appear only when repository changes are pending for several agent responses and memory has not been updated.
-
-Compression reminders should appear only when memory is large enough to need action, or during explicit memory audit/compression workflows.
-
-Skill review reminders appear once per session after a minimum number of code-change responses; they do not repeat.
-
-The GUI should not show repeated "no compression needed" messages after every response.
-
-## Troubleshooting
-
-If memory is not injected:
-
-- Confirm the agent-specific SessionStart hook is enabled.
-- Confirm `.agents/memory/MEMORY.md` exists.
-- Confirm the project-local agent configuration layer is trusted.
-
-If reminders are noisy:
-
-- Check whether the Stop or AfterAgent hook prints lean/healthy memory reports.
-- Prefer silent state updates unless action is needed.
-
-If worktree memory diverges:
-
-- Consolidate only durable lessons, decisions, and current handoff state.
-- Avoid copying stale task narration back to the main workspace.
-
-If encoding looks wrong:
-
-- Confirm files are UTF-8 without BOM.
-- Avoid using shell output as proof of file corruption on legacy Windows consoles; validate with the repository file hygiene script.
+Retrieved database output is context until explicitly curated. Never store secrets, private credentials, or raw task narration.

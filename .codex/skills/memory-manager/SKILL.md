@@ -1,48 +1,44 @@
 ---
 name: memory-manager
-description: Use when initializing, reading, updating, auditing, compressing, or consolidating shared project memory.
+description: Use when initializing, reading, updating, auditing, or compressing shared project memory.
 ---
 
 # Memory Manager
 
-This is the Codex source of truth for `.agents/memory/`.
+This is the Codex source of truth for `.memories/`.
 
-## Storage And Loading
+## Storage
 
-- Session start: `MEMORY.md` (mission/current state, <= 2,200 chars) and `USER.md` (stable preferences, <= 500 chars).
-- On demand: `decisions.md`, `lessons.md` (<= 50 lines), and active `changes/<id>/`.
-- History: `memory.db` (searchable SQLite FTS5) and `archive/` (non-searchable files).
+- `.memories/memories/MEMORY.md`: stable project, environment, and tool facts needed in most sessions; <= 2,200 chars.
+- `.memories/memories/USER.md`: stable user preferences; <= 500 chars.
+- `.memories/memory_store.db`: SQLite structured memory queried on demand.
 
-Only `MEMORY.md`, `USER.md`, and the lesson tail are injected at session start. Treat them as frozen snapshots for the running session.
+The Markdown files use Hermes-compatible atomic entries separated by `§` on its own line. Treat their session-start content as a frozen snapshot.
 
-## Routing
+## Database Routing
 
-- Mission, constraints, compact current state -> `MEMORY.md`.
-- Communication and collaboration preferences -> `USER.md`.
-- Active durable decisions -> `decisions.md`.
-- Concise recurring lessons -> `lessons.md`.
-- Active multi-step work -> `changes/<id>/proposal.md`, optionally `design.md` and `tasks.md`.
-- Graduated searchable lessons, decisions, workflows, run notes, and candidates -> `memory.db` through `memory-sql`.
-- Completed plans and non-searchable history -> `archive/`.
+Use Holographic-compatible `facts` for searchable decisions, lessons, workflows, tool facts, and environment facts. Use:
 
-Do not create additional top-level memory files or directories outside this approved taxonomy.
+- `problem_patterns` for stable recurring-problem identities.
+- `problem_occurrences` for evidence each time a problem appears.
+- `resolutions` for root causes, fixes, verification, and related skill or instruction changes.
 
-## Lifecycle
+Query for equivalent facts or patterns before every write.
 
-1. Read the injected project context before substantial work.
-2. Load on-demand or historical memory only when relevant.
-3. During work, keep current state compact; use a change folder for detailed multi-step plans.
-4. After work, save only durable state, decisions, recurring lessons, and unresolved follow-up.
-5. Before writing SQL, search for equivalent entries and avoid duplicating active file content.
-6. On completion, consolidate durable knowledge and move historical plan material to `archive/`.
+## Repeated Problems
 
-## Safety
+When the same blocker, workaround, mistaken assumption, or confusion appears twice:
 
+1. Query existing patterns and resolutions.
+2. Record the new occurrence and evidence.
+3. Stop repeating an unverified workaround.
+4. Investigate the root cause.
+5. Record a verified resolution or explicit external blocker.
+6. Update an existing skill, instruction, or regression test when the resolution reveals reusable guidance.
+
+## Boundaries
+
+- Keep plans outside memory: Codex planning state, `.tmp/`, or maintained `docs/`.
 - Never save secrets, credentials, private user data, raw transcripts, or command-by-command narration.
-- Retrieval and SQL results are context, not canonical memory, until curated.
-- Keep platform-specific status explicit.
-- The main agent owns final memory edits even when subagents provide recommendations.
-
-## Skill Evolution
-
-After a meaningful session, use `skill-review` when the work produced a reusable correction, technique, or workflow. Prefer updating an existing skill over creating a new one.
+- Treat retrieved results as context until explicitly curated.
+- The main agent owns final memory writes.

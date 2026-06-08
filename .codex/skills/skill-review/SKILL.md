@@ -21,7 +21,7 @@ Do not save transient environment failures, unverified negative claims, one-off 
 2. Absorb the guidance into an existing related skill.
 3. Add a focused support file to an existing skill.
 4. Create a project skill only when no existing skill fits.
-5. Store an unready candidate in `memory.db` with `type='candidate'`, or drop it.
+5. Store an unready reusable idea as a low-trust `facts` entry with category `candidate`, or drop it.
 
 Search `.codex/skills/`, available user skills, and active memory before deciding.
 

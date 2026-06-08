@@ -6,7 +6,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 
 - These instructions apply only to OpenAI Codex.
 - Treat `.codex/` as a private Codex support directory.
-- Shared project memory lives under `.agents/memory/`, with `MEMORY.md` as the compact session-start project index.
+- Shared instantiated memory lives under the git-ignored `.memories/` root. Tracked cross-agent infrastructure remains under `.agents/`.
 - Root `AGENTS.md` is intentionally absent to avoid polluting non-Codex agents and subagents.
 - `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit or commit those clones.
 - `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.
@@ -16,7 +16,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, `SKILL.md`, workflow documents, and technical docs.
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
-- Keep Traditional Chinese content only in `.agents/memory/` and `docs/zh-TW/`.
+- Keep Traditional Chinese content only in `.memories/` and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 
@@ -42,27 +42,27 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 
 - Prefer explicit tradeoffs over hidden assumptions: state what you know, what you are assuming, and what decision or help is needed when the next step depends on user intent or environment ownership.
 - Ask for user assistance immediately when credentials, global settings, approvals, environment ownership, external accounts, product decisions, or irreversible tradeoffs are needed. Do not wait for repeated failures before asking.
-- If the same blocker, workaround, wrong assumption, or confusion appears twice, surface the pattern to the user and propose whether it should become a memory note, skill update, instruction update, or follow-up task.
+- If the same blocker, workaround, wrong assumption, or confusion appears twice, query `memory_store.db`, stop repeating an unverified workaround, investigate the root cause, and record either a verified resolution or the explicit external blocker. Then decide whether an existing skill, instruction, or regression test must change.
 
 ## Memory
 
-- `.agents/memory/` is cross-agent shared state. Keep it small and high-signal.
-- Session-start context is `MEMORY.md` (mission and current state, at most 2,200 chars) plus `USER.md` (user preferences, at most 500 chars), injected once per session.
-- On-demand project memory is `decisions.md`, `lessons.md` (at most 50 lines), and active `changes/<id>/`.
-- Searchable and historical storage is `memory.db` (SQLite FTS5 through Claude and Codex MCP) plus `archive/`; it is never auto-loaded.
-- Before substantial work, align with injected project context and the auto-loaded lesson tail.
-- Keep `.agents/memory/` as ignored instantiated project memory. Commit rules, hooks, skills, and templates, not local project memory content.
+- `.memories/` is cross-agent instantiated state and remains fully git-ignored.
+- Session-start context is `.memories/memories/MEMORY.md` (stable project facts, at most 2,200 chars) plus `.memories/memories/USER.md` (stable user preferences, at most 500 chars), injected once per session.
+- Both files use Hermes-compatible atomic entries separated by `§` on its own line.
+- Searchable structured memory is `.memories/memory_store.db`, a SQLite store using the Hermes Holographic fact schema plus recurring-problem occurrence and resolution tables. It is queried on demand and never auto-loaded wholesale.
+- Before substantial work, align with the injected files and query `memory_store.db` when past decisions, lessons, workflows, tool facts, environment facts, or problem history may matter.
+- Commit rules, hooks, skills, schema code, and templates, not local instantiated memory content.
 - After file-changing tasks, update memory only when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
-- Route mission/current state to `MEMORY.md`, preferences to `USER.md`, active decisions to `decisions.md`, recurring lessons to `lessons.md`, active plans to `changes/<id>/`, searchable graduated entries to `memory.db`, and non-searchable history to `archive/`.
-- Use `memory-sql` to query searchable history, deduplicate before writes, graduate stale entries, and record session metadata.
-- Do not duplicate current session context or active on-demand content in `memory.db`.
+- Route stable project facts needed in most sessions to `MEMORY.md`, stable user preferences to `USER.md`, and searchable decisions, lessons, workflows, tool facts, environment facts, recurring problem occurrences, root causes, and verified resolutions to `memory_store.db`.
+- Use `memory-sql` to query before writes, deduplicate facts, record problem occurrences, and maintain verified resolutions.
+- Do not duplicate bounded file entries in `memory_store.db` unless the database entry adds structured evidence, lifecycle, trust, or retrieval value.
 - `MEMORY.md` and `USER.md` are frozen session snapshots: disk changes affect the next session's injected context.
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
 - Mark platform-specific progress clearly, such as Codex-only, Gemini pending, or Antigravity pending.
 - Use `.codex/skills/memory-manager/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
-- Follow the compact change lifecycle: active proposals live in `changes/<id>/`; after completion consolidate durable knowledge and move historical material to `archive/`.
+- Keep plans outside the memory taxonomy: use Codex native planning state, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.
-- When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.agents/memory/MEMORY.md` edits.
+- When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.memories/` writes.
 
 ## Verification
 

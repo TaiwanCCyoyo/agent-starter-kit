@@ -35,7 +35,7 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 | `verification-loop` | Concise implement-check-fix workflow |
 | `gen-commit` | Commit review and Conventional Commit workflow |
 | `memory-manager`, `save-memory`, `compress-memory` | Shared project memory lifecycle |
-| `memory-sql` | Shared SQLite FTS5 history queries and curated writes |
+| `memory-sql` | Holographic-compatible SQLite fact and recurring-problem workflows |
 | `skill-review` | ECC-style extraction quality gate and manual Hermes-style curation |
 | `worktree-manager` | Worktree lifecycle with memory consolidation |
 
@@ -43,7 +43,7 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 
 | Layer | Responsibility |
 | :--- | :--- |
-| `.codex/hooks/session_start.py` | Initializes the approved taxonomy and injects `MEMORY.md`, `USER.md`, and the lesson tail |
+| `.codex/hooks/session_start.py` | Initializes `.memories/`, the SQLite schema, and injects `MEMORY.md` plus `USER.md` |
 | `.codex/hooks/post_tool_use_hygiene.py` | Runs targeted formatting, lint, file hygiene, and Python print checks |
 | `.codex/hooks/stop_memory_check.py` | Enforces memory limits, strict taxonomy, session-scoped reminders, SQL graduation guidance, and one-time skill review |
 | `.pre-commit-config.yaml` | Repository commit gate for hygiene, secrets, ruff, no-print checks, and mypy |
@@ -53,13 +53,13 @@ This document describes the Codex-specific layer. Codex uses native Plan Mode, r
 `.codex/config.toml` defines `memory-db` as a project-scoped stdio MCP server:
 
 - Command: `uvx mcp-server-sqlite`
-- Database: `.agents/memory/memory.db`
+- Database: `.memories/memory_store.db`
 - Working directory: repository root through `cwd = ".."`
 - Read tools: automatic approval
 - Schema and write tools: prompt for approval
 - Startup failure: non-fatal (`required = false`)
 
-Claude and Codex target the same ignored database. Both use the same schema and FTS5 triggers, but each platform has its own configuration format.
+The current migration is Codex-specific. Claude Code, Gemini CLI, and Antigravity still require separate adapter migrations.
 
 ## ECC Adaptation
 
@@ -89,8 +89,8 @@ Implemented:
 
 - Bounded `MEMORY.md` and `USER.md`.
 - Frozen session-start snapshots.
-- Compact session-start files, on-demand files, and SQLite FTS5 searchable history.
-- Curated, deduplicated graduation from active files into searchable history.
+- Hermes-compatible bounded files and frozen session-start snapshots.
+- Holographic-compatible SQLite facts, FTS5, entities, trust metadata, recurring problem occurrences, and verified resolutions.
 - Manual skill review and lifecycle decisions.
 
 Not implemented:
