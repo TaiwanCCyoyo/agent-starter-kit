@@ -68,16 +68,16 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `/save-memory` | 將長期事實儲存至適當的 bounded file 或 SQLite store |
 | `/worktree` | 建立、管理並合併 Git worktree，同時保留記憶體 |
 
-### 開發（從 ECC v2.0.0-rc.1 移植）
+### 已移除（2026-06-10 清理——agents、Superpowers 與內建 `/code-review` 已涵蓋）
 
-| Command | 用途 |
+| Command | 替代方案 |
 |---|---|
-| `/build-fix` | 偵測建構系統並逐步修正建構／型別錯誤 |
-| `/code-review` | 審查本地端 diff |
-| `/feature-dev` | 結構化功能開發：先理解需求，再撰寫程式碼 |
-| `/python-review` | 對 Python 變更呼叫 `python-reviewer` agent |
-| `/security-scan` | 對 agent、hook、MCP、權限表面執行安全性審查 |
-| `/test-coverage` | 分析涵蓋率缺口並產生遺漏的測試 |
+| `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
+| `/code-review` | 內建 `/code-review`（含 `ultra` 雲端 review）+ `code-reviewer` / `implementation-reviewer` agents |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `repo-explorer` agent |
+| `/python-review` | `python-reviewer` agent |
+| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
+| `/test-coverage` | `python-testing` skill（`pytest --cov`） |
 
 ### 未從 ECC 移植（含原因）
 

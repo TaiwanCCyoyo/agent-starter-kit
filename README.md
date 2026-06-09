@@ -37,7 +37,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 ### 3. Agent Workflows
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/build-fix`, `/code-review`, `/gen-commit`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`, `/learn-eval`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
@@ -180,7 +180,7 @@ This repository integrates superpowers capabilities across all three agents:
 
 This starter kit is shaped by two open-source projects:
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The development agents (planner, code-reviewer, tdd-guide, security-reviewer, etc.), slash commands (/plan, /build-fix, /code-review, /test-coverage), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are all ported or adapted from ECC v2.0.0-rc.1.
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode, Superpowers, and autoloaded skills.
 
 - **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's bounded `MEMORY.md` and `USER.md`, frozen prompt snapshots, SQLite FTS5 session recall, and learning-loop design. This starter kit adapts those mechanisms rather than directly porting Hermes.
 

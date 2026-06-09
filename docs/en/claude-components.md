@@ -68,16 +68,16 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `/save-memory` | Save durable facts to the appropriate bounded file or SQLite store |
 | `/worktree` | Create, manage, and merge Git worktrees with memory preservation |
 
-### Development (ported from ECC v2.0.0-rc.1)
+### Removed (2026-06-10 cleanup — agents, Superpowers, and built-in `/code-review` now cover these)
 
-| Command | Purpose |
+| Command | Replacement |
 |---|---|
-| `/build-fix` | Detect build system and incrementally fix build/type errors |
-| `/code-review` | Review local diff |
-| `/feature-dev` | Structured feature development: understand first, then write |
-| `/python-review` | Invoke `python-reviewer` agent on Python changes |
-| `/security-scan` | Run security review across agent, hook, MCP, permission surfaces |
-| `/test-coverage` | Analyze coverage gaps and generate missing tests |
+| `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
+| `/code-review` | Built-in `/code-review` (incl. `ultra` cloud review) + `code-reviewer` / `implementation-reviewer` agents |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `repo-explorer` agent |
+| `/python-review` | `python-reviewer` agent |
+| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
+| `/test-coverage` | `python-testing` skill (`pytest --cov`) |
 
 ### Not ported from ECC (with reasons)
 

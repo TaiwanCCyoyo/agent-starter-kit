@@ -37,7 +37,7 @@
 ### 3. Agent 工作流程
 
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
-- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/build-fix`、`/code-review`、`/gen-commit`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
+- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`、`/learn-eval`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 
 ## 自動化 Hooks 與生命週期
@@ -181,7 +181,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 本 starter kit 的架構設計受到兩個開源專案的啟發：
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。開發用 agents（planner、code-reviewer、tdd-guide、security-reviewer 等）、斜線指令（/plan、/build-fix、/code-review、/test-coverage）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode、Superpowers 與 autoloaded skills 取代。
 
 - **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot、SQLite FTS5 session recall 與 learning loop，再依 starter kit 需求改編，而不是直接移植 Hermes。
 
