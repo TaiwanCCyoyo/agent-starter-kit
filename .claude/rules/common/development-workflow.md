@@ -11,7 +11,7 @@
 
 ### 1. Plan First
 
-Use `/plan` or Native Plan Mode to create an implementation plan. Identify dependencies and risks, and break down into phases before writing any code.
+Use Native Plan Mode to create an implementation plan. For plans that need durable cross-session or cross-agent visibility, or when working from a `.prd.md` file, apply the autoloaded `plan-artifact` skill to produce a structured `.references/plans/` artifact. Identify dependencies and risks, and break down into phases before writing any code.
 
 ### 2. TDD Approach
 

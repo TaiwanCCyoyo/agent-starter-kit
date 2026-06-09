@@ -75,7 +75,6 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `/build-fix` | 偵測建構系統並逐步修正建構／型別錯誤 |
 | `/code-review` | 審查本地端 diff |
 | `/feature-dev` | 結構化功能開發：先理解需求，再撰寫程式碼 |
-| `/plan` | 建立實作計畫；等待使用者確認後才開始撰寫程式碼 |
 | `/python-review` | 對 Python 變更呼叫 `python-reviewer` agent |
 | `/security-scan` | 對 agent、hook、MCP、權限表面執行安全性審查 |
 | `/test-coverage` | 分析涵蓋率缺口並產生遺漏的測試 |
@@ -109,6 +108,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `memory-sql` | SQLite FTS5 可搜尋歷史：schema、session 記錄、搜尋查詢與路由規則 |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
 | `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期由 Superpowers 提供。 |
+| `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。Native Plan Mode 負責互動式規劃；此 skill 專用於持久化結構化輸出。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 

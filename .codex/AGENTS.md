@@ -84,6 +84,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Revisit the official repo-scoped `.agents/skills` path before adding skills meant to be shared outside Codex.
 - Use the installed Superpowers plugin for general brainstorming, planning, TDD, systematic debugging, worktree lifecycle, and completion verification.
 - Use `python-testing` for repository-specific Python gates, `worktree-memory-sync` for ignored memory state across worktrees, `memory-sql` for searchable history, and `skill-review` after meaningful sessions.
+- Use `plan-artifact` to produce durable cross-session or PRD-based plans as `.references/plans/` artifacts; native planning flow handles interactive planning.
 
 ## Subagents
 

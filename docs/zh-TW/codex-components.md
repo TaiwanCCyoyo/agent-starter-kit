@@ -40,12 +40,13 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | `memory-sql` | 與 Holographic 相容的 SQLite facts 與重複問題 workflow |
 | `skill-review` | 人工 reusable-pattern 品質門與 skill candidate routing |
 | `worktree-memory-sync` | 跨 worktree 的 ignored memory 初始化與整合 |
+| `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。原生規劃負責互動式規劃；此 skill 專用於持久化結構化輸出。 |
 
 ## Claude 能力取捨
 
 | Claude 能力 | Codex 決策 | 原因 |
 | :--- | :--- | :--- |
-| `/plan` | 原生取代 | Codex Plan Mode 已提供對話式 grounding 與 decision-complete `<proposed_plan>`。 |
+| `/plan` | Skill + 原生取代 | 對話式規劃由原生 Plan Mode 提供。持久化產出（PRD-based 或跨 session）使用 `plan-artifact` skill；不需要 slash command。 |
 | `plan-reviewer` | 已移植 | 獨立 plan critique 有價值，且不重複 plan creation。 |
 | `/feature-dev` | Superpowers／原生取代 | Brainstorming、Plan Mode、TDD、verification 與 review 已構成完整流程。 |
 | `/build-fix` | Superpowers／原生取代 | Systematic debugging 加 repository verification 已涵蓋逐步診斷與修復。 |

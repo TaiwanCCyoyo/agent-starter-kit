@@ -102,7 +102,7 @@ Available slash commands and their corresponding skills:
 | `/save-memory` | — (command only) |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
-Plans approved via Native Plan Mode can be copied to `.references/plans/{kebab-name}.plan.md` for cross-agent, same-machine visibility. Include the goal, source request, decisions, tasks, verification, open questions, update time, and related commit when available.
+Use the `plan-artifact` skill to produce durable cross-session or PRD-based plans as `.references/plans/{kebab-name}.plan.md`. For simpler in-session planning, Native Plan Mode is sufficient. Plans remain git-ignored and are not durable memory.
 
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 

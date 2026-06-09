@@ -40,12 +40,13 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | `memory-sql` | Holographic-compatible SQLite facts and recurring-problem workflows |
 | `skill-review` | Manual reusable-pattern quality gate and skill candidate routing |
 | `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees |
+| `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native planning handles interactive planning; this skill is for persistent structured output. |
 
 ## Claude Capability Decisions
 
 | Claude capability | Codex decision | Reason |
 | :--- | :--- | :--- |
-| `/plan` | Native replacement | Codex Plan Mode provides conversational grounding and decision-complete `<proposed_plan>` output. |
+| `/plan` | Skill + native replacement | Conversational planning is provided by native Plan Mode. Durable artifact output (PRD-based or cross-session) uses the `plan-artifact` skill; no slash command needed. |
 | `plan-reviewer` | Ported | Independent plan critique is useful and does not duplicate plan creation. |
 | `/feature-dev` | Superpowers/native replacement | Brainstorming, Plan Mode, TDD, verification, and review already form the workflow. |
 | `/build-fix` | Superpowers/native replacement | Systematic debugging plus repository verification covers incremental diagnosis and repair. |

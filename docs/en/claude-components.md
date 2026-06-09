@@ -75,7 +75,6 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `/build-fix` | Detect build system and incrementally fix build/type errors |
 | `/code-review` | Review local diff |
 | `/feature-dev` | Structured feature development: understand first, then write |
-| `/plan` | Create implementation plan; waits for user confirmation before coding |
 | `/python-review` | Invoke `python-reviewer` agent on Python changes |
 | `/security-scan` | Run security review across agent, hook, MCP, permission surfaces |
 | `/test-coverage` | Analyze coverage gaps and generate missing tests |
@@ -109,6 +108,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `memory-sql` | SQLite FTS5 searchable history: schema, session recording, search queries, and routing rules |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
 | `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle is provided by Superpowers. |
+| `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native Plan Mode handles interactive planning; this skill is for the persistent structured output. |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 

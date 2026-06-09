@@ -3,7 +3,7 @@ name: plan-reviewer
 description: >
   Read-only plan quality reviewer. Takes a plan and critiques it as a senior engineer:
   completeness, scope creep, step sequencing, repo alignment, testability, and over-engineering.
-  Returns blockers, warnings, and passes. Use after /plan and before approving complex features.
+  Returns blockers, warnings, and passes. Use after Native Plan Mode planning and before approving complex features.
   Run in a fresh session for high-risk tasks to get an independent perspective (no memory bias).
 tools:
   - Read

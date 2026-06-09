@@ -16,7 +16,7 @@ Located in `.claude/agents/`:
 | silent-failure-hunter | Swallowed errors, bad fallbacks | Reliability concerns |
 | loop-operator | Autonomous loop monitoring | Long-running agent loops |
 | repo-explorer | Codebase exploration | Finding files and patterns |
-| plan-reviewer | Plan quality critique (read-only) | After `/plan`, before approving complex features |
+| plan-reviewer | Plan quality critique (read-only) | After Native Plan Mode planning, before approving complex features |
 | implementation-reviewer | Read-only code review | Pre-commit correctness check |
 | commit-specialist | Commit message drafting | Generating Conventional Commits |
 | doc-translator | EN→zh-TW translation | `docs/en/` → `docs/zh-TW/` |
@@ -25,7 +25,7 @@ Located in `.claude/agents/`:
 
 ## When to Use Agents
 
-- Complex feature or refactor → use **Native Plan Mode** (`/plan`), not an agent
+- Complex feature or refactor → use **Native Plan Mode**, not an agent
 - Code just written → **code-reviewer**
 - New feature or bug fix → **tdd-guide**
 - Architectural decision → **architect**
