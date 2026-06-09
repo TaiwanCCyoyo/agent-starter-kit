@@ -190,5 +190,8 @@
   },
   "enabledMcpjsonServers": [
     "memory-db"
-  ]
+  ],
+  "worktree": {
+        "baseRef": "head"
+  }
 }
