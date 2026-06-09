@@ -17,7 +17,7 @@ def repo_root(cwd: str) -> Path:
 
 
 def run(root: Path, args: list[str]) -> tuple[int, str, str]:
-    result = subprocess.run(args, cwd=root, text=True, capture_output=True)
+    result = subprocess.run(args, cwd=root, text=True, capture_output=True, encoding="utf-8", errors="replace")
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
@@ -30,7 +30,7 @@ def to_relative_path(root: Path, file_path: str) -> str:
 
 
 def changed_files(root: Path) -> list[str]:
-    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True)
+    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True, encoding="utf-8", errors="replace")
     files: list[str] = []
     for line in changed.stdout.splitlines():
         if not line.strip():
@@ -68,6 +68,11 @@ def should_warn_on_print(rel_path: str) -> bool:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     try:
         event = json.load(sys.stdin)
     except Exception:
@@ -106,7 +111,7 @@ def main() -> int:
         message = "\n\n".join(checks)
         if warnings:
             message += "\n\nWarnings:\n" + "\n".join(warnings)
-        sys.stdout.write(json.dumps({"systemMessage": message, "continue": False, "stopReason": "Claude Code post-edit hygiene check failed."}) + "\n")
+        sys.stdout.write(json.dumps({"decision": "block", "reason": message}) + "\n")
     elif warnings:
         sys.stdout.write(json.dumps({"systemMessage": "Warnings:\n" + "\n".join(warnings)}) + "\n")
 
