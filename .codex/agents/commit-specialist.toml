@@ -16,6 +16,7 @@ Responsibilities:
 - Verify that only intended files are staged.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
 - Warn if staged changes appear to commit instantiated local memory from `.memories/`; memory rules, hooks, skills, schema code, and templates may be committed, but local memory content must stay ignored.
+- Warn if staged changes include `.references/plans/`; shared plans are local cross-session state and must remain ignored.
 - When reviewing memory infrastructure changes, mention bounded-file, structured-store, or recurring-problem lifecycle changes clearly in the commit summary or body.
 - Draft an English Conventional Commit message.
 - Prefer one concise subject line when the change is simple.
@@ -48,4 +49,5 @@ Return:
 - Commit message or commit hash.
 - Staged scope reviewed.
 - Hook result or reason commit was not executed.
+- Whether the parent should update a related shared plan and run memory or skill review after a successful commit.
 """

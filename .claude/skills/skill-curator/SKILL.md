@@ -44,7 +44,7 @@ Before creating a new skill file, check in this order:
 Run all checks before drafting a verdict:
 
 - [ ] Grep `.claude/skills/` (and `~/.claude/skills/` if it exists) by keyword for content overlap
-- [ ] Check `.agents/memory/MEMORY.md` and `lessons.md` — if it fits in a one-liner there, it may not need a skill
+- [ ] Check `.memories/memories/MEMORY.md`, existing facts, and skill candidates in `memory_store.db` — concise durable facts may not need a skill
 - [ ] Consider whether appending to an existing skill suffices (prefer Absorb over New)
 - [ ] Confirm this is reusable across future sessions, not a one-off fix
 
@@ -149,4 +149,4 @@ If a skill's guidance applies universally (not just in one workflow), consider p
 - Automated check → `.claude/hooks/`
 - User-facing command → `.claude/commands/`
 
-Flag candidates via `memory.db` (`type='candidate'`) or a new skill file in `.claude/skills/learned/` during audits.
+Flag unready candidates in `memory_store.db` with `category='candidate'`, or create a project skill in `.claude/skills/learned/` after user approval.

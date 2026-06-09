@@ -4,24 +4,21 @@ description: Analyze coverage, identify gaps, and generate missing tests toward 
 
 # Test Coverage
 
-Analyze test coverage, identify gaps, and generate missing tests to reach 80%+ coverage.
+Analyze Python test coverage, identify meaningful gaps, and add focused tests toward a user-defined or risk-justified target.
 
 ## Step 1: Detect Test Framework
 
-| Indicator | Coverage Command |
-|-----------|-----------------|
-| `jest.config.*` or `package.json` jest | `npx jest --coverage --coverageReporters=json-summary` |
-| `vitest.config.*` | `npx vitest run --coverage` |
-| `pytest.ini` / `pyproject.toml` pytest | `pytest --cov=src --cov-report=json` |
-| `Cargo.toml` | `cargo llvm-cov --json` |
-| `pom.xml` with JaCoCo | `mvn test jacoco:report` |
-| `go.mod` | `go test -coverprofile=coverage.out ./...` |
+Use the repository-supported command:
+
+```bash
+uv run python -m pytest --cov --cov-report=term-missing
+```
 
 ## Step 2: Analyze Coverage Report
 
 1. Run the coverage command
 2. Parse the output (JSON summary or terminal output)
-3. List files **below 80% coverage**, sorted worst-first
+3. List the lowest-covered files and important uncovered branches
 4. For each under-covered file, identify:
    - Untested functions or methods
    - Missing branch coverage (if/else, switch, error paths)
@@ -48,7 +45,7 @@ For each under-covered file, generate tests following this priority:
 
 1. Run the full test suite — all tests must pass
 2. Re-run coverage — verify improvement
-3. If still below 80%, repeat Step 3 for remaining gaps
+3. Repeat only while additional tests cover meaningful behavior and remain in scope
 
 ## Step 5: Report
 

@@ -11,8 +11,8 @@ Located in `.claude/agents/`:
 | code-reviewer | Code review | After writing code |
 | code-simplifier | Simplify and refine code | After implementation |
 | python-reviewer | Python-specific review | Python code changes |
-| security-reviewer | Security analysis | Before commits with auth/input/API changes |
-| performance-optimizer | Performance analysis | Bottlenecks, slow code |
+| security-reviewer | Read-only security analysis | Auth, input, data, filesystem, network, crypto, payment changes |
+| performance-optimizer | Read-only performance analysis | Measured bottlenecks or tooling cost |
 | silent-failure-hunter | Swallowed errors, bad fallbacks | Reliability concerns |
 | loop-operator | Autonomous loop monitoring | Long-running agent loops |
 | repo-explorer | Codebase exploration | Finding files and patterns |
@@ -30,6 +30,8 @@ Located in `.claude/agents/`:
 - New feature or bug fix → **tdd-guide**
 - Architectural decision → **architect**
 - Security-sensitive change → **security-reviewer**
+
+`architect`, reviewers, explorers, and memory analysts are read-only. `code-simplifier`, `tdd-guide`, and `loop-operator` may write only when explicitly delegated a bounded implementation task. `performance-optimizer` and `security-reviewer` report findings but do not edit.
 
 ## Parallel Execution
 

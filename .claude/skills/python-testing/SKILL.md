@@ -39,4 +39,10 @@ Do not use single-file mypy as final evidence of type correctness. `uv run mypy 
 
 ## Coverage Target
 
-80%+ coverage required. Critical paths (hooks, memory scripts) require 100%.
+Coverage is optional unless the user requests it or the change is high risk. Run:
+
+```bash
+uv run python -m pytest --cov --cov-report=term-missing
+```
+
+Use coverage to find meaningful untested behavior, not to satisfy a universal percentage. If a task defines a threshold, report the measured result against that threshold.

@@ -33,11 +33,11 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `code-reviewer` | sonnet | Read, Grep, Glob, Bash | General code review across all languages |
 | `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | Simplify code structure while preserving behavior |
 | `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | Monitor and safely intervene in autonomous loops |
-| `performance-optimizer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | Identify bottlenecks, optimize algorithms and queries |
+| `performance-optimizer` | sonnet | Read, Grep, Glob, Bash | Read-only review of measured bottlenecks, I/O, memory, complexity, and tooling cost |
 | `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python-specific review: type hints, security, Pythonic idioms |
-| `security-reviewer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | OWASP Top 10, secrets detection, trading security |
+| `security-reviewer` | sonnet | Read, Grep, Glob, Bash | Read-only secrets, injection, dependency, permission, auth, and sensitive-data review |
 | `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | Find swallowed exceptions, bad fallbacks, missing error propagation |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | Delegatable TDD subagent; follows `superpowers:test-driven-development` workflow; targets 80%+ coverage |
+| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | Delegatable bounded TDD implementation following `superpowers:test-driven-development`; coverage is optional |
 
 ### Not ported from ECC (with reasons)
 
@@ -115,7 +115,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | Skill | Purpose |
 |---|---|
 | `cost-aware-llm-pipeline` | LLM cost control: model routing, budget tracking, prompt caching |
-| `eval-harness` | Formal evaluation framework for Claude Code sessions (EDD, pass@k) |
 | `github-ops` | CI/CD debugging, release management, Dependabot monitoring |
 | `llm-trading-agent-security` | Trading agent security: spend limits, circuit breakers, key handling |
 | `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. General TDD provided by Superpowers. |
@@ -140,6 +139,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | Non-Python language patterns | Unused languages |
 | `homelab-*`, `network-*`, `healthcare-*` | Domain mismatch |
 | `angular-developer`, `react-*`, `nextjs-*` | No frontend planned |
+| `eval-harness` | Removed 2026-06-09: referenced nonexistent `/eval` commands and had no runner, graders, baseline format, Python commands, or CI integration. Restore only after those capabilities exist. |
 
 ---
 
@@ -168,8 +168,8 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 | Rule set | Paths | Source | Notes |
 |---|---|---|---|
-| `rules/common/` | All files | ECC v2.0.0-rc.1 | Universal principles: KISS/DRY/YAGNI, naming, error handling, immutability, file size limits |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations on all function signatures; formatter changed from black to **ruff**; logging required (no `print()`) |
+| `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed) | Scoped changes, repository alignment, risk-based testing, review severity, and reviewer routing; size and immutability are heuristics |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
 
 ### Not ported from ECC (with reasons)
 
@@ -190,6 +190,11 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | `uvm-patterns` skill | Custom build | UVM project starts |
 | `rules/systemverilog/` | Custom build | UVM project starts |
 | CI/CD guidance in README | Docs update | After integration stabilises |
+| Eval-driven development harness | Workflow infrastructure | Add a real runner, deterministic graders, baselines, repeated-run metrics, Python commands, and CI integration |
+
+### Shared Plans
+
+Approved plans that need cross-agent or cross-session visibility live under `.references/plans/{kebab-name}.plan.md`. This is the only writable exception under the otherwise read-only `.references/` tree. Plans remain git-ignored and outside durable memory.
 
 ### Searchable Memory — SQLite FTS5
 

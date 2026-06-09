@@ -18,7 +18,7 @@ Identify the project's build tool and run the build:
 | `pom.xml` | `mvn compile` |
 | `build.gradle` | `./gradlew compileJava` |
 | `go.mod` | `go build ./...` |
-| `pyproject.toml` | `python -m compileall -q .` or `mypy .` |
+| `pyproject.toml` | `uv run mypy .` and `uv run python -m pytest` |
 
 ## Step 2: Parse and Group Errors
 
@@ -43,7 +43,7 @@ Stop and ask the user if:
 - A fix introduces **more errors than it resolves**
 - The **same error persists after 3 attempts** (likely a deeper issue)
 - The fix requires **architectural changes** (not just a build fix)
-- Build errors stem from **missing dependencies** (need `npm install`, `cargo add`, etc.)
+- Build errors stem from **missing dependencies** that require an environment-owner decision or network access
 
 ## Step 5: Summary
 

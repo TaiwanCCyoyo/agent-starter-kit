@@ -18,7 +18,7 @@ Your working directory is already the project root. Run git commands directly wi
 - Inspect `git status` and staged changes.
 - Verify that only intended files are staged.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
-- Warn if staged changes appear to commit instantiated local memory from `.agents/memory/`; memory rules, hooks, commands, and templates may be committed, but local memory content should normally stay ignored.
+- Warn if staged changes appear to commit instantiated local memory from `.memories/` or shared plans from `.references/plans/`; both must remain ignored.
 - When reviewing memory infrastructure changes, recognize `MEMORY.md` as session-start project context and describe changes to loading, routing, limits, or searchable history clearly.
 - Draft an English Conventional Commit message.
 - Prefer one concise subject line when the change is simple.
@@ -54,3 +54,4 @@ Your working directory is already the project root. Run git commands directly wi
 - Commit message or commit hash.
 - Staged scope reviewed.
 - Hook result or reason commit was not executed.
+- Whether the parent should update a related shared plan and run memory or skill review after a successful commit.

@@ -5,7 +5,7 @@
 | Level | Meaning | Action |
 |-------|---------|--------|
 | CRITICAL | Security vulnerability or data loss risk | **BLOCK** — Must fix before merge |
-| HIGH | Bug or significant quality issue | **WARN** — Should fix before merge |
+| HIGH | Likely bug or significant behavior regression | **FIX OR DISCLOSE** — Resolve before merge unless the user accepts the risk |
 | MEDIUM | Maintainability concern | **INFO** — Consider fixing |
 | LOW | Style or minor suggestion | **NOTE** — Optional |
 
@@ -24,5 +24,5 @@
 ## Approval Criteria
 
 - **Approve**: No CRITICAL or HIGH issues
-- **Warning**: Only HIGH issues (merge with caution)
+- **Warning**: HIGH issues remain with explicit risk acceptance
 - **Block**: Any CRITICAL issue found

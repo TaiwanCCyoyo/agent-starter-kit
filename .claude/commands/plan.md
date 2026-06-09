@@ -41,12 +41,12 @@ The assistant will:
 
 | Input | Mode | Behavior |
 |---|---|---|
-| `path/to/name.prd.md` | PRD artifact mode | Read the PRD, pick the next pending delivery milestone or implementation phase, and write `.claude/plans/{name}.plan.md` |
+| `path/to/name.prd.md` | PRD artifact mode | Read the PRD, pick the next pending delivery milestone or implementation phase, and write `.references/plans/{name}.plan.md` |
 | Any other markdown path | Reference mode | Read the file as context and produce an inline plan |
 | Free-form text | Conversational mode | Produce an inline plan |
 | Empty input | Clarification mode | Ask what should be planned |
 
-In PRD artifact mode, create `.claude/plans/` if needed. If the PRD contains a `Delivery Milestones` table, update only the selected row from `pending` to `in-progress` and set its `Plan` cell to the generated plan path. If the PRD uses the legacy `.claude/PRPs/prds/` format with `Implementation Phases`, read it without migrating paths.
+In PRD artifact mode, create `.references/plans/` if needed. This is the only writable path under `.references/`; all upstream reference clones remain read-only. If the PRD contains a `Delivery Milestones` table, update only the selected row from `pending` to `in-progress` and set its `Plan` cell to the generated plan path.
 
 ## Pattern Grounding
 
@@ -64,7 +64,7 @@ If no similar code exists, state that explicitly. Do not invent a pattern.
 
 ## PRD Artifact Output
 
-When called with a `.prd.md` file, write the plan to `.claude/plans/{kebab-case-name}.plan.md` using this structure:
+When called with a `.prd.md` file, write the plan to `.references/plans/{kebab-case-name}.plan.md` using this structure:
 
 ````markdown
 # Plan: {Feature Name}
@@ -72,6 +72,8 @@ When called with a `.prd.md` file, write the plan to `.claude/plans/{kebab-case-
 **Source PRD**: {path}
 **Selected Milestone**: {milestone or phase name}
 **Complexity**: {Small | Medium | Large}
+**Updated**: {ISO 8601 timestamp}
+**Related Commit**: pending
 
 ## Summary
 {2-3 sentences}
@@ -107,6 +109,11 @@ When called with a `.prd.md` file, write the plan to `.claude/plans/{kebab-case-
 - [ ] All tasks complete
 - [ ] Validation passes
 - [ ] Patterns mirrored, not reinvented
+
+## Completion
+- **Status**: approved | in-progress | completed | blocked
+- **Verification**: pending
+- **Commit**: pending
 ````
 
 After writing the artifact, report its path and WAIT for confirmation before writing code.
@@ -184,8 +191,4 @@ After planning:
 - Use `superpowers: test-driven-development` to implement with test-driven development
 - Use `/build-fix` if build errors occur
 - Use `/code-review` to review completed implementation
-- Use `/pr` or `/prp-pr` to open a pull request
-
-> **Need requirements first?** Use `/plan-prd` for a lean PRD at `.claude/prds/{name}.prd.md`.
->
-> **Need the legacy PRP flow?** Use `/prp-plan` for deep PRP planning with `.claude/PRPs/` artifacts. Use `/prp-implement` to execute those plans with rigorous validation loops.
+- Use the repository's configured GitHub workflow when a pull request is requested

@@ -56,3 +56,12 @@ Agent-Status: autonomous
 - Never include ignored local state under `.memories/`.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.
+
+## Post-Commit Review
+
+After a successful commit:
+
+1. If a related `.references/plans/*.plan.md` exists, update its status, verification summary, and commit hash. Do not create a plan retroactively for a simple commit.
+2. Decide whether the session produced durable facts, decisions, lessons, environment constraints, recurring problems, or verified resolutions worth routing through `save-memory` or `memory-sql`.
+3. Use `skill-review` for user corrections, non-obvious techniques, reusable workflows, or corrected skill guidance.
+4. Do not store commit narration, duplicate plan content, or transient failures in memory.

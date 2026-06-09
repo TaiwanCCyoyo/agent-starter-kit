@@ -25,7 +25,7 @@ Translate English documentation to Traditional Chinese (zh-TW).
 - Do not modify the source English document unless the user explicitly asks for source edits.
 - Do not translate code blocks, command syntax, file paths, or technical identifiers.
 - Do not create new files beyond the explicitly requested target.
-- Do not update `.agents/memory/` files.
+- Do not update `.memories/` or `.references/plans/` files.
 
 ## Return
 

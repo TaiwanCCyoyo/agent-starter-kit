@@ -1,14 +1,13 @@
 # Testing Requirements
 
-## Coverage Target: 80%
+## Risk-Based Coverage
 
-Unit and integration tests are the baseline. Add E2E tests for critical user flows when the project warrants it.
+- Add the smallest direct test for changed behavior and failure modes.
+- Add integration tests when a change crosses a real component, process, database, filesystem, or network boundary.
+- Add E2E tests only for critical user flows when the project has an E2E harness.
+- Run coverage when requested or when risk makes untested paths important. Do not impose a universal percentage.
 
-1. **Unit** — individual functions and utilities
-2. **Integration** — component boundaries, data access
-3. **E2E** — critical flows only, added when the project reaches that scale
-
-TDD workflow is provided by `superpowers: test-driven-development`. Repository-specific test commands and coverage tooling are in `skill: python-testing`.
+TDD workflow is provided by `superpowers:test-driven-development`. Repository-specific commands are in `skill: python-testing`.
 
 ## Test Structure (AAA Pattern)
 

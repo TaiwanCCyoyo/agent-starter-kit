@@ -1,27 +1,15 @@
 # Coding Style
 
-## Immutability (CRITICAL)
+## Core Practice
 
-ALWAYS create new objects, NEVER mutate existing ones:
+- Match existing repository patterns before introducing a new abstraction.
+- Prefer explicit, readable code over cleverness.
+- Keep changes scoped to requested behavior and direct verification.
+- Prefer immutable values when they reduce hidden state, but allow clear local mutation when it is simpler and safe.
+- Use early returns or extraction when nesting obscures control flow.
 
-```
-WRONG:  modify(original, field, value) → changes original in-place
-CORRECT: update(original, field, value) → returns new copy with change
-```
+## Review Heuristics
 
-## Size Limits
+File length, function length, parameter count, and nesting depth are signals for review, not universal failure thresholds. Request a split only when the current structure creates a concrete correctness, testing, or maintenance risk.
 
-- Files: 200–400 lines typical, **800 max**
-- Functions: **50 lines max**
-- Nesting: **4 levels max** — use early returns
-
-## Code Quality Checklist
-
-Before marking work complete:
-- [ ] Code is readable and well-named
-- [ ] Functions are small (<50 lines)
-- [ ] Files are focused (<800 lines)
-- [ ] No deep nesting (>4 levels)
-- [ ] Proper error handling
-- [ ] No hardcoded values
-- [ ] No mutation (immutable patterns used)
+Before marking work complete, confirm names are clear, error handling fits local patterns, constants are intentional, and no unrelated refactor was introduced.

@@ -33,11 +33,11 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `code-reviewer` | sonnet | Read, Grep, Glob, Bash | 跨語言通用程式碼審查 |
 | `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | 在保留行為的前提下簡化程式碼結構 |
 | `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | 監控自主循環並安全介入 |
-| `performance-optimizer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | 識別瓶頸、最佳化演算法與查詢 |
+| `performance-optimizer` | sonnet | Read, Grep, Glob, Bash | 唯讀審查已量測的瓶頸、I/O、記憶體、複雜度與工具成本 |
 | `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python 專屬審查：型別提示、安全性、Pythonic 慣例 |
-| `security-reviewer` | sonnet | Read, Write, Edit, Bash, Grep, Glob | OWASP Top 10、機密偵測、交易安全性 |
+| `security-reviewer` | sonnet | Read, Grep, Glob, Bash | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查 |
 | `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | 尋找被吞掉的例外、錯誤的 fallback、遺漏的錯誤傳播 |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | 可委派的 TDD 子 agent；遵循 `superpowers:test-driven-development` 工作流程；目標涵蓋率 80%+ |
+| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | 可委派的有界 TDD 實作；遵循 `superpowers:test-driven-development`，coverage 為選配 |
 
 ### 未從 ECC 移植（含原因）
 
@@ -115,7 +115,6 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | Skill | 用途 |
 |---|---|
 | `cost-aware-llm-pipeline` | LLM 成本控制：模型路由、預算追蹤、提示快取 |
-| `eval-harness` | Claude Code 工作階段的正式評估框架（EDD、pass@k） |
 | `github-ops` | CI/CD 除錯、版本管理、Dependabot 監控 |
 | `llm-trading-agent-security` | 交易代理安全性：消費上限、斷路器、金鑰處理 |
 | `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。通用 TDD 由 Superpowers 提供。 |
@@ -140,6 +139,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | 非 Python 語言模式 | 未使用的語言 |
 | `homelab-*`、`network-*`、`healthcare-*` | 領域不符 |
 | `angular-developer`、`react-*`、`nextjs-*` | 未規劃前端 |
+| `eval-harness` | 2026-06-09 移除：引用不存在的 `/eval` commands，且沒有 runner、graders、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。 |
 
 ---
 
@@ -168,8 +168,8 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 | 規則集 | 路徑 | 來源 | 備註 |
 |---|---|---|---|
-| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1 | 通用原則：KISS/DRY/YAGNI、命名規範、錯誤處理、不可變性、檔案大小限制 |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | 所有函式簽名須加型別注解；格式化工具由 black 改為 **ruff**；必須使用 logging（禁用 `print()`） |
+| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂） | 限縮變更、repo 對齊、風險導向測試、review severity 與 reviewer routing；尺寸與不可變性僅作 heuristics |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
 
 ### 未從 ECC 移植（含原因）
 
@@ -190,6 +190,11 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `uvm-patterns` skill | 自訂建置 | UVM 專案啟動 |
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
 | README 中的 CI/CD 指引 | 文件更新 | 整合穩定後進行 |
+| Eval-driven development harness | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
+
+### 共用 Plans
+
+需要跨 agent 或跨 session 查看之核准 plans 存放於 `.references/plans/{kebab-name}.plan.md`。這是原則上唯讀的 `.references/` 內唯一可寫例外。Plans 保持 gitignored，且不屬於 durable memory。
 
 ### 可搜尋記憶——SQLite FTS5
 

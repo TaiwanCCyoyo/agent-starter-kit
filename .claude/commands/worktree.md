@@ -8,25 +8,13 @@ Follow `.claude/skills/worktree-memory-sync/SKILL.md` for the repository-specifi
 
 ## Creation
 
-When creating a worktree (Mode B — Feature Branch):
-
-1. Create the branch and worktree with `git worktree add <path> <branch>`.
-2. Ensure `.agents/memory/MEMORY.md` exists in the worktree.
-3. Copy or initialize the approved memory layout when relevant: `MEMORY.md`, `USER.md`, `decisions.md`, `lessons.md`, `changes/`, `archive/`.
-4. Immediately define the worktree mission in the session-start project context:
-   - Branch goal.
-   - Definition of done.
-   - Any constraints from the user request.
-5. Do not leave `[MISSION REQUIRED]` in the new worktree memory.
+Use the Superpowers worktree workflow for detection, consent, creation, setup, and baseline verification. After creation, copy only missing `.memories/` items and never overwrite worktree-local `MEMORY.md`, `USER.md`, or `memory_store.db`.
 
 ## Active Development
 
-- Use the local worktree memory for task progress.
-- Mark entries with the branch name when needed.
-- Keep compact branch status in `MEMORY.md`.
-- Keep detailed handoff in an active `changes/<id>/` plan.
-- Keep recurring branch lessons concise in `lessons.md`; graduate stale lessons to `memory.db` via `/memory-sql` or `archive/`.
-- Keep branch-specific multi-step plans under `changes/<change-id>/` and consolidate/archive them before worktree removal.
+- Keep durable memory within the approved `.memories/` taxonomy.
+- Keep approved cross-session plans under `.references/plans/`.
+- Use `/memory-sql` for searchable facts and recurring-problem history.
 
 ## Finish
 
@@ -35,23 +23,19 @@ Before removing a worktree:
 1. Verify the definition of done.
 2. Run relevant tests or checks.
 3. Read the worktree memory and main repository memory.
-4. Consolidate durable lessons and meaningful completed milestones into the main memory.
-5. Merge the branch into the target branch.
-6. Remove the worktree.
-7. Delete the branch only after the merge succeeds.
+4. Consolidate durable, non-duplicate memory into the current main-workspace state.
+5. Follow Superpowers for merge, PR, preservation, or cleanup.
 
 ## Consolidation
 
 When consolidating worktree memory:
 
-1. Identify source and destination memory directories.
-2. Read `MEMORY.md` plus relevant on-demand files from both locations.
-3. Transfer only high-signal lessons, architectural decisions, active handoff, and meaningful completed milestones.
-4. Route consolidated items to the correct destination file instead of forcing everything into `MEMORY.md`.
-5. Move completed, rejected, or superseded worktree change plans to `archive/` after consolidation.
-6. Avoid duplicate entries.
-7. Prefix branch-specific milestones when context matters.
-8. Report consolidated items, target files, archived change folders, and skipped duplicates.
+1. Identify source and destination `.memories/` directories.
+2. Compare bounded files and query structured memory before writes.
+3. Transfer only durable, non-duplicate facts and verified resolutions.
+4. Preserve newer main-workspace entries.
+5. Update the related `.references/plans/*.plan.md` with status, verification, and commit when relevant.
+6. Report consolidated items and skipped duplicates.
 
 ## Safety
 

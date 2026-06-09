@@ -9,7 +9,7 @@ This command invokes the **python-reviewer** agent for comprehensive Python-spec
 ## What This Command Does
 
 1. **Identify Python Changes**: Find modified `.py` files via `git diff`
-2. **Run Static Analysis**: Execute `ruff`, `mypy`, `pylint`, `black --check`
+2. **Run Static Analysis**: Execute repository-supported Ruff and mypy checks
 3. **Security Scan**: Check for SQL injection, command injection, unsafe deserialization
 4. **Type Safety Review**: Analyze type hints and mypy errors
 5. **Pythonic Code Check**: Verify code follows PEP 8 and Python best practices
@@ -55,23 +55,11 @@ Use `/python-review` when:
 ## Automated Checks Run
 
 ```bash
-# Type checking
-mypy .
-
-# Linting and formatting
-ruff check .
-black --check .
-isort --check-only .
-
-# Security scanning
-bandit -r .
-
-# Dependency audit
-pip-audit
-safety check
-
-# Testing
-pytest --cov=app --cov-report=term-missing
+uv run ruff check .
+uv run mypy .
+uv run python -m pytest
+# Optional when requested or risk-justified:
+uv run python -m pytest --cov --cov-report=term-missing
 ```
 
 ## Example Usage
@@ -89,8 +77,7 @@ Agent:
 ## Static Analysis Results
 ✓ ruff: No issues
 ✓ mypy: No errors
-WARNING: black: 2 files need reformatting
-✓ bandit: No security issues
+✓ pytest: Tests passed
 
 ## Issues Found
 
@@ -158,7 +145,7 @@ with open("config.json") as f:  # Good
 Recommendation: FAIL: Block merge until CRITICAL issue is fixed
 
 ## Formatting Required
-Run: `black app/routes/user.py app/services/auth.py`
+Run: `uv run ruff format app/routes/user.py app/services/auth.py`
 ```
 
 ## Approval Criteria
@@ -203,7 +190,7 @@ The reviewer checks for:
 ## Related
 
 - Agent: `agents/python-reviewer.md`
-- Skills: `skills/python-patterns/`, `skills/python-testing/`
+- Skill: `skills/python-testing/`
 
 ## Common Fixes
 

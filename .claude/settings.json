@@ -87,8 +87,6 @@
       "Bash(uv *)",
       "Bash(ruff *)",
       "Bash(mypy *)",
-      "Bash(black *)",
-      "Bash(isort *)",
       "Bash(pytest *)",
       "Bash(pre-commit *)",
       "Bash(node *)",

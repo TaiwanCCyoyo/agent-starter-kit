@@ -1,98 +1,87 @@
 # Codex Components Reference
 
-This document describes the Codex-specific layer. Codex uses native Plan Mode, repo-scoped skills, specialist subagents, project hooks, plugins, and project-scoped MCP servers rather than mirroring Claude Code slash commands.
+Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project hooks, installed plugins, and a project-scoped memory MCP server. It aligns outcomes and policy with Claude Code without copying every Claude command or agent.
 
-## Native Equivalents
+## Native And Plugin Equivalents
 
-| Claude/ECC concept | Codex implementation |
+| Capability | Codex implementation |
 | :--- | :--- |
-| `/plan` and planner agent | Native Plan Mode and `<proposed_plan>` |
-| TDD, debugging, worktrees, and completion verification | Installed Superpowers plugin |
-| GitHub operations skill | Installed GitHub plugin |
+| Planning | Native Plan Mode and `<proposed_plan>` |
+| Plan quality review | Read-only `plan_reviewer` agent |
+| TDD, debugging, worktrees, completion verification | Installed Superpowers plugin |
+| GitHub issues, PRs, CI, review comments, publishing | Installed GitHub plugin |
 | Slash commands | Natural-language skill triggers |
-| `memory-db` MCP | Project-scoped `.codex/config.toml` server |
+| Cross-session plans | Git-ignored `.references/plans/*.plan.md` |
+| Searchable memory | Project-scoped `memory-db` MCP server |
 
 ## Agents
 
-| Agent | Purpose |
-| :--- | :--- |
-| `repo_explorer` | Read-only repository orientation and dependency tracing |
-| `implementation_reviewer` | Correctness, regression, test coverage, and unintended-diff review |
-| `python_reviewer` | Python typing, ruff, logging, tests, and maintainability review |
-| `security_reviewer` | Secrets, unsafe commands, injection, dependency, and permission review |
-| `performance_reviewer` | Targeted latency, throughput, memory, complexity, and tooling-cost review |
-| `commit_specialist` | Staged-change review and explicit commit execution from the repository root |
-| `doc_translator` | Bounded translation edits |
-| `memory_auditor` / `memory_compressor` | Read-only memory recommendations and compression drafts |
+| Agent | Access | Purpose |
+| :--- | :--- | :--- |
+| `repo_explorer` | Read-only | Repository orientation and dependency tracing |
+| `plan_reviewer` | Read-only | Plan completeness, scope, sequencing, repository alignment, testability, and risk |
+| `implementation_reviewer` | Read-only | Correctness, regression, test coverage, and unintended-diff review |
+| `python_reviewer` | Read-only | Python runtime, typing, Ruff, tests, logging, and maintainability |
+| `security_reviewer` | Read-only | Secrets, injection, dependencies, permissions, auth, and sensitive data |
+| `performance_reviewer` | Read-only | Measured latency, memory, complexity, I/O, and tooling cost |
+| `memory_auditor` / `memory_compressor` | Read-only | Memory recommendations and bounded-file compression drafts |
+| `doc_translator` | Bounded write | Edits only the explicit translation target |
+| `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
+
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 
 ## Skills
 
 | Skill | Purpose |
 | :--- | :--- |
-| `python-testing` | Repository-specific Python, hook, Windows-path, ruff, and mypy requirements |
-| `gen-commit` | Commit review and Conventional Commit workflow |
-| `memory-manager`, `save-memory`, `compress-memory` | Shared project memory lifecycle |
-| `memory-sql` | Holographic-compatible SQLite fact and recurring-problem workflows |
-| `skill-review` | ECC-style extraction quality gate and manual Hermes-style curation |
+| `python-testing` | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements |
+| `gen-commit` | Commit review, Conventional Commits, post-commit plan update, memory routing, and skill review |
+| `memory-manager`, `save-memory`, `compress-memory` | Shared bounded and structured memory lifecycle |
+| `memory-sql` | Holographic-compatible SQLite facts and recurring-problem workflows |
+| `skill-review` | Manual reusable-pattern quality gate and skill candidate routing |
 | `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees |
+
+## Claude Capability Decisions
+
+| Claude capability | Codex decision | Reason |
+| :--- | :--- | :--- |
+| `/plan` | Native replacement | Codex Plan Mode provides conversational grounding and decision-complete `<proposed_plan>` output. |
+| `plan-reviewer` | Ported | Independent plan critique is useful and does not duplicate plan creation. |
+| `/feature-dev` | Superpowers/native replacement | Brainstorming, Plan Mode, TDD, verification, and review already form the workflow. |
+| `/build-fix` | Superpowers/native replacement | Systematic debugging plus repository verification covers incremental diagnosis and repair. |
+| `/code-review` | Native/plugin replacement | Local review uses Codex review stance and agents; PR review uses the GitHub plugin. |
+| `/python-review` | Agent replacement | `python_reviewer` uses repository-supported Ruff, mypy, pytest, and optional coverage commands. |
+| `/security-scan` | Agent and gate replacement | `security_reviewer`, detect-secrets, hooks, and pre-commit are installed; AgentShield is not. |
+| `/test-coverage` | Skill replacement | Optional coverage is part of `python-testing`; Codex does not need a command wrapper. |
+| `github-ops` | Plugin replacement | The GitHub plugin supplies repository, issue, PR, CI, comment, and publishing workflows with current connector semantics. |
+| `cost-aware-llm-pipeline` | Not ported | It is application-domain guidance with provider-specific model names and volatile pricing, not a Codex workflow. Create a shared, vendor-verified skill when this repository builds an LLM API pipeline. |
+| `eval-harness` | Removed/deferred | It referenced nonexistent `/eval` commands and lacked a runner, grader implementation, baseline format, Python commands, and CI integration. Restore only after those capabilities exist. |
+| `llm-trading-agent-security` | Not ported | It is domain-specific to transaction-signing or wallet-authorized agents. Share it when the repository contains that execution surface. |
+| `architect`, `code-simplifier`, `loop-operator`, `tdd-guide` | Not mirrored | Codex keeps planning and implementation in the main agent and uses Superpowers workflows; duplicating write-capable specialists would add overlapping authority. |
+| `code-reviewer`, `silent-failure-hunter` | Consolidated | `implementation_reviewer`, `python_reviewer`, `security_reviewer`, and systematic debugging cover the useful review dimensions. |
+| `performance-optimizer` | Read-only equivalent | Codex uses `performance_reviewer` and requires measurement before optimization. |
+
+## Plans, Memory, And Commits
+
+- `.references/plans/` is the only writable exception under the otherwise read-only `.references/` tree.
+- Approved cross-session plans record goal, decisions, tasks, verification, update time, status, and related commit. They remain git-ignored and are not durable memory.
+- After a commit, update a related plan when one exists, then route only durable facts, decisions, lessons, recurring problems, or verified resolutions into memory.
+- Reusable corrections and workflows go through `skill-review`; immature ideas may become low-trust `candidate` facts.
 
 ## Hooks And Gates
 
 | Layer | Responsibility |
 | :--- | :--- |
-| `.codex/hooks/session_start.py` | Initializes `.memories/`, the SQLite schema, and injects `MEMORY.md` plus `USER.md` |
-| `.codex/hooks/post_tool_use_hygiene.py` | Runs targeted formatting, lint, file hygiene, and Python print checks |
-| `.codex/hooks/stop_memory_check.py` | Enforces memory limits, strict taxonomy, session-scoped reminders, SQL graduation guidance, and one-time skill review |
-| `.pre-commit-config.yaml` | Repository commit gate for hygiene, secrets, ruff, no-print checks, and mypy |
+| `.codex/hooks/session_start.py` | Initializes `.memories/`, SQLite schema, and bounded session context |
+| `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Python no-print feedback |
+| `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, plan routing, and one-time skill-review reminder |
+| `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff, no-print, and full-project mypy |
 
-## Searchable Memory MCP
+Python verification uses `uv run python -m pytest`, `uv run ruff check .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 
-`.codex/config.toml` defines `memory-db` as a project-scoped stdio MCP server:
+## Deferred Capabilities
 
-- Command: `uvx mcp-server-sqlite`
-- Database: `.memories/memory_store.db`
-- Working directory: repository root through `cwd = ".."`
-- Read tools: automatic approval
-- Schema and write tools: prompt for approval
-- Startup failure: non-fatal (`required = false`)
-
-Codex and Claude Code are migrated. The Antigravity adapter is implemented but still requires runtime validation.
-
-## ECC Adaptation
-
-Ported or adapted:
-
-- Repository-specific Python testing, security, performance, and review principles.
-- Prompt Defense baseline.
-- Functional-test requirement for hook or script changes.
-- Session skill-review quality gate.
-
-Provided by installed plugins or Codex-native capability:
-
-- Planner agent and `/plan` command.
-- TDD, systematic debugging, worktree lifecycle, and completion verification through Superpowers.
-- GitHub operations workflow.
-- Claude slash-command wrappers.
-
-Not ported:
-
-- ECC observation/instinct pipeline and background learning process.
-- Hookify and harness-internal tooling.
-- Language/domain workflows not used by this starter kit.
-
-## Hermes Adaptation
-
-Implemented:
-
-- Bounded `MEMORY.md` and `USER.md`.
-- Frozen session-start snapshots.
-- Hermes-compatible bounded files and frozen session-start snapshots.
-- Holographic-compatible SQLite facts, FTS5, entities, trust metadata, recurring problem occurrences, and verified resolutions.
-- Manual skill review and lifecycle decisions.
-
-Not implemented:
-
-- Automatic capture of every conversation message.
-- Transparent transcript recall.
-- Hermes background skill curator.
-- A persistent asynchronous memory process.
+- Automatic transcript capture and transparent recall.
+- Persistent asynchronous memory or background skill curation.
+- Eval-driven development infrastructure until a real runner, deterministic graders, baselines, repeated-run metrics, and CI integration exist.
+- Domain skills for LLM API cost routing or transaction-authorized agents until the repository adopts those application surfaces.

@@ -96,6 +96,13 @@ class HookContractTests(unittest.TestCase):
         self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
         self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
 
+    def test_taxonomy_warning_routes_plans_to_shared_reference_path(self) -> None:
+        self.populate_approved()
+        (self.memory_root / "changes").mkdir()
+        message = CODEX_STOP_HOOK.memory_taxonomy_message(self.root)
+        self.assertIn(".references/plans/", message)
+        self.assertNotIn("agent-native planning state", message)
+
 
 class CodexSessionStartTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -190,6 +197,13 @@ class ClaudeHookContractTests(unittest.TestCase):
         CLAUDE_STOP_HOOK.write_state(self.root, {"session_id": "old", "response_count": 9})
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
+
+    def test_taxonomy_warning_routes_plans_to_shared_reference_path(self) -> None:
+        self.populate_approved()
+        (self.memory_root / "changes").mkdir()
+        message = CLAUDE_STOP_HOOK.memory_taxonomy_message(self.root)
+        self.assertIn(".references/plans/", message)
+        self.assertNotIn("agent-native planning state", message)
 
 
 class ClaudeSessionStartTests(unittest.TestCase):

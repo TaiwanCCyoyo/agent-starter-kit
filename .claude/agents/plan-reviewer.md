@@ -20,7 +20,7 @@ Your job is to find problems the planner missed — scope creep, hidden dependen
 
 ## Input
 
-The plan to review is provided in the user message, or read from `.claude/plans/` if a path is given.
+The plan to review is provided in the user message, or read from `.references/plans/` if a path is given.
 
 ## How to Review
 

@@ -8,7 +8,8 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Treat `.codex/` as a private Codex support directory.
 - Shared instantiated memory lives under the git-ignored `.memories/` root. Tracked cross-agent infrastructure remains under `.agents/`.
 - Root `AGENTS.md` is intentionally absent to avoid polluting non-Codex agents and subagents.
-- `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit or commit those clones.
+- `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit those clones.
+- `.references/plans/` is the only writable exception under `.references/`. Store approved cross-agent plans there as `{kebab-name}.plan.md`; never commit them or treat them as durable memory.
 - `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.
 
 ## Operating Contract
@@ -60,7 +61,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
 - Mark platform-specific progress clearly, such as Codex-only or Antigravity pending.
 - Use `.codex/skills/memory-manager/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
-- Keep plans outside the memory taxonomy: use Codex native planning state, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
+- Keep plans outside the memory taxonomy: use Codex native planning state for in-session work, `.references/plans/` for approved cross-session plans, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.memories/` writes.
 
@@ -87,8 +88,10 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 ## Subagents
 
 - Codex project custom agents live in `.codex/agents/*.toml`.
-- Read-only subagents: `repo_explorer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
+- Read-only subagents: `repo_explorer`, `plan_reviewer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
 - Write-capable subagents: `doc_translator` may edit only the explicit target translation file; `commit_specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
+- Use `plan_reviewer` after complex or high-risk plans. It critiques plans but does not replace Codex Native Plan Mode.
+- Use `security_reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
 - Specialist reviewer agents supplement the main Codex agent for review and analysis; they do not replace Codex's implementation or planning flow.

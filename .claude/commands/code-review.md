@@ -45,17 +45,15 @@ Read each changed file in full. Check for:
 - Insecure dependencies
 - Path traversal risks
 
-**Code Quality (HIGH):**
-- Functions > 50 lines
-- Files > 800 lines
-- Nesting depth > 4 levels
+**Code Quality (HIGH when behavior risk is concrete):**
+- Functions, files, or nesting whose complexity hides likely bugs
 - Missing error handling
 - console.log statements
 - TODO/FIXME comments
 - Missing JSDoc for public APIs
 
 **Best Practices (MEDIUM):**
-- Mutation patterns (use immutable instead)
+- Hidden shared-state mutation
 - Emoji usage in code/comments
 - Missing tests for new code
 - Accessibility issues (a11y)
@@ -99,7 +97,7 @@ If PR not found, stop with error. Store PR metadata for later phases.
 Build review context:
 
 1. **Project rules** — Read `CLAUDE.md`, `.claude/docs/`, and any contributing guidelines
-2. **Planning artifacts** — Check `.claude/prds/`, `.claude/plans/`, `.claude/reviews/`, and legacy `.claude/PRPs/{prds,plans,reports,reviews}/` for context related to this PR
+2. **Planning artifacts** — Check `.references/plans/` and maintained project documentation for context related to this PR
 3. **PR intent** — Parse PR description for goals, linked issues, test plans
 4. **Changed files** — List all modified files and categorize by type (source, test, config, docs)
 
@@ -165,7 +163,9 @@ go build ./...  # Build
 
 **Python** (has `pyproject.toml` / `setup.py`):
 ```bash
-pytest  # Tests
+uv run ruff check .
+uv run mypy .
+uv run python -m pytest
 ```
 
 Run only the commands that apply to the detected project type. Record pass/fail for each.

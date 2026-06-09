@@ -2,13 +2,12 @@
 
 ## Feature Implementation Workflow
 
-### 0. Research & Reuse _(mandatory before any new implementation)_
+### 0. Research & Reuse
 
-- **GitHub code search first:** Run `gh search repos` and `gh search code` to find existing implementations, templates, and patterns before writing anything new.
-- **Library docs second:** Use Context7 or primary vendor docs to confirm API behavior, package usage, and version-specific details before implementing.
-- **Exa only when the first two are insufficient:** Use Exa for broader web research or discovery after GitHub search and primary docs.
-- **Check package registries:** Search PyPI and other registries before writing utility code. Prefer battle-tested libraries over hand-rolled solutions.
-- **Search for adaptable implementations:** Look for open-source projects that solve 80%+ of the problem and can be forked, ported, or wrapped.
+- Read the relevant repository implementation and tests first.
+- Use existing local helpers and patterns before adding dependencies or abstractions.
+- Check primary vendor documentation when API behavior or version compatibility is uncertain.
+- Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
 ### 1. Plan First
 
@@ -16,11 +15,11 @@ Use `/plan` or Native Plan Mode to create an implementation plan. Identify depen
 
 ### 2. TDD Approach
 
-Follow `superpowers: test-driven-development` for the red-green-refactor cycle. Use the `tdd-guide` agent when delegating TDD work. Verify 80%+ coverage.
+Follow `superpowers:test-driven-development` for behavior changes. Use `tdd-guide` only when delegating a bounded TDD implementation. Run coverage when requested or justified by risk.
 
 ### 3. Code Review
 
-Use the `code-reviewer` agent immediately after writing code. Address CRITICAL and HIGH issues before committing.
+Use `implementation-reviewer` before committing meaningful changes. Use `code-reviewer` for broader quality review when requested. Resolve CRITICAL findings; resolve HIGH findings or disclose why they remain.
 
 ### 4. Commit & Push
 

@@ -17,7 +17,8 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 - Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/` and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
-- Treat `.references/` as read-only upstream reference clones. Do not edit or commit its contents.
+- Treat `.references/` as read-only upstream reference clones, except for `.references/plans/`.
+- Use `.references/plans/{kebab-name}.plan.md` for approved plans that must remain visible across agents and sessions. These files are local, git-ignored working state, not durable memory or maintained documentation.
 - Use `.tmp/` for repository-local scratch files, generated diagnostics, and disposable reports. Prefer it over the operating system `/tmp` or `%TEMP%` when work belongs to this repository.
 - Preserve files in `.tmp/` that you did not create, and remove only your own disposable artifacts after verifying they are no longer needed.
 
@@ -64,7 +65,7 @@ It is injected by `.claude/hooks/session_start.py` at session start.
 - Use atomic entries separated by `§` in bounded Markdown files.
 - Graduate lower-frequency knowledge to `memory_store.db` instead of expanding files.
 - `MEMORY.md` is injected as a session-start snapshot; writes affect automatic context at the next session start.
-- Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`; plans are not long-term memory.
+- Keep active cross-session plans in `.references/plans/`; use agent-native planning state for in-session work, `.tmp/` for disposable artifacts, and `docs/` only for maintained documentation. Plans are not long-term memory.
 - Use `/memory-maintenance` for audits, compression, and consolidation.
 - Use `/learn-eval` after meaningful sessions to extract reusable patterns as skills.
 - When delegating memory analysis, use `memory_auditor` (save recommendations) or `memory_compressor` (compression drafts); the main agent owns final edits.
@@ -101,14 +102,16 @@ Available slash commands and their corresponding skills:
 | `/save-memory` | — (command only) |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
-Plans approved via Native Plan Mode can be copied to `.claude/plans/{kebab-name}.plan.md` (gitignored) for same-machine cross-session visibility. If the output is worth keeping long-term, the user archives it separately.
+Plans approved via Native Plan Mode can be copied to `.references/plans/{kebab-name}.plan.md` for cross-agent, same-machine visibility. Include the goal, source request, decisions, tasks, verification, open questions, update time, and related commit when available.
 
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 
 ## Subagents
 
 - Claude Code custom agents live in `.claude/agents/*.md`.
-- Read-only subagents: `repo_explorer`, `implementation_reviewer`, `memory_auditor`, and `memory_compressor`.
-- Write-capable subagents: `doc_translator` may edit only the explicit target translation file; `commit_specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
+- Read-only subagents: `architect`, `code-reviewer`, `implementation-reviewer`, `plan-reviewer`, `python-reviewer`, `security-reviewer`, `silent-failure-hunter`, `repo-explorer`, `memory-auditor`, and `memory-compressor`.
+- Write-capable subagents: `code-simplifier`, `performance-optimizer`, `tdd-guide`, and `loop-operator` may edit only when explicitly delegated a bounded implementation task; `doc-translator` may edit only the explicit target translation file; `commit-specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
+- Use `plan-reviewer` after complex or high-risk plans. It critiques plans but does not replace Native Plan Mode.
+- Use `security-reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.

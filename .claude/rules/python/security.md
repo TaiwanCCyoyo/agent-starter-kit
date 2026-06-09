@@ -9,18 +9,10 @@ paths:
 
 ## Secret Management
 
-```python
-import os
-from dotenv import load_dotenv
+Use `os.environ["NAME"]` or the application's existing configuration layer for required secrets. Do not add a dotenv dependency unless the project explicitly adopts one.
 
-load_dotenv()
+## Security Review
 
-api_key = os.environ["OPENAI_API_KEY"]  # Raises KeyError if missing
-```
-
-## Security Scanning
-
-- Use **bandit** for static security analysis:
-  ```bash
-  bandit -r src/
-  ```
+- `detect-secrets` runs in pre-commit.
+- Use `security-reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or sensitive data flows.
+- Add a security scanner only when it is installed and configured as a repository dependency or CI gate.

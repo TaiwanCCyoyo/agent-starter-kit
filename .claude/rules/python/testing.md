@@ -11,22 +11,6 @@ paths:
 
 Use **pytest** as the testing framework.
 
-## Test Organization
+Use descriptive test names and existing fixtures. Add `pytest.mark` categories only when the repository config defines and uses them.
 
-Use `pytest.mark` for test categorization:
-
-```python
-import pytest
-
-@pytest.mark.unit
-def test_calculate_total():
-    ...
-
-@pytest.mark.integration
-def test_database_connection():
-    ...
-```
-
-## Reference
-
-See skill: `python-testing` for detailed pytest patterns and fixtures.
+See `skill: python-testing` for the exact commands, Windows import behavior, hook fixtures, and optional coverage workflow.

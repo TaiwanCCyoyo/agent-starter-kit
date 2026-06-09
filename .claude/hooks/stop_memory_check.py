@@ -103,7 +103,8 @@ def memory_taxonomy_message(root: Path) -> str:
         "Memory taxonomy reminder: unexpected files or directories under `.memories/`: "
         + ", ".join(sorted(unexpected))
         + ". Approved items are `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db`. "
-        "Keep plans and disposable artifacts under agent-native planning state, `.tmp/`, or maintained `docs/`."
+        "Keep approved cross-session plans under `.references/plans/`, disposable artifacts under `.tmp/`, "
+        "and maintained documentation under `docs/`."
     )
 
 
@@ -180,7 +181,7 @@ def memory_update_message(root: Path, state: dict) -> str:
         "3. Put searchable decisions, lessons, workflows, tool facts, and environment facts in `memory_store.db`.\n"
         "4. If a blocker, workaround, mistaken assumption, or confusion recurred, query `problem_patterns` and `problem_occurrences`, "
         "stop repeating an unverified workaround, and record a root cause plus verified resolution or explicit external blocker.\n"
-        "5. Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`; plans are not long-term memory.\n"
+        "5. Keep approved cross-session plans in `.references/plans/`; plans are not long-term memory.\n"
         "Keep technical memory concise and discuss progress with the user in Traditional Chinese."
     )
 

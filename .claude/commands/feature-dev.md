@@ -14,7 +14,7 @@ A structured feature-development workflow that emphasizes understanding existing
 
 ### 2. Codebase Exploration
 
-- use `code-explorer` to analyze the relevant existing code
+- use `repo-explorer` when delegated exploration adds value
 - trace execution paths and architecture layers
 - understand integration points and conventions
 
@@ -26,21 +26,21 @@ A structured feature-development workflow that emphasizes understanding existing
 
 ### 4. Architecture Design
 
-- use `code-architect` to design the feature
-- provide the implementation blueprint
+- use Native Plan Mode for design and trade-offs
+- use `architect` only for a read-only second opinion on high-risk architecture
 - wait for approval before implementing
 
 ### 5. Implementation
 
 - implement the feature following the approved design
-- prefer TDD where appropriate
+- follow `superpowers:test-driven-development` for behavior changes
 - keep commits small and focused
 
 ### 6. Quality Review
 
-- use `code-reviewer` to review the implementation
-- address critical and important issues
-- verify test coverage
+- use `implementation-reviewer` for pre-commit correctness review
+- use `code-reviewer` only for a broader quality review when requested
+- address CRITICAL findings and resolve or disclose HIGH findings
 
 ### 7. Summary
 
