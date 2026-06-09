@@ -4,8 +4,10 @@
 # Ignore local reference clones and disposable workspace files
 .references/
 .tmp/
-.claude/plans/
-.agent/temp/*
+
+# Ignore worktree location
+.worktrees/
+.claude/worktrees/
 
 # Python Environment & Cache
 .venv/
