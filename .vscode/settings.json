@@ -1,0 +1,39 @@
+{
+    "files.exclude": {
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        ".venv/**": true,
+        ".uv/**": true,
+        ".ruff_cache/**": true,
+        ".pytest_cache/**": true,
+        ".mypy_cache/**": true,
+        ".coverage*": true
+    },
+    "search.exclude": {
+        ".worktrees/**": true,
+        ".claude/worktrees/**": true,
+        ".references/**": true,
+        ".memories/**": true,
+        ".tmp/**": true
+    },
+    "files.watcherExclude": {
+        ".worktrees/**": true,
+        ".claude/worktrees/**": true,
+        ".references/**": true,
+        ".memories/**": true,
+        ".tmp/**": true,
+        ".venv/**": true,
+        ".uv/**": true,
+        ".ruff_cache/**": true,
+        ".pytest_cache/**": true,
+        ".mypy_cache/**": true,
+        "**/__pycache__/**": true
+    },
+    "workbench.localHistory.exclude": {
+        ".worktrees/**": true,
+        ".claude/worktrees/**": true,
+        ".tmp/**": true,
+        ".references/**": true,
+        ".memories/**": true
+    }
+}
