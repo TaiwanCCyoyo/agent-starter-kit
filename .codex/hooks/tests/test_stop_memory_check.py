@@ -258,6 +258,13 @@ class ClaudeMCPConfigTests(unittest.TestCase):
 
 
 class CodexMCPConfigTests(unittest.TestCase):
+    def test_memory_control_server_registered(self) -> None:
+        config = tomllib.loads((ROOT / ".codex" / "config.toml").read_text(encoding="utf-8"))
+        server = config["mcp_servers"]["memory-control"]
+        self.assertEqual(server["command"], "uv")
+        self.assertIn("memory_control.py", server["args"][-1])
+        self.assertEqual(server["tools"]["dismiss_reminder"]["approval_mode"], "auto")
+
     def test_memory_store_is_project_scoped(self) -> None:
         config = tomllib.loads((ROOT / ".codex" / "config.toml").read_text(encoding="utf-8"))
         server = config["mcp_servers"]["memory-db"]
