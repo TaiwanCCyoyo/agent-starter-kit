@@ -248,6 +248,14 @@ class ClaudeMCPConfigTests(unittest.TestCase):
         args = config["mcpServers"]["memory-db"]["args"]
         self.assertIn("memory_store.db", args[-1])
 
+    def test_memory_control_server_registered(self) -> None:
+        import json
+
+        config = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
+        server = config["mcpServers"]["memory-control"]
+        self.assertEqual(server["command"], "uv")
+        self.assertIn("memory_control.py", server["args"][-1])
+
 
 class CodexMCPConfigTests(unittest.TestCase):
     def test_memory_store_is_project_scoped(self) -> None:

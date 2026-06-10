@@ -117,6 +117,7 @@
       "Bash(code *)",
       "Bash(cat .git/COMMIT_EDITMSG)",
       "Bash(cat .git/HEAD)",
+      "mcp__memory-control__dismiss_reminder",
       "mcp__memory-db__read_query",
       "mcp__memory-db__write_query"
     ],
@@ -191,6 +192,7 @@
     "superpowers@claude-plugins-official": true
   },
   "enabledMcpjsonServers": [
+    "memory-control",
     "memory-db"
   ],
   "worktree": {
