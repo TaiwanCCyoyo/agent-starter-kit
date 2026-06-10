@@ -8,7 +8,7 @@ from types import ModuleType
 
 from scripts.memory_store import SCHEMA_SQL
 
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).parents[3]
 
 
 def load_module(name: str, path: Path) -> ModuleType:
