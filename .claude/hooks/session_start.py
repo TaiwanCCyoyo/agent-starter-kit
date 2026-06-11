@@ -163,7 +163,6 @@ def main():
     sync_status = sync_memory_if_needed(root_dir)
     taxonomy_init_status = initialize_memory_taxonomy(root_dir, branch)
     purpose = get_branch_purpose(branch)
-    claude_instructions = read_text(root_dir / "CLAUDE.md", "Claude instructions not found at `CLAUDE.md`.")
     memory_content = read_text(root_dir / MEMORY_REL_DIR / "MEMORY.md")
     user_content = read_text(root_dir / MEMORY_REL_DIR / "USER.md")
 
@@ -199,11 +198,6 @@ def main():
 ### [Goal Alignment Suggestion]
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 **Context Clue (Last Commit)**: `{last_msg}`
-
-Please check the Claude instructions and project context below before repository work.
-
-### [Claude Repository Instructions: CLAUDE.md]
-{claude_instructions}
 
 ### [Project Context: MEMORY.md]
 {memory_content}

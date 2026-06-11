@@ -1,13 +1,13 @@
 # Claude Code Instructions for AI Agent Starter Kit
 
 This file is the Claude Code instruction entrypoint for this repository.
-It is injected by `.claude/hooks/session_start.py` at session start.
+It is loaded natively by Claude Code at session start.
 
 ## Scope
 
 - These instructions apply only to Claude Code.
 - Treat `.claude/` as a private Claude Code support directory.
-- Shared instantiated memory lives under the git-ignored `.memories/` root. Tracked cross-agent infrastructure remains under `.agents/`.
+- Shared instantiated memory lives under the git-ignored `.memories/` root.
 
 ## Operating Contract
 
