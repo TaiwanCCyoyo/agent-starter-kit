@@ -37,6 +37,7 @@ It is loaded natively by Claude Code at session start.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
 - Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
+- Never delete existing functions, features, configuration, or other code you consider unnecessary without explicit user approval — apparent dead code may be used in contexts not visible to you.
 
 ## Learning And Escalation
 
@@ -112,6 +113,7 @@ When adding new workflows, create both a command entry point and a skill documen
 - Read-only subagents: `architect`, `code-reviewer`, `implementation-reviewer`, `plan-reviewer`, `python-reviewer`, `security-reviewer`, `silent-failure-hunter`, `repo-explorer`, `memory-auditor`, and `memory-compressor`.
 - Write-capable subagents: `code-simplifier`, `performance-optimizer`, `tdd-guide`, and `loop-operator` may edit only when explicitly delegated a bounded implementation task; `doc-translator` may edit only the explicit target translation file; `commit-specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Use `plan-reviewer` after complex or high-risk plans. It critiques plans but does not replace Native Plan Mode.
+- When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
 - Use `security-reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.

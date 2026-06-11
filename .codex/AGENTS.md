@@ -35,6 +35,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
 - Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
+- Never delete existing functions, features, configuration, or other code you consider unnecessary without explicit user approval — apparent dead code may be used in contexts not visible to you.
 - For non-trivial implementation work, state the goal and concrete verification commands before editing.
 - Use Codex's native planning flow for product and architecture planning; do not create or rely on a separate planner agent.
 - Keep shared hook and hygiene logic shell-neutral. Put cross-agent checks in Python scripts under `scripts/` rather than Bash, PowerShell, or agent-specific command fragments.
@@ -92,6 +93,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Read-only subagents: `repo_explorer`, `plan_reviewer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
 - Write-capable subagents: `doc_translator` may edit only the explicit target translation file; `commit_specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Use `plan_reviewer` after complex or high-risk plans. It critiques plans but does not replace Codex Native Plan Mode.
+- When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
 - Use `security_reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
