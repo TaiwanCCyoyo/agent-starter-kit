@@ -126,7 +126,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `coding-standards` | Superpowers + 縮減後的 `coding-style` rule 已涵蓋 |
 | `tdd-workflow` | 由 `superpowers:test-driven-development` 取代 |
 | `verification-loop` | 由 Superpowers TDD/debugging/completion-verification 取代 |
-| `git-workflow` | 716 行 Git 教科書；repo 提交規範已在 `git-workflow` rule + `commit-helper` skill |
+| `git-workflow` | 716 行 Git 教科書；repo 提交規範現在僅在 `commit-helper` skill（`git-workflow` rule 也於 2026-06-13 清理中一併移除） |
 
 ### 未從 ECC 移植（含原因）
 
@@ -168,8 +168,15 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 | 規則集 | 路徑 | 來源 | 備註 |
 |---|---|---|---|
-| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂） | 限縮變更、repo 對齊、風險導向測試、review severity 與 reviewer routing；尺寸與不可變性僅作 heuristics |
+| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops` 與 CLAUDE.md `Subagents` 擁有。 |
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
+
+### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
+
+| 規則 | 原因 |
+|---|---|
+| `rules/common/git-workflow` | commit 格式由 `commit-helper` skill 擁有；PR 流程由 `github-ops` skill 擁有 |
+| `rules/common/agents` | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此 |
 
 ### 未從 ECC 移植（含原因）
 

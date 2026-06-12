@@ -1,31 +1,27 @@
 # Development Workflow
 
-## Feature Implementation Workflow
+## Research & Reuse
 
-### 0. Research & Reuse
-
+Before writing any code:
 - Read the relevant repository implementation and tests first.
 - Use existing local helpers and patterns before adding dependencies or abstractions.
 - Check primary vendor documentation when API behavior or version compatibility is uncertain.
-- Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
-### 1. Plan First
+## Phase Routing
 
-Use Native Plan Mode to create an implementation plan. For plans that need durable cross-session or cross-agent visibility, or when working from a `.prd.md` file, apply the autoloaded `plan-artifact` skill to produce a structured `.references/plans/` artifact. Identify dependencies and risks, and break down into phases before writing any code.
+Each phase has a designated owner — use it rather than re-deriving the workflow:
 
-### 2. TDD Approach
+| Phase | Owner |
+|-------|-------|
+| Plan | Native Plan Mode / `plan-artifact` skill / `superpowers:writing-plans` + `executing-plans` / `plan-reviewer` |
+| TDD | `superpowers:test-driven-development` |
+| Debug | `superpowers:systematic-debugging` |
+| Review | `implementation-reviewer` → `code-reviewer` → `superpowers:requesting-code-review` |
+| Verify | `superpowers:verification-before-completion` |
+| Commit | `/gen-commit` (`commit-helper` skill) |
+| Finish branch | `superpowers:finishing-a-development-branch` |
 
-Follow `superpowers:test-driven-development` for behavior changes. Use `tdd-guide` only when delegating a bounded TDD implementation. Run coverage when requested or justified by risk.
-
-### 3. Code Review
-
-Use `implementation-reviewer` before committing meaningful changes. Use `code-reviewer` for broader quality review when requested. Resolve CRITICAL findings; resolve HIGH findings or disclose why they remain.
-
-### 4. Commit & Push
-
-Follow conventional commits format. See [git-workflow.md](./git-workflow.md) for commit message format and PR process.
-
-### 5. Pre-Review Checks
+## Pre-Review Checks
 
 - All automated checks (CI/CD) passing
 - Merge conflicts resolved

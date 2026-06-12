@@ -1,29 +1,24 @@
-# Security Guidelines
+# Security Routing
 
-## Mandatory Security Checks
+## Security-Sensitive Triggers
 
-Before ANY commit:
-- [ ] No hardcoded secrets (API keys, passwords, tokens)
-- [ ] All user inputs validated
-- [ ] SQL injection prevention (parameterized queries)
-- [ ] XSS prevention (sanitized HTML)
-- [ ] CSRF protection enabled
-- [ ] Authentication/authorization verified
-- [ ] Rate limiting on all endpoints
-- [ ] Error messages don't leak sensitive data
+**Use `security-reviewer` agent when the change touches:**
 
-## Secret Management
+- Authentication or authorization
+- Untrusted user input
+- Database queries
+- Filesystem access
+- External API calls
+- Cryptographic operations
+- Payments or financial data
 
-- NEVER hardcode secrets in source code
-- ALWAYS use environment variables or a secret manager
-- Validate that required secrets are present at startup
-- Rotate any secrets that may have been exposed
+## Response Protocol
 
-## Security Response Protocol
+If a security issue is found:
+1. STOP and use **security-reviewer** before continuing
+2. Rotate any exposed secrets immediately
+3. Review the codebase for similar issues
 
-If security issue found:
-1. STOP immediately
-2. Use **security-reviewer** agent
-3. Fix CRITICAL issues before continuing
-4. Rotate any exposed secrets
-5. Review entire codebase for similar issues
+## Secrets
+
+Never hardcode secrets. See `commit-helper` skill and `rules/python/security.md` for details.

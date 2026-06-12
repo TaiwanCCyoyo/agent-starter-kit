@@ -11,7 +11,7 @@
 
 ## Security Review Triggers
 
-**STOP and use `security-reviewer` agent when:**
+**STOP and use `security-reviewer` agent when the change touches:**
 
 - Authentication or authorization code
 - User input handling
@@ -26,3 +26,9 @@
 - **Approve**: No CRITICAL or HIGH issues
 - **Warning**: HIGH issues remain with explicit risk acceptance
 - **Block**: Any CRITICAL issue found
+
+## Reviewers
+
+- Pre-commit correctness → `implementation-reviewer`
+- Broader quality review → `code-reviewer`
+- Security-sensitive changes → `security-reviewer`

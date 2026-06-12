@@ -107,6 +107,8 @@ Use the `plan-artifact` skill to produce durable cross-session or PRD-based plan
 
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 
+The `superpowers` plugin provides always-available workflow skills — prefer these over re-deriving the same workflows from scratch: `test-driven-development`, `systematic-debugging`, `requesting-code-review`, `receiving-code-review`, `verification-before-completion`, `writing-plans`, `executing-plans`, `finishing-a-development-branch`. See `development-workflow.md` for per-phase routing.
+
 ## Subagents
 
 - Claude Code custom agents live in `.claude/agents/*.md`.
@@ -117,3 +119,4 @@ When adding new workflows, create both a command entry point and a skill documen
 - Use `security-reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
+- Run independent subagents in parallel — single message, multiple Agent tool calls. Sequential dispatch is only needed when one result feeds the next.

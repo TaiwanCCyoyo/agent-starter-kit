@@ -126,7 +126,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `coding-standards` | Superpowers + narrowed `coding-style` rule cover this |
 | `tdd-workflow` | Replaced by `superpowers:test-driven-development` |
 | `verification-loop` | Replaced by Superpowers TDD/debugging/completion-verification |
-| `git-workflow` | 716-line Git textbook; repo commit policy is in the `git-workflow` rule + `commit-helper` skill |
+| `git-workflow` | 716-line Git textbook; repo commit policy is now solely in the `commit-helper` skill (the `git-workflow` rule was also removed in the 2026-06-13 cleanup) |
 
 ### Not ported from ECC (with reasons)
 
@@ -168,8 +168,15 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 | Rule set | Paths | Source | Notes |
 |---|---|---|---|
-| `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed) | Scoped changes, repository alignment, risk-based testing, review severity, and reviewer routing; size and immutability are heuristics |
+| `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, and CLAUDE.md `Subagents`. |
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
+
+### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
+
+| Rule | Reason |
+|---|---|
+| `rules/common/git-workflow` | Commit format owned by `commit-helper` skill; PR workflow owned by `github-ops` skill |
+| `rules/common/agents` | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there |
 
 ### Not ported from ECC (with reasons)
 
