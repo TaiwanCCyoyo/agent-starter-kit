@@ -1,10 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "model": "opusplan",
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "0"
   },
-  "teammateMode": "tmux",
   "permissions": {
     "allow": [
       "Read(**)",
@@ -149,6 +147,11 @@
       "~/.claude"
     ]
   },
+  "model": "opusplan",
+  "enabledMcpjsonServers": [
+    "memory-control",
+    "memory-db"
+  ],
   "hooks": {
     "SessionStart": [
       {
@@ -188,14 +191,12 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "superpowers@claude-plugins-official": true
-  },
-  "enabledMcpjsonServers": [
-    "memory-control",
-    "memory-db"
-  ],
   "worktree": {
     "baseRef": "head"
-  }
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "github@claude-plugins-official": true
+  },
+  "teammateMode": "tmux"
 }
