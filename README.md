@@ -50,7 +50,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files are formatted, linted, checked for file hygiene, and warned on `print()` calls; docs and config files run file hygiene only. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check --fix`, type-checks with `mypy`, and warns on `print()` usage. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes, checks memory size, and prompts skill review after substantial sessions. | `.claude/hooks/stop_memory_check.py` |
 | **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files. | `.agent/hooks/session_start.py` |
 | **Antigravity** | `PostToolUse` | Runs targeted Ruff, mypy, and file-hygiene checks. | `.agent/hooks/post_tool_use_hygiene.py` |
@@ -119,7 +119,7 @@ jobs:
         run: pip install uv && uv sync --group dev
 
       - name: Lint
-        run: uv run ruff check .
+        run: uv run ruff check --fix .
 
       - name: Type check
         run: uv run mypy .
@@ -148,7 +148,7 @@ Requires `gh` CLI installed and authenticated (`gh auth login`).
 
 ### Troubleshooting CI Failures
 
-1. **Reproduce locally first** — run the same commands the workflow runs (`ruff check .`, `mypy .`, `pytest`) before investigating remotely.
+1. **Reproduce locally first** — run the same commands the workflow runs (`ruff check --fix .`, `mypy .`, `pytest`) before investigating remotely.
 2. **Read the full log** — `gh run view <run-id> --log-failed` shows only the failing step output.
 3. **Check for environment differences** — Python version, missing env vars, or missing `uv sync` are the most common causes.
 4. **Distinguish flaky from real** — if the same test passes locally and fails remotely consistently, it is usually an environment issue, not a flaky test.
@@ -166,7 +166,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
-After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check .`.
+After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check --fix .`.
 
 ### Superpowers Skills Integration
 
@@ -198,7 +198,7 @@ To initialize this repository and set up verification tools:
    ```
 3. **Verify Environment**
    ```bash
-   uv run ruff check .
+   uv run ruff check --fix .
    ```
 4. **Antigravity MCP Setup**
 

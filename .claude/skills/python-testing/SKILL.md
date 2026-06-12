@@ -27,7 +27,7 @@ pytest does not recursively discover hidden directories (`.claude/`, `.codex/`) 
 
 ```bash
 # Lint
-uv run ruff check .
+uv run ruff check --fix .
 
 # Type gate — run against the whole project, not a single file
 uv run mypy .

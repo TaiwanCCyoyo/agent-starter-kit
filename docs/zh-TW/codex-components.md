@@ -94,7 +94,7 @@ Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 
 | `.codex/hooks/stop_memory_check.py` | Memory limits、taxonomy、plan routing 與一次性 skill-review reminder |
 | `.pre-commit-config.yaml` | File hygiene、detect-secrets、Ruff、no-print 與完整專案 mypy |
 
-Python verification 使用 `uv run python -m pytest`、`uv run ruff check .` 與 `uv run mypy .`。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
+Python verification 使用 `uv run python -m pytest`、`uv run ruff check --fix .` 與 `uv run mypy .`。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 
 ## 延後能力
 

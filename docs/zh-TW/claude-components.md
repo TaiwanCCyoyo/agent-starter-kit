@@ -150,7 +150,7 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 | Hook | 觸發時機 | 執行內容 |
 |---|---|---|
 | `session_start.py` | 工作階段開始 | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
-| `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
+| `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check --fix`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
 | `stop_memory_check.py` | 每次回覆後 | 若有重大工作則提示記憶更新；在 5 次以上有程式碼變更的回覆後，每 session 提示一次技能審查（`/learn-eval`） |
 
 ### 已注意但未從 ECC 移植的 hook 概念

@@ -24,7 +24,7 @@ def configure_logging() -> None:
 
 def run_hygiene(target_path: Path):
     """
-    Runs ruff check and ruff format on the specified path.
+    Runs ruff check --fix and ruff format on the specified path.
     Prints errors if they occur.
     """
     cmd_check = ["uv", "run", "ruff", "check", "--fix", "--force-exclude", str(target_path)]
