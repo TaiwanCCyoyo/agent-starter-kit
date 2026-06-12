@@ -64,12 +64,12 @@ It is loaded natively by Claude Code at session start.
 **Policy:**
 - Keep MEMORY.md under 2,200 chars; USER.md under 500 chars.
 - Use atomic entries separated by `§` in bounded Markdown files.
-- Graduate lower-frequency knowledge to `memory_store.db` instead of expanding files.
 - `MEMORY.md` is injected as a session-start snapshot; writes affect automatic context at the next session start.
-- Keep active cross-session plans in `.references/plans/`; use agent-native planning state for in-session work, `.tmp/` for disposable artifacts, and `docs/` only for maintained documentation. Plans are not long-term memory.
-- Use `/memory-maintenance` for audits, compression, and consolidation.
-- Use `/learn-eval` after meaningful sessions to extract reusable patterns as skills.
-- When delegating memory analysis, use `memory_auditor` (save recommendations) or `memory_compressor` (compression drafts); the main agent owns final edits.
+- Keep plans, raw transcripts, command narration, secrets, credentials, and private user data outside memory.
+- Use `/memory-maintenance` for initialization, reading, audits, taxonomy, and operation routing.
+- Use `/save-memory` for explicit durable writes, `/compress-memory` for bounded-file cleanup, and `/memory-sql` for every database operation.
+- The `.claude/rules/memory/storage.md` guardrails load when operating on `.memories/**`.
+- When delegating memory analysis, use `memory-auditor` for save recommendations or `memory-compressor` for compression drafts; the main agent owns final edits.
 
 ## Verification
 
@@ -99,8 +99,8 @@ Available slash commands and their corresponding skills:
 | `/learn-eval` | `.claude/skills/skill-curator/SKILL.md` |
 | `/memory-maintenance` | `.claude/skills/memory-manager/SKILL.md` |
 | `/memory-sql` | `.claude/skills/memory-sql/SKILL.md` |
-| `/compress-memory` | — (command only) |
-| `/save-memory` | — (command only) |
+| `/compress-memory` | `.claude/skills/compress-memory/SKILL.md` |
+| `/save-memory` | `.claude/skills/save-memory/SKILL.md` |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
 Use the `plan-artifact` skill to produce durable cross-session or PRD-based plans as `.references/plans/{kebab-name}.plan.md`. For simpler in-session planning, Native Plan Mode is sufficient. Plans remain git-ignored and are not durable memory.

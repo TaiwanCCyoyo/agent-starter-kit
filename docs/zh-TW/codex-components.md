@@ -24,7 +24,7 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | `python_reviewer` | 唯讀 | Python runtime、typing、Ruff、測試、logging 與維護性 |
 | `security_reviewer` | 唯讀 | Secrets、注入、依賴、權限、auth 與敏感資料 |
 | `performance_reviewer` | 唯讀 | 已量測的延遲、記憶體、複雜度、I/O 與工具成本 |
-| `memory_auditor`／`memory_compressor` | 唯讀 | 記憶建議與 bounded-file 壓縮草案 |
+| `memory_auditor`／`memory_compressor` | 唯讀 | Save 分類與 compression 草案的 advisory layer；final writes 仍由主代理與 memory skills 負責 |
 | `doc_translator` | 有界寫入 | 只修改明確指定的翻譯目標 |
 | `commit_specialist` | 有界寫入 | 審查 staged changes，僅在明確要求時 commit |
 
@@ -37,8 +37,10 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | `python-development` | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
 | `python-testing` | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求 |
 | `gen-commit` | Commit 審查、Conventional Commits、commit 後 plan 更新、memory routing 與 skill review |
-| `memory-manager`、`save-memory`、`compress-memory` | 共用 bounded 與 structured memory 生命週期 |
-| `memory-sql` | 與 Holographic 相容的 SQLite facts 與重複問題 workflow |
+| `memory-manager` | Memory 初始化、讀取、audit、taxonomy、health checks 與 operation routing |
+| `save-memory` | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff |
+| `compress-memory` | Bounded-file 清理、去重與低頻知識 graduation |
+| `memory-sql` | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions |
 | `skill-review` | 人工 reusable-pattern 品質門與 skill candidate routing |
 | `worktree-memory-sync` | 跨 worktree 的 ignored memory 初始化與整合 |
 | `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。原生規劃負責互動式規劃；此 skill 專用於持久化結構化輸出。 |

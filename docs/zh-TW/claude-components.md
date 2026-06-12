@@ -20,8 +20,8 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `commit-specialist` | sonnet | Bash, Read | 審查已暫存的變更並草擬 commit 訊息 |
 | `doc-translator` | sonnet | Read, Write, Edit | 將 `docs/en/` 檔案翻譯為 `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | 唯讀程式碼審查：正確性、風格、安全性 |
-| `memory-auditor` | sonnet | Read, Grep, Glob | 在重大工作完成後建議記憶體更新 |
-| `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 session-start context 與按需記憶的壓縮提案 |
+| `memory-auditor` | haiku | Read, Grep, Glob | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory |
+| `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory |
 | `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖 |
 
@@ -104,8 +104,10 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | Skill | 用途 |
 |---|---|
 | `commit-helper` | Conventional Commits 格式、pre-commit 檢查清單 |
-| `memory-manager` | 讀取、更新、壓縮專案記憶體的完整流程；包含凍結快照模型、Hermes 對齊路由規則與大小健康標準 |
-| `memory-sql` | SQLite FTS5 可搜尋歷史：schema、session 記錄、搜尋查詢與路由規則 |
+| `memory-manager` | Memory 初始化、讀取、audit、taxonomy、health checks 與 operation routing |
+| `save-memory` | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff |
+| `compress-memory` | Bounded-file 清理、去重與低頻知識 graduation |
+| `memory-sql` | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
 | `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期由 Superpowers 提供。 |
 | `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。Native Plan Mode 負責互動式規劃；此 skill 專用於持久化結構化輸出。 |
@@ -169,6 +171,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | 規則集 | 路徑 | 來源 | 備註 |
 |---|---|---|---|
 | `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops`、`superpowers:finishing-a-development-branch` 與 CLAUDE.md `Subagents` 擁有。 |
+| `rules/memory/` | `.memories/**` | 自訂 | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。 |
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）

@@ -24,7 +24,7 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | `python_reviewer` | Read-only | Python runtime, typing, Ruff, tests, logging, and maintainability |
 | `security_reviewer` | Read-only | Secrets, injection, dependencies, permissions, auth, and sensitive data |
 | `performance_reviewer` | Read-only | Measured latency, memory, complexity, I/O, and tooling cost |
-| `memory_auditor` / `memory_compressor` | Read-only | Memory recommendations and bounded-file compression drafts |
+| `memory_auditor` / `memory_compressor` | Read-only | Advisory layer for save classification and compression drafts; final writes remain with the main agent and memory skills |
 | `doc_translator` | Bounded write | Edits only the explicit translation target |
 | `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
 
@@ -37,8 +37,10 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | `python-development` | Python coding, typing, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
 | `python-testing` | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements |
 | `gen-commit` | Commit review, Conventional Commits, post-commit plan update, memory routing, and skill review |
-| `memory-manager`, `save-memory`, `compress-memory` | Shared bounded and structured memory lifecycle |
-| `memory-sql` | Holographic-compatible SQLite facts and recurring-problem workflows |
+| `memory-manager` | Memory initialization, reading, audits, taxonomy, health checks, and operation routing |
+| `save-memory` | Explicit durable writes, classification, bounded-file limits, and deduplication handoff |
+| `compress-memory` | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge |
+| `memory-sql` | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions |
 | `skill-review` | Manual reusable-pattern quality gate and skill candidate routing |
 | `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees |
 | `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native planning handles interactive planning; this skill is for persistent structured output. |

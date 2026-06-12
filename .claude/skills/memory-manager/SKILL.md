@@ -1,11 +1,11 @@
 ---
 name: memory-manager
-description: Use when initializing, reading, updating, auditing, or compressing shared project memory.
+description: Use when initializing, reading, auditing, or deciding how to route shared project memory operations.
 ---
 
 # Memory Manager
 
-This is the Claude Code source of truth for `.memories/`.
+This skill owns memory taxonomy, lifecycle boundaries, health checks, and operation routing. It does not own detailed writes, compression, or SQL procedures.
 
 ## Storage
 
@@ -15,26 +15,17 @@ This is the Claude Code source of truth for `.memories/`.
 
 The Markdown files use Hermes-compatible atomic entries separated by `§` on its own line. Treat their session-start content as a frozen snapshot.
 
-## Database Routing
+## Operation Routing
 
-Use Holographic-compatible `facts` for searchable decisions, lessons, workflows, tool facts, and environment facts. Use:
-
-- `problem_patterns` for stable recurring-problem identities.
-- `problem_occurrences` for evidence each time a problem appears.
-- `resolutions` for root causes, fixes, verification, and related skill or instruction changes.
-
-Query for equivalent facts or patterns before every write.
+- Use `save-memory` for explicit durable writes.
+- Use `compress-memory` when bounded files are too large, duplicated, stale, or poorly routed.
+- Use `memory-sql` for database schema discovery, searches, inserts, recurring-problem history, and resolutions.
+- Use `worktree-memory-sync` for ignored memory state across Git worktrees.
+- When delegated analysis is useful, use `memory-auditor` for read-only save recommendations or `memory-compressor` for a read-only compression draft. Route their output back through the owning skill; subagents never write memory.
 
 ## Repeated Problems
 
-When the same blocker, workaround, mistaken assumption, or confusion appears twice:
-
-1. Query existing patterns and resolutions.
-2. Record the new occurrence and evidence.
-3. Stop repeating an unverified workaround.
-4. Investigate the root cause.
-5. Record a verified resolution or explicit external blocker.
-6. Update an existing skill, instruction, or regression test when the resolution reveals reusable guidance.
+When the same blocker, workaround, mistaken assumption, or confusion appears twice, route to `memory-sql` for the recurring-problem workflow and stop repeating the unverified approach.
 
 ## Boundaries
 

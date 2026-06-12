@@ -20,8 +20,8 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `commit-specialist` | sonnet | Bash, Read | Review staged changes and draft commit messages |
 | `doc-translator` | sonnet | Read, Write, Edit | Translate `docs/en/` files to `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | Read-only code review: correctness, style, security |
-| `memory-auditor` | sonnet | Read, Grep, Glob | Recommend memory updates after significant work |
-| `memory-compressor` | sonnet | Read, Grep, Glob | Draft compression proposals for automatically loaded and on-demand memory |
+| `memory-auditor` | haiku | Read, Grep, Glob | Classify save candidates and Do Not Save items; never writes memory |
+| `memory-compressor` | sonnet | Read, Grep, Glob | Draft bounded-file compression and graduation proposals; never writes memory |
 | `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
 | `repo-explorer` | sonnet | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies |
 
@@ -104,8 +104,10 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | Skill | Purpose |
 |---|---|
 | `commit-helper` | Conventional Commits format, pre-commit checklist |
-| `memory-manager` | Full procedure for reading, updating, compressing project memory; includes frozen snapshot model, Hermes-aligned routing rules, and size health criteria |
-| `memory-sql` | SQLite FTS5 searchable history: schema, session recording, search queries, and routing rules |
+| `memory-manager` | Memory initialization, reading, audits, taxonomy, health checks, and operation routing |
+| `save-memory` | Explicit durable writes, classification, bounded-file limits, and deduplication handoff |
+| `compress-memory` | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge |
+| `memory-sql` | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
 | `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle is provided by Superpowers. |
 | `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native Plan Mode handles interactive planning; this skill is for the persistent structured output. |
@@ -169,6 +171,7 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | Rule set | Paths | Source | Notes |
 |---|---|---|---|
 | `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, `superpowers:finishing-a-development-branch`, and CLAUDE.md `Subagents`. |
+| `rules/memory/` | `.memories/**` | Custom | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access. |
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)

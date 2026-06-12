@@ -85,17 +85,16 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - `.memories/` is cross-agent instantiated state and remains fully git-ignored.
 - Session-start context is `.memories/memories/MEMORY.md` (stable project facts, at most 2,200 chars) plus `.memories/memories/USER.md` (stable user preferences, at most 500 chars), injected once per session.
 - Both files use Hermes-compatible atomic entries separated by `§` on its own line.
-- Searchable structured memory is `.memories/memory_store.db`, a SQLite store using the Hermes Holographic fact schema plus recurring-problem occurrence and resolution tables. It is queried on demand and never auto-loaded wholesale.
-- Before substantial work, align with the injected files and query `memory_store.db` when past decisions, lessons, workflows, tool facts, environment facts, or problem history may matter.
-- Commit rules, hooks, skills, schema code, and templates, not local instantiated memory content.
-- After file-changing tasks, update memory only when the change creates durable project state, decisions, lessons, constraints, or handoff notes.
-- Route stable project facts needed in most sessions to `MEMORY.md`, stable user preferences to `USER.md`, and searchable decisions, lessons, workflows, tool facts, environment facts, recurring problem occurrences, root causes, and verified resolutions to `memory_store.db`.
-- Use `memory-sql` to query before writes, deduplicate facts, record problem occurrences, and maintain verified resolutions.
-- Do not duplicate bounded file entries in `memory_store.db` unless the database entry adds structured evidence, lifecycle, trust, or retrieval value.
+- Searchable structured memory is `.memories/memory_store.db`; query it on demand and never load it wholesale or edit it as a regular file.
 - `MEMORY.md` and `USER.md` are frozen session snapshots: disk changes affect the next session's injected context.
-- Record durable lessons when repeated blockers, mistaken assumptions, hidden tradeoffs, or user-assistance patterns affect the work, even if the code change itself is small.
-- Mark platform-specific progress clearly, such as Codex-only or Antigravity pending.
-- Use `.codex/skills/memory-manager/SKILL.md` for memory initialization, updates, audits, compression, and consolidation.
+- Keep plans, raw transcripts, command narration, secrets, credentials, and private user data outside memory.
+- Commit memory infrastructure, not local instantiated memory content.
+- Use `memory-manager` for initialization, reading, audits, taxonomy, and operation routing.
+- Use `save-memory` for explicit durable writes and `compress-memory` for bounded-file cleanup or graduation.
+- Use `memory-sql` for SQLite discovery, deduplication, reads, writes, recurring problems, and verified resolutions.
+- Query relevant memory before substantial work when past decisions, lessons, workflows, tool facts, environment facts, or problem history may matter.
+- After meaningful changes, save only durable project state, decisions, lessons, constraints, preferences, or handoff facts.
+- When the same blocker or mistaken workaround appears twice, use the recurring-problem workflow and stop repeating the unverified approach.
 - Keep plans outside the memory taxonomy: use Codex native planning state for in-session work, `.references/plans/` for approved cross-session plans, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.memories/` writes.

@@ -5,7 +5,7 @@ description: Use when querying or writing the Holographic-compatible SQLite stor
 
 # Memory SQL
 
-Codex accesses `.memories/memory_store.db` through the `memory-db` SQLite MCP server.
+This skill is the sole owner of SQLite memory operations. Codex accesses `.memories/memory_store.db` through the `memory-db` SQLite MCP server; never edit the database as a regular file.
 
 ## Use It For
 
@@ -38,11 +38,12 @@ The schema is initialized by `scripts.memory_store.initialize_memory_store`.
 
 1. Use `list_tables` or `describe_table` before assuming schema state.
 2. Search `facts_fts` and relevant problem tables before every insert.
-3. Ask for approval before database writes when tool policy requires it.
+3. Receive write intent from `save-memory`, `compress-memory`, or an explicit user request; ask for approval when tool policy requires it.
 4. Store one concise fact per row with an accurate category, tags, and trust score.
 5. Use a stable semantic fingerprint for recurring problems, not a raw error string.
 6. On recurrence, insert an occurrence, update the pattern count and timestamps, then investigate root cause.
 7. Mark a resolution `verified` only with concrete verification evidence.
+8. Return concise results to the calling workflow; retrieved rows remain context until curated.
 
 Example fact search:
 
