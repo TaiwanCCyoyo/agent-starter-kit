@@ -19,6 +19,7 @@ Each phase has a designated owner — use it rather than re-deriving the workflo
 | Review | `implementation-reviewer` → `code-reviewer` → `superpowers:requesting-code-review` |
 | Verify | `superpowers:verification-before-completion` |
 | Commit | `/gen-commit` (`commit-helper` skill) |
+| Prepare PR | `github-ops` skill (full branch history, `base...HEAD` diff, summary, test plan) |
 | Finish branch | `superpowers:finishing-a-development-branch` |
 
 ## Pre-Review Checks

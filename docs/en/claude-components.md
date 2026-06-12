@@ -168,14 +168,14 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 
 | Rule set | Paths | Source | Notes |
 |---|---|---|---|
-| `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `superpowers:finishing-a-development-branch`, and CLAUDE.md `Subagents`. |
+| `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, `superpowers:finishing-a-development-branch`, and CLAUDE.md `Subagents`. |
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
 | Rule | Reason |
 |---|---|
-| `rules/common/git-workflow` | Commit format owned by `commit-helper` skill; PR creation owned by `superpowers:finishing-a-development-branch` (Option 2: `push -u` + `gh pr create`) |
+| `rules/common/git-workflow` | Commit format owned by `commit-helper`; PR preparation owned by `github-ops` (full history, `base...HEAD` diff, summary, test plan); push and creation owned by `superpowers:finishing-a-development-branch` |
 | `rules/common/agents` | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there |
 
 ### Not ported from ECC (with reasons)

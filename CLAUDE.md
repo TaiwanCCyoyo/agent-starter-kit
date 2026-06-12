@@ -116,7 +116,7 @@ The `superpowers` plugin provides always-available workflow skills — prefer th
 - Write-capable subagents: `code-simplifier`, `performance-optimizer`, `tdd-guide`, and `loop-operator` may edit only when explicitly delegated a bounded implementation task; `doc-translator` may edit only the explicit target translation file; `commit-specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Use `plan-reviewer` after complex or high-risk plans. It critiques plans but does not replace Native Plan Mode.
 - When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
-- Use `security-reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
+- Use `security-reviewer` for the security-sensitive triggers defined in `.claude/rules/common/security.md`.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
 - Run independent subagents in parallel — single message, multiple Agent tool calls. Sequential dispatch is only needed when one result feeds the next.

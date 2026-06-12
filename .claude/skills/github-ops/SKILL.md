@@ -54,6 +54,19 @@ gh issue comment <number> --body "Thanks for reporting. Could you share reproduc
 
 ## PR Management
 
+### PR Creation Preparation
+
+Before creating a pull request:
+
+1. Identify the target base branch.
+2. Review the complete branch commit history, not only the latest commit.
+3. Inspect the complete branch diff with `git diff <base-branch>...HEAD`.
+4. Draft a summary that covers all material changes in the branch.
+5. Draft a test plan from fresh verification evidence.
+
+Use `superpowers:finishing-a-development-branch` to push the branch and create the pull
+request after this preparation is complete.
+
 ### Review Checklist
 
 1. Check CI status: `gh pr checks <number>`
