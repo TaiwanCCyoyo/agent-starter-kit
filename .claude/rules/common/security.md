@@ -21,4 +21,9 @@ If a security issue is found:
 
 ## Secrets
 
-Never hardcode secrets. See `commit-helper` skill and `rules/python/security.md` for details.
+Never hardcode secrets in source code.
+
+- Use environment variables or a secret manager — never inline secrets.
+- Validate that required secrets are present at startup.
+
+Commit-time gate: `commit-helper` skill (detect-secrets). Python-specific guidance: `rules/python/security.md`.

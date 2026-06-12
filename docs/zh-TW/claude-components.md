@@ -168,14 +168,14 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 | 規則集 | 路徑 | 來源 | 備註 |
 |---|---|---|---|
-| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops` 與 CLAUDE.md `Subagents` 擁有。 |
+| `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`superpowers:finishing-a-development-branch` 與 CLAUDE.md `Subagents` 擁有。 |
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 
 | 規則 | 原因 |
 |---|---|
-| `rules/common/git-workflow` | commit 格式由 `commit-helper` skill 擁有；PR 流程由 `github-ops` skill 擁有 |
+| `rules/common/git-workflow` | commit 格式由 `commit-helper` skill 擁有；PR 建立由 `superpowers:finishing-a-development-branch`（Option 2：`push -u` + `gh pr create`）擁有 |
 | `rules/common/agents` | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此 |
 
 ### 未從 ECC 移植（含原因）

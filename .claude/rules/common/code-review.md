@@ -11,15 +11,7 @@
 
 ## Security Review Triggers
 
-**STOP and use `security-reviewer` agent when the change touches:**
-
-- Authentication or authorization code
-- User input handling
-- Database queries
-- File system operations
-- External API calls
-- Cryptographic operations
-- Payment or financial code
+Security-sensitive changes → see the trigger list in `security.md`; route to `security-reviewer`.
 
 ## Approval Criteria
 
