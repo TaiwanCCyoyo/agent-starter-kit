@@ -94,9 +94,9 @@ def main() -> int:
             if code != 0:
                 checks.append(f"`ruff format` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
-            code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", rel_path])
+            code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", "--fix", rel_path])
             if code != 0:
-                checks.append(f"`ruff check` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
+                checks.append(f"`ruff check --fix` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
             if should_warn_on_print(rel_path):
                 code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/python_hygiene.py", "--no-print", rel_path])

@@ -150,7 +150,7 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 | Hook | Trigger | What it does |
 |---|---|---|
 | `session_start.py` | Session start | Injects `CLAUDE.md`, `.memories/memories/MEMORY.md`, and `USER.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies the approved memory layout into new worktrees. |
-| `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
+| `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check --fix`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
 | `stop_memory_check.py` | After each response | Nudges memory update if significant work was done; prompts skill review via `/learn-eval` after 5+ responses with code changes (once per session) |
 
 ### ECC hook concepts noted but not ported

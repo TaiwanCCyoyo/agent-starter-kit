@@ -77,7 +77,7 @@ def test_python_warning_returns_warning_json(tmp_path: Path) -> None:
     payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
     run_results = [
         (0, "", ""),  # ruff format
-        (0, "", ""),  # ruff check
+        (0, "", ""),  # ruff check --fix
         (1, "src/sample.py:1: avoid print(); use logging instead", ""),  # python_hygiene
         (0, "", ""),  # file_hygiene
     ]

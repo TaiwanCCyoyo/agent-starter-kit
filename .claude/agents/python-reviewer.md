@@ -18,7 +18,7 @@ You are a senior Python code reviewer ensuring high standards of Pythonic code a
 
 When invoked:
 1. Run `git diff -- '*.py'` to see recent Python file changes
-2. Run repository-supported checks when useful: `uv run ruff check .`, `uv run mypy .`, and `uv run python -m pytest`
+2. Run repository-supported checks when useful: `uv run ruff check --fix .`, `uv run mypy .`, and `uv run python -m pytest`
 3. Focus on modified `.py` files
 4. Begin review immediately
 
@@ -71,7 +71,7 @@ When invoked:
 
 ```bash
 uv run mypy .
-uv run ruff check .
+uv run ruff check --fix .
 uv run python -m pytest
 uv run python -m pytest --cov --cov-report=term-missing  # Optional
 ```

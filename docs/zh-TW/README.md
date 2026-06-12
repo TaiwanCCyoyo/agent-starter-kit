@@ -50,7 +50,7 @@
 | **Codex** | `PostToolUse` | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene，並提醒 `print()` calls；文件與設定檔只跑 file hygiene。 | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/python_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check --fix` lint、`mypy` 型別檢查，並警告 `print()` 用法。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，檢查記憶大小，並在 session 達到一定規模後提示技能審查。 | `.claude/hooks/stop_memory_check.py` |
 | **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。 | `.agent/hooks/session_start.py` |
 | **Antigravity** | `PostToolUse` | 針對修改檔案執行 Ruff、mypy 與 file hygiene。 | `.agent/hooks/post_tool_use_hygiene.py` |
@@ -119,7 +119,7 @@ jobs:
         run: pip install uv && uv sync --group dev
 
       - name: Lint
-        run: uv run ruff check .
+        run: uv run ruff check --fix .
 
       - name: Type check
         run: uv run mypy .
@@ -148,7 +148,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 ### CI 失敗疑難排解
 
-1. **先在本地重現** — 在遠端調查之前，先執行 workflow 所使用的相同指令（`ruff check .`、`mypy .`、`pytest`）。
+1. **先在本地重現** — 在遠端調查之前，先執行 workflow 所使用的相同指令（`ruff check --fix .`、`mypy .`、`pytest`）。
 2. **閱讀完整日誌** — `gh run view <run-id> --log-failed` 只會顯示失敗步驟的輸出。
 3. **檢查環境差異** — Python 版本不符、缺少環境變數或未執行 `uv sync` 是最常見的原因。
 4. **區分偶發性失敗與真實錯誤** — 若同一個測試在本地通過但在遠端持續失敗，通常是環境問題，而非偶發性不穩定測試。
@@ -167,7 +167,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 
-複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check .` 驗證。
+複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
 
 ### 整合 Superpowers 技能
 
@@ -199,7 +199,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
    ```
 3. **驗證環境設定**
    ```bash
-   uv run ruff check .
+   uv run ruff check --fix .
    ```
 4. **設定 Antigravity MCP**
 

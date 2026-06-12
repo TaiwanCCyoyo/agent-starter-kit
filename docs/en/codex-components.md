@@ -78,7 +78,7 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, plan routing, and one-time skill-review reminder |
 | `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff, no-print, and full-project mypy |
 
-Python verification uses `uv run python -m pytest`, `uv run ruff check .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
+Python verification uses `uv run python -m pytest`, `uv run ruff check --fix .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 
 ## Deferred Capabilities
 
