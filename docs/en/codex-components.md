@@ -1,6 +1,6 @@
 # Codex Components Reference
 
-Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project hooks, installed plugins, and a project-scoped memory MCP server. It aligns outcomes and policy with Claude Code without copying every Claude command or agent.
+Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project hooks, installed plugins, and a project-scoped memory MCP server. Its `.codex/AGENTS.md` is semantically aligned with the shared policy in `CLAUDE.md` plus `.claude/rules/common/`, while retaining Codex-specific approval and tool constraints.
 
 ## Native And Plugin Equivalents
 
@@ -34,6 +34,7 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 
 | Skill | Purpose |
 | :--- | :--- |
+| `python-development` | Python coding, typing, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
 | `python-testing` | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements |
 | `gen-commit` | Commit review, Conventional Commits, post-commit plan update, memory routing, and skill review |
 | `memory-manager`, `save-memory`, `compress-memory` | Shared bounded and structured memory lifecycle |
@@ -61,6 +62,21 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | `architect`, `code-simplifier`, `loop-operator`, `tdd-guide` | Not mirrored | Codex keeps planning and implementation in the main agent and uses Superpowers workflows; duplicating write-capable specialists would add overlapping authority. |
 | `code-reviewer`, `silent-failure-hunter` | Consolidated | `implementation_reviewer`, `python_reviewer`, `security_reviewer`, and systematic debugging cover the useful review dimensions. |
 | `performance-optimizer` | Read-only equivalent | Codex uses `performance_reviewer` and requires measurement before optimization. |
+
+## Shared Policy Alignment
+
+| Shared behavior | Codex owner |
+| :--- | :--- |
+| Operating contract, prompt defense, scoped changes | `.codex/AGENTS.md` |
+| Research and reuse before implementation | `.codex/AGENTS.md` engineering discipline |
+| Review severity and CRITICAL/HIGH completion policy | `.codex/AGENTS.md` review and security section |
+| Security triggers and secret handling | `.codex/AGENTS.md` plus `security_reviewer` |
+| Risk-based test scope | `.codex/AGENTS.md` verification section |
+| Python development rules | `python-development` |
+| Repository Python verification | `python-testing` |
+| Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and Superpowers phase routing |
+
+Superpowers is active in Codex. It provides workflow guidance but cannot bypass user intent, sandbox approvals, dirty-worktree protections, repository ownership, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests. GitHub plugin workflows own Codex PR preparation and publishing behavior.
 
 ## Plans, Memory, And Commits
 

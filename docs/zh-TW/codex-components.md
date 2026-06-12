@@ -1,6 +1,6 @@
 # Codex 元件參考
 
-Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project hooks、已安裝 plugins 與專案級 memory MCP。它與 Claude Code 對齊結果及政策，但不逐一複製每個 Claude command 或 agent。
+Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project hooks、已安裝 plugins 與專案級 memory MCP。其 `.codex/AGENTS.md` 與 `CLAUDE.md` 加上 `.claude/rules/common/` 的共享政策保持語意對齊，同時保留 Codex 專屬 approval 與 tool constraints。
 
 ## 原生與 Plugin 對應
 
@@ -34,6 +34,7 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 
 | Skill | 用途 |
 | :--- | :--- |
+| `python-development` | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
 | `python-testing` | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求 |
 | `gen-commit` | Commit 審查、Conventional Commits、commit 後 plan 更新、memory routing 與 skill review |
 | `memory-manager`、`save-memory`、`compress-memory` | 共用 bounded 與 structured memory 生命週期 |
@@ -61,6 +62,21 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | `architect`、`code-simplifier`、`loop-operator`、`tdd-guide` | 不鏡像 | Codex 由 main agent 負責 planning/implementation，並使用 Superpowers；複製 write-capable specialists 會造成權責重疊。 |
 | `code-reviewer`、`silent-failure-hunter` | 已整併 | `implementation_reviewer`、`python_reviewer`、`security_reviewer` 與 systematic debugging 已涵蓋有效面向。 |
 | `performance-optimizer` | 唯讀對等 | Codex 使用 `performance_reviewer`，要求先量測再最佳化。 |
+
+## 共享政策對齊
+
+| 共享行為 | Codex owner |
+| :--- | :--- |
+| Operating contract、prompt defense、scoped changes | `.codex/AGENTS.md` |
+| 實作前 research 與 reuse | `.codex/AGENTS.md` engineering discipline |
+| Review severity 與 CRITICAL/HIGH completion policy | `.codex/AGENTS.md` review and security section |
+| Security triggers 與 secret handling | `.codex/AGENTS.md` 加上 `security_reviewer` |
+| Risk-based test scope | `.codex/AGENTS.md` verification section |
+| Python development rules | `python-development` |
+| Repository Python verification | `python-testing` |
+| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 Superpowers phase routing |
+
+Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 user intent、sandbox approvals、dirty-worktree protections、repository ownership，或 delegation、commit、destructive action、push、merge 與 pull request 所需的明確授權。Codex 的 PR 準備與發布行為由 GitHub plugin workflows 擁有。
 
 ## Plans、Memory 與 Commits
 

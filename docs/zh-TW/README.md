@@ -175,7 +175,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 - **Claude Code**：官方外掛 `superpowers@claude-plugins-official` 已於 `.claude/settings.json` 啟用，無需手動安裝，自動生效。
 - **Antigravity**：源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能已複製至 `.agent/skills/`，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
-- **Codex**：尚未預先設定 superpowers，請依照 [obra/superpowers](https://github.com/obra/superpowers) 的說明自行安裝。
+- **Codex**：Superpowers plugin 已安裝並啟用；repository instructions 會將其 workflows 限制在 Codex 的 approval、delegation、commit 與 branch safety 規則內。
 
 ## 設計來源
 

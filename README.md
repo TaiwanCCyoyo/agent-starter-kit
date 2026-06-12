@@ -174,7 +174,7 @@ This repository integrates superpowers capabilities across all three agents:
 
 - **Claude Code**: The official `superpowers@claude-plugins-official` plugin is enabled in `.claude/settings.json` and activates automatically — no manual installation required.
 - **Antigravity**: A suite of skills adapted from the open-source [obra/superpowers](https://github.com/obra/superpowers) project resides under `.agent/skills/`, fully compliant with the MIT License (Copyright (c) 2026 Jesse Vincent).
-- **Codex**: Superpowers is not pre-configured. Install it separately following the [obra/superpowers](https://github.com/obra/superpowers) setup instructions.
+- **Codex**: The Superpowers plugin is installed and active. Repository instructions adapt its workflows to Codex approval, delegation, commit, and branch-safety rules.
 
 ## Design Influences
 
