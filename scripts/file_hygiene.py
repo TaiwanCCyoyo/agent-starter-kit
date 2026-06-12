@@ -22,7 +22,13 @@ ALLOWED_PATHS = [
     ".memories/",
     ".references/",
     ".tmp/",
-    "docs/zh-TW/",
+]
+
+# Path markers where Traditional Chinese content is allowed. Matching is
+# case-insensitive and markers may appear at any path depth or in a filename.
+ALLOWED_PATH_MARKERS = [
+    re.compile(r"(?:^|[./_-])plans?(?:$|[./_-])", re.IGNORECASE),
+    re.compile(r"(?:^|[./_-])zh-tw(?:$|[./_-])", re.IGNORECASE),
 ]
 
 MARKDOWN_LANGUAGE_LINK_LINES = 5
@@ -36,7 +42,7 @@ def is_path_allowed(filepath: str):
     for allowed in ALLOWED_PATHS:
         if norm_path.startswith(allowed):
             return True
-    return False
+    return any(marker.search(norm_path) for marker in ALLOWED_PATH_MARKERS)
 
 
 def check_file_hygiene(filepath: str):
@@ -70,7 +76,9 @@ def check_file_hygiene(filepath: str):
                 # this would still trigger. But based on is_path_allowed, we skip this whole block.
                 LOGGER.error("Error: Non-English (CJK) character or Mojibake found in %s at line %s:", filepath, i + 1)
                 LOGGER.error("  > %s", line.strip())
-                LOGGER.error("Note: If this is intentional, move the content to an allowed path (docs/zh-TW/, .memories/, .references/, or .tmp/).")
+                LOGGER.error(
+                    "Note: If this is intentional, use a path marked plan/plans or zh-TW, or move the content under .memories/, .references/, or .tmp/."
+                )
                 return False
     else:
         # In allowed paths, we already did the UTF-8 encoding check above.

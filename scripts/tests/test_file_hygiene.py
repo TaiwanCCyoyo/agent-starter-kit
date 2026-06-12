@@ -15,8 +15,21 @@ class FileHygieneLanguageTests(unittest.TestCase):
         self.assertTrue(is_path_allowed(".memories/memories/USER.md"))
         self.assertTrue(is_path_allowed(".memories/memories/MEMORY.md"))
 
+    def test_plan_marker_anywhere_in_path_allows_cjk(self) -> None:
+        self.assertTrue(is_path_allowed("docs/plan/feature.md"))
+        self.assertTrue(is_path_allowed("docs/plans/feature.md"))
+        self.assertTrue(is_path_allowed("docs/features/feature.plan.md"))
+        self.assertTrue(is_path_allowed("docs/features/implementation-plan.md"))
+
+    def test_zh_tw_marker_anywhere_in_path_allows_cjk(self) -> None:
+        self.assertTrue(is_path_allowed("docs/zh-TW/example.md"))
+        self.assertTrue(is_path_allowed("docs/zh-tw/example.md"))
+        self.assertTrue(is_path_allowed("docs/translations/example.zh-TW.md"))
+        self.assertTrue(is_path_allowed("docs/translations/example.zh-tw.md"))
+
     def test_regular_english_path_does_not_allow_cjk(self) -> None:
         self.assertFalse(is_path_allowed("docs/en/example.md"))
+        self.assertFalse(is_path_allowed("docs/explanation/example.md"))
 
     def test_allowed_path_still_requires_utf8(self) -> None:
         directory = TemporaryDirectory()
