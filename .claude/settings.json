@@ -196,7 +196,10 @@
   },
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "ponytail@ponytail": true,
+    "skill-creator@claude-plugins-official": true,
+    "plugin-dev@claude-plugins-official": true
   },
   "teammateMode": "tmux"
 }

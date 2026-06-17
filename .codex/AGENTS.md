@@ -37,6 +37,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Read the relevant implementation and tests before changing code.
 - Reuse existing local helpers and patterns before adding dependencies or abstractions.
 - Check primary vendor documentation when API behavior or version compatibility is uncertain.
+- Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 - Prefer the smallest change that satisfies the verified goal; do not add speculative features, knobs, abstractions, or error handling beyond the request.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.

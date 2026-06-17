@@ -38,6 +38,7 @@ It is loaded natively by Claude Code at session start.
 - Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
 - Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
 - Never delete existing functions, features, configuration, or other code you consider unnecessary without explicit user approval — apparent dead code may be used in contexts not visible to you.
+- Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
 ## Learning And Escalation
 

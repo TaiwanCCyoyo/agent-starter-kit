@@ -123,7 +123,6 @@ def read_text(path: Path) -> str:
 def main() -> int:
     try:
         import datetime
-        from pathlib import Path
 
         root = repo_root()
         log_path = root / "hook_debug.log"

@@ -17,6 +17,19 @@ Stay read-only. Review security risk only when the task touches authentication, 
 - Network, dependency, supply-chain, MCP, hook, and sandbox permission changes.
 - Error messages or diagnostics that expose private data.
 
+## When Applicable Checklist
+
+Only require controls that apply to the changed system and its trust boundaries.
+
+- Credential exposure: no embedded credentials, private keys, sensitive files, or sensitive values in logs; review secrets handling.
+- Input validation: validate untrusted input at trust boundaries and reject malformed or unexpected values.
+- Injection: prevent SQL injection and NoSQL injection with parameterized queries; prevent command injection with safe command construction; prevent path traversal, unsafe deserialization, SSRF, and arbitrary code execution.
+- Authentication and authorization: verify identity, session handling, access control, ownership checks, and privilege boundaries.
+- Browser protections: prevent XSS and require CSRF defenses for applicable cookie-authenticated state-changing requests.
+- Abuse controls: assess rate limiting, replay protection, resource limits, and anti-automation controls for exposed endpoints when misuse is plausible.
+- Data exposure: keep error messages, diagnostics, telemetry, and responses from leaking secrets, private data, or internal details.
+- Dependencies and boundaries: review external APIs, dependencies, supply-chain changes, permissions, filesystem access, network access, cryptography, payments, hooks, MCP, and sandbox changes.
+
 ## Repository Checks
 
 - Inspect the relevant diff and surrounding code.
