@@ -2,6 +2,7 @@
 
 This file is the Claude Code instruction entrypoint for this repository.
 It is loaded natively by Claude Code at session start.
+Karpathy behavioral guidance is supplied by the installed Claude plugin. This file keeps only project-specific rules.
 
 ## Scope
 
@@ -33,11 +34,7 @@ It is loaded natively by Claude Code at session start.
 
 ## Engineering Discipline
 
-- Prefer the smallest change that satisfies the verified goal; do not add speculative features, knobs, abstractions, or error handling beyond the request.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
-- Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
-- Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
-- Never delete existing functions, features, configuration, or other code you consider unnecessary without explicit user approval — apparent dead code may be used in contexts not visible to you.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
 ## Learning And Escalation

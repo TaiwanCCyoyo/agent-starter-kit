@@ -199,7 +199,8 @@
     "github@claude-plugins-official": true,
     "ponytail@ponytail": true,
     "skill-creator@claude-plugins-official": true,
-    "plugin-dev@claude-plugins-official": true
+    "plugin-dev@claude-plugins-official": true,
+    "andrej-karpathy-skills@karpathy-skills": true
   },
   "teammateMode": "tmux"
 }

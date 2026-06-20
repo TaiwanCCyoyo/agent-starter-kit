@@ -5,8 +5,3 @@ preview = true
 
 [lint]
 select = ["E", "F", "I", "ANN001"]
-
-[lint.per-file-ignores]
-".agent/hooks/session_start.py" = ["E402"]
-".claude/hooks/session_start.py" = ["E402"]
-".codex/hooks/session_start.py" = ["E402"]

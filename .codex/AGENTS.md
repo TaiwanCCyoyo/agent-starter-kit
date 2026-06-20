@@ -38,12 +38,7 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Reuse existing local helpers and patterns before adding dependencies or abstractions.
 - Check primary vendor documentation when API behavior or version compatibility is uncertain.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
-- Prefer the smallest change that satisfies the verified goal; do not add speculative features, knobs, abstractions, or error handling beyond the request.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
-- Touch only files and lines related to the task; do not refactor, reformat, rename, or delete adjacent code unless needed for the current request.
-- Clean up unused imports, variables, functions, or files created by the current change, but only mention pre-existing unrelated dead code unless asked to remove it.
-- Never delete existing functions, features, configuration, or other code you consider unnecessary without explicit user approval — apparent dead code may be used in contexts not visible to you.
-- For non-trivial implementation work, state the goal and concrete verification commands before editing.
 - Use Codex's native planning flow for product and architecture planning; do not create or rely on a separate planner agent.
 - Keep shared hook and hygiene logic shell-neutral. Put cross-agent checks in Python scripts under `scripts/` rather than Bash, PowerShell, or agent-specific command fragments.
 
@@ -77,7 +72,6 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 
 ## Learning And Escalation
 
-- Prefer explicit tradeoffs over hidden assumptions: state what you know, what you are assuming, and what decision or help is needed when the next step depends on user intent or environment ownership.
 - Ask for user assistance immediately when credentials, global settings, approvals, environment ownership, external accounts, product decisions, or irreversible tradeoffs are needed. Do not wait for repeated failures before asking.
 - If the same blocker, workaround, wrong assumption, or confusion appears twice, query `memory_store.db`, stop repeating an unverified workaround, investigate the root cause, and record either a verified resolution or the explicit external blocker. Then decide whether an existing skill, instruction, or regression test must change.
 
@@ -102,9 +96,7 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 
 ## Verification
 
-- Before editing a non-trivial change, state the goal and checks that will prove success.
 - After editing, run those checks and report the evidence.
-- Do not claim completion without verification evidence.
 - Add the smallest direct test for changed behavior and failure modes.
 - Add integration tests when a change crosses a real component, process, database, filesystem, or network boundary.
 - Add E2E tests only for critical user flows when the repository has an E2E harness.
@@ -139,3 +131,12 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
 - Specialist reviewer agents supplement the main Codex agent for review and analysis; they do not replace Codex's implementation or planning flow.
+
+<!-- Source: multica-ai/andrej-karpathy-skills; keep in sync with .codex/skills/karpathy-guidelines/SKILL.md. Claude receives the full version through its plugin. -->
+## Karpathy Guidelines Condensed
+
+- State assumptions, ambiguity, and tradeoffs explicitly; ask when unclear instead of picking silently.
+- Prefer the smallest change that satisfies the verified goal; do not add speculative features, knobs, abstractions, or unreachable error handling.
+- Touch only files and lines related to the task; do not refactor, reformat, rename, delete, or "improve" adjacent code unless needed for the current request.
+- Clean up only imports, variables, functions, or files made unused by the current change; mention unrelated dead code instead of deleting it.
+- For non-trivial work, define success criteria and run the checks that prove them before claiming completion.
