@@ -14,6 +14,8 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | Cross-session plans | Git-ignored `.references/plans/*.plan.md` |
 | Searchable memory | Project-scoped `memory-db` MCP server |
 
+Codex keeps planning and implementation authority in the main agent. Reviewer agents provide critique, security review, and verification feedback; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
+
 ## Agents
 
 | Agent | Access | Purpose |
@@ -80,6 +82,8 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 
 Superpowers is active in Codex. It provides workflow guidance but cannot bypass user intent, sandbox approvals, dirty-worktree protections, repository ownership, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests. GitHub plugin workflows own Codex PR preparation and publishing behavior.
 
+Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or `plan-artifact`, test and debug through Superpowers, review through `implementation_reviewer` plus targeted specialists, prepare PRs through the GitHub plugin, and finish branches through Superpowers within Codex approval rules.
+
 ## Plans, Memory, And Commits
 
 - `.references/plans/` is the only writable exception under the otherwise read-only `.references/` tree.
@@ -95,6 +99,7 @@ Superpowers is active in Codex. It provides workflow guidance but cannot bypass 
 | `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Python no-print feedback |
 | `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, plan routing, and one-time skill-review reminder |
 | `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff, no-print, and full-project mypy |
+| `.vscode/settings.json` | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 
 Python verification uses `uv run python -m pytest`, `uv run ruff check --fix .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 

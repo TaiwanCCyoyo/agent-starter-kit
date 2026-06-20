@@ -68,6 +68,8 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `/save-memory` | Save durable facts to the appropriate bounded file or SQLite store |
 | `/worktree` | Create, manage, and merge Git worktrees with memory preservation |
 
+Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion remain guarded by Superpowers finishing workflow and explicit user authorization.
+
 ### Removed (2026-06-10 cleanup — agents, Superpowers, and built-in `/code-review` now cover these)
 
 | Command | Replacement |
@@ -155,6 +157,8 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 | `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check --fix`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
 | `stop_memory_check.py` | After each response | Nudges memory update if significant work was done; prompts skill review via `/learn-eval` after 5+ responses with code changes (once per session) |
 
+Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
+
 ### ECC hook concepts noted but not ported
 
 | Concept | Status | Why |
@@ -173,6 +177,8 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | `rules/common/` | All files | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, `superpowers:finishing-a-development-branch`, and CLAUDE.md `Subagents`. |
 | `rules/memory/` | `.memories/**` | Custom | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access. |
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
+
+The common rules intentionally stay small. Security triggers are centralized in `rules/common/security.md`, severity handling in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
@@ -199,7 +205,6 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | `marketing-agent` agent | ECC port | Short-form video planning confirmed |
 | `uvm-patterns` skill | Custom build | UVM project starts |
 | `rules/systemverilog/` | Custom build | UVM project starts |
-| CI/CD guidance in README | Docs update | After integration stabilises |
 | Eval-driven development harness | Workflow infrastructure | Add a real runner, deterministic graders, baselines, repeated-run metrics, Python commands, and CI integration |
 
 ### Shared Plans

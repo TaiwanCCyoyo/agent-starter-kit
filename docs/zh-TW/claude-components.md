@@ -68,6 +68,8 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `/save-memory` | 將長期事實儲存至適當的 bounded file 或 SQLite store |
 | `/worktree` | 建立、管理並合併 Git worktree，同時保留記憶體 |
 
+Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 仍由 Superpowers finishing workflow 加上使用者明確授權把關。
+
 ### 已移除（2026-06-10 清理——agents、Superpowers 與內建 `/code-review` 已涵蓋）
 
 | Command | 替代方案 |
@@ -155,6 +157,8 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 | `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check --fix`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
 | `stop_memory_check.py` | 每次回覆後 | 若有重大工作則提示記憶更新；在 5 次以上有程式碼變更的回覆後，每 session 提示一次技能審查（`/learn-eval`） |
 
+Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
+
 ### 已注意但未從 ECC 移植的 hook 概念
 
 | 概念 | 狀態 | 原因 |
@@ -173,6 +177,8 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `rules/common/` | 所有檔案 | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops`、`superpowers:finishing-a-development-branch` 與 CLAUDE.md `Subagents` 擁有。 |
 | `rules/memory/` | `.memories/**` | 自訂 | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。 |
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
+
+Common rules 刻意維持精簡。Security triggers 集中在 `rules/common/security.md`，severity handling 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 
@@ -199,7 +205,6 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `marketing-agent` agent | ECC 移植 | 確認短片製作規劃啟動 |
 | `uvm-patterns` skill | 自訂建置 | UVM 專案啟動 |
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
-| README 中的 CI/CD 指引 | 文件更新 | 整合穩定後進行 |
 | Eval-driven development harness | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
 
 ### 共用 Plans

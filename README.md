@@ -12,6 +12,13 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 5. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
 6. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
 
+## Current Defaults
+
+- **Shared development rules**: Codex and Claude Code now use the same phase routing model: native planning for plans, Superpowers for TDD/debugging/verification/branch completion, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
+- **Ruff with fixes enabled**: Local hooks, pre-commit, and CI examples use `ruff check --fix` plus `ruff format` so import cleanup and auto-fixable lint issues are handled consistently.
+- **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
+- **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
+
 ## Memory Management Workflow
 
 This project uses a proactive memory system to maintain long-term context across sessions and worktrees.
@@ -160,21 +167,23 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | Path | Purpose |
 | :--- | :--- |
 | `.memories/` | Git-ignored instantiated memory: bounded files and SQLite store. |
+| `.agents/` | Tracked shared cross-agent infrastructure. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
 | `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
+| `.vscode/` | Workspace editor defaults that match file hygiene and Python Ruff workflows. |
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
 After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check --fix .`.
 
-### Superpowers Skills Integration
+### Agent Workflow Plugin And Skill Integration
 
-This repository integrates superpowers capabilities across all three agents:
+This repository integrates workflow plugins and guidance differently per agent:
 
-- **Claude Code**: The official `superpowers@claude-plugins-official` plugin is enabled in `.claude/settings.json` and activates automatically — no manual installation required.
-- **Antigravity**: A suite of skills adapted from the open-source [obra/superpowers](https://github.com/obra/superpowers) project resides under `.agent/skills/`, fully compliant with the MIT License (Copyright (c) 2026 Jesse Vincent).
-- **Codex**: The Superpowers plugin is installed and active. Repository instructions adapt its workflows to Codex approval, delegation, commit, and branch-safety rules.
+- **Claude Code**: Uses Superpowers, Ponytail, and Karpathy behavioral guidance through Claude's plugin/skill layer. The project-level `.claude/` rules keep only repository-specific routing and safety policy.
+- **Codex**: Superpowers and Ponytail are external Codex plugins and must be installed in the Codex environment before use. Karpathy guidance has no separate Codex install command in this starter kit, so the condensed guidance is integrated into `.codex/AGENTS.md` and the full skill is copied under `.codex/skills/karpathy-guidelines/`.
+- **Antigravity**: Uses the existing `.agent/skills/`, `.agent/rules/`, and `.agent/workflows/` content. Its plugin and skill set is not aligned with the Claude Code and Codex plugin layers.
 
 ## Design Influences
 

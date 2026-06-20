@@ -14,6 +14,8 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | 跨 session plans | Git-ignored `.references/plans/*.plan.md` |
 | 可搜尋記憶 | 專案級 `memory-db` MCP server |
 
+Codex 將 planning 與 implementation 權責保留在 main agent。Reviewer agents 負責 critique、security review 與 verification feedback；它們不取代 Codex Native Plan Mode，也不會在沒有使用者明確授權時接管 commit、push、merge 或 pull request。
+
 ## Agents
 
 | Agent | 權限 | 用途 |
@@ -80,6 +82,8 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 
 Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 user intent、sandbox approvals、dirty-worktree protections、repository ownership，或 delegation、commit、destructive action、push、merge 與 pull request 所需的明確授權。Codex 的 PR 準備與發布行為由 GitHub plugin workflows 擁有。
 
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或 `plan-artifact`，test/debug 透過 Superpowers，review 透過 `implementation_reviewer` 與專職 reviewers，PR 準備交給 GitHub plugin，branch completion 則由 Superpowers 在 Codex approval 規則內處理。
+
 ## Plans、Memory 與 Commits
 
 - `.references/plans/` 是原則上唯讀的 `.references/` 內唯一可寫例外。
@@ -95,6 +99,7 @@ Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 
 | `.codex/hooks/post_tool_use_hygiene.py` | 聚焦格式化、lint、file hygiene 與 Python no-print feedback |
 | `.codex/hooks/stop_memory_check.py` | Memory limits、taxonomy、plan routing 與一次性 skill-review reminder |
 | `.pre-commit-config.yaml` | File hygiene、detect-secrets、Ruff、no-print 與完整專案 mypy |
+| `.vscode/settings.json` | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 
 Python verification 使用 `uv run python -m pytest`、`uv run ruff check --fix .` 與 `uv run mypy .`。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 

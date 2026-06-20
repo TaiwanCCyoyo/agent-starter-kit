@@ -12,6 +12,13 @@
 5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
 6. **驗證優先**：Agent 在進行非瑣碎變更前須先說明驗證計畫，修改後執行驗證，並提供結果作為完成的證據。
 
+## 目前預設值
+
+- **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，Superpowers 負責 TDD、debugging、verification 與 branch completion，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
+- **Ruff 啟用自動修正**：本地 hooks、pre-commit 與 CI 範例皆使用 `ruff check --fix` 搭配 `ruff format`，讓 import cleanup 與可自動修正的 lint 問題保持一致。
+- **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
+- **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
+
 ## 記憶管理流程
 
 本專案使用主動式記憶系統，維持跨 session 與 worktree 的長期上下文。
@@ -164,18 +171,19 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
 | `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
+| `.vscode/` | 與 file hygiene 與 Python Ruff workflow 對齊的 workspace editor defaults。 |
 | `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
 
 複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
 
-### 整合 Superpowers 技能
+### Agent workflow plugins 與 skills 整合
 
-本儲存庫在三個 Agent 中均整合了 superpowers 能力：
+本儲存庫依不同 Agent 採用不同方式整合 workflow plugins 與 guidance：
 
-- **Claude Code**：官方外掛 `superpowers@claude-plugins-official` 已於 `.claude/settings.json` 啟用，無需手動安裝，自動生效。
-- **Antigravity**：源自開源專案 [obra/superpowers](https://github.com/obra/superpowers) 的一系列精選技能已複製至 `.agent/skills/`，並遵守 MIT 授權條款（版權所有 (c) 2026 Jesse Vincent）。
-- **Codex**：Superpowers plugin 已安裝並啟用；repository instructions 會將其 workflows 限制在 Codex 的 approval、delegation、commit 與 branch safety 規則內。
+- **Claude Code**：透過 Claude 的 plugin/skill layer 使用 Superpowers、Ponytail 與 Karpathy behavioral guidance。專案內的 `.claude/` rules 只保留 repository-specific routing 與 safety policy。
+- **Codex**：Superpowers 與 Ponytail 是外部 Codex plugins，使用前需要在 Codex 環境手動安裝。Karpathy guidance 在本 starter kit 中沒有獨立 Codex 安裝指令，因此以 condensed guidance 整合進 `.codex/AGENTS.md`，並將完整 skill 複製到 `.codex/skills/karpathy-guidelines/`。
+- **Antigravity**：使用既有 `.agent/skills/`、`.agent/rules/` 與 `.agent/workflows/` 內容；其 plugin 與 skill set 尚未與 Claude Code、Codex 的 plugin layer 對齊。
 
 ## 設計來源
 
