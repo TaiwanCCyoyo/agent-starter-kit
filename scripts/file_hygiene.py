@@ -17,18 +17,15 @@ LOGGER = logging.getLogger("file_hygiene")
 # CJK Unified Ideographs plus common CJK punctuation (indicates non-English content or Mojibake)
 CJK_RE = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]")
 
-# Paths where non-English content is EXPLICITLY allowed
-ALLOWED_PATHS = [
-    ".memories/",
-    ".references/",
-    ".tmp/",
-]
-
 # Path markers where Traditional Chinese content is allowed. Matching is
-# case-insensitive and markers may appear at any path depth or in a filename.
+# case-insensitive and markers may appear at any path depth or in a filename,
+# covering both dotted (.tmp, .references) and plain (tmp, references) variants.
 ALLOWED_PATH_MARKERS = [
     re.compile(r"(?:^|[./_-])plans?(?:$|[./_-])", re.IGNORECASE),
     re.compile(r"(?:^|[./_-])zh-tw(?:$|[./_-])", re.IGNORECASE),
+    re.compile(r"(?:^|[./_-])memor(?:y|ies)(?:$|[./_-])", re.IGNORECASE),
+    re.compile(r"(?:^|/)\.references?(?:$|/)", re.IGNORECASE),
+    re.compile(r"(?:^|[./_-])tmp(?:$|[./_-])", re.IGNORECASE),
 ]
 
 MARKDOWN_LANGUAGE_LINK_LINES = 5
@@ -39,9 +36,6 @@ def is_path_allowed(filepath: str):
     Checks if the given file path is in a directory allowed to contain non-English characters.
     """
     norm_path = Path(filepath).as_posix()
-    for allowed in ALLOWED_PATHS:
-        if norm_path.startswith(allowed):
-            return True
     return any(marker.search(norm_path) for marker in ALLOWED_PATH_MARKERS)
 
 
