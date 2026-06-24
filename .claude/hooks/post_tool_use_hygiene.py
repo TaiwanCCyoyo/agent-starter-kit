@@ -1,3 +1,4 @@
+import io
 import json
 import subprocess
 import sys
@@ -62,9 +63,9 @@ def event_files(event: dict, root: Path) -> list[str]:
 
 
 def main() -> int:
-    if hasattr(sys.stdout, "reconfigure"):
+    if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    if hasattr(sys.stderr, "reconfigure"):
+    if isinstance(sys.stderr, io.TextIOWrapper):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
     try:

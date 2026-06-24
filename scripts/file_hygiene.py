@@ -1,4 +1,5 @@
 import argparse
+import io
 import logging
 import os
 import re
@@ -84,9 +85,9 @@ def check_file_hygiene(filepath: str):
 
 
 def main():
-    if hasattr(sys.stdout, "reconfigure"):
+    if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    if hasattr(sys.stderr, "reconfigure"):
+    if isinstance(sys.stderr, io.TextIOWrapper):
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     handler: logging.Handler
     if RichHandler is not None:

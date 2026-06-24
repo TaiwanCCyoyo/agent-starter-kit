@@ -1,3 +1,4 @@
+import io
 import shutil
 import subprocess
 import sys
@@ -155,7 +156,7 @@ def get_branch_purpose(branch: str):
 
 
 def main():
-    if hasattr(sys.stdout, "reconfigure"):
+    if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8")
 
     root_dir = repo_root()

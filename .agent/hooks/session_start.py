@@ -1,3 +1,4 @@
+import io
 import shutil
 import subprocess
 import sys
@@ -131,7 +132,7 @@ def main() -> int:
     except Exception:
         pass
 
-    if hasattr(sys.stdout, "reconfigure"):
+    if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8")
 
     root = repo_root()
