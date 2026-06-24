@@ -4,8 +4,6 @@ import sys
 from pathlib import Path
 
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
-PRINT_WARNING_EXCLUDED_PREFIXES = (".claude/hooks/", ".codex/hooks/")
-PRINT_WARNING_EXCLUDED_FILES = {"scripts/auto_format.py", "scripts/file_hygiene.py"}
 
 
 def repo_root(cwd: str) -> Path:
@@ -63,10 +61,6 @@ def event_files(event: dict, root: Path) -> list[str]:
     return files or changed_files(root)
 
 
-def should_warn_on_print(rel_path: str) -> bool:
-    return not rel_path.startswith(PRINT_WARNING_EXCLUDED_PREFIXES) and rel_path not in PRINT_WARNING_EXCLUDED_FILES
-
-
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -83,7 +77,6 @@ def main() -> int:
         return 0
 
     checks: list[str] = []
-    warnings: list[str] = []
 
     files = [f for f in event_files(event, root) if Path(f).suffix.lower() in TEXT_SUFFIXES]
     for rel_path in dict.fromkeys(files):
@@ -98,22 +91,13 @@ def main() -> int:
             if code != 0:
                 checks.append(f"`ruff check --fix` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
-            if should_warn_on_print(rel_path):
-                code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/python_hygiene.py", "--no-print", rel_path])
-                if code != 0:
-                    warnings.append(f"`python_hygiene` found warnings in `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
-
         code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", rel_path])
         if code != 0:
             checks.append(f"`file_hygiene` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
     if checks:
         message = "\n\n".join(checks)
-        if warnings:
-            message += "\n\nWarnings:\n" + "\n".join(warnings)
         sys.stdout.write(json.dumps({"decision": "block", "reason": message}) + "\n")
-    elif warnings:
-        sys.stdout.write(json.dumps({"systemMessage": "Warnings:\n" + "\n".join(warnings)}) + "\n")
 
     return 0
 

@@ -4,4 +4,4 @@ line-length = 160
 preview = true
 
 [lint]
-select = ["E", "F", "I", "ANN001"]
+select = ["E", "F", "I", "ANN001", "T201"]

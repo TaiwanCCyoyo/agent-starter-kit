@@ -71,15 +71,14 @@ def test_failed_check_returns_codex_blocking_json(tmp_path: Path) -> None:
     }
 
 
-def test_python_warning_returns_warning_json(tmp_path: Path) -> None:
+def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
     target = tmp_path / "src" / "sample.py"
     target.parent.mkdir()
     target.write_text("print('hello')\n", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
     run_results = [
         (0, "", ""),
-        (0, "", ""),
-        (1, "src/sample.py:1: avoid print(); use logging instead", ""),
+        (1, "T201 `print` found", ""),
         (0, "", ""),
     ]
 
@@ -87,9 +86,15 @@ def test_python_warning_returns_warning_json(tmp_path: Path) -> None:
 
     assert exit_code == 0
     assert json.loads(output) == {
-        "systemMessage": ("Warnings:\n`python_hygiene` found warnings in `src/sample.py`.\nsrc/sample.py:1: avoid print(); use logging instead")
+        "systemMessage": "`ruff check --fix` failed on `src/sample.py`.\nT201 `print` found",
+        "continue": False,
+        "stopReason": "Codex post-edit hygiene check failed.",
     }
-    assert commands[2] == ["uv", "run", "python", "scripts/python_hygiene.py", "--no-print", "src/sample.py"]
+    assert commands == [
+        ["uv", "run", "ruff", "format", "src/sample.py"],
+        ["uv", "run", "ruff", "check", "--fix", "src/sample.py"],
+        ["uv", "run", "python", "scripts/file_hygiene.py", "--file", "src/sample.py"],
+    ]
 
 
 @pytest.mark.parametrize("path_style", ["backslash", "forward-slash"])

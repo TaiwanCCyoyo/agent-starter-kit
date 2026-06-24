@@ -96,9 +96,9 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 | Layer | Responsibility |
 | :--- | :--- |
 | `.codex/hooks/session_start.py` | Initializes `.memories/`, SQLite schema, and bounded session context |
-| `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Python no-print feedback |
+| `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Ruff-backed Python print blocking |
 | `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, plan routing, and one-time skill-review reminder |
-| `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff, no-print, and full-project mypy |
+| `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff including T201 print blocking, and full-project mypy |
 | `.vscode/settings.json` | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 
 Python verification uses `uv run python -m pytest`, `uv run ruff check --fix .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.

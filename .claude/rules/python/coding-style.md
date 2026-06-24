@@ -34,7 +34,7 @@ class Point(NamedTuple):
 ## Formatting
 
 - **ruff format** for code formatting
-- **ruff check --fix** for linting; `I` rules enabled in `ruff.toml` for import sorting
+- **ruff check --fix** for linting; `I` rules enabled in `ruff.toml` for import sorting and `T201` rejects `print()` calls
 - Use Ruff for import sorting
 
 ## Logging
