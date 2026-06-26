@@ -10,7 +10,7 @@ This skill is the source of truth for high-quality commits in this project. All 
 ## Pre-commit Checklist
 
 1. **Hook Awareness**: Ensure `pre-commit` hooks are active. If a commit is blocked by hooks, fix the specific issue and re-stage before retrying.
-2. **Scope Verification**: Use `git status` and `git diff --cached` to ensure only intended changes are staged.
+2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only. The `commit_specialist` performs the full staged-content review with `git status` and `git diff --cached` to ensure only intended changes are staged.
 3. **Local State Guard**: Avoid staging `.env`, credentials, temporary build artifacts, generated junk, or ignored local memory state.
 
 ## Security And Hygiene
@@ -61,10 +61,11 @@ Agent-Status: assisted
 
 - The commit message itself is always in English.
 - The summary provided to the user must be in Traditional Chinese (zh-TW).
+- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates the user's intent plus the filename-level staged scope to `commit_specialist` for content-level review.
 
 ## Execution And Failure Mitigation
 
-- Commit execution is delegated to the `commit_specialist` subagent, including running `git commit`, reading hook output, and retrying after fixes.
+- Commit execution is delegated to the `commit_specialist` subagent, including staged-content analysis, security and hygiene checks, running `git commit`, reading hook output, and retrying after fixes.
 - If `git commit` fails due to hooks, enter Fix Mode: read the specific error output, apply the minimal fix, re-stage changed files, and retry.
 - Do not bypass hooks unless the user explicitly authorizes it.
 

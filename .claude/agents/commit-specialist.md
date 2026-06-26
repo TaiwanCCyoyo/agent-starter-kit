@@ -17,6 +17,7 @@ Your working directory is already the project root. Run git commands directly wi
 
 - Inspect `git status` and staged changes.
 - Verify that only intended files are staged.
+- Perform the full staged-content diff review; the parent agent should only provide user intent and a filename-level staged-scope preflight.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
 - Warn if staged changes appear to commit instantiated local memory from `.memories/` or shared plans from `.references/plans/`; both must remain ignored.
 - When reviewing memory infrastructure changes, recognize `MEMORY.md` as session-start project context and describe changes to loading, routing, limits, or searchable history clearly.
@@ -25,6 +26,7 @@ Your working directory is already the project root. Run git commands directly wi
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
 - Include the required `Agent:` and `Agent-Status:` trailers from `.claude/skills/commit-helper/SKILL.md`.
+- Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
 - If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 
 ## Boundaries

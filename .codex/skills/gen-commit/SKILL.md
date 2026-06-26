@@ -7,17 +7,17 @@ description: Use when the user says /gen-commit, gen-commit, generate commit, cr
 
 This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
 
-Delegate staged-change analysis, commit-message drafting, commit execution, and hook failure handling to the `commit_specialist` subagent. The main agent is responsible for confirming user intent and staged scope only.
+Delegate staged-change content analysis, commit-message drafting, commit execution, hook failure handling, and any pre-commit fixes to the `commit_specialist` subagent. The main agent is responsible only for confirming user intent and doing a filename-level staged-scope preflight.
 
 ## Workflow
 
-1. Inspect `git status`.
-2. Inspect staged changes with `git diff --cached`.
-3. If nothing is staged, inspect unstaged changes and ask before staging unless the user explicitly requested autonomous staging.
-4. Confirm that no `.env`, credentials, local memory noise, generated state, or unrelated files are staged.
-5. Delegate to `commit_specialist` for message drafting and, when the user requests a commit, execution.
+1. Confirm whether the user wants only a commit message or wants Codex to execute a commit.
+2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
+3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
+4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, `.references/plans/`, generated state, or unrelated files.
+5. Delegate to `commit_specialist` with the user's intent and the filename-level staged scope. Do not inspect staged file contents in the main agent.
 6. If the user requested only a message, instruct `commit_specialist` to return the message without committing.
-7. If the user requested a commit, instruct `commit_specialist` to execute `git commit` and handle any hook failures.
+7. If the user requested a commit, instruct `commit_specialist` to execute `git commit`, perform full staged-content review, run security and hygiene checks, and handle any hook failures or pre-commit fixes.
 
 ## Commit Message Standard
 
@@ -56,6 +56,7 @@ Agent-Status: autonomous
 - Never include ignored local state under `.memories/`.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.
+- The main agent must not perform full staged-content diff review during this workflow; content-level review, secret detection, hygiene checks, and pre-commit remediation belong to `commit_specialist`.
 
 ## Post-Commit Review
 
