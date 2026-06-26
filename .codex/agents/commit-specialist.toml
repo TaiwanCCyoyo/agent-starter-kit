@@ -1,5 +1,6 @@
 name = "commit_specialist"
 description = "Git commit specialist for reviewing staged changes, drafting Conventional Commit messages, and optionally executing safe commits."
+model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 nickname_candidates = ["Committer", "Registrar", "Scribe"]
