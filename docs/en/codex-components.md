@@ -14,13 +14,13 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | Cross-session plans | Git-ignored `.references/plans/*.plan.md` |
 | Searchable memory | Project-scoped `memory-db` MCP server |
 
-Codex keeps planning and implementation authority in the main agent. Reviewer agents provide critique, security review, and verification feedback; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
+Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
 
 ## Agents
 
 | Agent | Access | Purpose |
 | :--- | :--- | :--- |
-| `repo_explorer` | Read-only | Repository orientation and dependency tracing |
+| `evidence_gatherer` | Read-only | Locate files, trace execution paths, map dependencies, and run high-output commands while returning concise summaries instead of raw stdout |
 | `plan_reviewer` | Read-only | Plan completeness, scope, sequencing, repository alignment, testability, and risk |
 | `implementation_reviewer` | Read-only | Correctness, regression, test coverage, and unintended-diff review |
 | `python_reviewer` | Read-only | Python runtime, typing, Ruff, tests, logging, and maintainability |
@@ -30,7 +30,7 @@ Codex keeps planning and implementation authority in the main agent. Reviewer ag
 | `doc_translator` | Bounded write | Edits only the explicit translation target |
 | `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
 
-`plan_reviewer` critiques plans and never replaces Native Plan Mode. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. Prefer read-only subagents when the useful output is a compact report with file paths, command names, risk notes, and next-step recommendations rather than raw terminal or search output. Use `evidence_gatherer` for mechanical extraction of broad searches, large stdout, logs, diffs, and test output; escalate to a higher-tier reviewer when the task requires judgment over ambiguous output. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 
 ## Skills
 

@@ -23,7 +23,7 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `memory-auditor` | haiku | Read, Grep, Glob | Classify save candidates and Do Not Save items; never writes memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | Draft bounded-file compression and graduation proposals; never writes memory |
 | `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
-| `repo-explorer` | sonnet | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies |
+| `evidence-gatherer` | haiku | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies; run high-output commands and return concise summaries (pass/fail, key metrics, errors) to isolate verbose stdout from the parent agent's context |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
@@ -76,7 +76,7 @@ Claude Code PR preparation is owned by the `github-ops` skill: inspect full bran
 |---|---|
 | `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
 | `/code-review` | Built-in `/code-review` (incl. `ultra` cloud review) + `code-reviewer` / `implementation-reviewer` agents |
-| `/feature-dev` | Native Plan Mode + Superpowers TDD + `repo-explorer` agent |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `evidence-gatherer` agent |
 | `/python-review` | `python-reviewer` agent |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
 | `/test-coverage` | `python-testing` skill (`pytest --cov`) |

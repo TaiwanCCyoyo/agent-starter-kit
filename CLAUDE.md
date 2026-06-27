@@ -110,7 +110,8 @@ The `superpowers` plugin provides always-available workflow skills — prefer th
 ## Subagents
 
 - Claude Code custom agents live in `.claude/agents/*.md`.
-- Read-only subagents: `architect`, `code-reviewer`, `implementation-reviewer`, `plan-reviewer`, `python-reviewer`, `security-reviewer`, `silent-failure-hunter`, `repo-explorer`, `memory-auditor`, and `memory-compressor`.
+- Read-only subagents: `architect`, `code-reviewer`, `implementation-reviewer`, `plan-reviewer`, `python-reviewer`, `security-reviewer`, `silent-failure-hunter`, `evidence-gatherer`, `memory-auditor`, and `memory-compressor`.
+- Prefer read-only subagents for context isolation: broad repository search, large diff or log inspection, dependency tracing, test-output summarization, or running any command whose stdout would overwhelm the main context. The subagent absorbs the volume and returns only the key signal — file paths, metrics, pass/fail, error lines, and next-step recommendations. Use `evidence-gatherer` for mechanical extraction (Haiku); escalate to a higher-tier agent when the task requires judgment over ambiguous output.
 - Write-capable subagents: `code-simplifier`, `performance-optimizer`, `tdd-guide`, and `loop-operator` may edit only when explicitly delegated a bounded implementation task; `doc-translator` may edit only the explicit target translation file; `commit-specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Use `plan-reviewer` after complex or high-risk plans. It critiques plans but does not replace Native Plan Mode.
 - When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.

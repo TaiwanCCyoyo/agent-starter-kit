@@ -23,7 +23,7 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `memory-auditor` | haiku | Read, Grep, Glob | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory |
 | `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
-| `repo-explorer` | sonnet | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖 |
+| `evidence-gatherer` | haiku | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖；執行高輸出指令並回傳精簡摘要（pass/fail、關鍵指標、錯誤），將大量 stdout 隔離於 parent agent 的 context 之外 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
@@ -76,7 +76,7 @@ Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch his
 |---|---|
 | `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
 | `/code-review` | 內建 `/code-review`（含 `ultra` 雲端 review）+ `code-reviewer` / `implementation-reviewer` agents |
-| `/feature-dev` | Native Plan Mode + Superpowers TDD + `repo-explorer` agent |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `evidence-gatherer` agent |
 | `/python-review` | `python-reviewer` agent |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
 | `/test-coverage` | `python-testing` skill（`pytest --cov`） |

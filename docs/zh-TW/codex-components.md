@@ -14,13 +14,13 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | 跨 session plans | Git-ignored `.references/plans/*.plan.md` |
 | 可搜尋記憶 | 專案級 `memory-db` MCP server |
 
-Codex 將 planning 與 implementation 權責保留在 main agent。Reviewer agents 負責 critique、security review 與 verification feedback；它們不取代 Codex Native Plan Mode，也不會在沒有使用者明確授權時接管 commit、push、merge 或 pull request。
+Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不會在沒有使用者明確授權時接管 commit、push、merge 或 pull request。
 
 ## Agents
 
 | Agent | 權限 | 用途 |
 | :--- | :--- | :--- |
-| `repo_explorer` | 唯讀 | Repo 導覽與依賴追蹤 |
+| `evidence_gatherer` | 唯讀 | 定位檔案、追蹤執行路徑、繪製相依關係圖，並執行高輸出指令且只回傳精簡摘要，不回傳 raw stdout |
 | `plan_reviewer` | 唯讀 | 計畫完整性、範圍、排序、repo 對齊、可測試性與風險 |
 | `implementation_reviewer` | 唯讀 | 正確性、回歸、測試與非預期 diff |
 | `python_reviewer` | 唯讀 | Python runtime、typing、Ruff、測試、logging 與維護性 |
@@ -30,7 +30,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Reviewer agen
 | `doc_translator` | 有界寫入 | 只修改明確指定的翻譯目標 |
 | `commit_specialist` | 有界寫入 | 審查 staged changes，僅在明確要求時 commit |
 
-`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
+`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。當有用輸出是包含 file paths、command names、risk notes 與 next-step recommendations 的精簡報告，而不是原始 terminal 或搜尋輸出時，優先使用 read-only subagents。使用 `evidence_gatherer` 機械式擷取大範圍搜尋、大量 stdout、logs、diffs 與 test output；若任務需要判斷模糊輸出，再升級給較高階 reviewer。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 
 ## Skills
 

@@ -123,8 +123,9 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 ## Subagents
 
 - Codex project custom agents live in `.codex/agents/*.toml`.
-- Read-only subagents: `repo_explorer`, `plan_reviewer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
+- Read-only subagents: `evidence_gatherer`, `plan_reviewer`, `implementation_reviewer`, `python_reviewer`, `security_reviewer`, `performance_reviewer`, `memory_auditor`, and `memory_compressor`.
 - Write-capable subagents: `doc_translator` may edit only the explicit target translation file; `commit_specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
+- Prefer read-only subagents for context isolation: broad repository search, large diff or log inspection, dependency tracing, test-output summarization, or running any command whose stdout would overwhelm the main context. The subagent absorbs the volume and returns only the key signal: file paths, metrics, pass/fail status, error lines, risk notes, and next-step recommendations. Use `evidence_gatherer` for mechanical extraction; escalate to a higher-tier reviewer when the task requires judgment over ambiguous output.
 - Use `plan_reviewer` after complex or high-risk plans. It critiques plans but does not replace Codex Native Plan Mode.
 - When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
 - Use `security_reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
