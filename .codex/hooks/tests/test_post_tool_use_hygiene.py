@@ -55,6 +55,28 @@ def test_valid_json_with_clean_markdown_produces_no_output(tmp_path: Path) -> No
     assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/sample.md"]]
 
 
+def test_apply_patch_uses_patch_paths_instead_of_dirty_worktree(tmp_path: Path) -> None:
+    target = tmp_path / "docs" / "target.md"
+    dirty = tmp_path / "docs" / "dirty.md"
+    target.parent.mkdir()
+    target.write_text("clean\n", encoding="utf-8")
+    dirty.write_text("unrelated\n", encoding="utf-8")
+    patch_text = """*** Begin Patch
+*** Update File: docs/target.md
+@@
+-old
++clean
+*** End Patch
+"""
+    payload = {"cwd": str(tmp_path), "tool_name": "apply_patch", "tool_input": {"cmd": patch_text}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/target.md"]]
+
+
 def test_failed_check_returns_codex_blocking_json(tmp_path: Path) -> None:
     target = tmp_path / "docs" / "sample.md"
     target.parent.mkdir()
@@ -108,6 +130,22 @@ def test_windows_path_input_becomes_repo_relative_cli_argument(tmp_path: Path, p
     _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
 
     assert commands[-1][-1] == "docs/windows.md"
+
+
+def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> None:
+    # When no file_path or patch header is found, the hook falls back to
+    # changed_files() so hygiene still runs if the JSON format is unexpected.
+    dirty = tmp_path / "docs" / "unrelated.md"
+    dirty.parent.mkdir()
+    dirty.write_text("unrelated\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "shell", "tool_input": {"command": "echo hi"}}
+
+    with patch.object(HOOK, "changed_files", return_value=["docs/unrelated.md"]):
+        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/unrelated.md"]]
 
 
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])

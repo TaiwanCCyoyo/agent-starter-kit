@@ -108,6 +108,22 @@ def test_windows_path_input_becomes_repo_relative_cli_argument(tmp_path: Path, p
     assert commands[-1][-1] == "docs/windows.md"
 
 
+def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> None:
+    # When no file_path is found in tool_input, the hook falls back to
+    # changed_files() so hygiene still runs if the JSON format is unexpected.
+    dirty = tmp_path / "docs" / "unrelated.md"
+    dirty.parent.mkdir()
+    dirty.write_text("unrelated\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Bash", "tool_input": {"command": "echo hi"}}
+
+    with patch.object(HOOK, "changed_files", return_value=["docs/unrelated.md"]):
+        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/unrelated.md"]]
+
+
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])
 def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
     stdin = io.StringIO(raw_input)
