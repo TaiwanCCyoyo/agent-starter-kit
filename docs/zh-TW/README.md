@@ -167,7 +167,6 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | Path | 用途 |
 | :--- | :--- |
 | `.memories/` | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。 |
-| `.agents/` | 可提交至 Git 的共用 Agent 基礎設施。 |
 | `.agent/` | Antigravity rules、skills、workflows。 |
 | `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
 | `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |

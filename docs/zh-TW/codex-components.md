@@ -11,7 +11,7 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | TDD、除錯、worktree、完成前驗證 | 已安裝的 Superpowers plugin |
 | GitHub issues、PR、CI、review comments、發布 | 已安裝的 GitHub plugin |
 | Slash commands | 自然語言 skill triggers |
-| 跨 session plans | Git-ignored `.references/plans/*.plan.md` |
+| 跨 session planning | Native planning 加上選用的 project-owned OpenSpec files |
 | 可搜尋記憶 | 專案級 `memory-db` MCP server |
 
 Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不會在沒有使用者明確授權時接管 commit、push、merge 或 pull request。
@@ -45,13 +45,12 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `memory-sql` | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions |
 | `skill-review` | 人工 reusable-pattern 品質門與 skill candidate routing |
 | `worktree-memory-sync` | 跨 worktree 的 ignored memory 初始化與整合 |
-| `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。原生規劃負責互動式規劃；此 skill 專用於持久化結構化輸出。 |
 
 ## Claude 能力取捨
 
 | Claude 能力 | Codex 決策 | 原因 |
 | :--- | :--- | :--- |
-| `/plan` | Skill + 原生取代 | 對話式規劃由原生 Plan Mode 提供。持久化產出（PRD-based 或跨 session）使用 `plan-artifact` skill；不需要 slash command。 |
+| `/plan` | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化 PRD-based 或跨 session planning handoff 可在 OpenSpec files 存在時使用。 |
 | `plan-reviewer` | 已移植 | 獨立 plan critique 有價值，且不重複 plan creation。 |
 | `/feature-dev` | Superpowers／原生取代 | Brainstorming、Plan Mode、TDD、verification 與 review 已構成完整流程。 |
 | `/build-fix` | Superpowers／原生取代 | Systematic debugging 加 repository verification 已涵蓋逐步診斷與修復。 |
@@ -82,13 +81,13 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 user intent、sandbox approvals、dirty-worktree protections、repository ownership，或 delegation、commit、destructive action、push、merge 與 pull request 所需的明確授權。Codex 的 PR 準備與發布行為由 GitHub plugin workflows 擁有。
 
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或 `plan-artifact`，test/debug 透過 Superpowers，review 透過 `implementation_reviewer` 與專職 reviewers，PR 準備交給 GitHub plugin，branch completion 則由 Superpowers 在 Codex approval 規則內處理。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode、選用的 project-owned OpenSpec files，或 Superpowers planning skills；test/debug 透過 Superpowers；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備交給 GitHub plugin；branch completion 則由 Superpowers 在 Codex approval 規則內處理。
 
 ## Plans、Memory 與 Commits
 
-- `.references/plans/` 是原則上唯讀的 `.references/` 內唯一可寫例外。
-- 核准的跨 session plan 記錄 goal、decisions、tasks、verification、更新時間、狀態與 related commit；保持 gitignored，且不屬於 durable memory。
-- Commit 後，若存在相關 plan 就更新它，再把真正 durable 的 facts、decisions、lessons、重複問題或 verified resolutions 路由到 memory。
+- OpenSpec specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。
+- OpenSpec planning artifacts 可以作為一般專案歷史，記錄 goals、decisions、tasks、verification、status 與 related commits；它們不屬於 durable memory，也不需要放進 `.references/`。
+- Commit 後，若存在相關 OpenSpec change 就更新它，再把真正 durable 的 facts、decisions、lessons、重複問題或 verified resolutions 路由到 memory。
 - 可重用修正與 workflows 經 `skill-review`；尚未成熟的想法可存成低信任 `candidate` facts。
 
 ## Hooks 與 Gates

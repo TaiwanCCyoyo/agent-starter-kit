@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python .agents/hooks/session_start.py"
+            "command": "uv run python .agent/hooks/session_start.py"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python .agents/hooks/post_tool_use_hygiene.py"
+            "command": "uv run python .agent/hooks/post_tool_use_hygiene.py"
           }
         ]
       }
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python .agents/hooks/stop_memory_check.py"
+            "command": "uv run python .agent/hooks/stop_memory_check.py"
           }
         ]
       }

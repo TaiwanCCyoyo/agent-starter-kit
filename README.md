@@ -6,15 +6,17 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 ## Core Philosophy
 
 1. **Long-Term Memory Persistence**: Codex uses bounded files under `.memories/memories/` plus a Holographic-compatible SQLite `memory_store.db`.
-2. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer while sharing the same project memory.
-3. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
-4. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
-5. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
-6. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
+2. **Optional OpenSpec Planning Handoff**: Downstream projects may initialize OpenSpec and treat its specs, changes, and tasks as regular project files.
+3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer while sharing the same project memory.
+4. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
+5. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
+6. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
+7. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
 
 ## Current Defaults
 
-- **Shared development rules**: Codex and Claude Code now use the same phase routing model: native planning for plans, Superpowers for TDD/debugging/verification/branch completion, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
+- **Shared development rules**: Codex and Claude Code now use the same phase routing model: native planning for in-session plans, optional downstream OpenSpec files for durable planning handoff, Superpowers for TDD/debugging/verification/branch completion, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
+- **OpenSpec CLI dependency**: Spec-driven planning expects the OpenSpec CLI to be installed by the user. Run `openspec init` in each downstream project or workspace that wants OpenSpec planning, then treat the generated specs, changes, and tasks as normal project files and commit them when they are part of the project record.
 - **Ruff with fixes enabled**: Local hooks, pre-commit, and CI examples use `ruff check --fix` plus `ruff format` so import cleanup and auto-fixable lint issues are handled consistently.
 - **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
 - **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
@@ -167,7 +169,6 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | Path | Purpose |
 | :--- | :--- |
 | `.memories/` | Git-ignored instantiated memory: bounded files and SQLite store. |
-| `.agents/` | Tracked shared cross-agent infrastructure. |
 | `.agent/` | Antigravity rules, skills, and workflows. |
 | `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
 | `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
@@ -175,7 +176,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
 | `.pre-commit-config.yaml` | Repository-level verification hooks. |
 
-After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, and verify with `uv run ruff check --fix .`.
+After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
 
 ### Agent Workflow Plugin And Skill Integration
 
@@ -209,7 +210,16 @@ To initialize this repository and set up verification tools:
    ```bash
    uv run ruff check --fix .
    ```
-4. **Antigravity MCP Setup**
+4. **Initialize OpenSpec When Needed**
+
+   Install the OpenSpec CLI in your user environment, then initialize planning state per project or workspace:
+   ```bash
+   openspec init
+   ```
+
+   This starter kit does not commit the `openspec/` directory created by initializing the template repository itself. Downstream projects should treat their own OpenSpec specs, changes, and tasks as regular project files and commit them when those artifacts define project planning or requirements.
+
+5. **Antigravity MCP Setup**
 
    If you are using Antigravity, note that it requires MCP servers to be configured globally. Please configure your SQLite memory-db MCP server in your home directory (e.g., `~/.mcp.json`).
 

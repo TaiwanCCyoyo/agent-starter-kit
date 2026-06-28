@@ -13,7 +13,7 @@ Use the Superpowers worktree workflow for detection, consent, creation, setup, a
 ## Active Development
 
 - Keep durable memory within the approved `.memories/` taxonomy.
-- Keep approved cross-session plans under `.references/plans/`.
+- Keep durable planning handoff in the relevant project planning or specification content.
 - Use `/memory-sql` for searchable facts and recurring-problem history.
 
 ## Finish
@@ -34,7 +34,7 @@ When consolidating worktree memory:
 2. Compare bounded files and query structured memory before writes.
 3. Transfer only durable, non-duplicate facts and verified resolutions.
 4. Preserve newer main-workspace entries.
-5. Update the related `.references/plans/*.plan.md` with status, verification, and commit when relevant.
+5. Update the related project planning or specification content with status, verification, or spec changes when relevant.
 6. Report consolidated items and skipped duplicates.
 
 ## Safety

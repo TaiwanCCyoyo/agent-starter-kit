@@ -19,7 +19,7 @@ Your working directory is already the project root. Run git commands directly wi
 - Verify that only intended files are staged.
 - Perform the full staged-content diff review; the parent agent should only provide user intent and a filename-level staged-scope preflight.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
-- Warn if staged changes appear to commit instantiated local memory from `.memories/` or shared plans from `.references/plans/`; both must remain ignored.
+- Warn if staged changes appear to commit instantiated local memory from `.memories/`.
 - When reviewing memory infrastructure changes, recognize `MEMORY.md` as session-start project context and describe changes to loading, routing, limits, or searchable history clearly.
 - Draft an English Conventional Commit message.
 - Prefer one concise subject line when the change is simple.

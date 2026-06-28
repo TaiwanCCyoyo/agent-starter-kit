@@ -14,7 +14,7 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 1. Confirm whether the user wants only a commit message or wants Codex to execute a commit.
 2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
 3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
-4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, `.references/plans/`, generated state, or unrelated files.
+4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, generated state, or unrelated files.
 5. Delegate to `commit_specialist` with the user's intent and the filename-level staged scope. Do not inspect staged file contents in the main agent.
 6. If the user requested only a message, instruct `commit_specialist` to return the message without committing.
 7. If the user requested a commit, instruct `commit_specialist` to execute `git commit`, perform full staged-content review, run security and hygiene checks, and handle any hook failures or pre-commit fixes.
@@ -62,7 +62,7 @@ Agent-Status: autonomous
 
 After a successful commit:
 
-1. If a related `.references/plans/*.plan.md` exists, update its status, verification summary, and commit hash. Do not create a plan retroactively for a simple commit.
+1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
 2. Decide whether the session produced durable facts, decisions, lessons, environment constraints, recurring problems, or verified resolutions worth routing through `save-memory` or `memory-sql`.
 3. Use `skill-review` for user corrections, non-obvious techniques, reusable workflows, or corrected skill guidance.
 4. Do not store commit narration, duplicate plan content, or transient failures in memory.

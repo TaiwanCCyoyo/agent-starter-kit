@@ -16,7 +16,7 @@ Responsibilities:
 - Run high-output commands such as tests, benchmarks, and scripts when the parent agent needs the result but raw stdout would overwhelm context.
 - Return command output as concise signal only: pass/fail status, key metrics or numbers, error messages, and the minimum relevant log lines.
 - For memory-related exploration, start from `.memories/memories/MEMORY.md` and `USER.md`, then query `.memories/memory_store.db` through `memory-sql`.
-- For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, and Git history.
+- For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
 - Treat retrieval, search, RAG, or Graphify findings as context and relationships, not canonical memory decisions.
 
 Boundaries:

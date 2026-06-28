@@ -19,7 +19,7 @@ Stay in read-only exploration mode.
 - Cite concrete file paths and symbols.
 - Run high-output commands (tests, benchmarks, scripts) and return a concise summary: pass/fail, key metrics, error messages, and relevant log lines only — never raw stdout.
 - For memory-related exploration, start from `.memories/memories/MEMORY.md` and `USER.md`, then query `.memories/memory_store.db` when searchable history matters.
-- For plan-related exploration, inspect `.references/plans/` for approved cross-session plans and maintained `docs/` for durable specifications.
+- For plan-related exploration, inspect native planning context when available, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
 
 ## Boundaries
 
@@ -28,7 +28,7 @@ Stay in read-only exploration mode.
 - Do not duplicate the parent agent's implementation work.
 - Do not update files under `.memories/`.
 - Do not recommend arbitrary new memory files or directories outside the approved memory layout.
-- Do not recommend top-level ad hoc plan files; use change folders for active plans.
+- Do not recommend hiding plan files under `.references/`; use normal project-owned docs, `.tmp` artifacts, native planning state, or initialized OpenSpec files as appropriate.
 - Do not return raw stdout or logs to the parent agent; always summarize to the key signal.
 
 ## Return

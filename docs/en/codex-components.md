@@ -11,7 +11,7 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 | TDD, debugging, worktrees, completion verification | Installed Superpowers plugin |
 | GitHub issues, PRs, CI, review comments, publishing | Installed GitHub plugin |
 | Slash commands | Natural-language skill triggers |
-| Cross-session plans | Git-ignored `.references/plans/*.plan.md` |
+| Cross-session planning | Native planning plus optional project-owned OpenSpec files |
 | Searchable memory | Project-scoped `memory-db` MCP server |
 
 Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
@@ -45,13 +45,12 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `memory-sql` | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions |
 | `skill-review` | Manual reusable-pattern quality gate and skill candidate routing |
 | `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees |
-| `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native planning handles interactive planning; this skill is for persistent structured output. |
 
 ## Claude Capability Decisions
 
 | Claude capability | Codex decision | Reason |
 | :--- | :--- | :--- |
-| `/plan` | Skill + native replacement | Conversational planning is provided by native Plan Mode. Durable artifact output (PRD-based or cross-session) uses the `plan-artifact` skill; no slash command needed. |
+| `/plan` | Native/optional artifact replacement | Conversational planning is provided by native Plan Mode. Durable PRD-based or cross-session planning handoff may use project-owned OpenSpec files when present. |
 | `plan-reviewer` | Ported | Independent plan critique is useful and does not duplicate plan creation. |
 | `/feature-dev` | Superpowers/native replacement | Brainstorming, Plan Mode, TDD, verification, and review already form the workflow. |
 | `/build-fix` | Superpowers/native replacement | Systematic debugging plus repository verification covers incremental diagnosis and repair. |
@@ -82,13 +81,13 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 
 Superpowers is active in Codex. It provides workflow guidance but cannot bypass user intent, sandbox approvals, dirty-worktree protections, repository ownership, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests. GitHub plugin workflows own Codex PR preparation and publishing behavior.
 
-Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or `plan-artifact`, test and debug through Superpowers, review through `implementation_reviewer` plus targeted specialists, prepare PRs through the GitHub plugin, and finish branches through Superpowers within Codex approval rules.
+Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode, optional project-owned OpenSpec files, or Superpowers planning skills; test and debug through Superpowers; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin; and finish branches through Superpowers within Codex approval rules.
 
 ## Plans, Memory, And Commits
 
-- `.references/plans/` is the only writable exception under the otherwise read-only `.references/` tree.
-- Approved cross-session plans record goal, decisions, tasks, verification, update time, status, and related commit. They remain git-ignored and are not durable memory.
-- After a commit, update a related plan when one exists, then route only durable facts, decisions, lessons, recurring problems, or verified resolutions into memory.
+- `.references/` is read-only local reference storage for upstream clones and comparison material.
+- OpenSpec specs, changes, and tasks are regular project files when present; commit them when they are part of the project record.
+- After a commit, update the related OpenSpec change when one exists, then route only durable facts, decisions, lessons, recurring problems, or verified resolutions into memory.
 - Reusable corrections and workflows go through `skill-review`; immature ideas may become low-trust `candidate` facts.
 
 ## Hooks And Gates
@@ -97,7 +96,7 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 | :--- | :--- |
 | `.codex/hooks/session_start.py` | Initializes `.memories/`, SQLite schema, and bounded session context |
 | `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Ruff-backed Python print blocking |
-| `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, plan routing, and one-time skill-review reminder |
+| `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, planning-location guidance, and one-time skill-review reminder |
 | `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff including T201 print blocking, and full-project mypy |
 | `.vscode/settings.json` | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 

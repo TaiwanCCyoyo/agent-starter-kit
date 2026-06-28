@@ -25,7 +25,7 @@ def _project_root() -> Path:
 def dismiss_reminder() -> str:
     """Reset the memory reminder counter after evaluating that no update is needed.
 
-    The Stop hook re-arms automatically after 3 more responses.
+    The Stop hook re-arms automatically after 5 more responses.
     Claude Code only — not available in Codex or Antigravity sessions.
     """
     root = _project_root()

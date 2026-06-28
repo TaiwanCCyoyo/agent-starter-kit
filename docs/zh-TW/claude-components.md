@@ -112,7 +112,6 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `memory-sql` | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions |
 | `skill-curator` | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引 |
 | `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期由 Superpowers 提供。 |
-| `plan-artifact` | 持久化跨 session/跨 agent 計畫產出——PRD 讀取、pattern grounding、結構化 `.references/plans/` 輸出。Native Plan Mode 負責互動式規劃；此 skill 專用於持久化結構化輸出。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
@@ -207,9 +206,9 @@ Common rules 刻意維持精簡。Security triggers 集中在 `rules/common/secu
 | `rules/systemverilog/` | 自訂建置 | UVM 專案啟動 |
 | Eval-driven development harness | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
 
-### 共用 Plans
+### OpenSpec Planning Handoff
 
-需要跨 agent 或跨 session 查看之核准 plans 存放於 `.references/plans/{kebab-name}.plan.md`。這是原則上唯讀的 `.references/` 內唯一可寫例外。Plans 保持 gitignored，且不屬於 durable memory。
+OpenSpec 是選用的專案狀態，不是 starter kit 需要提交的內容。Specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。Plans 不屬於 durable memory。
 
 ### 可搜尋記憶——SQLite FTS5
 

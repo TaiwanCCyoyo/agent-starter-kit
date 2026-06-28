@@ -96,12 +96,12 @@ class HookContractTests(unittest.TestCase):
         self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
         self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
 
-    def test_taxonomy_warning_routes_plans_to_shared_reference_path(self) -> None:
+    def test_taxonomy_warning_keeps_plans_outside_memory(self) -> None:
         self.populate_approved()
         (self.memory_root / "changes").mkdir()
         message = CODEX_STOP_HOOK.memory_taxonomy_message(self.root)
-        self.assertIn(".references/plans/", message)
-        self.assertNotIn("agent-native planning state", message)
+        self.assertIn("Keep planning outside memory", message)
+        self.assertIn("project-owned OpenSpec files when initialized", message)
 
 
 class CodexSessionStartTests(unittest.TestCase):
@@ -198,12 +198,12 @@ class ClaudeHookContractTests(unittest.TestCase):
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
 
-    def test_taxonomy_warning_routes_plans_to_shared_reference_path(self) -> None:
+    def test_taxonomy_warning_keeps_plans_outside_memory(self) -> None:
         self.populate_approved()
         (self.memory_root / "changes").mkdir()
         message = CLAUDE_STOP_HOOK.memory_taxonomy_message(self.root)
-        self.assertIn(".references/plans/", message)
-        self.assertNotIn("agent-native planning state", message)
+        self.assertIn("Keep planning outside memory", message)
+        self.assertIn("project-owned OpenSpec files when initialized", message)
 
 
 class ClaudeSessionStartTests(unittest.TestCase):

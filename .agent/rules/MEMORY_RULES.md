@@ -2,7 +2,7 @@
 
 ## Unified Location
 
-Shared instantiated memory lives under `.memories/`. Never write memory to the legacy `.agents/memory/` directory.
+Shared instantiated memory lives under `.memories/`.
 
 ## Taxonomy
 

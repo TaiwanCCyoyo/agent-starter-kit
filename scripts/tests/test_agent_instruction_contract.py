@@ -20,11 +20,11 @@ def test_ruff_uses_inline_e402_suppression_for_session_hook_bootstrap() -> None:
         assert "from scripts.memory_store import initialize_memory_store  # noqa: E402" in hook_content
 
 
-def test_claude_instructions_delegate_karpathy_guidelines_to_plugin() -> None:
+def test_claude_instructions_use_direct_openspec_routing() -> None:
     claude_instructions = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
 
-    assert "Karpathy behavioral guidance is supplied by the installed Claude plugin." in claude_instructions
-    assert "This file keeps only project-specific rules." in claude_instructions
+    assert ("downstream" + " project") not in claude_instructions.lower()
+    assert "Use OpenSpec to communicate plans and specs across agents" in claude_instructions
 
 
 def test_codex_instructions_end_with_marked_karpathy_condensed_section() -> None:

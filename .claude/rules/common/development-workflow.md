@@ -13,7 +13,7 @@ Each phase has a designated owner — use it rather than re-deriving the workflo
 
 | Phase | Owner |
 |-------|-------|
-| Plan | Native Plan Mode / `plan-artifact` skill / `superpowers:writing-plans` + `executing-plans` / `plan-reviewer` |
+| Plan | Native Plan Mode / optional OpenSpec project files / `superpowers:writing-plans` + `executing-plans` / `plan-reviewer` |
 | TDD | `superpowers:test-driven-development` |
 | Debug | `superpowers:systematic-debugging` |
 | Review | `implementation-reviewer` → `code-reviewer` → `superpowers:requesting-code-review` |

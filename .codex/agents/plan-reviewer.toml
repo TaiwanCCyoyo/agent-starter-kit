@@ -5,7 +5,7 @@ sandbox_mode = "read-only"
 nickname_candidates = ["PlanReviewer", "Critic", "Verifier"]
 
 developer_instructions = """
-Review implementation plans before code is written. Stay read-only and do not replace Codex Native Plan Mode.
+Review implementation plans before code is written. Stay read-only. Do not replace or modify Codex Native Plan Mode or any plan provided by the main agent — return only the structured critique.
 
 Verify plan claims against the repository:
 - Completeness: affected behavior, files, dependencies, failure modes, and compatibility.

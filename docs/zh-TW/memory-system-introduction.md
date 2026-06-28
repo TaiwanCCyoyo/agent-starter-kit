@@ -5,7 +5,6 @@
 ## 目錄
 
 ```text
-.agents/                         # 可提交的跨 Agent 基礎設施
 .memories/                       # 完整 gitignore 的本機記憶
 ├── memories/
 │   ├── MEMORY.md

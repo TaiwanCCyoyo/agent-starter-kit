@@ -17,7 +17,7 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Sensitive Data**: Never commit `.env` files, private keys, tokens, passwords, or credentials.
 2. **No Junk**: Reject or warn if generated binaries, temporary build artifacts, unrelated `__pycache__` files, or local settings are staged.
-3. **Memory Safety**: Never include ignored local state under `.memories/` or shared plans under `.references/plans/`.
+3. **Local State Safety**: Never include ignored local state under `.memories/`.
 4. **Surgical Changes**: Ensure changes are relevant to the requested task. Reject unrelated cleanup or noisy diffs unless requested.
 
 ## Commit Message Standard
@@ -73,7 +73,7 @@ Agent-Status: assisted
 
 After a successful commit:
 
-1. If a related `.references/plans/*.plan.md` exists, update its status, verification summary, and commit hash. Do not create a plan retroactively for a simple commit.
+1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
 2. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
 3. Route durable knowledge through `/save-memory` or `/memory-maintenance` only when it will help future sessions; do not save commit narration or duplicate the plan.
 4. Run `/learn-eval` when a user correction, non-obvious technique, reusable workflow, or corrected skill may deserve absorption into an existing skill or a new skill candidate.

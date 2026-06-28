@@ -1,15 +1,3 @@
-# Claude Code Instructions for AI Agent Starter Kit
-
-This file is the Claude Code instruction entrypoint for this repository.
-It is loaded natively by Claude Code at session start.
-Karpathy behavioral guidance is supplied by the installed Claude plugin. This file keeps only project-specific rules.
-
-## Scope
-
-- These instructions apply only to Claude Code.
-- Treat `.claude/` as a private Claude Code support directory.
-- Shared instantiated memory lives under the git-ignored `.memories/` root.
-
 ## Operating Contract
 
 - Communicate with the user in Traditional Chinese.
@@ -18,8 +6,8 @@ Karpathy behavioral guidance is supplied by the installed Claude plugin. This fi
 - Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/` and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
-- Treat `.references/` as read-only upstream reference clones, except for `.references/plans/`.
-- Use `.references/plans/{kebab-name}.plan.md` for approved plans that must remain visible across agents and sessions. These files are local, git-ignored working state, not durable memory or maintained documentation.
+- Treat `.references/` as read-only upstream reference clones.
+- Use OpenSpec to communicate plans and specs across agents; treat its specs, changes, and tasks as regular project files.
 - Use `.tmp/` for repository-local scratch files, generated diagnostics, and disposable reports. Prefer it over the operating system `/tmp` or `%TEMP%` when work belongs to this repository.
 - Preserve files in `.tmp/` that you did not create, and remove only your own disposable artifacts after verifying they are no longer needed.
 
@@ -101,7 +89,7 @@ Available slash commands and their corresponding skills:
 | `/save-memory` | `.claude/skills/save-memory/SKILL.md` |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
-Use the `plan-artifact` skill to produce durable cross-session or PRD-based plans as `.references/plans/{kebab-name}.plan.md`. For simpler in-session planning, Native Plan Mode is sufficient. Plans remain git-ignored and are not durable memory.
+Use native planning for in-session work. Use OpenSpec for cross-agent or cross-session plan/spec communication when durable planning handoff is needed. Plans remain outside durable memory.
 
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 

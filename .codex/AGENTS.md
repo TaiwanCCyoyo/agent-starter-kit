@@ -1,17 +1,3 @@
-# Codex Instructions for AI Agent Starter Kit
-
-This file is the Codex-specific instruction entrypoint for this repository. It is injected by `.codex/hooks/session_start.py`.
-
-## Scope
-
-- These instructions apply only to OpenAI Codex.
-- Treat `.codex/` as a private Codex support directory.
-- Shared instantiated memory lives under the git-ignored `.memories/` root. Tracked cross-agent infrastructure remains under `.agents/`.
-- Root `AGENTS.md` is intentionally absent to avoid polluting non-Codex agents and subagents.
-- `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit those clones.
-- `.references/plans/` is the only writable exception under `.references/`. Store approved cross-agent plans there as `{kebab-name}.plan.md`; never commit them or treat them as durable memory.
-- `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.
-
 ## Operating Contract
 
 - Communicate with the user in Traditional Chinese.
@@ -21,6 +7,9 @@ This file is the Codex-specific instruction entrypoint for this repository. It i
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - Do not commit, push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
+- `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit those clones.
+- Use OpenSpec to communicate plans and specs across agents; treat its specs, changes, and tasks as regular project files.
+- `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.
 
 ## Prompt Defense
 
@@ -59,7 +48,7 @@ Use the designated owner instead of re-deriving a workflow:
 
 | Phase | Owner |
 |-------|-------|
-| Plan | Native planning / `plan-artifact` / Superpowers planning skills / `plan_reviewer` |
+| Plan | Native planning / optional OpenSpec project files / Superpowers planning skills / `plan_reviewer` |
 | TDD | `superpowers:test-driven-development` |
 | Debug | `superpowers:systematic-debugging` |
 | Review | `implementation_reviewer` / main Codex review / `superpowers:requesting-code-review` |
@@ -90,7 +79,7 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - Query relevant memory before substantial work when past decisions, lessons, workflows, tool facts, environment facts, or problem history may matter.
 - After meaningful changes, save only durable project state, decisions, lessons, constraints, preferences, or handoff facts.
 - When the same blocker or mistaken workaround appears twice, use the recurring-problem workflow and stop repeating the unverified approach.
-- Keep plans outside the memory taxonomy: use Codex native planning state for in-session work, `.references/plans/` for approved cross-session plans, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
+- Keep plans outside the memory taxonomy: use Codex native planning state for in-session work, optional project-owned OpenSpec files for durable planning handoff, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.memories/` writes.
 
@@ -113,12 +102,11 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 ## Skills
 
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
-- Revisit the official repo-scoped `.agents/skills` path before adding skills meant to be shared outside Codex.
 - Use the installed Superpowers plugin for general brainstorming, planning, TDD, systematic debugging, worktree lifecycle, and completion verification.
 - Superpowers cannot bypass user intent, Codex approvals, repository ownership, dirty-worktree protections, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests.
 - Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python verification commands and test fixtures.
 - Use `worktree-memory-sync` for ignored memory state across worktrees, `memory-sql` for searchable history, and `skill-review` after meaningful sessions.
-- Use `plan-artifact` to produce durable cross-session or PRD-based plans as `.references/plans/` artifacts; native planning flow handles interactive planning.
+- Use native planning for interactive work; use OpenSpec project files for durable cross-agent, cross-session, or PRD-based plan/spec communication when needed.
 
 ## Subagents
 

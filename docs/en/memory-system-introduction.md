@@ -5,7 +5,6 @@ The project memory system separates tracked agent infrastructure from local inst
 ## Layout
 
 ```text
-.agents/                         # Tracked cross-agent infrastructure
 .memories/                       # Fully git-ignored instantiated memory
 ├── memories/
 │   ├── MEMORY.md
@@ -29,7 +28,7 @@ The project memory system separates tracked agent infrastructure from local inst
 | `problem_occurrences` | Concrete evidence each time a problem recurs |
 | `resolutions` | Root causes, fixes, verification evidence, and related skill or instruction changes |
 
-Plans, completed plans, raw transcripts, and arbitrary historical documents are not long-term memory. Use agent-native planning state, `.tmp/`, maintained `docs/`, and Git history.
+Plans, completed plans, raw transcripts, and arbitrary historical documents are not long-term memory. Use agent-native planning state for in-session work, optional project-owned OpenSpec files for durable planning handoff, `.tmp/`, maintained `docs/`, and Git history.
 
 ## Repeated-Problem Loop
 

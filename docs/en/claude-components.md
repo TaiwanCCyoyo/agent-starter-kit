@@ -112,7 +112,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `memory-sql` | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions |
 | `skill-curator` | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance |
 | `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle is provided by Superpowers. |
-| `plan-artifact` | Durable cross-session/cross-agent plan artifacts — PRD ingestion, pattern grounding, structured `.references/plans/` output. Native Plan Mode handles interactive planning; this skill is for the persistent structured output. |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
@@ -207,9 +206,9 @@ The common rules intentionally stay small. Security triggers are centralized in 
 | `rules/systemverilog/` | Custom build | UVM project starts |
 | Eval-driven development harness | Workflow infrastructure | Add a real runner, deterministic graders, baselines, repeated-run metrics, Python commands, and CI integration |
 
-### Shared Plans
+### OpenSpec Planning Handoff
 
-Approved plans that need cross-agent or cross-session visibility live under `.references/plans/{kebab-name}.plan.md`. This is the only writable exception under the otherwise read-only `.references/` tree. Plans remain git-ignored and outside durable memory.
+OpenSpec is optional project state, not starter-kit committed content. Its specs, changes, and tasks are regular project files when present; commit them when they are part of the project record. Plans remain outside durable memory.
 
 ### Searchable Memory — SQLite FTS5
 

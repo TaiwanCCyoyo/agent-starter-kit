@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-MEMORY_REMINDER_INTERVAL = 3
+MEMORY_REMINDER_INTERVAL = 5
 MEMORY_CHAR_LIMIT = 2200
 MEMORY_LINE_LIMIT = 100
 USER_CHAR_LIMIT = 500
@@ -103,8 +103,8 @@ def memory_taxonomy_message(root: Path) -> str:
         "Memory taxonomy reminder: unexpected files or directories under `.memories/`: "
         + ", ".join(sorted(unexpected))
         + ". Approved items are `memories/MEMORY.md`, `memories/USER.md`, and `memory_store.db`. "
-        "Keep approved cross-session plans under `.references/plans/`, disposable artifacts under `.tmp/`, "
-        "and maintained documentation under `docs/`."
+        "Keep planning outside memory: use native planning state, project-owned OpenSpec files when initialized, "
+        "disposable artifacts under `.tmp/`, and maintained documentation under `docs/`."
     )
 
 
@@ -174,15 +174,10 @@ def memory_update_message(root: Path, state: dict) -> str:
         return ""
 
     return (
-        f"[System] Memory reminder: {len(non_memory_changes)} files changed over {response_count} Claude responses.\n"
-        "Before finishing:\n"
-        "1. Update `.memories/memories/MEMORY.md` only for stable project facts needed in most future sessions (limit 2,200 chars).\n"
-        "2. Put stable user preferences in `.memories/memories/USER.md` (limit 500 chars).\n"
-        "3. Put searchable decisions, lessons, workflows, tool facts, and environment facts in `memory_store.db`.\n"
-        "4. If a blocker, workaround, mistaken assumption, or confusion recurred, query `problem_patterns` and `problem_occurrences`, "
-        "stop repeating an unverified workaround, and record a root cause plus verified resolution or explicit external blocker.\n"
-        "5. Keep approved cross-session plans in `.references/plans/`; plans are not long-term memory.\n"
-        "Keep technical memory concise and discuss progress with the user in Traditional Chinese."
+        f"[System] Memory checkpoint: {response_count} responses, {len(non_memory_changes)} files changed this session.\n"
+        "Multiple conversations have accumulated — if important facts, decisions, or patterns emerged, persist them now:\n"
+        "stable project facts → `/save-memory`; searchable decisions and lessons → `/memory-sql`.\n"
+        "Nothing important to save? Call `mcp__memory-control__dismiss_reminder` to reset this counter."
     )
 
 
