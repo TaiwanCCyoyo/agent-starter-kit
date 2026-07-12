@@ -3,11 +3,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-MEMORY_REMINDER_INTERVAL = 5
 MEMORY_CHAR_LIMIT = 2200
 MEMORY_LINE_LIMIT = 100
 USER_CHAR_LIMIT = 500
-SKILL_REVIEW_INTERVAL = 5
 MEMORY_ROOT = Path(".memories")
 MEMORY_DIR = MEMORY_ROOT / "memories"
 STATE_FILE = MEMORY_ROOT / ".claude_stop_memory_state.json"
@@ -59,20 +57,6 @@ def memory_mtime(root: Path) -> float:
     if not path.exists():
         return 0.0
     return path.stat().st_mtime
-
-
-def changed_non_memory_files(root: Path) -> list[str]:
-    changed = subprocess.run(["git", "status", "--porcelain"], cwd=root, text=True, capture_output=True)
-    changed_files: list[str] = []
-    for line in changed.stdout.splitlines():
-        if not line.strip():
-            continue
-        path = line[3:].strip()
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1].strip()
-        if not path.replace("\\", "/").startswith(".memories/"):
-            changed_files.append(path)
-    return changed_files
 
 
 def memory_taxonomy_message(root: Path) -> str:
@@ -152,49 +136,6 @@ def user_health_message(root: Path) -> str:
     )
 
 
-def memory_update_message(root: Path, state: dict) -> str:
-    current_memory_mtime = memory_mtime(root)
-    previous_memory_mtime = float(state.get("memory_mtime", 0.0))
-    response_count = int(state.get("response_count", 0))
-
-    if current_memory_mtime > previous_memory_mtime:
-        response_count = 0
-
-    non_memory_changes = changed_non_memory_files(root)
-    if not non_memory_changes:
-        state["memory_mtime"] = current_memory_mtime
-        state["response_count"] = 0
-        return ""
-
-    response_count += 1
-    state["memory_mtime"] = current_memory_mtime
-    state["response_count"] = response_count
-
-    if response_count < MEMORY_REMINDER_INTERVAL:
-        return ""
-
-    return (
-        f"[System] Memory checkpoint: {response_count} responses, {len(non_memory_changes)} files changed this session.\n"
-        "Multiple conversations have accumulated — if important facts, decisions, or patterns emerged, persist them now:\n"
-        "stable project facts → `/save-memory`; searchable decisions and lessons → `/memory-sql`.\n"
-        "Nothing important to save? Call `mcp__memory-control__dismiss_reminder` to reset this counter."
-    )
-
-
-def skill_review_message(state: dict) -> str:
-    if state.get("skill_review_prompted"):
-        return ""
-    response_count = int(state.get("response_count", 0))
-    if response_count < SKILL_REVIEW_INTERVAL:
-        return ""
-    state["skill_review_prompted"] = True
-    return (
-        f"[System] Skill Review Reminder: {response_count} responses with code changes this session. "
-        "Run `/learn-eval` to check whether any non-obvious techniques or reusable workflows "
-        "from this session deserve skill extraction. See `.claude/skills/skill-curator/SKILL.md`."
-    )
-
-
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -206,12 +147,6 @@ def main() -> int:
 
     state = read_state(root, session_id)
     messages = []
-    memory_update_reminder = memory_update_message(root, state)
-    if memory_update_reminder:
-        messages.append(memory_update_reminder)
-    skill_reminder = skill_review_message(state)
-    if skill_reminder:
-        messages.append(skill_reminder)
     memory_message = memory_health_message(root, state)
     if memory_message:
         messages.append(memory_message)

@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python \"$(git rev-parse --show-toplevel)/.codex/hooks/stop_memory_check.py\"",
+            "command": "uv run python \"$(git rev-parse --show-toplevel)/.codex/hooks/memory_health_check.py\"",
             "timeout": 30,
             "statusMessage": "Checking memory maintenance"
           }

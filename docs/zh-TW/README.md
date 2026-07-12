@@ -55,10 +55,10 @@
 | :--- | :--- | :--- | :--- |
 | **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene；文件與設定檔只跑 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。 | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Codex 更新記憶，並檢查記憶大小。 | `.codex/hooks/stop_memory_check.py` |
+| **Codex** | `Stop` | 檢查記憶大小限制與 taxonomy。 | `.codex/hooks/memory_health_check.py` |
 | **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check --fix` lint，並驗證 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | 有 pending changes 且經過多輪回覆後提醒 Claude 更新記憶，檢查記憶大小，並在 session 達到一定規模後提示技能審查。 | `.claude/hooks/stop_memory_check.py` |
+| **Claude Code** | `Stop` | 檢查記憶大小限制與 taxonomy。 | `.claude/hooks/memory_health_check.py` |
 | **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。 | `.agent/hooks/session_start.py` |
 | **Antigravity** | `PostToolUse` | 針對修改檔案執行 Ruff、mypy 與 file hygiene。 | `.agent/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `Stop` | 檢查 bounded-file 限制與嚴格 memory taxonomy。 | `.agent/hooks/stop_memory_check.py` |

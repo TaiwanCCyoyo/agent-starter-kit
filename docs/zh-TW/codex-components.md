@@ -96,7 +96,7 @@ Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 
 | :--- | :--- |
 | `.codex/hooks/session_start.py` | 初始化 `.memories/`、SQLite schema 與 bounded session context |
 | `.codex/hooks/post_tool_use_hygiene.py` | 聚焦格式化、lint、file hygiene，並透過 Ruff 阻擋 Python print calls |
-| `.codex/hooks/stop_memory_check.py` | Memory limits、taxonomy、plan routing 與一次性 skill-review reminder |
+| `.codex/hooks/memory_health_check.py` | Memory limits、taxonomy 與 plan routing |
 | `.pre-commit-config.yaml` | File hygiene、detect-secrets、Ruff T201 print blocking 與完整專案 mypy |
 | `.vscode/settings.json` | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 

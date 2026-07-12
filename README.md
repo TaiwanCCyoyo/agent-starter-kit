@@ -57,10 +57,10 @@ This repository uses agent-native hooks to maintain system integrity:
 | :--- | :--- | :--- | :--- |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
 | **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files are formatted, linted, and checked for file hygiene; docs and config files run file hygiene only. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex** | `Stop` | Reminds Codex to update memory after several response rounds with pending changes and checks memory size. | `.codex/hooks/stop_memory_check.py` |
+| **Codex** | `Stop` | Checks memory size limits and taxonomy. | `.codex/hooks/memory_health_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
 | **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check --fix`, and validates file hygiene. Ruff blocks `print()` calls via `T201`. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | Reminds Claude to update memory after several response rounds with pending changes, checks memory size, and prompts skill review after substantial sessions. | `.claude/hooks/stop_memory_check.py` |
+| **Claude Code** | `Stop` | Checks memory size limits and taxonomy. | `.claude/hooks/memory_health_check.py` |
 | **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files. | `.agent/hooks/session_start.py` |
 | **Antigravity** | `PostToolUse` | Runs targeted Ruff, mypy, and file-hygiene checks. | `.agent/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `Stop` | Checks bounded-file limits and rejects legacy memory taxonomy. | `.agent/hooks/stop_memory_check.py` |

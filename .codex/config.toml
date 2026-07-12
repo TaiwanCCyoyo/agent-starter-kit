@@ -5,20 +5,6 @@ codex_hooks = true
 max_threads = 4
 max_depth = 1
 
-[mcp_servers.memory-control]
-command = "uv"
-args = ["run", "python", ".codex/mcp/memory_control.py"]
-cwd = ".."
-enabled = true
-required = false
-startup_timeout_sec = 30
-tool_timeout_sec = 60
-enabled_tools = ["dismiss_reminder"]
-default_tools_approval_mode = "prompt"
-
-[mcp_servers.memory-control.tools.dismiss_reminder]
-approval_mode = "auto"
-
 [mcp_servers.memory-db]
 command = "uvx"
 args = ["mcp-server-sqlite", "--db-path", ".memories/memory_store.db"]

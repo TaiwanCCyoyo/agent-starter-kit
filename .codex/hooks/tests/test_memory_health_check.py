@@ -19,8 +19,8 @@ def load_module(name: str, path: Path) -> ModuleType:
 
 
 STOP_HOOKS = {
-    "claude": load_module("claude_stop_memory_check", ROOT / ".claude" / "hooks" / "stop_memory_check.py"),
-    "codex": load_module("codex_stop_memory_check", ROOT / ".codex" / "hooks" / "stop_memory_check.py"),
+    "claude": load_module("claude_memory_health_check", ROOT / ".claude" / "hooks" / "memory_health_check.py"),
+    "codex": load_module("codex_memory_health_check", ROOT / ".codex" / "hooks" / "memory_health_check.py"),
 }
 CODEX_STOP_HOOK = STOP_HOOKS["codex"]
 CLAUDE_STOP_HOOK = STOP_HOOKS["claude"]
@@ -92,9 +92,13 @@ class HookContractTests(unittest.TestCase):
         self.assertEqual(CODEX_STOP_HOOK.user_health_message(self.root), "")
 
     def test_state_resets_between_sessions(self) -> None:
-        CODEX_STOP_HOOK.write_state(self.root, {"session_id": "old", "response_count": 9})
-        self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
+        CODEX_STOP_HOOK.write_state(self.root, {"session_id": "old", "health_memory_mtime": 9})
+        self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "old")["health_memory_mtime"], 9)
         self.assertEqual(CODEX_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
+
+    def test_stop_hook_has_no_response_count_reminder(self) -> None:
+        self.assertFalse(hasattr(CODEX_STOP_HOOK, "memory_update_message"))
+        self.assertFalse(hasattr(CODEX_STOP_HOOK, "skill_review_message"))
 
     def test_taxonomy_warning_keeps_plans_outside_memory(self) -> None:
         self.populate_approved()
@@ -119,8 +123,10 @@ class CodexSessionStartTests(unittest.TestCase):
         self.assertIn("MEMORY.md", result)
         self.assertEqual({path.name for path in memory_dir.iterdir()}, {"MEMORY.md", "USER.md"})
         self.assertTrue((memory_root / "memory_store.db").exists())
-        self.assertIn("feat/test", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
-        self.assertNotIn("# ", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
+        content = (memory_dir / "MEMORY.md").read_text(encoding="utf-8")
+        self.assertNotIn("feat/test", content)
+        self.assertNotIn("# ", content)
+        self.assertNotIn("Definition of Done", content)
 
     def test_user_context_can_be_read_for_injection(self) -> None:
         memory_dir = self.root / ".memories" / "memories"
@@ -194,9 +200,13 @@ class ClaudeHookContractTests(unittest.TestCase):
         self.assertEqual(CLAUDE_STOP_HOOK.user_health_message(self.root), "")
 
     def test_state_resets_between_sessions(self) -> None:
-        CLAUDE_STOP_HOOK.write_state(self.root, {"session_id": "old", "response_count": 9})
-        self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["response_count"], 9)
+        CLAUDE_STOP_HOOK.write_state(self.root, {"session_id": "old", "health_memory_mtime": 9})
+        self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["health_memory_mtime"], 9)
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
+
+    def test_stop_hook_has_no_response_count_reminder(self) -> None:
+        self.assertFalse(hasattr(CLAUDE_STOP_HOOK, "memory_update_message"))
+        self.assertFalse(hasattr(CLAUDE_STOP_HOOK, "skill_review_message"))
 
     def test_taxonomy_warning_keeps_plans_outside_memory(self) -> None:
         self.populate_approved()
@@ -221,8 +231,10 @@ class ClaudeSessionStartTests(unittest.TestCase):
         self.assertIn("MEMORY.md", result)
         self.assertEqual({path.name for path in memory_dir.iterdir()}, {"MEMORY.md", "USER.md"})
         self.assertTrue((memory_root / "memory_store.db").exists())
-        self.assertIn("feat/test", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
-        self.assertNotIn("# ", (memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
+        content = (memory_dir / "MEMORY.md").read_text(encoding="utf-8")
+        self.assertNotIn("feat/test", content)
+        self.assertNotIn("# ", content)
+        self.assertNotIn("Definition of Done", content)
 
     def test_user_context_can_be_read_for_injection(self) -> None:
         memory_dir = self.root / ".memories" / "memories"
@@ -233,6 +245,15 @@ class ClaudeSessionStartTests(unittest.TestCase):
 
 
 class ClaudeMCPConfigTests(unittest.TestCase):
+    def test_claude_hooks_use_exec_form_with_project_dir_placeholder(self) -> None:
+        import json
+
+        config = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        for event in ("SessionStart", "PostToolUse", "Stop"):
+            hook = config["hooks"][event][0]["hooks"][0]
+            self.assertEqual(hook["command"], "uv")
+            self.assertTrue(any("${CLAUDE_PROJECT_DIR}" in arg for arg in hook["args"]))
+
     def test_memory_store_is_project_scoped(self) -> None:
         import json
 
@@ -248,22 +269,17 @@ class ClaudeMCPConfigTests(unittest.TestCase):
         args = config["mcpServers"]["memory-db"]["args"]
         self.assertIn("memory_store.db", args[-1])
 
-    def test_memory_control_server_registered(self) -> None:
+    def test_memory_control_server_is_not_registered(self) -> None:
         import json
 
         config = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
-        server = config["mcpServers"]["memory-control"]
-        self.assertEqual(server["command"], "uv")
-        self.assertIn("memory_control.py", server["args"][-1])
+        self.assertNotIn("memory-control", config["mcpServers"])
 
 
 class CodexMCPConfigTests(unittest.TestCase):
-    def test_memory_control_server_registered(self) -> None:
+    def test_memory_control_server_is_not_registered(self) -> None:
         config = tomllib.loads((ROOT / ".codex" / "config.toml").read_text(encoding="utf-8"))
-        server = config["mcp_servers"]["memory-control"]
-        self.assertEqual(server["command"], "uv")
-        self.assertIn("memory_control.py", server["args"][-1])
-        self.assertEqual(server["tools"]["dismiss_reminder"]["approval_mode"], "auto")
+        self.assertNotIn("memory-control", config["mcp_servers"])
 
     def test_memory_store_is_project_scoped(self) -> None:
         config = tomllib.loads((ROOT / ".codex" / "config.toml").read_text(encoding="utf-8"))

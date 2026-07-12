@@ -154,7 +154,7 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 |---|---|---|
 | `session_start.py` | Session start | Injects `CLAUDE.md`, `.memories/memories/MEMORY.md`, and `USER.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies the approved memory layout into new worktrees. |
 | `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check --fix`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py` |
-| `stop_memory_check.py` | After each response | Nudges memory update if significant work was done; prompts skill review via `/learn-eval` after 5+ responses with code changes (once per session) |
+| `memory_health_check.py` | After each response | Checks bounded-memory limits and taxonomy |
 
 Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
 
@@ -162,7 +162,7 @@ Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitesp
 
 | Concept | Status | Why |
 |---|---|---|
-| PostToolUse continuous learning | **Partially implemented** | Skill review trigger added to `stop_memory_check.py`; full hook-based observation pipeline (instinct YAML, background Haiku agent) not ported — too heavyweight without a persistent process |
+| PostToolUse continuous learning | **Not implemented** | The hook-based observation pipeline (instinct YAML, background Haiku agent) is not ported — too heavyweight without a persistent process |
 | Stop governance capture | Deferred | ECC logs security events at session end — relevant if project grows to include autonomous trading agents |
 
 ---

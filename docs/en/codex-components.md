@@ -96,7 +96,7 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 | :--- | :--- |
 | `.codex/hooks/session_start.py` | Initializes `.memories/`, SQLite schema, and bounded session context |
 | `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Ruff-backed Python print blocking |
-| `.codex/hooks/stop_memory_check.py` | Memory limits, taxonomy, planning-location guidance, and one-time skill-review reminder |
+| `.codex/hooks/memory_health_check.py` | Memory limits, taxonomy, and planning-location guidance |
 | `.pre-commit-config.yaml` | File hygiene, detect-secrets, Ruff including T201 print blocking, and full-project mypy |
 | `.vscode/settings.json` | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 

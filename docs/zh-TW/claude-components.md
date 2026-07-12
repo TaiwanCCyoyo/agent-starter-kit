@@ -154,7 +154,7 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 |---|---|---|
 | `session_start.py` | 工作階段開始 | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
 | `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check --fix`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py` |
-| `stop_memory_check.py` | 每次回覆後 | 若有重大工作則提示記憶更新；在 5 次以上有程式碼變更的回覆後，每 session 提示一次技能審查（`/learn-eval`） |
+| `memory_health_check.py` | 每次回覆後 | 檢查 bounded memory 限制與 taxonomy |
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 
@@ -162,7 +162,7 @@ Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、
 
 | 概念 | 狀態 | 原因 |
 |---|---|---|
-| PostToolUse 持續學習 | **部分實作** | 已在 `stop_memory_check.py` 加入技能審查觸發器；完整 hook 觀察管線（instinct YAML、背景 Haiku agent）未移植——在沒有持久程序的情況下過於重量級 |
+| PostToolUse 持續學習 | **未實作** | 完整 hook 觀察管線（instinct YAML、背景 Haiku agent）未移植——在沒有持久程序的情況下過於重量級 |
 | Stop 治理捕捉 | 延後 | ECC 在 session 結束時記錄安全事件——若專案發展到包含自主交易代理時將有其相關性 |
 
 ---

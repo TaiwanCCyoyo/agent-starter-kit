@@ -56,7 +56,7 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 ## Codex Lifecycle
 
 - `.codex/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
-- `.codex/hooks/stop_memory_check.py` validates limits and taxonomy, reminds Codex to curate durable memory, and enforces the repeated-problem loop.
+- `.codex/hooks/memory_health_check.py` validates limits and taxonomy.
 - `.codex/skills/memory-manager/SKILL.md` defines routing.
 - `.codex/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
 - `.codex/config.toml` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
@@ -64,7 +64,7 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 ## Claude Code Lifecycle
 
 - `.claude/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
-- `.claude/hooks/stop_memory_check.py` validates limits and taxonomy, reminds Claude to curate durable memory, and enforces the repeated-problem loop.
+- `.claude/hooks/memory_health_check.py` validates limits and taxonomy.
 - `.claude/skills/memory-manager/SKILL.md` defines routing.
 - `.claude/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
 - `.mcp.json` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.

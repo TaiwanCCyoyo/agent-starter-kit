@@ -37,7 +37,7 @@ def get_git_info():
         return f"unknown (error: {str(e)})", False, "No history found"
 
 
-DEFAULT_MEMORY_TEMPLATE = """[MISSION REQUIRED] Define the durable project mission and constraints for branch `{branch}`.
+DEFAULT_MEMORY_TEMPLATE = """[MISSION REQUIRED] Define the durable project mission and constraints for this workspace.
 §
 Store only stable project, environment, tool, decision, lesson, or workflow facts that should influence most future sessions.
 §
@@ -46,7 +46,7 @@ Use memory_store.db for searchable structured facts, recurring problem occurrenc
 
 
 def memory_template_for_branch(branch: str) -> str:
-    return DEFAULT_MEMORY_TEMPLATE.format(branch=branch)
+    return DEFAULT_MEMORY_TEMPLATE
 
 
 def initialize_memory_taxonomy(root_dir: Path, branch: str) -> str:
@@ -169,11 +169,11 @@ def main():
 
     mission_alert = ""
     if "[MISSION REQUIRED]" in memory_content:
-        mission_alert = f"""
+        mission_alert = """
 > [!IMPORTANT]
-> **UNINITIALIZED BRANCH MISSION DETECTED**
-> This worktree was recently created for branch `{branch}`.
-> **ACTION REQUIRED**: Please define the 'Branch Goal' and 'Definition of Done' in the `Doing` section of `MEMORY.md` before starting technical tasks.
+> **UNINITIALIZED PROJECT MEMORY DETECTED**
+> **ACTION REQUIRED**: Define only durable project mission and constraints in `MEMORY.md`.
+> Keep task goals, plans, and definition of done in native planning or OpenSpec.
 """
 
     worktree_memory_alert = ""

@@ -1,14 +1,5 @@
 {
   "mcpServers": {
-    "memory-control": {
-      "command": "uv",
-      "args": [
-        "run",
-        "python",
-        "${CLAUDE_PROJECT_DIR:-.}/.claude/mcp/memory_control.py"
-      ],
-      "env": {}
-    },
     "memory-db": {
       "command": "uvx",
       "args": [
