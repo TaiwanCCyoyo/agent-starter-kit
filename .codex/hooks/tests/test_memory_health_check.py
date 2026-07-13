@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import ModuleType
+from unittest.mock import patch
 
 from scripts.memory_store import SCHEMA_SQL
 
@@ -203,6 +204,10 @@ class ClaudeHookContractTests(unittest.TestCase):
         CLAUDE_STOP_HOOK.write_state(self.root, {"session_id": "old", "health_memory_mtime": 9})
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "old")["health_memory_mtime"], 9)
         self.assertEqual(CLAUDE_STOP_HOOK.read_state(self.root, "new"), {"session_id": "new"})
+
+    def test_uses_claude_project_dir_over_event_cwd(self) -> None:
+        with patch.dict("os.environ", {"CLAUDE_PROJECT_DIR": str(self.root)}):
+            self.assertEqual(CLAUDE_STOP_HOOK.project_root("."), self.root)
 
     def test_stop_hook_has_no_response_count_reminder(self) -> None:
         self.assertFalse(hasattr(CLAUDE_STOP_HOOK, "memory_update_message"))

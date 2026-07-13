@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,12 @@ def repo_root(cwd: str) -> Path:
         return Path(root)
     except Exception:
         return Path(cwd).resolve()
+
+
+def project_root(cwd: str) -> Path:
+    if root := os.environ.get("CLAUDE_PROJECT_DIR"):
+        return Path(root).resolve()
+    return repo_root(cwd)
 
 
 def memory_path(root: Path) -> Path:
@@ -142,7 +149,7 @@ def main() -> int:
     except Exception:
         event = {}
 
-    root = repo_root(event.get("cwd") or ".")
+    root = project_root(event.get("cwd") or ".")
     session_id = event.get("session_id", "")
 
     state = read_state(root, session_id)
