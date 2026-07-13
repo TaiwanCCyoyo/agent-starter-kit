@@ -7,7 +7,7 @@ description: Generate a high-quality Git commit message using the commit_special
 Delegate this task to the `commit_specialist` subagent.
 
 The subagent MUST follow `.claude/skills/commit-helper/SKILL.md` as the quality standard.
-The final commit message MUST include the agent identity trailers defined in that skill.
+The final commit message MUST include the formal co-author identity and status trailers defined in that skill.
 
 ## Workflow
 

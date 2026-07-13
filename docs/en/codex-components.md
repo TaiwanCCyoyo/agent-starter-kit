@@ -20,17 +20,25 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 
 | Agent | Access | Purpose |
 | :--- | :--- | :--- |
-| `evidence_gatherer` | Read-only | Locate files, trace execution paths, map dependencies, and run high-output commands while returning concise summaries instead of raw stdout |
+| `signal_miner` | Read-only | Lowest-cost mechanical exploration and signal extraction from repository searches, execution traces, verbose logs, diffs, tests, and command output |
+| `task_worker` | Bounded write | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands |
 | `plan_reviewer` | Read-only | Plan completeness, scope, sequencing, repository alignment, testability, and risk |
 | `implementation_reviewer` | Read-only | Correctness, regression, test coverage, and unintended-diff review |
-| `python_reviewer` | Read-only | Python runtime, typing, Ruff, tests, logging, and maintainability |
 | `security_reviewer` | Read-only | Secrets, injection, dependencies, permissions, auth, and sensitive data |
-| `performance_reviewer` | Read-only | Measured latency, memory, complexity, I/O, and tooling cost |
 | `memory_auditor` / `memory_compressor` | Read-only | Advisory layer for save classification and compression drafts; final writes remain with the main agent and memory skills |
 | `doc_translator` | Bounded write | Edits only the explicit translation target |
 | `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
 
-`plan_reviewer` critiques plans and never replaces Native Plan Mode. Prefer read-only subagents when the useful output is a compact report with file paths, command names, risk notes, and next-step recommendations rather than raw terminal or search output. Use `evidence_gatherer` for mechanical extraction of broad searches, large stdout, logs, diffs, and test output; escalate to a higher-tier reviewer when the task requires judgment over ambiguous output. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
+### Model routing
+
+| Tier | Model | Roles |
+|---|---|---|
+| High-confidence review | `gpt-5.6` / high | Plan, implementation, and security review |
+| Balanced judgment | `gpt-5.6-terra` / low-medium | Translation and memory compression |
+| Bounded implementation | `gpt-5.6-terra` / medium | Routine, explicitly scoped implementation through `task_worker` |
+| High-volume mechanical work | `gpt-5.6-luna` / medium | Signal mining, commits, and memory classification |
+
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. `signal_miner` is the lowest-cost read-only utility for mechanical exploration and verbose output. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 
 ## Skills
 
@@ -55,7 +63,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `/feature-dev` | Superpowers/native replacement | Brainstorming, Plan Mode, TDD, verification, and review already form the workflow. |
 | `/build-fix` | Superpowers/native replacement | Systematic debugging plus repository verification covers incremental diagnosis and repair. |
 | `/code-review` | Native/plugin replacement | Local review uses Codex review stance and agents; PR review uses the GitHub plugin. |
-| `/python-review` | Agent replacement | `python_reviewer` uses repository-supported Ruff, mypy, pytest, and optional coverage commands. |
+| `/python-review` | Skill replacement | `python-testing` provides repository-supported Ruff, mypy, pytest, and optional coverage commands. |
 | `/security-scan` | Agent and gate replacement | `security_reviewer`, detect-secrets, hooks, and pre-commit are installed; AgentShield is not. |
 | `/test-coverage` | Skill replacement | Optional coverage is part of `python-testing`; Codex does not need a command wrapper. |
 | `github-ops` | Plugin replacement | The GitHub plugin supplies repository, issue, PR, CI, comment, and publishing workflows with current connector semantics. |
@@ -63,8 +71,8 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `eval-harness` | Removed/deferred | It referenced nonexistent `/eval` commands and lacked a runner, grader implementation, baseline format, Python commands, and CI integration. Restore only after those capabilities exist. |
 | `llm-trading-agent-security` | Not ported | It is domain-specific to transaction-signing or wallet-authorized agents. Share it when the repository contains that execution surface. |
 | `architect`, `code-simplifier`, `loop-operator`, `tdd-guide` | Not mirrored | Codex keeps planning and implementation in the main agent and uses Superpowers workflows; duplicating write-capable specialists would add overlapping authority. |
-| `code-reviewer`, `silent-failure-hunter` | Consolidated | `implementation_reviewer`, `python_reviewer`, `security_reviewer`, and systematic debugging cover the useful review dimensions. |
-| `performance-optimizer` | Read-only equivalent | Codex uses `performance_reviewer` and requires measurement before optimization. |
+| `code-reviewer`, `silent-failure-hunter`, `python-reviewer` | Consolidated | `implementation_reviewer`, `security_reviewer`, Python skills, and systematic debugging cover the useful review dimensions. |
+| `performance-optimizer` | Main-agent review | Require a measured bottleneck before requesting targeted performance analysis. |
 
 ## Shared Policy Alignment
 

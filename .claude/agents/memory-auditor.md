@@ -1,7 +1,7 @@
 ---
 name: memory-auditor
 description: Read-only memory auditor that reviews project changes and recommends durable memory updates without editing memory directly. Use when you want an independent assessment of what should be saved after meaningful work.
-model: claude-haiku-4-5-20251001
+model: haiku
 tools:
   - Read
   - Grep

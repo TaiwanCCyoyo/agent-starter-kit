@@ -1,7 +1,8 @@
 ---
 name: memory-compressor
 description: Read-only memory compressor that drafts proposals for oversized automatically loaded or on-demand memory. The main agent applies the final edits.
-model: claude-sonnet-4-6
+model: sonnet
+effort: medium
 tools:
   - Read
   - Grep

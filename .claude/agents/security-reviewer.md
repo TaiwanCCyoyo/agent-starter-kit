@@ -2,7 +2,8 @@
 name: security-reviewer
 description: Read-only security reviewer for secrets, unsafe commands, injection, dependencies, permissions, authentication, and sensitive data flows.
 tools: ["Read", "Bash", "Grep", "Glob"]
-model: sonnet
+model: opus
+effort: high
 ---
 
 # Security Reviewer

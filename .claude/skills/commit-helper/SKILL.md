@@ -36,15 +36,18 @@ This skill is the source of truth for high-quality commits in this project. All 
    - Wrap each line at 72 characters.
    - Leave one blank line between subject and body.
 
-## Agent Commit Trailers
+## AI Commit Trailers
 
-- Every commit drafted or executed by Claude must include `Agent: Claude`.
+- Every commit drafted or executed by Claude must include a formal `Co-authored-by:` identity trailer.
+- When the resolved model display name is reliably known, use the format `Co-authored-by: Claude <resolved model display name> <noreply@anthropic.com>` and replace the placeholder with that name, for example `Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>`.
+- When the exact model display name is unavailable, use `Co-authored-by: Claude <noreply@anthropic.com>`.
+- Never emit the literal `<resolved model display name>` placeholder.
+- Do not add an `AI-Model` trailer; Claude model aliases and runtime overrides may vary.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
   - `Agent-Status: autonomous` when Claude staged and committed without manual review of the final staged diff.
   - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
-- Do not use `Co-Authored-By` as the primary agent identity marker. Use it only when the user explicitly wants GitHub co-author attribution.
-- If multiple agents materially contributed before the commit, add one `Agent:` trailer per agent in contribution order and one shared `Agent-Status:` trailer for the commit execution mode.
+- If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor and one shared `Agent-Status:` trailer for the commit execution mode. Do not invent contributor email addresses.
 
 Example:
 
@@ -53,8 +56,8 @@ fix(claude): align hygiene hook behavior
 
 Remove per-file type checks from the post-edit hook.
 
-Agent: Claude
 Agent-Status: assisted
+Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
 ```
 
 ## Interaction And Summary

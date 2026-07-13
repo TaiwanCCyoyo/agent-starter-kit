@@ -1,7 +1,8 @@
 ---
 name: doc-translator
 description: Document translator that translates English documentation to Traditional Chinese (zh-TW). May only edit the explicit target translation file. Use when asked to translate docs/en/ files to docs/zh-TW/.
-model: claude-sonnet-4-6
+model: sonnet
+effort: low
 tools:
   - Read
   - Write

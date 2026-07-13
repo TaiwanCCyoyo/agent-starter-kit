@@ -13,37 +13,30 @@ Intended for Python and SystemVerilog/UVM developers.
 
 Agents are specialized subagents invoked by the main Claude session for focused tasks.
 
+Claude auto-delegation is primarily guided by each agent's description and the current task context. `signal-miner` is the lowest-cost read-only utility for mechanical exploration and verbose output. `task-worker` is a mid-cost option only for a higher-tier main session to downshift bounded implementation with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main session handles simple work directly or uses built-in Explore or general-purpose as appropriate; it does not escalate to `task-worker`. Keep ambiguous, cross-cutting, security-sensitive, architectural, and planning work with the main session or a suitable built-in agent.
+
+Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode uses `opus`, and execution uses `sonnet`. Custom agents are not used to transfer plans back to the main session.
+
 ### Memory & Workflow (original — not from ECC)
 
 | Agent | Model | Tools | Purpose |
 |---|---|---|---|
-| `commit-specialist` | sonnet | Bash, Read | Review staged changes and draft commit messages |
+| `commit-specialist` | haiku | Bash, Read | Review staged changes and draft commit messages |
 | `doc-translator` | sonnet | Read, Write, Edit | Translate `docs/en/` files to `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | Read-only code review: correctness, style, security |
 | `memory-auditor` | haiku | Read, Grep, Glob | Classify save candidates and Do Not Save items; never writes memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | Draft bounded-file compression and graduation proposals; never writes memory |
-| `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
-| `evidence-gatherer` | haiku | Read, Grep, Glob, Bash | Locate files, trace execution paths, map dependencies; run high-output commands and return concise summaries (pass/fail, key metrics, errors) to isolate verbose stdout from the parent agent's context |
-
-### Development (ported from ECC v2.0.0-rc.1)
-
-| Agent | Model | Tools | Purpose |
-|---|---|---|---|
-| `architect` | opus | Read, Grep, Glob | System design, trade-off analysis, ADRs |
-| `code-reviewer` | sonnet | Read, Grep, Glob, Bash | General code review across all languages |
-| `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | Simplify code structure while preserving behavior |
-| `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | Monitor and safely intervene in autonomous loops |
-| `performance-optimizer` | sonnet | Read, Grep, Glob, Bash | Read-only review of measured bottlenecks, I/O, memory, complexity, and tooling cost |
-| `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python-specific review: type hints, security, Pythonic idioms |
-| `security-reviewer` | sonnet | Read, Grep, Glob, Bash | Read-only secrets, injection, dependency, permission, auth, and sensitive-data review |
-| `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | Find swallowed exceptions, bad fallbacks, missing error propagation |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | Delegatable bounded TDD implementation following `superpowers:test-driven-development`; coverage is optional |
+| `plan-reviewer` | opus (high) | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
+| `signal-miner` | haiku | Read, Grep, Glob, Bash | Lowest-cost mechanical exploration and signal extraction from repository searches, execution traces, verbose logs, diffs, tests, and command output |
+| `task-worker` | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands |
+| `security-reviewer` | opus (high) | Read, Grep, Glob, Bash | Read-only secrets, injection, dependency, permission, auth, and sensitive-data review |
 
 ### Not ported from ECC (with reasons)
 
 | Agent | Reason |
 |---|---|
 | `planner` | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`) |
+| `architect`, `code-reviewer`, `code-simplifier`, `loop-operator`, `performance-optimizer`, `python-reviewer`, `silent-failure-hunter`, `tdd-guide` | Removed 2026-07-13 — native Claude capabilities, focused reviewers, and installed Superpowers/Ponytail workflows cover their responsibilities without overlapping delegation. |
 | `refactor-cleaner` | Depends on Node.js tools (knip, depcheck, ts-prune); Python project |
 | `harness-optimizer` | Requires ECC-internal `/harness-audit`; not portable |
 | All `*-build-resolver` (11 agents) | Non-Python languages not in use |
@@ -51,6 +44,16 @@ Agents are specialized subagents invoked by the main Claude session for focused 
 | `gan-*`, `seo-specialist` | Out of scope |
 | `homelab-*`, `network-*`, `healthcare-reviewer` | Domain mismatch |
 | `marketing-agent` | Deferred — add when short-form video planning starts |
+
+---
+
+## Interactive, Automated, and Company Use
+
+- Interactive work: enter Native Plan Mode, optionally use `plan-reviewer` for complex or high-risk plans, approve the plan, then return to execution mode.
+- Unattended work: use separate planning and execution sessions. The planning session writes an OpenSpec or maintained plan artifact; the execution session reads the approved artifact. Do not use a planner subagent as the main-session handoff.
+- Claude-only company copy: retain non-memory instructions, rules, agents, skills, and hygiene hooks. Exclude memory agents, memory skills/commands/rules/hooks, `.memories/`, the `memory-db` MCP server, memory permissions, and memory references in copied agent prompts. Use organization-approved model IDs or alias mappings rather than this repository's personal-Pro defaults.
+
+`REVIEW.md` is not part of the local baseline. Add it only when the repository is enrolled in Claude's managed Team or Enterprise Code Review service.
 
 ---
 
@@ -75,9 +78,9 @@ Claude Code PR preparation is owned by the `github-ops` skill: inspect full bran
 | Command | Replacement |
 |---|---|
 | `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
-| `/code-review` | Built-in `/code-review` (incl. `ultra` cloud review) + `code-reviewer` / `implementation-reviewer` agents |
-| `/feature-dev` | Native Plan Mode + Superpowers TDD + `evidence-gatherer` agent |
-| `/python-review` | `python-reviewer` agent |
+| `/code-review` | Built-in `/code-review` (incl. `ultra` cloud review) + `implementation-reviewer` agent |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `signal-miner` agent |
+| `/python-review` | `python-testing` skill and `implementation-reviewer` |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
 | `/test-coverage` | `python-testing` skill (`pytest --cov`) |
 

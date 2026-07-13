@@ -30,15 +30,15 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 - Keep the subject under 50 characters when practical.
 - Use the body to explain why and how for complex changes.
 
-## Agent Commit Trailers
+## AI Commit Trailers
 
-- Every commit drafted or executed by Codex must include `Agent: Codex`.
+- Every commit drafted or executed by Codex must include `Co-authored-by: Codex <codex@openai.com>` as its formal AI identity.
+- Include the `AI-Model` trailer defined by the configured commit specialist. This skill does not select or name the model.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
   - `Agent-Status: autonomous` when Codex staged and committed without manual review of the final staged diff.
   - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
-- Do not use `Co-Authored-By` as the primary agent identity marker. Use it only when the user explicitly wants GitHub co-author attribution.
-- If multiple agents materially contributed before the commit, add one `Agent:` trailer per agent in contribution order and one shared `Agent-Status:` trailer for the commit execution mode.
+- If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor and one shared `Agent-Status:` trailer for the commit execution mode. Do not invent contributor email addresses.
 - Example:
 
 ```text
@@ -46,8 +46,8 @@ feat(codex): add targeted hygiene checks
 
 Add file-scoped hook checks and repository-level Python gates.
 
-Agent: Codex
 Agent-Status: autonomous
+Co-authored-by: Codex <codex@openai.com>
 ```
 
 ## Safety

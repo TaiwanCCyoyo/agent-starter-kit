@@ -1,6 +1,6 @@
 name = "commit_specialist"
 description = "Git commit specialist for reviewing staged changes, drafting Conventional Commit messages, and optionally executing safe commits."
-model = "gpt-5.4-mini"
+model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 nickname_candidates = ["Committer", "Registrar", "Scribe"]
@@ -43,9 +43,9 @@ Commit message rules:
 - Start the description with lowercase.
 - Do not end the subject with a period.
 - Keep the subject under 50 characters when practical.
-- Include `Agent: Codex`.
+- Include `Co-authored-by: Codex <codex@openai.com>` as the formal AI identity.
+- Include `AI-Model: gpt-5.6-luna`.
 - Include exactly one `Agent-Status: autonomous` or `Agent-Status: assisted` trailer.
-- Do not add `Co-Authored-By` unless the user explicitly requests GitHub co-author attribution.
 
 Return:
 - Commit message or commit hash.

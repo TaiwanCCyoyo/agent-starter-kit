@@ -20,17 +20,25 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | Agent | 權限 | 用途 |
 | :--- | :--- | :--- |
-| `evidence_gatherer` | 唯讀 | 定位檔案、追蹤執行路徑、繪製相依關係圖，並執行高輸出指令且只回傳精簡摘要，不回傳 raw stdout |
+| `signal_miner` | 唯讀 | 最低成本的機械式探索，從 repository searches、execution traces、冗長 logs、diffs、tests 與 command output 挖出關鍵訊號 |
+| `task_worker` | 有界寫入 | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報 |
 | `plan_reviewer` | 唯讀 | 計畫完整性、範圍、排序、repo 對齊、可測試性與風險 |
 | `implementation_reviewer` | 唯讀 | 正確性、回歸、測試與非預期 diff |
-| `python_reviewer` | 唯讀 | Python runtime、typing、Ruff、測試、logging 與維護性 |
 | `security_reviewer` | 唯讀 | Secrets、注入、依賴、權限、auth 與敏感資料 |
-| `performance_reviewer` | 唯讀 | 已量測的延遲、記憶體、複雜度、I/O 與工具成本 |
 | `memory_auditor`／`memory_compressor` | 唯讀 | Save 分類與 compression 草案的 advisory layer；final writes 仍由主代理與 memory skills 負責 |
 | `doc_translator` | 有界寫入 | 只修改明確指定的翻譯目標 |
 | `commit_specialist` | 有界寫入 | 審查 staged changes，僅在明確要求時 commit |
 
-`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。當有用輸出是包含 file paths、command names、risk notes 與 next-step recommendations 的精簡報告，而不是原始 terminal 或搜尋輸出時，優先使用 read-only subagents。使用 `evidence_gatherer` 機械式擷取大範圍搜尋、大量 stdout、logs、diffs 與 test output；若任務需要判斷模糊輸出，再升級給較高階 reviewer。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
+### 模型路由
+
+| 層級 | 模型 | 角色 |
+|---|---|---|
+| 高可信審查 | `gpt-5.6` / high | Plan、implementation 與 security review |
+| 平衡判斷 | `gpt-5.6-terra` / low-medium | 翻譯與 memory compression |
+| 有界實作 | `gpt-5.6-terra` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
+| 高流量機械工作 | `gpt-5.6-luna` / medium | Signal mining、commit 與 memory 分類 |
+
+`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與消化冗長輸出；`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 
 ## Skills
 
@@ -55,7 +63,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `/feature-dev` | Superpowers／原生取代 | Brainstorming、Plan Mode、TDD、verification 與 review 已構成完整流程。 |
 | `/build-fix` | Superpowers／原生取代 | Systematic debugging 加 repository verification 已涵蓋逐步診斷與修復。 |
 | `/code-review` | 原生／plugin 取代 | Local review 使用 Codex review stance 與 agents；PR review 使用 GitHub plugin。 |
-| `/python-review` | Agent 取代 | `python_reviewer` 使用 repo 支援的 Ruff、mypy、pytest 與選配 coverage。 |
+| `/python-review` | Skill 取代 | `python-testing` 提供 repo 支援的 Ruff、mypy、pytest 與選配 coverage。 |
 | `/security-scan` | Agent 與 gates 取代 | 已有 `security_reviewer`、detect-secrets、hooks、pre-commit；未安裝 AgentShield。 |
 | `/test-coverage` | Skill 取代 | 選配 coverage 已在 `python-testing`；Codex 不需要 command wrapper。 |
 | `github-ops` | Plugin 取代 | GitHub plugin 提供 repo、issue、PR、CI、comment 與發布流程，且 connector semantics 可維持更新。 |
@@ -63,8 +71,8 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `eval-harness` | 已移除／延後 | 它引用不存在的 `/eval` commands，且沒有 runner、grader、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。 |
 | `llm-trading-agent-security` | 不移植 | 僅適用會簽交易或有 wallet authority 的 agents；repo 出現該執行面時再共享。 |
 | `architect`、`code-simplifier`、`loop-operator`、`tdd-guide` | 不鏡像 | Codex 由 main agent 負責 planning/implementation，並使用 Superpowers；複製 write-capable specialists 會造成權責重疊。 |
-| `code-reviewer`、`silent-failure-hunter` | 已整併 | `implementation_reviewer`、`python_reviewer`、`security_reviewer` 與 systematic debugging 已涵蓋有效面向。 |
-| `performance-optimizer` | 唯讀對等 | Codex 使用 `performance_reviewer`，要求先量測再最佳化。 |
+| `code-reviewer`、`silent-failure-hunter`、`python-reviewer` | 已整併 | `implementation_reviewer`、`security_reviewer`、Python skills 與 systematic debugging 已涵蓋有效面向。 |
+| `performance-optimizer` | 主代理審查 | 僅在有量測到的瓶頸時，才要求針對性的效能分析。 |
 
 ## 共享政策對齊
 

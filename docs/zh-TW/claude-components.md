@@ -13,37 +13,30 @@
 
 Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行特定任務。
 
+Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的唯讀苦力，負責機械式探索與消化冗長輸出；`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
+
+`.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
+
 ### 記憶體與工作流程（原創——非來自 ECC）
 
 | Agent | 模型 | 工具 | 用途 |
 |---|---|---|---|
-| `commit-specialist` | sonnet | Bash, Read | 審查已暫存的變更並草擬 commit 訊息 |
+| `commit-specialist` | haiku | Bash, Read | 審查已暫存的變更並草擬 commit 訊息 |
 | `doc-translator` | sonnet | Read, Write, Edit | 將 `docs/en/` 檔案翻譯為 `docs/zh-TW/` |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | 唯讀程式碼審查：正確性、風格、安全性 |
 | `memory-auditor` | haiku | Read, Grep, Glob | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory |
-| `plan-reviewer` | sonnet | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
-| `evidence-gatherer` | haiku | Read, Grep, Glob, Bash | 定位檔案、追蹤執行路徑、繪製相依關係圖；執行高輸出指令並回傳精簡摘要（pass/fail、關鍵指標、錯誤），將大量 stdout 隔離於 parent agent 的 context 之外 |
-
-### 開發（從 ECC v2.0.0-rc.1 移植）
-
-| Agent | 模型 | 工具 | 用途 |
-|---|---|---|---|
-| `architect` | opus | Read, Grep, Glob | 系統設計、取捨分析、ADR |
-| `code-reviewer` | sonnet | Read, Grep, Glob, Bash | 跨語言通用程式碼審查 |
-| `code-simplifier` | sonnet | Read, Write, Edit, Bash, Grep, Glob | 在保留行為的前提下簡化程式碼結構 |
-| `loop-operator` | sonnet | Read, Grep, Glob, Bash, Edit | 監控自主循環並安全介入 |
-| `performance-optimizer` | sonnet | Read, Grep, Glob, Bash | 唯讀審查已量測的瓶頸、I/O、記憶體、複雜度與工具成本 |
-| `python-reviewer` | sonnet | Read, Grep, Glob, Bash | Python 專屬審查：型別提示、安全性、Pythonic 慣例 |
-| `security-reviewer` | sonnet | Read, Grep, Glob, Bash | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查 |
-| `silent-failure-hunter` | sonnet | Read, Grep, Glob, Bash | 尋找被吞掉的例外、錯誤的 fallback、遺漏的錯誤傳播 |
-| `tdd-guide` | sonnet | Read, Write, Edit, Bash, Grep | 可委派的有界 TDD 實作；遵循 `superpowers:test-driven-development`，coverage 為選配 |
+| `plan-reviewer` | opus（high） | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
+| `signal-miner` | haiku | Read, Grep, Glob, Bash | 最低成本的機械式探索，從 repository searches、execution traces、冗長 logs、diffs、tests 與 command output 挖出關鍵訊號 |
+| `task-worker` | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報 |
+| `security-reviewer` | opus（high） | Read, Grep, Glob, Bash | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查 |
 
 ### 未從 ECC 移植（含原因）
 
 | Agent | 原因 |
 |---|---|
 | `planner` | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代 |
+| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能、聚焦 reviewer 與已安裝的 Superpowers/Ponytail workflows 已涵蓋其責任，無須重複委派。 |
 | `refactor-cleaner` | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python |
 | `harness-optimizer` | 需要 ECC 內部的 `/harness-audit`；無法移植 |
 | 所有 `*-build-resolver`（共 11 個 agents） | 未使用非 Python 語言 |
@@ -51,6 +44,16 @@ Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行�
 | `gan-*`、`seo-specialist` | 超出範疇 |
 | `homelab-*`、`network-*`、`healthcare-reviewer` | 領域不符 |
 | `marketing-agent` | 延後——待短片製作規劃啟動時新增 |
+
+---
+
+## 互動、自動化與公司使用
+
+- 互動工作：進入 Native Plan Mode；複雜或高風險計畫可選用 `plan-reviewer`；核准計畫後再回到執行模式。
+- 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入 OpenSpec 或受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
+- Claude-only 公司移植：保留非 memory instructions、rules、agents、skills 與 hygiene hooks；排除 memory agents、skills/commands/rules/hooks、`.memories/`、`memory-db` MCP server、memory permissions，以及複製後 agent prompts 中的 memory references。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
+
+`REVIEW.md` 不屬於本機 baseline；只有 repository 加入 Claude 託管的 Team 或 Enterprise Code Review 時才加入。
 
 ---
 
@@ -75,9 +78,9 @@ Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch his
 | Command | 替代方案 |
 |---|---|
 | `/build-fix` | Superpowers systematic debugging + `python-testing` skill |
-| `/code-review` | 內建 `/code-review`（含 `ultra` 雲端 review）+ `code-reviewer` / `implementation-reviewer` agents |
-| `/feature-dev` | Native Plan Mode + Superpowers TDD + `evidence-gatherer` agent |
-| `/python-review` | `python-reviewer` agent |
+| `/code-review` | 內建 `/code-review`（含 `ultra` 雲端 review）+ `implementation-reviewer` agent |
+| `/feature-dev` | Native Plan Mode + Superpowers TDD + `signal-miner` agent |
+| `/python-review` | `python-testing` skill 與 `implementation-reviewer` |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate |
 | `/test-coverage` | `python-testing` skill（`pytest --cov`） |
 

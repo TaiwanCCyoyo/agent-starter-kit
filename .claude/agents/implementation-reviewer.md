@@ -1,7 +1,8 @@
 ---
 name: implementation-reviewer
 description: Read-only implementation reviewer for checking correctness, style consistency, and potential issues in code changes. Use when requesting a code review before committing or merging.
-model: claude-opus-4-8
+model: opus
+effort: high
 tools:
   - Read
   - Grep
