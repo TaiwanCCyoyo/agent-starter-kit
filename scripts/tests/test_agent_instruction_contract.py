@@ -151,8 +151,8 @@ def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
         assert "Agent: Codex" not in content
 
     assert "AI-Model: gpt-5.6-luna" not in codex_skill
-    assert "configured commit specialist" in codex_skill
-    assert "AI-Model: gpt-5.6-luna" in codex_agent
+    assert "main agent selects the ordered list" in codex_skill
+    assert "AI-Model: gpt-5.6-luna" not in codex_agent
 
     for content in (claude_skill, claude_agent):
         assert "Co-authored-by: Claude <resolved model display name> <noreply@anthropic.com>" in content
@@ -162,3 +162,26 @@ def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
     assert "Do not add an `AI-Model` trailer" in claude_skill
     assert "  - Edit" in claude_agent
     assert "Follow `.claude/skills/commit-helper/SKILL.md` as the source of truth." in claude_agent
+
+
+def test_commit_model_attribution_is_selected_by_the_parent_agent() -> None:
+    codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
+    codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
+    claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
+    claude_command = (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8")
+    claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
+
+    assert "ordered list of material contributor models" in codex_skill
+    assert "request it before drafting or committing" in codex_skill
+    assert "AI-Model: gpt-5.6\nAI-Model: gpt-5.6-terra" in codex_skill
+    assert "Do not infer, add, reorder, or replace" in codex_agent
+    assert "AI-Model: gpt-5.6-luna" not in codex_agent
+
+    for content in (claude_skill, claude_command):
+        assert "contributor-model context and roles" in content
+    assert "final discretion" not in claude_agent
+    assert "final discretion" not in claude_skill
+    assert "must request it before drafting or committing" in claude_skill
+    assert "Request contributor-model context from the parent" in claude_agent
+    assert "do not merge, omit, infer, or substitute contributors" in claude_agent
+    assert "Do not add an `AI-Model` trailer" in claude_skill

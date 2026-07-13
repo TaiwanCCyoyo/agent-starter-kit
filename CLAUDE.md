@@ -89,8 +89,6 @@ Available slash commands and their corresponding skills:
 | `/save-memory` | `.claude/skills/save-memory/SKILL.md` |
 | `/worktree` | `.claude/skills/worktree-memory-sync/SKILL.md` |
 
-Use native planning for in-session work. Use OpenSpec for cross-agent or cross-session plan/spec communication when durable planning handoff is needed. Plans remain outside durable memory.
-
 When adding new workflows, create both a command entry point and a skill document. Do not add workflow logic directly to this file.
 
 The `superpowers` plugin provides always-available workflow skills — prefer these over re-deriving the same workflows from scratch: `test-driven-development`, `systematic-debugging`, `requesting-code-review`, `receiving-code-review`, `verification-before-completion`, `writing-plans`, `executing-plans`, `finishing-a-development-branch`. See `development-workflow.md` for per-phase routing.
@@ -104,7 +102,6 @@ The `superpowers` plugin provides always-available workflow skills — prefer th
 - Prefer `signal-miner` for broad repository search, large diff or log inspection, dependency tracing, test-output summarization, or any command whose stdout would overwhelm the main context. It absorbs the volume and returns only key signal — file paths, metrics, pass/fail, error lines, and next-step recommendations. Escalate ambiguous evidence to a higher-tier reviewer rather than asking the miner to judge it.
 - Write-capable subagents: `task-worker` handles bounded implementation; `doc-translator` may edit only the explicit target translation file; `commit-specialist` may review staged changes, draft commit messages, and commit only when explicitly requested.
 - Use `plan-reviewer` after complex or high-risk plans. It critiques plans but does not replace Native Plan Mode.
-- Native Plan Mode owns primary planning. Do not create a planner subagent or use a subagent-produced plan as the main-session handoff.
 - When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
 - Use `security-reviewer` for the security-sensitive triggers defined in `.claude/rules/common/security.md`.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.

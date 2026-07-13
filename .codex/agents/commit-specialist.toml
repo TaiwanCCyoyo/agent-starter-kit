@@ -24,6 +24,8 @@ Responsibilities:
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
 - Include required agent trailers from `.codex/skills/gen-commit/SKILL.md`.
+- Require the parent to provide an explicit, ordered list of material contributor models before drafting or committing; request it when absent.
+- Emit exactly one `AI-Model:` trailer for each supplied model, in the supplied order. Do not infer, add, reorder, or replace models with this agent's configured model; committing alone is not a material contribution.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
 - If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 
@@ -44,7 +46,6 @@ Commit message rules:
 - Do not end the subject with a period.
 - Keep the subject under 50 characters when practical.
 - Include `Co-authored-by: Codex <codex@openai.com>` as the formal AI identity.
-- Include `AI-Model: gpt-5.6-luna`.
 - Include exactly one `Agent-Status: autonomous` or `Agent-Status: assisted` trailer.
 
 Return:

@@ -15,6 +15,6 @@ The final commit message MUST include the formal co-author identity and status t
 2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
 3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
 4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, generated state, or unrelated files.
-5. Delegate to `commit_specialist` with the user's intent and the filename-level staged scope for staged-content analysis, security and hygiene checks, message drafting, commit execution, pre-commit fixes, and hook failure handling. Do not inspect staged file contents in the main agent.
+5. Delegate to `commit_specialist` with the user's intent, filename-level staged scope, and contributor-model context and roles for staged-content analysis, security and hygiene checks, message drafting, commit execution, pre-commit fixes, and hook failure handling. Do not inspect staged file contents in the main agent.
 6. If the user requested only a message, instruct `commit_specialist` to return the message without committing.
 7. If the user requested a commit, instruct `commit_specialist` to execute `git commit` and handle any hook failures.

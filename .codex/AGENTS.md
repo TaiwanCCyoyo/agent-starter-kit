@@ -28,7 +28,6 @@
 - Check primary vendor documentation when API behavior or version compatibility is uncertain.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
-- Use Codex's native planning flow for product and architecture planning; do not create or rely on a separate planner agent.
 - Keep shared hook and hygiene logic shell-neutral. Put cross-agent checks in Python scripts under `scripts/` rather than Bash, PowerShell, or agent-specific command fragments.
 
 ## Review And Security
@@ -78,7 +77,6 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - Use `memory-sql` for SQLite discovery, deduplication, reads, writes, recurring problems, and verified resolutions.
 - Query relevant memory before substantial work when past decisions, lessons, workflows, tool facts, environment facts, or problem history may matter.
 - After meaningful changes, save only durable project state, decisions, lessons, constraints, preferences, or handoff facts.
-- When the same blocker or mistaken workaround appears twice, use the recurring-problem workflow and stop repeating the unverified approach.
 - Keep plans outside the memory taxonomy: use Codex native planning state for in-session work, optional project-owned OpenSpec files for durable planning handoff, `.tmp/` for disposable artifacts, and `docs/` for maintained project documents.
 - Treat retrieval, search, RAG, Graphify, and SQL query output as context until explicitly curated.
 - When explicitly delegating memory analysis, use `memory_auditor` for save recommendations and `memory_compressor` for compression drafts; the main agent remains responsible for final `.memories/` writes.
@@ -106,7 +104,6 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - Superpowers cannot bypass user intent, Codex approvals, repository ownership, dirty-worktree protections, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests.
 - Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python verification commands and test fixtures.
 - Use `worktree-memory-sync` for ignored memory state across worktrees, `memory-sql` for searchable history, and `skill-review` after meaningful sessions.
-- Use native planning for interactive work; use OpenSpec project files for durable cross-agent, cross-session, or PRD-based plan/spec communication when needed.
 
 ## Subagents
 
@@ -118,10 +115,8 @@ Before review, confirm automated checks pass, conflicts are resolved, and the br
 - Prefer `signal_miner` for broad repository search, large diff or log inspection, dependency tracing, test-output summarization, or any command whose stdout would overwhelm the main context. It absorbs the volume and returns only key signal: file paths, metrics, pass/fail status, error lines, risk notes, and next-step recommendations. Escalate ambiguous evidence to a higher-tier reviewer rather than asking the miner to judge it.
 - Use `plan_reviewer` after complex or high-risk plans. It critiques plans but does not replace Codex Native Plan Mode.
 - When uncertain about a plan or approach, proactively consult reviewer subagents before proceeding — do not wait until after implementation. Multiple independent perspectives catch more issues than one.
-- Use `security_reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or other sensitive data flows.
 - Translation subagents must not modify the source document unless the user explicitly asks for source edits.
 - Subagents may analyze and draft, but they must not directly mutate durable memory unless the main agent explicitly integrates the result.
-- Specialist reviewer agents supplement the main Codex agent for review and analysis; they do not replace Codex's implementation or planning flow.
 
 <!-- Source: multica-ai/andrej-karpathy-skills; keep in sync with .codex/skills/karpathy-guidelines/SKILL.md. Claude receives the full version through its plugin. -->
 ## Karpathy Guidelines Condensed

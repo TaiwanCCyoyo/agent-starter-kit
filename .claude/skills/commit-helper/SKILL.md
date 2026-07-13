@@ -39,10 +39,12 @@ This skill is the source of truth for high-quality commits in this project. All 
 ## AI Commit Trailers
 
 - Every commit drafted or executed by Claude must include a formal `Co-authored-by:` identity trailer.
+- Before delegating, the main agent must provide `commit-specialist` with contributor-model context and roles for models that materially contributed; committing alone is not a material contribution.
 - When the resolved model display name is reliably known, use the format `Co-authored-by: Claude <resolved model display name> <noreply@anthropic.com>` and replace the placeholder with that name, for example `Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>`.
 - When the exact model display name is unavailable, use `Co-authored-by: Claude <noreply@anthropic.com>`.
 - Never emit the literal `<resolved model display name>` placeholder.
 - Do not add an `AI-Model` trailer; Claude model aliases and runtime overrides may vary.
+- If contributor-model context is missing or unclear and multiple agents materially contributed, `commit_specialist` must request it before drafting or committing.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
   - `Agent-Status: autonomous` when Claude staged and committed without manual review of the final staged diff.
   - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
@@ -64,7 +66,7 @@ Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
 
 - The commit message itself is always in English.
 - The summary provided to the user must be in Traditional Chinese (zh-TW).
-- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates the user's intent plus the filename-level staged scope to `commit_specialist` for content-level review.
+- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates the user's intent, filename-level staged scope, and contributor-model context and roles to `commit_specialist` for content-level review.
 
 ## Execution And Failure Mitigation
 
