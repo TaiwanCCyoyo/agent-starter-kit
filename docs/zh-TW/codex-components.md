@@ -26,7 +26,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `implementation_reviewer` | 唯讀 | 正確性、回歸、測試與非預期 diff |
 | `security_reviewer` | 唯讀 | Secrets、注入、依賴、權限、auth 與敏感資料 |
 | `memory_auditor`／`memory_compressor` | 唯讀 | Save 分類與 compression 草案的 advisory layer；final writes 仍由主代理與 memory skills 負責 |
-| `doc_translator` | 有界寫入 | 只修改明確指定的翻譯目標 |
+| `doc_translator` | 有界寫入 | 低階文件同步者：依 main agent 提供的 source diff 修改單一明確的非 canonical 目標；衝突時以 main agent 維護的 canonical 文件為準 |
 | `commit_specialist` | 有界寫入 | 審查 staged changes，僅在明確要求時 commit |
 
 ### 模型路由
@@ -34,9 +34,9 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | 層級 | 模型 | 角色 |
 |---|---|---|
 | 高可信審查 | `gpt-5.6` / high | Plan、implementation 與 security review |
-| 平衡判斷 | `gpt-5.6-terra` / low-medium | 翻譯與 memory compression |
+| 平衡判斷 | `gpt-5.6-terra` / low-medium | Memory compression |
 | 有界實作 | `gpt-5.6-terra` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
-| 高流量機械工作 | `gpt-5.6-luna` / medium | Signal mining、commit 與 memory 分類 |
+| 高流量機械工作 | `gpt-5.6-luna` / medium | Signal mining、commit、文件同步與 memory 分類 |
 
 `plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與消化冗長輸出；`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 

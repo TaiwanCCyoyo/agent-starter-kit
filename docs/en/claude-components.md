@@ -22,7 +22,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | Agent | Model | Tools | Purpose |
 |---|---|---|---|
 | `commit-specialist` | haiku | Bash, Read | Review staged changes and draft commit messages |
-| `doc-translator` | sonnet | Read, Write, Edit | Translate `docs/en/` files to `docs/zh-TW/` |
+| `doc-translator` | haiku | Read, Write, Edit | Low-tier synchronizer for one explicit non-canonical target from a parent-provided source diff; the main session's canonical document wins conflicts |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | Read-only code review: correctness, style, security |
 | `memory-auditor` | haiku | Read, Grep, Glob | Classify save candidates and Do Not Save items; never writes memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | Draft bounded-file compression and graduation proposals; never writes memory |

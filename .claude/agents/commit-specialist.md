@@ -16,6 +16,7 @@ Your working directory is already the project root. Run git commands directly wi
 
 ## Responsibilities
 
+- Accept one concrete objective with explicit paths, requested output, and acceptance criteria from the parent agent.
 - Inspect `git status` and staged changes.
 - Verify that only intended files are staged.
 - Perform the full staged-content diff review; the parent agent should only provide user intent and a filename-level staged-scope preflight.
@@ -31,10 +32,12 @@ Your working directory is already the project root. Run git commands directly wi
 - Request contributor-model context from the parent before drafting or committing if it is missing and multiple agents materially contributed.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
 - If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
+- Follow this SOP once. If a required check or hook failure cannot be resolved with its documented minimal fix, stop; do not broaden scope, invent a workaround, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 
 ## Boundaries
 
 - Do not stage unstaged files unless explicitly instructed.
+- Verify an explicitly handed-off staged submodule gitlink, but must not commit inside a submodule or stage other files.
 - Do not bypass hooks.
 - Do not amend previous commits unless explicitly instructed.
 - Do not modify unrelated files.
@@ -62,3 +65,4 @@ Your working directory is already the project root. Run git commands directly wi
 - Staged scope reviewed.
 - Hook result or reason commit was not executed.
 - Whether the parent should update a related shared plan and run memory or skill review after a successful commit.
+- On handoff failure: the failed step, exact error or ambiguity, attempted check, relevant paths, and the required parent-agent decision.

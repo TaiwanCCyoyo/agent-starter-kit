@@ -12,6 +12,7 @@ This skill is the source of truth for high-quality commits in this project. All 
 1. **Hook Awareness**: Ensure `pre-commit` hooks are active. If a commit is blocked by hooks, fix the specific issue and re-stage before retrying.
 2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only. The `commit_specialist` performs the full staged-content review with `git status` and `git diff --cached` to ensure only intended changes are staged.
 3. **Local State Guard**: Avoid staging `.env`, credentials, temporary build artifacts, generated junk, or ignored local memory state.
+4. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit_specialist`. The specialist verifies it and must not commit inside a submodule.
 
 ## Security And Hygiene
 
@@ -66,7 +67,8 @@ Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
 
 - The commit message itself is always in English.
 - The summary provided to the user must be in Traditional Chinese (zh-TW).
-- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates the user's intent, filename-level staged scope, and contributor-model context and roles to `commit_specialist` for content-level review.
+- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates one concrete objective with explicit paths, requested output, acceptance criteria, contributor-model context and roles, and staged submodule gitlink state to `commit_specialist` for content-level review.
+- For an uncommitted submodule, unexpected gitlink delta, or unresolved hook failure, `commit_specialist` stops and returns the failed step, evidence, and the precise parent-agent decision required.
 
 ## Execution And Failure Mitigation
 

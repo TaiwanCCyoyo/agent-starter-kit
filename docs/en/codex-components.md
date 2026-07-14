@@ -26,7 +26,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `implementation_reviewer` | Read-only | Correctness, regression, test coverage, and unintended-diff review |
 | `security_reviewer` | Read-only | Secrets, injection, dependencies, permissions, auth, and sensitive data |
 | `memory_auditor` / `memory_compressor` | Read-only | Advisory layer for save classification and compression drafts; final writes remain with the main agent and memory skills |
-| `doc_translator` | Bounded write | Edits only the explicit translation target |
+| `doc_translator` | Bounded write | Low-tier synchronizer for one explicit non-canonical target from a parent-provided source diff; the main agent's canonical document wins conflicts |
 | `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
 
 ### Model routing
@@ -34,9 +34,9 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | Tier | Model | Roles |
 |---|---|---|
 | High-confidence review | `gpt-5.6` / high | Plan, implementation, and security review |
-| Balanced judgment | `gpt-5.6-terra` / low-medium | Translation and memory compression |
+| Balanced judgment | `gpt-5.6-terra` / low-medium | Memory compression |
 | Bounded implementation | `gpt-5.6-terra` / medium | Routine, explicitly scoped implementation through `task_worker` |
-| High-volume mechanical work | `gpt-5.6-luna` / medium | Signal mining, commits, and memory classification |
+| High-volume mechanical work | `gpt-5.6-luna` / medium | Signal mining, commits, documentation synchronization, and memory classification |
 
 `plan_reviewer` critiques plans and never replaces Native Plan Mode. `signal_miner` is the lowest-cost read-only utility for mechanical exploration and verbose output. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 

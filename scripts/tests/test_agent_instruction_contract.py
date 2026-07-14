@@ -51,7 +51,7 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
         "task_worker": ("gpt-5.6-terra", "medium"),
         "signal_miner": ("gpt-5.6-luna", "medium"),
         "commit_specialist": ("gpt-5.6-luna", "medium"),
-        "doc_translator": ("gpt-5.6-terra", "low"),
+        "doc_translator": ("gpt-5.6-luna", "low"),
         "memory_auditor": ("gpt-5.6-luna", "medium"),
         "memory_compressor": ("gpt-5.6-terra", "medium"),
     }
@@ -89,7 +89,7 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
 def test_claude_agent_model_routing_uses_current_aliases() -> None:
     expected = {
         "commit-specialist": ("haiku", None),
-        "doc-translator": ("sonnet", "low"),
+        "doc-translator": ("haiku", None),
         "signal-miner": ("haiku", None),
         "implementation-reviewer": ("opus", "high"),
         "memory-auditor": ("haiku", None),
@@ -138,6 +138,39 @@ def test_main_agent_cost_routing_does_not_upgrade_low_cost_sessions() -> None:
         assert "do not escalate" in lowered
         assert "raise capability" not in lowered
         assert "capability floor" not in lowered
+
+
+def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
+    codex_agents = (
+        (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8"),
+        (ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"),
+        (ROOT / ".codex" / "agents" / "doc-translator.toml").read_text(encoding="utf-8"),
+    )
+    claude_agents = (
+        (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8"),
+        (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8"),
+        (ROOT / ".claude" / "agents" / "doc-translator.md").read_text(encoding="utf-8"),
+    )
+    commit_workflows = (
+        (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8"),
+        (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8"),
+        (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8"),
+    )
+
+    for content in (*codex_agents, *claude_agents):
+        assert "one concrete objective" in content
+        assert "acceptance criteria" in content
+        assert "parent agent" in content
+        assert "stop" in content.lower()
+
+    for content in commit_workflows:
+        assert "submodule" in content
+        assert "git add -- <submodule-path>" in content
+        assert "must not commit inside a submodule" in content
+
+    for content in (codex_agents[2], claude_agents[2]):
+        assert "explicit target" in content
+        assert "source diff" in content
 
 
 def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:

@@ -22,7 +22,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | Agent | 模型 | 工具 | 用途 |
 |---|---|---|---|
 | `commit-specialist` | haiku | Bash, Read | 審查已暫存的變更並草擬 commit 訊息 |
-| `doc-translator` | sonnet | Read, Write, Edit | 將 `docs/en/` 檔案翻譯為 `docs/zh-TW/` |
+| `doc-translator` | haiku | Read, Write, Edit | 低階文件同步者：依 main session 提供的 source diff 修改單一明確的非 canonical 目標；衝突時以 main session 維護的 canonical 文件為準 |
 | `implementation-reviewer` | opus | Read, Grep, Glob, Bash | 唯讀程式碼審查：正確性、風格、安全性 |
 | `memory-auditor` | haiku | Read, Grep, Glob | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory |
