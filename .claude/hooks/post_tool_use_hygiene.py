@@ -31,6 +31,7 @@ Design note — two-tier file resolution:
 
 import io
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -39,7 +40,20 @@ TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
 
 
 def repo_root(cwd: str) -> Path:
-    """Return the Git repository root for the hook cwd, or cwd itself."""
+    """Return the main repo root, anchored to CLAUDE_PROJECT_DIR when available.
+
+    Claude Code exports CLAUDE_PROJECT_DIR to hook subprocesses pointing at the
+    main project root. Preferring it over `git rev-parse --show-toplevel`
+    keeps hygiene checks anchored to the main repo even when the session cwd
+    drifts into a nested git submodule (e.g. shioaji_stock_prices, which has
+    its own .git and would otherwise resolve to the wrong repo root).
+    """
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
+    if project_dir:
+        path = Path(project_dir)
+        if path.is_dir():
+            return path.resolve()
+
     try:
         root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=cwd, text=True, encoding="utf-8").strip()
         return Path(root)

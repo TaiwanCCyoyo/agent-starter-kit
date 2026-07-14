@@ -134,3 +134,23 @@ def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
 
     assert exit_code == 0
     assert stdout.getvalue() == ""
+
+
+def test_repo_root_prefers_claude_project_dir_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    submodule = tmp_path / "nested-submodule"
+    submodule.mkdir()
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+    assert HOOK.repo_root(str(submodule)) == tmp_path.resolve()
+
+
+def test_repo_root_ignores_nonexistent_claude_project_dir_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path / "does-not-exist"))
+
+    assert HOOK.repo_root(str(tmp_path)) == tmp_path.resolve()
+
+
+def test_repo_root_falls_back_to_cwd_when_env_unset_and_not_a_git_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("CLAUDE_PROJECT_DIR", raising=False)
+
+    assert HOOK.repo_root(str(tmp_path)) == tmp_path.resolve()
