@@ -26,7 +26,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `implementation_reviewer` | Read-only | Correctness, regression, test coverage, and unintended-diff review |
 | `security_reviewer` | Read-only | Secrets, injection, dependencies, permissions, auth, and sensitive data |
 | `memory_auditor` / `memory_compressor` | Read-only | Advisory layer for save classification and compression drafts; final writes remain with the main agent and memory skills |
-| `doc_translator` | Bounded write | Low-tier synchronizer for one explicit non-canonical target from a parent-provided source diff; the main agent's canonical document wins conflicts |
+| `doc_translator` | Bounded write | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main agent selects source and target, and its canonical document wins conflicts |
 | `commit_specialist` | Bounded write | Reviews staged changes and commits only on explicit request |
 
 ### Model routing
