@@ -13,7 +13,7 @@
 
 Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行特定任務。
 
-Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的唯讀苦力，負責機械式探索與消化冗長輸出；`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
+Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
 
 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
 
@@ -27,7 +27,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | `memory-auditor` | haiku | Read, Grep, Glob | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory |
 | `plan-reviewer` | opus（high） | Read, Grep, Glob, Bash | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性 |
-| `signal-miner` | haiku | Read, Grep, Glob, Bash | 最低成本的機械式探索，從 repository searches、execution traces、冗長 logs、diffs、tests 與 command output 挖出關鍵訊號 |
+| `signal-miner` | haiku | Read, Grep, Glob, Bash | 最低成本的機械式探索；在執行前承接預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出 |
 | `task-worker` | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報 |
 | `security-reviewer` | opus（high） | Read, Grep, Glob, Bash | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查 |
 

@@ -28,19 +28,16 @@ def test_claude_instructions_use_direct_openspec_routing() -> None:
     assert "Use OpenSpec to communicate plans and specs across agents" in claude_instructions
 
 
-def test_codex_instructions_end_with_marked_karpathy_condensed_section() -> None:
-    codex_instructions = (ROOT / ".codex" / "AGENTS.md").read_text(encoding="utf-8").strip()
+def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
+    instructions = {
+        ROOT / "CLAUDE.md": 80,
+        ROOT / ".codex" / "AGENTS.md": 90,
+    }
 
-    marker = (
-        "<!-- Source: multica-ai/andrej-karpathy-skills; keep in sync with "
-        ".codex/skills/karpathy-guidelines/SKILL.md. Claude receives the full version through its plugin. -->"
-    )
-    section = "## Karpathy Guidelines Condensed"
-
-    assert marker in codex_instructions
-    assert section in codex_instructions
-    assert codex_instructions.rfind(section) > codex_instructions.rfind("## Subagents")
-    assert codex_instructions.endswith("For non-trivial work, define success criteria and run the checks that prove them before claiming completion.")
+    for path, max_lines in instructions.items():
+        content = path.read_text(encoding="utf-8")
+        assert len(content.splitlines()) <= max_lines
+        assert "## Karpathy Guidelines Condensed" not in content
 
 
 def test_codex_agent_model_routing_uses_current_tiers() -> None:
@@ -125,19 +122,38 @@ def test_claude_agent_model_routing_uses_current_aliases() -> None:
     assert "  - Edit" not in signal_miner
 
 
-def test_main_agent_cost_routing_does_not_upgrade_low_cost_sessions() -> None:
+def test_task_worker_descriptions_do_not_upgrade_low_cost_sessions() -> None:
     instructions = (
-        (ROOT / ".codex" / "AGENTS.md").read_text(encoding="utf-8"),
-        (ROOT / "CLAUDE.md").read_text(encoding="utf-8"),
+        (ROOT / ".codex" / "agents" / "task-worker.toml").read_text(encoding="utf-8"),
+        (ROOT / ".claude" / "agents" / "task-worker.md").read_text(encoding="utf-8"),
     )
 
     for content in instructions:
         lowered = content.lower()
-        assert "signal_miner" in content or "signal-miner" in content
         assert "lowest-cost" in lowered
-        assert "do not escalate" in lowered
+        assert "do not use" in lowered
         assert "raise capability" not in lowered
         assert "capability floor" not in lowered
+
+
+def test_signal_miner_descriptions_proactively_route_high_output_commands() -> None:
+    codex_config = tomllib.loads((ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"))
+    claude_frontmatter = (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8").split("---", 2)[1].lower()
+    descriptions = (codex_config["description"].lower(), claude_frontmatter)
+
+    for description in descriptions:
+        assert "expected to produce large logs or stdout" in description
+        assert "delegate before running" in description
+        for command_family in (
+            "tests",
+            "benchmarks",
+            "broad searches",
+            "verbose diagnostics",
+            "dependency traces",
+            "large diff/log inspections",
+        ):
+            assert command_family in description
+        assert "never raw output" in description
 
 
 def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:

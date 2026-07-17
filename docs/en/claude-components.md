@@ -13,7 +13,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 Agents are specialized subagents invoked by the main Claude session for focused tasks.
 
-Claude auto-delegation is primarily guided by each agent's description and the current task context. `signal-miner` is the lowest-cost read-only utility for mechanical exploration and verbose output. `task-worker` is a mid-cost option only for a higher-tier main session to downshift bounded implementation with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main session handles simple work directly or uses built-in Explore or general-purpose as appropriate; it does not escalate to `task-worker`. Keep ambiguous, cross-cutting, security-sensitive, architectural, and planning work with the main session or a suitable built-in agent.
+Claude auto-delegation is primarily guided by each agent's description and the current task context. `signal-miner` is the lowest-cost read-only utility for mechanical exploration and bounded high-output commands. When tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, delegate before running them in the main context. `task-worker` is a mid-cost option only for a higher-tier main session to downshift bounded implementation with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main session handles simple work directly or uses built-in Explore or general-purpose as appropriate; it does not escalate to `task-worker`. Keep ambiguous, cross-cutting, security-sensitive, architectural, and planning work with the main session or a suitable built-in agent.
 
 Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode uses `opus`, and execution uses `sonnet`. Custom agents are not used to transfer plans back to the main session.
 
@@ -27,7 +27,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | `memory-auditor` | haiku | Read, Grep, Glob | Classify save candidates and Do Not Save items; never writes memory |
 | `memory-compressor` | sonnet | Read, Grep, Glob | Draft bounded-file compression and graduation proposals; never writes memory |
 | `plan-reviewer` | opus (high) | Read, Grep, Glob, Bash | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability |
-| `signal-miner` | haiku | Read, Grep, Glob, Bash | Lowest-cost mechanical exploration and signal extraction from repository searches, execution traces, verbose logs, diffs, tests, and command output |
+| `signal-miner` | haiku | Read, Grep, Glob, Bash | Lowest-cost mechanical exploration and pre-execution routing for commands expected to produce large logs or stdout; returns concise signal instead of raw output |
 | `task-worker` | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands |
 | `security-reviewer` | opus (high) | Read, Grep, Glob, Bash | Read-only secrets, injection, dependency, permission, auth, and sensitive-data review |
 

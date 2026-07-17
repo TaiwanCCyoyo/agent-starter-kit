@@ -20,7 +20,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | Agent | 權限 | 用途 |
 | :--- | :--- | :--- |
-| `signal_miner` | 唯讀 | 最低成本的機械式探索，從 repository searches、execution traces、冗長 logs、diffs、tests 與 command output 挖出關鍵訊號 |
+| `signal_miner` | 唯讀 | 最低成本的機械式探索；在執行前承接預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出 |
 | `task_worker` | 有界寫入 | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報 |
 | `plan_reviewer` | 唯讀 | 計畫完整性、範圍、排序、repo 對齊、可測試性與風險 |
 | `implementation_reviewer` | 唯讀 | 正確性、回歸、測試與非預期 diff |
@@ -38,7 +38,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | 有界實作 | `gpt-5.6-terra` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
 | 高流量機械工作 | `gpt-5.6-luna` / medium | Signal mining、commit、文件同步與 memory 分類 |
 
-`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與消化冗長輸出；`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
+`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 
 ## Skills
 
