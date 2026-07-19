@@ -18,6 +18,12 @@ repos:
   # Enforce encoding (UTF-8) and language constraints for the entire project
   - repo: local
     hooks:
+      - id: prettier
+        name: Prettier (JSON)
+        entry: prettier --write
+        language: node
+        additional_dependencies: [prettier@3.9.5]
+        files: \.(json|jsonc|json5)$
       - id: file-validation
         name: File Hygiene (Encoding, English & Cleanup)
         entry: uv run python scripts/file_hygiene.py --file
@@ -38,3 +44,9 @@ repos:
       - id: ruff
         args: [ --fix ]
       - id: ruff-format
+
+  # Taplo (TOML Formatter)
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format

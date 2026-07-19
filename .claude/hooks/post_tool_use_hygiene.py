@@ -37,6 +37,7 @@ import sys
 from pathlib import Path
 
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
+FORMATTER_HOOKS = {".py": ("ruff", "ruff-format"), ".json": ("prettier",), ".toml": ("taplo-format",)}
 
 
 def repo_root(cwd: str) -> Path:
@@ -65,6 +66,15 @@ def run(root: Path, args: list[str]) -> tuple[int, str, str]:
     """Run a hygiene command from the repo root and normalize text output."""
     result = subprocess.run(args, cwd=root, text=True, capture_output=True, encoding="utf-8", errors="replace")
     return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+
+def run_hook(root: Path, hook: str, rel_path: str) -> tuple[int, str, str]:
+    """Run a targeted pre-commit hook, retrying after an expected rewrite."""
+    args = ["uv", "run", "pre-commit", "run", hook, "--files", rel_path]
+    code, stdout, stderr = run(root, args)
+    if code == 1 and "files were modified by this hook" in stdout:
+        return run(root, args)
+    return code, stdout, stderr
 
 
 def to_relative_path(root: Path, file_path: str) -> str:
@@ -152,18 +162,14 @@ def main() -> int:
     for rel_path in dict.fromkeys(files):
         suffix = Path(rel_path).suffix.lower()
 
-        if suffix == ".py":
-            code, stdout, stderr = run(root, ["uv", "run", "ruff", "format", rel_path])
+        for formatter_hook in FORMATTER_HOOKS.get(suffix, ()):
+            code, stdout, stderr = run_hook(root, formatter_hook, rel_path)
             if code != 0:
-                checks.append(f"`ruff format` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
+                checks.append(f"`{formatter_hook}` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
-            code, stdout, stderr = run(root, ["uv", "run", "ruff", "check", "--fix", rel_path])
-            if code != 0:
-                checks.append(f"`ruff check --fix` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
-
-        code, stdout, stderr = run(root, ["uv", "run", "python", "scripts/file_hygiene.py", "--file", rel_path])
+        code, stdout, stderr = run_hook(root, "file-validation", rel_path)
         if code != 0:
-            checks.append(f"`file_hygiene` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
+            checks.append(f"`file-validation` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
 
     if checks:
         message = "\n\n".join(checks)

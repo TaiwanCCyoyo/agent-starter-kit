@@ -13,7 +13,13 @@ enabled = true
 required = false
 startup_timeout_sec = 30
 tool_timeout_sec = 60
-enabled_tools = ["read_query", "write_query", "create_table", "list_tables", "describe_table"]
+enabled_tools = [
+  "read_query",
+  "write_query",
+  "create_table",
+  "list_tables",
+  "describe_table",
+]
 default_tools_approval_mode = "prompt"
 
 [mcp_servers.memory-db.tools.read_query]

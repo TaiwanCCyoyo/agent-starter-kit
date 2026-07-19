@@ -52,7 +52,7 @@ def test_valid_json_with_clean_markdown_produces_no_output(tmp_path: Path) -> No
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/sample.md"]]
+    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/sample.md"]]
 
 
 def test_apply_patch_uses_patch_paths_instead_of_dirty_worktree(tmp_path: Path) -> None:
@@ -74,7 +74,7 @@ def test_apply_patch_uses_patch_paths_instead_of_dirty_worktree(tmp_path: Path) 
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/target.md"]]
+    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/target.md"]]
 
 
 def test_failed_check_returns_codex_blocking_json(tmp_path: Path) -> None:
@@ -87,7 +87,7 @@ def test_failed_check_returns_codex_blocking_json(tmp_path: Path) -> None:
 
     assert exit_code == 0
     assert json.loads(output) == {
-        "systemMessage": "`file_hygiene` failed on `docs/sample.md`.\ninvalid content",
+        "systemMessage": "`file-validation` failed on `docs/sample.md`.\ninvalid content",
         "continue": False,
         "stopReason": "Codex post-edit hygiene check failed.",
     }
@@ -99,8 +99,8 @@ def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
     target.write_text("print('hello')\n", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
     run_results = [
-        (0, "", ""),
         (1, "T201 `print` found", ""),
+        (0, "", ""),
         (0, "", ""),
     ]
 
@@ -108,14 +108,46 @@ def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
 
     assert exit_code == 0
     assert json.loads(output) == {
-        "systemMessage": "`ruff check --fix` failed on `src/sample.py`.\nT201 `print` found",
+        "systemMessage": "`ruff` failed on `src/sample.py`.\nT201 `print` found",
         "continue": False,
         "stopReason": "Codex post-edit hygiene check failed.",
     }
     assert commands == [
-        ["uv", "run", "ruff", "format", "src/sample.py"],
-        ["uv", "run", "ruff", "check", "--fix", "src/sample.py"],
-        ["uv", "run", "python", "scripts/file_hygiene.py", "--file", "src/sample.py"],
+        ["uv", "run", "pre-commit", "run", "ruff", "--files", "src/sample.py"],
+        ["uv", "run", "pre-commit", "run", "ruff-format", "--files", "src/sample.py"],
+        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "src/sample.py"],
+    ]
+
+
+@pytest.mark.parametrize(("suffix", "hook"), [(".json", "prettier"), (".toml", "taplo-format")])
+def test_config_files_run_their_formatter_before_hygiene(tmp_path: Path, suffix: str, hook: str) -> None:
+    target = tmp_path / f"config{suffix}"
+    target.write_text("content\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [
+        ["uv", "run", "pre-commit", "run", hook, "--files", f"config{suffix}"],
+        ["uv", "run", "pre-commit", "run", "file-validation", "--files", f"config{suffix}"],
+    ]
+
+
+def test_formatter_retry_after_rewrite_does_not_block(tmp_path: Path) -> None:
+    target = tmp_path / "config.toml"
+    target.write_text("content\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [(1, "files were modified by this hook", ""), (0, "", ""), (0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [
+        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
+        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
+        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "config.toml"],
     ]
 
 
@@ -145,7 +177,7 @@ def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> N
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "python", "scripts/file_hygiene.py", "--file", "docs/unrelated.md"]]
+    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/unrelated.md"]]
 
 
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])

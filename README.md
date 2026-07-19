@@ -56,10 +56,10 @@ This repository uses agent-native hooks to maintain system integrity:
 | Agent | Hook Type | Purpose | Script |
 | :--- | :--- | :--- | :--- |
 | **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
-| **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files are formatted, linted, and checked for file hygiene; docs and config files run file hygiene only. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
+| **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files use Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
 | **Codex** | `Stop` | Checks memory size limits and taxonomy. | `.codex/hooks/memory_health_check.py` |
 | **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | For `.py` files: auto-formats with `ruff format`, lints with `ruff check --fix`, and validates file hygiene. Ruff blocks `print()` calls via `T201`. For config and doc files: validates file hygiene. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `PostToolUse` | Python uses Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Claude Code** | `Stop` | Checks memory size limits and taxonomy. | `.claude/hooks/memory_health_check.py` |
 | **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files. | `.agent/hooks/session_start.py` |
 | **Antigravity** | `PostToolUse` | Runs targeted Ruff, mypy, and file-hygiene checks. | `.agent/hooks/post_tool_use_hygiene.py` |

@@ -3,19 +3,16 @@ name = "agent-starter-kit"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = [
-    "fastmcp>=2.0",
-    "pyyaml>=6.0.3",
-]
+dependencies = ["fastmcp>=2.0", "pyyaml>=6.0.3"]
 
 [dependency-groups]
 dev = [
-    "mypy>=1.0",
-    "pre-commit>=4.5.1",
-    "pytest>=9.0.3",
-    "pytest-cov>=7.0.0",
-    "rich>=15.0.0",
-    "ruff>=0.15.10",
+  "mypy>=1.0",
+  "pre-commit>=4.5.1",
+  "pytest>=9.0.3",
+  "pytest-cov>=7.0.0",
+  "rich>=15.0.0",
+  "ruff>=0.15.10",
 ]
 
 [tool.mypy]
