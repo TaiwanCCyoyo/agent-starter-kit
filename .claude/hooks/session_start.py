@@ -1,4 +1,5 @@
 import io
+import os
 import shutil
 import subprocess
 import sys
@@ -19,6 +20,20 @@ MEMORY_FILE_TEMPLATES = {
 
 
 def repo_root() -> Path:
+    """Return the main repo root, anchored to CLAUDE_PROJECT_DIR when available.
+
+    Claude Code exports CLAUDE_PROJECT_DIR to hook subprocesses pointing at the
+    main project root. Preferring it over `git rev-parse --show-toplevel` keeps
+    memory initialization anchored to the main repo even when the session or a
+    subagent's cwd drifts into a nested git submodule (e.g. shioaji_stock_prices,
+    which has its own .git and would otherwise resolve to the wrong repo root).
+    """
+    project_dir = os.environ.get("CLAUDE_PROJECT_DIR")
+    if project_dir:
+        path = Path(project_dir)
+        if path.is_dir():
+            return path.resolve()
+
     try:
         root = subprocess.check_output("git rev-parse --show-toplevel", shell=True, text=True, encoding="utf-8").strip()
         return Path(root)
@@ -26,12 +41,12 @@ def repo_root() -> Path:
         return Path.cwd().resolve()
 
 
-def get_git_info():
+def get_git_info(cwd: Path):
     try:
-        branch = subprocess.check_output("git branch --show-current", shell=True, text=True, encoding="utf-8").strip()
-        worktree_list = subprocess.check_output("git worktree list", shell=True, text=True, encoding="utf-8").strip()
+        branch = subprocess.check_output("git branch --show-current", shell=True, cwd=cwd, text=True, encoding="utf-8").strip()
+        worktree_list = subprocess.check_output("git worktree list", shell=True, cwd=cwd, text=True, encoding="utf-8").strip()
         is_worktree = len(worktree_list.splitlines()) > 1
-        last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, text=True, encoding="utf-8").strip()
+        last_commit_msg = subprocess.check_output("git log -1 --pretty=%B", shell=True, cwd=cwd, text=True, encoding="utf-8").strip()
         return branch or "detached", is_worktree, last_commit_msg
     except Exception as e:
         return f"unknown (error: {str(e)})", False, "No history found"
@@ -93,7 +108,7 @@ def sync_memory_if_needed(current_root: Path):
     target_dir = current_root / MEMORY_ROOT_REL_DIR
 
     try:
-        common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, text=True, encoding="utf-8").strip()
+        common_dir = subprocess.check_output("git rev-parse --git-common-dir", shell=True, cwd=current_root, text=True, encoding="utf-8").strip()
         main_root = Path(common_dir).resolve().parent
 
         if main_root == current_root:
@@ -160,7 +175,7 @@ def main():
         sys.stdout.reconfigure(encoding="utf-8")
 
     root_dir = repo_root()
-    branch, is_worktree, last_msg = get_git_info()
+    branch, is_worktree, last_msg = get_git_info(root_dir)
     sync_status = sync_memory_if_needed(root_dir)
     taxonomy_init_status = initialize_memory_taxonomy(root_dir, branch)
     purpose = get_branch_purpose(branch)
