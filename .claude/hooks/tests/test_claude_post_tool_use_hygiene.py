@@ -48,11 +48,14 @@ def test_valid_json_with_clean_markdown_produces_no_output(tmp_path: Path) -> No
     target.write_text("clean\n", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
 
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/sample.md"]]
+    assert commands == [
+        ["uv", "run", "pre-commit", "run", "prettier", "--files", "docs/sample.md"],
+        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/sample.md"],
+    ]
 
 
 def test_failed_check_returns_claude_blocking_json(tmp_path: Path) -> None:
@@ -61,7 +64,7 @@ def test_failed_check_returns_claude_blocking_json(tmp_path: Path) -> None:
     target.write_text("bad\n", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
 
-    exit_code, output, _commands = invoke_main(payload, tmp_path, [(1, "", "invalid content")])
+    exit_code, output, _commands = invoke_main(payload, tmp_path, [(0, "", ""), (1, "", "invalid content")])
 
     assert exit_code == 0
     assert json.loads(output) == {
@@ -95,7 +98,10 @@ def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
     ]
 
 
-@pytest.mark.parametrize(("suffix", "hook"), [(".json", "prettier"), (".toml", "taplo-format")])
+@pytest.mark.parametrize(
+    ("suffix", "hook"),
+    [(".toml", "taplo-format"), (".ts", "prettier"), (".html", "prettier"), (".yaml", "prettier")],
+)
 def test_config_files_run_their_formatter_before_hygiene(tmp_path: Path, suffix: str, hook: str) -> None:
     target = tmp_path / f"config{suffix}"
     target.write_text("content\n", encoding="utf-8")
@@ -109,6 +115,34 @@ def test_config_files_run_their_formatter_before_hygiene(tmp_path: Path, suffix:
         ["uv", "run", "pre-commit", "run", hook, "--files", f"config{suffix}"],
         ["uv", "run", "pre-commit", "run", "file-validation", "--files", f"config{suffix}"],
     ]
+
+
+def test_json_files_run_prettier_but_skip_file_validation(tmp_path: Path) -> None:
+    # Mirrors the `exclude: ^(uv\.lock|.*\.json)$` on the file-validation hook
+    # in .pre-commit-config.yaml, so the two stay in agreement.
+    target = tmp_path / "config.json"
+    target.write_text("{}\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == [["uv", "run", "pre-commit", "run", "prettier", "--files", "config.json"]]
+
+
+def test_binary_file_is_skipped_entirely(tmp_path: Path) -> None:
+    # A binary file must never reach file-validation, which hard-fails on
+    # UnicodeDecodeError and would otherwise block every binary edit.
+    target = tmp_path / "image.png"
+    target.write_bytes(b"\x89PNG\r\n\x1a\n")
+    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == []
 
 
 def test_formatter_retry_after_rewrite_does_not_block(tmp_path: Path) -> None:
@@ -135,7 +169,7 @@ def test_windows_path_input_becomes_repo_relative_cli_argument(tmp_path: Path, p
     windows_path = str(target).replace("/", "\\") if path_style == "backslash" else target.as_posix()
     payload = {"cwd": str(tmp_path), "tool_input": {"file_path": windows_path}}
 
-    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
 
     assert commands[-1][-1] == "docs/windows.md"
 
@@ -149,11 +183,14 @@ def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> N
     payload = {"cwd": str(tmp_path), "tool_name": "Bash", "tool_input": {"command": "echo hi"}}
 
     with patch.object(HOOK, "changed_files", return_value=["docs/unrelated.md"]):
-        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/unrelated.md"]]
+    assert commands == [
+        ["uv", "run", "pre-commit", "run", "prettier", "--files", "docs/unrelated.md"],
+        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/unrelated.md"],
+    ]
 
 
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])

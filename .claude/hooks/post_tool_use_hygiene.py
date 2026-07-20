@@ -32,12 +32,33 @@ Design note — two-tier file resolution:
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
-TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
-FORMATTER_HOOKS = {".py": ("ruff", "ruff-format"), ".json": ("prettier",), ".toml": ("taplo-format",)}
+from identify.identify import tags_from_filename
+
+# Formatters with a fixed, narrow scope get an explicit mapping. Every other
+# text file falls through to `prettier`, which uses --ignore-unknown to no-op
+# on any extension it doesn't support — so new prettier-supported languages
+# (ts, html, css, ...) never need a new entry here.
+FORMATTER_HOOKS: dict[str, tuple[str, ...]] = {".py": ("ruff", "ruff-format"), ".toml": ("taplo-format",)}
+DEFAULT_FORMATTER_HOOKS: tuple[str, ...] = ("prettier",)
+
+# Mirrors the `file-validation` hook's `exclude` in .pre-commit-config.yaml so
+# the Claude hook and pre-commit agree on which files skip the English/UTF-8 check.
+FILE_VALIDATION_EXCLUDE = re.compile(r"^(uv\.lock|.*\.json)$")
+
+
+def is_text_file(rel_path: str) -> bool:
+    """Return True for files pre-commit would classify with the `text` tag.
+
+    Delegates to `identify` (a pre-commit dependency) instead of hand-maintaining
+    a suffix allowlist, so this stays in sync with the `types: [text]` filters
+    already used in .pre-commit-config.yaml.
+    """
+    return "text" in tags_from_filename(rel_path)
 
 
 def repo_root(cwd: str) -> Path:
@@ -158,14 +179,17 @@ def main() -> int:
 
     checks: list[str] = []
 
-    files = [f for f in event_files(event, root) if Path(f).suffix.lower() in TEXT_SUFFIXES]
+    files = [f for f in event_files(event, root) if is_text_file(f)]
     for rel_path in dict.fromkeys(files):
         suffix = Path(rel_path).suffix.lower()
 
-        for formatter_hook in FORMATTER_HOOKS.get(suffix, ()):
+        for formatter_hook in FORMATTER_HOOKS.get(suffix, DEFAULT_FORMATTER_HOOKS):
             code, stdout, stderr = run_hook(root, formatter_hook, rel_path)
             if code != 0:
                 checks.append(f"`{formatter_hook}` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
+
+        if FILE_VALIDATION_EXCLUDE.match(rel_path):
+            continue
 
         code, stdout, stderr = run_hook(root, "file-validation", rel_path)
         if code != 0:
