@@ -1,8 +1,9 @@
 ---
 paths:
-  - "**/*.py"
-  - "**/*.pyi"
+    - "**/*.py"
+    - "**/*.pyi"
 ---
+
 # Python Patterns
 
 ## Protocol (Duck Typing)

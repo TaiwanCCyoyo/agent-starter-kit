@@ -25,17 +25,17 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Language**: English only for all commit metadata: subject, body, and trailers.
 2. **Format**: `<type>[optional scope]: <description>`
-   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
+    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
 3. **Subject Line**:
-   - Use imperative mood, such as `add` instead of `added`.
-   - Start with lowercase.
-   - Do not end with a period.
-   - Keep under 50 characters when practical.
+    - Use imperative mood, such as `add` instead of `added`.
+    - Start with lowercase.
+    - Do not end with a period.
+    - Keep under 50 characters when practical.
 4. **Body**:
-   - Use for complex changes to explain why and how.
-   - Use a simple bullet list when helpful.
-   - Wrap each line at 72 characters.
-   - Leave one blank line between subject and body.
+    - Use for complex changes to explain why and how.
+    - Use a simple bullet list when helpful.
+    - Wrap each line at 72 characters.
+    - Leave one blank line between subject and body.
 
 ## AI Commit Trailers
 
@@ -47,8 +47,8 @@ This skill is the source of truth for high-quality commits in this project. All 
 - Do not add an `AI-Model` trailer; Claude model aliases and runtime overrides may vary.
 - If contributor-model context is missing or unclear and multiple agents materially contributed, `commit_specialist` must request it before drafting or committing.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
-  - `Agent-Status: autonomous` when Claude staged and committed without manual review of the final staged diff.
-  - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
+    - `Agent-Status: autonomous` when Claude staged and committed without manual review of the final staged diff.
+    - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
 - If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor and one shared `Agent-Status:` trailer for the commit execution mode. Do not invent contributor email addresses.
 

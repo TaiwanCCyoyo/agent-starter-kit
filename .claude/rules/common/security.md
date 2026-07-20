@@ -15,6 +15,7 @@
 ## Response Protocol
 
 If a security issue is found:
+
 1. STOP and use **security-reviewer** before continuing
 2. Rotate any exposed secrets immediately
 3. Review the codebase for similar issues

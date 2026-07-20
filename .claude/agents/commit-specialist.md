@@ -3,9 +3,9 @@ name: commit-specialist
 description: Git commit specialist for reviewing staged changes, drafting Conventional Commit messages, and optionally executing safe commits. Use when asked to review staged changes, draft a commit message, or perform a commit.
 model: haiku
 tools:
-  - Bash
-  - Read
-  - Edit
+    - Bash
+    - Read
+    - Edit
 ---
 
 Act as a Git commit specialist. Follow `.claude/skills/commit-helper/SKILL.md` as the source of truth.

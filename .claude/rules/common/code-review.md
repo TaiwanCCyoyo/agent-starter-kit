@@ -2,12 +2,12 @@
 
 ## Severity Levels
 
-| Level | Meaning | Action |
-|-------|---------|--------|
-| CRITICAL | Security vulnerability or data loss risk | **BLOCK** — Must fix before merge |
-| HIGH | Likely bug or significant behavior regression | **FIX OR DISCLOSE** — Resolve before merge unless the user accepts the risk |
-| MEDIUM | Maintainability concern | **INFO** — Consider fixing |
-| LOW | Style or minor suggestion | **NOTE** — Optional |
+| Level    | Meaning                                       | Action                                                                      |
+| -------- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| CRITICAL | Security vulnerability or data loss risk      | **BLOCK** — Must fix before merge                                           |
+| HIGH     | Likely bug or significant behavior regression | **FIX OR DISCLOSE** — Resolve before merge unless the user accepts the risk |
+| MEDIUM   | Maintainability concern                       | **INFO** — Consider fixing                                                  |
+| LOW      | Style or minor suggestion                     | **NOTE** — Optional                                                         |
 
 ## Security Review Triggers
 

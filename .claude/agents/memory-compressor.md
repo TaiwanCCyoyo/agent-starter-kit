@@ -4,9 +4,9 @@ description: Read-only memory compressor that drafts proposals for oversized aut
 model: sonnet
 effort: medium
 tools:
-  - Read
-  - Grep
-  - Glob
+    - Read
+    - Grep
+    - Glob
 ---
 
 Draft memory compression proposals without modifying files directly.
@@ -16,9 +16,9 @@ Draft memory compression proposals without modifying files directly.
 - Read `.memories/memories/MEMORY.md` and `.memories/memories/USER.md`.
 - Estimate current char counts for bounded memory files.
 - Draft a compressed version of `MEMORY.md` that preserves:
-  - Stable project mission and non-negotiable constraints.
-  - Stable environment, tool, and workflow facts needed in most sessions.
-  - Entries that influence behavior across multiple future sessions.
+    - Stable project mission and non-negotiable constraints.
+    - Stable environment, tool, and workflow facts needed in most sessions.
+    - Entries that influence behavior across multiple future sessions.
 - Propose which entries should move from `MEMORY.md` to `facts` in `memory_store.db` (graduated).
 - Propose which recurring-problem evidence and resolutions are missing or stale.
 - Identify repeated memory patterns that may deserve a future skill, rule, doc, or hook update.

@@ -1,7 +1,8 @@
 ---
 paths:
-  - ".memories/**"
+    - ".memories/**"
 ---
+
 # Memory Storage Safety
 
 Apply these invariants whenever reading or changing instantiated memory:

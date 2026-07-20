@@ -38,8 +38,8 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 - The main agent selects the ordered list of models that materially contributed to the committed work and supplies it to `commit_specialist`; committing alone is not a material contribution.
 - Emit one `AI-Model:` trailer per supplied model, in that order. The commit specialist must request it before drafting or committing when the list is missing, and must not infer or substitute its configured model.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
-  - `Agent-Status: autonomous` when Codex staged and committed without manual review of the final staged diff.
-  - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
+    - `Agent-Status: autonomous` when Codex staged and committed without manual review of the final staged diff.
+    - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
 - If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor and one shared `Agent-Status:` trailer for the commit execution mode. Do not invent contributor email addresses.
 - Example:

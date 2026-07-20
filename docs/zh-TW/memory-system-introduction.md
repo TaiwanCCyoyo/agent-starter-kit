@@ -18,15 +18,15 @@
 
 ## 職責
 
-| 儲存 | 用途 |
-| :--- | :--- |
-| `MEMORY.md` | 多數未來 session 都需要的穩定專案、環境與工具事實；最多 2,200 字元 |
-| `USER.md` | 穩定的使用者偏好與協作期待；最多 500 字元 |
-| `facts` | 可搜尋的決策、lesson、workflow、工具與環境事實 |
-| `entities`、`fact_entities`、`memory_banks`、`facts_fts` | 與 Holographic 相容的 entity、retrieval 與 FTS5 支援 |
-| `problem_patterns` | 重複 blocker、workaround、錯誤假設或混淆的穩定識別 |
-| `problem_occurrences` | 每次問題再次出現的具體證據 |
-| `resolutions` | Root cause、解法、驗證證據，以及相關 skill 或 instruction 修改 |
+| 儲存                                                     | 用途                                                               |
+| :------------------------------------------------------- | :----------------------------------------------------------------- |
+| `MEMORY.md`                                              | 多數未來 session 都需要的穩定專案、環境與工具事實；最多 2,200 字元 |
+| `USER.md`                                                | 穩定的使用者偏好與協作期待；最多 500 字元                          |
+| `facts`                                                  | 可搜尋的決策、lesson、workflow、工具與環境事實                     |
+| `entities`、`fact_entities`、`memory_banks`、`facts_fts` | 與 Holographic 相容的 entity、retrieval 與 FTS5 支援               |
+| `problem_patterns`                                       | 重複 blocker、workaround、錯誤假設或混淆的穩定識別                 |
+| `problem_occurrences`                                    | 每次問題再次出現的具體證據                                         |
+| `resolutions`                                            | Root cause、解法、驗證證據，以及相關 skill 或 instruction 修改     |
 
 Plan、已完成 plan、原始 transcript 與任意歷史文件不屬於長期記憶。請使用 Agent 原生 planning state、`.tmp/`、維護中的 `docs/` 與 Git history。
 

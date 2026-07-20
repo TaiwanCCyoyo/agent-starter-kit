@@ -2,6 +2,7 @@
 trigger: always_on
 description: Core Rule - Reuse Existing Implementations
 ---
+
 # Reuse Principles
 
 1. **Don't Reinvent the Wheel**: For complex tasks, significant features, or MCP server setups, always check reference open-source projects (e.g., `everything-claude-code`, `oh-my-openagent`) first.

@@ -18,15 +18,15 @@ The project memory system separates tracked agent infrastructure from local inst
 
 ## Responsibilities
 
-| Store | Purpose |
-| :--- | :--- |
-| `MEMORY.md` | Stable project, environment, and tool facts needed in most future sessions; <= 2,200 chars |
-| `USER.md` | Stable user preferences and collaboration expectations; <= 500 chars |
-| `facts` | Searchable decisions, lessons, workflows, tool facts, and environment facts |
-| `entities`, `fact_entities`, `memory_banks`, `facts_fts` | Holographic-compatible entity, retrieval, and FTS5 support |
-| `problem_patterns` | Stable identities for recurring blockers, workarounds, mistaken assumptions, or confusion |
-| `problem_occurrences` | Concrete evidence each time a problem recurs |
-| `resolutions` | Root causes, fixes, verification evidence, and related skill or instruction changes |
+| Store                                                    | Purpose                                                                                    |
+| :------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
+| `MEMORY.md`                                              | Stable project, environment, and tool facts needed in most future sessions; <= 2,200 chars |
+| `USER.md`                                                | Stable user preferences and collaboration expectations; <= 500 chars                       |
+| `facts`                                                  | Searchable decisions, lessons, workflows, tool facts, and environment facts                |
+| `entities`, `fact_entities`, `memory_banks`, `facts_fts` | Holographic-compatible entity, retrieval, and FTS5 support                                 |
+| `problem_patterns`                                       | Stable identities for recurring blockers, workarounds, mistaken assumptions, or confusion  |
+| `problem_occurrences`                                    | Concrete evidence each time a problem recurs                                               |
+| `resolutions`                                            | Root causes, fixes, verification evidence, and related skill or instruction changes        |
 
 Plans, completed plans, raw transcripts, and arbitrary historical documents are not long-term memory. Use agent-native planning state for in-session work, optional project-owned OpenSpec files for durable planning handoff, `.tmp/`, maintained `docs/`, and Git history.
 

@@ -24,22 +24,22 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Language**: English only for all commit metadata: subject, body, and trailers.
 2. **Format**: `<type>[optional scope]: <description>`
-   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
+    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
 3. **Subject Line**:
-   - Use imperative mood, such as `add` instead of `added`.
-   - Start with lowercase.
-   - Do not end with a period.
-   - Keep under 50 characters when practical.
+    - Use imperative mood, such as `add` instead of `added`.
+    - Start with lowercase.
+    - Do not end with a period.
+    - Keep under 50 characters when practical.
 4. **Body**:
-   - Use for complex changes to explain why and how.
-   - Wrap each line at 72 characters.
+    - Use for complex changes to explain why and how.
+    - Wrap each line at 72 characters.
 
 ## Agent Commit Trailers
 
 - Every commit drafted or executed by Antigravity must include `Agent: Antigravity`.
 - Every agent-created commit must include exactly one `Agent-Status` trailer:
-  - `Agent-Status: autonomous` when Antigravity staged and committed without manual review of the final staged diff.
-  - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
+    - `Agent-Status: autonomous` when Antigravity staged and committed without manual review of the final staged diff.
+    - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
 - Do not use `Co-Authored-By` as the primary agent identity marker. Use it only when the user explicitly wants GitHub co-author attribution.
 - If multiple agents materially contributed before the commit, add one `Agent:` trailer per agent in contribution order and one shared `Agent-Status:` trailer for the commit execution mode.

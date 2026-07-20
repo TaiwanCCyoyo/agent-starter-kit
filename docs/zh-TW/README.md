@@ -1,4 +1,5 @@
 [English Version](../../README.md)
+
 # AI Agent Starter Kit
 
 這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Codex、Claude Code 與 Antigravity。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
@@ -36,9 +37,9 @@
 使用多個 worktree 時，各 worktree 的記憶可能逐漸分歧。要把洞見合併回主 repository：
 
 1. 使用目前 Agent 的 worktree workflow：
-   ```bash
-   /worktree finish <path/to/worktree>
-   ```
+    ```bash
+    /worktree finish <path/to/worktree>
+    ```
 2. Agent 會執行 AI semantic consolidation，將高價值的 `Lessons Learned` 與 `Done` 項目合併回主要 `MEMORY.md`。
 
 ### 3. Agent 工作流程
@@ -51,26 +52,26 @@
 
 本 repository 使用各 Agent 原生 hooks 維護系統一致性：
 
-| Agent | Hook 類型 | 用途 | Script |
-| :--- | :--- | :--- | :--- |
-| **Codex** | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。 | `.codex/hooks/session_start.py` |
-| **Codex** | `PostToolUse` | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene；文件與設定檔只跑 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。 | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex** | `Stop` | 檢查記憶大小限制與 taxonomy。 | `.codex/hooks/memory_health_check.py` |
-| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。 | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check --fix` lint，並驗證 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | 檢查記憶大小限制與 taxonomy。 | `.claude/hooks/memory_health_check.py` |
-| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。 | `.agent/hooks/session_start.py` |
-| **Antigravity** | `PostToolUse` | 針對修改檔案執行 Ruff、mypy 與 file hygiene。 | `.agent/hooks/post_tool_use_hygiene.py` |
-| **Antigravity** | `Stop` | 檢查 bounded-file 限制與嚴格 memory taxonomy。 | `.agent/hooks/stop_memory_check.py` |
+| Agent           | Hook 類型      | 用途                                                                                                                                                              | Script                                                             |
+| :-------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
+| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。                                                                                                       | `.codex/hooks/session_start.py`                                    |
+| **Codex**       | `PostToolUse`  | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene；文件與設定檔只跑 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。              | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
+| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                                                                                                     | `.codex/hooks/memory_health_check.py`                              |
+| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。                                                                                                              | `.claude/hooks/session_start.py`                                   |
+| **Claude Code** | `PostToolUse`  | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check --fix` lint，並驗證 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py`                           |
+| **Claude Code** | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                                                                                                     | `.claude/hooks/memory_health_check.py`                             |
+| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。                                                                                                   | `.agent/hooks/session_start.py`                                    |
+| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                                                                                                                     | `.agent/hooks/post_tool_use_hygiene.py`                            |
+| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                                                                                                                    | `.agent/hooks/stop_memory_check.py`                                |
 
 ### Hook 疑難排解
 
 如果 hooks 沒有觸發：
 
 1. 確認 Git hooks 已安裝：
-   ```bash
-   uv run pre-commit install
-   ```
+    ```bash
+    uv run pre-commit install
+    ```
 2. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
 3. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
 4. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
@@ -106,36 +107,36 @@ Agent 透過 hooks 在本地端執行品質把關，但 CI pipeline 能在每次
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    quality:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install uv && uv sync --group dev
+            - name: Install dependencies
+              run: pip install uv && uv sync --group dev
 
-      - name: Lint
-        run: uv run ruff check --fix .
+            - name: Lint
+              run: uv run ruff check --fix .
 
-      - name: Type check
-        run: uv run mypy .
+            - name: Type check
+              run: uv run mypy .
 
-      - name: Test
-        run: uv run pytest
+            - name: Test
+              run: uv run pytest
 
-      - name: Secret scan
-        run: uv run pre-commit run detect-secrets --all-files
+            - name: Secret scan
+              run: uv run pre-commit run detect-secrets --all-files
 ```
 
 請調整 `pytest` 步驟以符合你的專案測試目錄，並將 Python 版本調整為與 `.python-version` 一致。
@@ -144,11 +145,11 @@ jobs:
 
 CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日常操作：
 
-| 任務 | 指令 |
-| :--- | :--- |
-| 查看失敗執行的日誌 | `gh run view <run-id> --log-failed` |
-| 重新執行失敗步驟 | `gh run rerun <run-id> --failed` |
-| 列出最近的失敗記錄 | `gh run list --status failure --limit 10` |
+| 任務                 | 指令                                            |
+| :------------------- | :---------------------------------------------- |
+| 查看失敗執行的日誌   | `gh run view <run-id> --log-failed`             |
+| 重新執行失敗步驟     | `gh run rerun <run-id> --failed`                |
+| 列出最近的失敗記錄   | `gh run list --status failure --limit 10`       |
 | 檢查 Dependabot 警示 | `gh api repos/{owner}/{repo}/dependabot/alerts` |
 
 需先安裝 `gh` CLI 並完成驗證（`gh auth login`）。
@@ -164,15 +165,15 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 套用到新專案時，依照支援的工具複製對應的 Agent 基礎設施：
 
-| Path | 用途 |
-| :--- | :--- |
-| `.memories/` | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。 |
-| `.agent/` | Antigravity rules、skills、workflows。 |
-| `.codex/` | Codex instructions、hooks、private command-like skills、specialist agents。 |
-| `.claude/` | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
-| `.vscode/` | 與 file hygiene 與 Python Ruff workflow 對齊的 workspace editor defaults。 |
-| `scripts/` | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。 |
-| `.pre-commit-config.yaml` | Repository 層級驗證 hooks。 |
+| Path                      | 用途                                                                                       |
+| :------------------------ | :----------------------------------------------------------------------------------------- |
+| `.memories/`              | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。           |
+| `.agent/`                 | Antigravity rules、skills、workflows。                                                     |
+| `.codex/`                 | Codex instructions、hooks、private command-like skills、specialist agents。                |
+| `.claude/`                | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
+| `.vscode/`                | 與 file hygiene 與 Python Ruff workflow 對齊的 workspace editor defaults。                 |
+| `scripts/`                | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。                     |
+| `.pre-commit-config.yaml` | Repository 層級驗證 hooks。                                                                |
 
 複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
 
@@ -197,23 +198,25 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 要初始化此儲存庫並設定驗證工具：
 
 1. **安裝 Git Hooks**
-   ```bash
-   uv run pre-commit install
-   ```
+    ```bash
+    uv run pre-commit install
+    ```
 2. **安裝開發相依套件**（包含 mypy 型別檢查器）
-   ```bash
-   uv sync --group dev
-   ```
+    ```bash
+    uv sync --group dev
+    ```
 3. **驗證環境設定**
-   ```bash
-   uv run ruff check --fix .
-   ```
+    ```bash
+    uv run ruff check --fix .
+    ```
 4. **設定 Antigravity MCP**
 
-   Antigravity 的 SQLite `memory-db` MCP server 必須設定在平台支援的全域設定中，例如使用者家目錄下的 `~/.mcp.json`。
+    Antigravity 的 SQLite `memory-db` MCP server 必須設定在平台支援的全域設定中，例如使用者家目錄下的 `~/.mcp.json`。
 
 ### 為新專案初始化記憶
+
 儲存庫初始化完成後：
+
 1. 請確認 `.memories/memories/MEMORY.md` 已記錄必要的專案長期資訊。
 
 ---

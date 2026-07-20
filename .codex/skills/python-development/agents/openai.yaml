@@ -1,4 +1,4 @@
 interface:
-  display_name: "Python Development"
-  short_description: "Apply repository Python development rules"
-  default_prompt: "Apply the repository Python development rules to this change."
+    display_name: "Python Development"
+    short_description: "Apply repository Python development rules"
+    default_prompt: "Apply the repository Python development rules to this change."

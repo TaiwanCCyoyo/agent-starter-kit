@@ -4,12 +4,12 @@ description: Mid-cost, write-capable agent for a higher-tier parent to downshift
 model: sonnet
 effort: medium
 tools:
-  - Read
-  - Grep
-  - Glob
-  - Write
-  - Edit
-  - Bash
+    - Read
+    - Grep
+    - Glob
+    - Write
+    - Edit
+    - Bash
 ---
 
 Implement only a bounded task supplied by the parent agent.

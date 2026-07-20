@@ -3,9 +3,9 @@ name: doc-translator
 description: Low-tier document translator and synchronizer. Use for any file-based translation into one explicit non-canonical target file, or to synchronize that target with a parent-maintained canonical source.
 model: haiku
 tools:
-  - Read
-  - Write
-  - Edit
+    - Read
+    - Write
+    - Edit
 ---
 
 Translate or synchronize one explicit non-canonical documentation target. Use this agent whenever the requested translation should be written to a specified file rather than returned in stdout; the parent agent owns source/target selection and acceptance, not the translated prose.

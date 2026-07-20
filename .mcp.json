@@ -1,13 +1,13 @@
 {
-  "mcpServers": {
-    "memory-db": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-sqlite",
-        "--db-path",
-        "${CLAUDE_PROJECT_DIR:-.}/.memories/memory_store.db"
-      ],
-      "env": {}
+    "mcpServers": {
+        "memory-db": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-sqlite",
+                "--db-path",
+                "${CLAUDE_PROJECT_DIR:-.}/.memories/memory_store.db"
+            ],
+            "env": {}
+        }
     }
-  }
 }

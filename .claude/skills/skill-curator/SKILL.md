@@ -6,6 +6,7 @@ description: Use for evaluating session patterns via /learn-eval, managing the s
 # Skill Curator
 
 This skill governs two activities:
+
 1. **Session Extraction** — triggered by `/learn-eval`, evaluates whether session patterns deserve skill files.
 2. **Lifecycle Management** — periodic curation of existing skills (active → stale → archived).
 
@@ -23,6 +24,7 @@ Ordered by priority:
 4. **Outdated skill that was corrected**: if a loaded skill contained wrong guidance that the user or task corrected, update it rather than create a new one.
 
 **Do NOT save:**
+
 - Environment-dependent failures (missing PATH, wrong credentials, OS-specific transient)
 - Negative tool claims that might be wrong ("tool X can't do Y" — verify before saving)
 - Transient errors that were resolved without a reusable fix
@@ -52,12 +54,12 @@ Run all checks before drafting a verdict:
 
 After the checklist, choose one:
 
-| Verdict | Meaning | Next Action |
-|---------|---------|-------------|
-| **Save** | Unique, specific, well-scoped, passes checklist | Draft skill → present to user → save on approval |
-| **Improve then Save** | Valuable but draft needs refinement | List improvements → revise → re-evaluate once |
-| **Absorb into [X]** | Should be appended to existing skill at path [X] | Show diff-style additions → append on approval |
-| **Drop** | Trivial, redundant, environment-specific, or one-off | Explain reasoning; no confirmation needed |
+| Verdict               | Meaning                                              | Next Action                                      |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------------ |
+| **Save**              | Unique, specific, well-scoped, passes checklist      | Draft skill → present to user → save on approval |
+| **Improve then Save** | Valuable but draft needs refinement                  | List improvements → revise → re-evaluate once    |
+| **Absorb into [X]**   | Should be appended to existing skill at path [X]     | Show diff-style additions → append on approval   |
+| **Drop**              | Trivial, redundant, environment-specific, or one-off | Explain reasoning; no confirmation needed        |
 
 **Verdict output format:**
 
@@ -75,11 +77,11 @@ After the checklist, choose one:
 
 ### Save Location
 
-| Pattern type | Location |
-|---|---|
-| Cross-project (bash behavior, API quirks, general debugging) | `~/.claude/skills/learned/` |
-| This-project-specific (config quirks, architecture conventions) | `.claude/skills/learned/` |
-| Improvement to an existing bundled skill | Edit the skill in place |
+| Pattern type                                                    | Location                    |
+| --------------------------------------------------------------- | --------------------------- |
+| Cross-project (bash behavior, API quirks, general debugging)    | `~/.claude/skills/learned/` |
+| This-project-specific (config quirks, architecture conventions) | `.claude/skills/learned/`   |
+| Improvement to an existing bundled skill                        | Edit the skill in place     |
 
 When in doubt, choose project-scoped (`.claude/skills/learned/`). Moving project → global is easier than the reverse.
 
@@ -112,11 +114,11 @@ Skill states mirror Hermes' curator model. Review `.claude/skills/` periodically
 
 ### States
 
-| State | Condition | Action |
-|-------|-----------|--------|
-| **active** | Used or referenced in the last 30 days | No action needed |
-| **stale** | Not used for 30–90 days | Mark for review; consider merging or archiving |
-| **archived** | Not used for 90+ days | Move to `.claude/skills/archived/<name>/` |
+| State        | Condition                              | Action                                         |
+| ------------ | -------------------------------------- | ---------------------------------------------- |
+| **active**   | Used or referenced in the last 30 days | No action needed                               |
+| **stale**    | Not used for 30–90 days                | Mark for review; consider merging or archiving |
+| **archived** | Not used for 90+ days                  | Move to `.claude/skills/archived/<name>/`      |
 
 Criteria for "used": the skill was loaded, referenced in a session, or explicitly invoked via command.
 

@@ -2,6 +2,7 @@
 trigger: always_on
 description: Test-Driven Development (TDD) Enforcement Rule (MIT Licensed, adapted from obra/superpowers)
 ---
+
 # Test-Driven Development (TDD) Rules
 
 > [!NOTE]

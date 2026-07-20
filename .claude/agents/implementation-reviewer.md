@@ -4,10 +4,10 @@ description: Read-only implementation reviewer for checking correctness, style c
 model: opus
 effort: high
 tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+    - Read
+    - Grep
+    - Glob
+    - Bash
 ---
 
 Review implementation without modifying files.

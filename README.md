@@ -1,4 +1,5 @@
 [繁體中文](docs/zh-TW/README.md)
+
 # AI Agent Starter Kit
 
 A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
@@ -38,9 +39,9 @@ For a detailed architecture, setup model, and copy checklist, see [Memory System
 When working with multiple worktrees, memories can diverge. To bring insights back to the main repository:
 
 1. Use the active agent's worktree workflow:
-   ```bash
-   /worktree finish <path/to/worktree>
-   ```
+    ```bash
+    /worktree finish <path/to/worktree>
+    ```
 2. The agent performs AI semantic consolidation to merge high-signal `Lessons Learned` and `Done` items into the primary `MEMORY.md`.
 
 ### 3. Agent Workflows
@@ -53,26 +54,26 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 
 This repository uses agent-native hooks to maintain system integrity:
 
-| Agent | Hook Type | Purpose | Script |
-| :--- | :--- | :--- | :--- |
-| **Codex** | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context. | `.codex/hooks/session_start.py` |
-| **Codex** | `PostToolUse` | Runs targeted post-edit hygiene. Python files use Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex** | `Stop` | Checks memory size limits and taxonomy. | `.codex/hooks/memory_health_check.py` |
-| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context. | `.claude/hooks/session_start.py` |
-| **Claude Code** | `PostToolUse` | Python uses Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop` | Checks memory size limits and taxonomy. | `.claude/hooks/memory_health_check.py` |
-| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files. | `.agent/hooks/session_start.py` |
-| **Antigravity** | `PostToolUse` | Runs targeted Ruff, mypy, and file-hygiene checks. | `.agent/hooks/post_tool_use_hygiene.py` |
-| **Antigravity** | `Stop` | Checks bounded-file limits and rejects legacy memory taxonomy. | `.agent/hooks/stop_memory_check.py` |
+| Agent           | Hook Type      | Purpose                                                                                                                                                               | Script                                                             |
+| :-------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
+| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                                                                                             | `.codex/hooks/session_start.py`                                    |
+| **Codex**       | `PostToolUse`  | Runs targeted post-edit hygiene. Python files use Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
+| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                                                                                               | `.codex/hooks/memory_health_check.py`                              |
+| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context.                                                                                                    | `.claude/hooks/session_start.py`                                   |
+| **Claude Code** | `PostToolUse`  | Python uses Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`.                                       | `.claude/hooks/post_tool_use_hygiene.py`                           |
+| **Claude Code** | `Stop`         | Checks memory size limits and taxonomy.                                                                                                                               | `.claude/hooks/memory_health_check.py`                             |
+| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.                                                                                    | `.agent/hooks/session_start.py`                                    |
+| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                                                                                                    | `.agent/hooks/post_tool_use_hygiene.py`                            |
+| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                                                                                        | `.agent/hooks/stop_memory_check.py`                                |
 
 ### Troubleshooting Hooks
 
 If hooks are not firing:
 
 1. Ensure Git hooks are installed:
-   ```bash
-   uv run pre-commit install
-   ```
+    ```bash
+    uv run pre-commit install
+    ```
 2. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
 3. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
 4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
@@ -108,36 +109,36 @@ Create `.github/workflows/ci.yml` in your project:
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    quality:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install uv && uv sync --group dev
+            - name: Install dependencies
+              run: pip install uv && uv sync --group dev
 
-      - name: Lint
-        run: uv run ruff check --fix .
+            - name: Lint
+              run: uv run ruff check --fix .
 
-      - name: Type check
-        run: uv run mypy .
+            - name: Type check
+              run: uv run mypy .
 
-      - name: Test
-        run: uv run pytest
+            - name: Test
+              run: uv run pytest
 
-      - name: Secret scan
-        run: uv run pre-commit run detect-secrets --all-files
+            - name: Secret scan
+              run: uv run pre-commit run detect-secrets --all-files
 ```
 
 Adjust the `pytest` step to match your project's test directory and the Python version to match `.python-version`.
@@ -146,11 +147,11 @@ Adjust the `pytest` step to match your project's test directory and the Python v
 
 Once CI is configured, use the `github-ops` skill (via Claude Code) for operational tasks:
 
-| Task | Command |
-| :--- | :--- |
-| View failed run logs | `gh run view <run-id> --log-failed` |
-| Re-run failed steps | `gh run rerun <run-id> --failed` |
-| List recent failures | `gh run list --status failure --limit 10` |
+| Task                    | Command                                         |
+| :---------------------- | :---------------------------------------------- |
+| View failed run logs    | `gh run view <run-id> --log-failed`             |
+| Re-run failed steps     | `gh run rerun <run-id> --failed`                |
+| List recent failures    | `gh run list --status failure --limit 10`       |
 | Check Dependabot alerts | `gh api repos/{owner}/{repo}/dependabot/alerts` |
 
 Requires `gh` CLI installed and authenticated (`gh auth login`).
@@ -166,15 +167,15 @@ Requires `gh` CLI installed and authenticated (`gh auth login`).
 
 When applying this starter kit to a new project, copy the agent infrastructure that matches your supported tools:
 
-| Path | Purpose |
-| :--- | :--- |
-| `.memories/` | Git-ignored instantiated memory: bounded files and SQLite store. |
-| `.agent/` | Antigravity rules, skills, and workflows. |
-| `.codex/` | Codex instructions, hooks, private command-like skills, and specialist agents. |
-| `.claude/` | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
-| `.vscode/` | Workspace editor defaults that match file hygiene and Python Ruff workflows. |
-| `scripts/` | Repository-level hygiene and formatting scripts used by Git and agent adapters. |
-| `.pre-commit-config.yaml` | Repository-level verification hooks. |
+| Path                      | Purpose                                                                                       |
+| :------------------------ | :-------------------------------------------------------------------------------------------- |
+| `.memories/`              | Git-ignored instantiated memory: bounded files and SQLite store.                              |
+| `.agent/`                 | Antigravity rules, skills, and workflows.                                                     |
+| `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                |
+| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
+| `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                  |
+| `scripts/`                | Repository-level hygiene and formatting scripts used by Git and agent adapters.               |
+| `.pre-commit-config.yaml` | Repository-level verification hooks.                                                          |
 
 After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
 
@@ -199,32 +200,35 @@ This starter kit is shaped by two open-source projects:
 To initialize this repository and set up verification tools:
 
 1. **Install Git Hooks**
-   ```bash
-   uv run pre-commit install
-   ```
+    ```bash
+    uv run pre-commit install
+    ```
 2. **Install Dev Dependencies** (includes mypy for type checking)
-   ```bash
-   uv sync --group dev
-   ```
+    ```bash
+    uv sync --group dev
+    ```
 3. **Verify Environment**
-   ```bash
-   uv run ruff check --fix .
-   ```
+    ```bash
+    uv run ruff check --fix .
+    ```
 4. **Initialize OpenSpec When Needed**
 
-   Install the OpenSpec CLI in your user environment, then initialize planning state per project or workspace:
-   ```bash
-   openspec init
-   ```
+    Install the OpenSpec CLI in your user environment, then initialize planning state per project or workspace:
 
-   This starter kit does not commit the `openspec/` directory created by initializing the template repository itself. Downstream projects should treat their own OpenSpec specs, changes, and tasks as regular project files and commit them when those artifacts define project planning or requirements.
+    ```bash
+    openspec init
+    ```
+
+    This starter kit does not commit the `openspec/` directory created by initializing the template repository itself. Downstream projects should treat their own OpenSpec specs, changes, and tasks as regular project files and commit them when those artifacts define project planning or requirements.
 
 5. **Antigravity MCP Setup**
 
-   If you are using Antigravity, note that it requires MCP servers to be configured globally. Please configure your SQLite memory-db MCP server in your home directory (e.g., `~/.mcp.json`).
+    If you are using Antigravity, note that it requires MCP servers to be configured globally. Please configure your SQLite memory-db MCP server in your home directory (e.g., `~/.mcp.json`).
 
 ### Initializing Memory for New Projects
+
 Once the repository is initialized:
+
 1. Ensure `.memories/memories/MEMORY.md` contains the target project's stable mission and constraints.
 
 ---

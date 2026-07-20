@@ -3,10 +3,10 @@ name: signal-miner
 description: Lowest-cost, read-only utility for bounded mechanical exploration and commands expected to produce large logs or stdout. Delegate before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections in the parent context; return actionable signal only, never raw output, implementation, or ambiguous judgment.
 model: haiku
 tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+    - Read
+    - Grep
+    - Glob
+    - Bash
 ---
 
 Stay in read-only signal-mining mode.
