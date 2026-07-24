@@ -60,7 +60,7 @@
 - Add E2E tests only for critical user flows when the repository has an E2E harness.
 - Run coverage when requested or when risk makes untested paths important; do not impose a universal percentage.
 - Use descriptive test names and the Arrange-Act-Assert structure when it improves clarity.
-- Rely on configured hooks for baseline hygiene checks; do not manually rerun hook-backed checks only to create evidence.
+- A successful post-edit hygiene hook is verification evidence for its touched files; do not manually rerun hook-backed checks only to create evidence.
 - Run additional task-specific checks when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
 - Manually rerun hook-backed checks only when changing hook scripts, validating hook behavior, debugging an uncertain or failed hook, or performing an explicit commit/pre-commit workflow.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk.

@@ -15,7 +15,8 @@ Use `python-development` separately for coding style, typing, logging, secrets, 
 - Use `uv run python -m pytest .codex/hooks/tests` for focused Codex hook verification.
 - Do not use `uv run pytest` as final evidence on this repository; its console entry point may omit the repository root from `sys.path`.
 - Do not rely on pytest's default recursive discovery for Codex hook tests because hidden directories such as `.codex/` are excluded by default.
-- Use `uv run ruff check --fix .` for lint verification.
+- A successful post-edit hygiene hook is sufficient Ruff evidence for its touched files; do not rerun Ruff by default.
+- For an explicit full-repository check (hook changes/debugging, commit workflow, or user request), use `uv run ruff check .` and `uv run ruff format --check .` so verification does not modify files.
 - Use `uv run mypy .` as the full-project type gate.
 - Do not treat single-file mypy results as final evidence because project context can affect type checking.
 

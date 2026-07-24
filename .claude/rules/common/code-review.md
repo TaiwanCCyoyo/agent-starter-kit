@@ -22,5 +22,5 @@ Security-sensitive changes → see the trigger list in `security.md`; route to `
 ## Reviewers
 
 - Pre-commit correctness → `implementation-reviewer`
-- Broader quality review → `code-reviewer`
+- Broader quality review → built-in `/code-review` or `implementation-reviewer`
 - Security-sensitive changes → `security-reviewer`

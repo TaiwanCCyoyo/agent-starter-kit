@@ -25,7 +25,7 @@ Apply the repository's Python development baseline without duplicating test comm
 
 ## Hooks And Verification
 
-- Treat `.codex/hooks/post_tool_use_hygiene.py` as fast targeted feedback for Codex edits.
+- Treat `.codex/hooks/post_tool_use_hygiene.py` as authoritative targeted feedback for Codex edits. A successful result is sufficient evidence for the touched file; do not manually rerun Ruff.
 - Keep full-project mypy as an explicit, pre-commit, or CI gate rather than a post-edit hook.
 - Use `python-testing` for exact pytest, Ruff, mypy, coverage, hook-fixture, and Windows-path verification.
 

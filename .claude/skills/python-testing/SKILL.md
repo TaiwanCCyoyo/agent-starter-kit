@@ -1,6 +1,6 @@
 ---
 name: python-testing
-description: Repository-specific Python verification requirements. Run all Python commands through uv run; use these exact commands for type checking and linting.
+description: Repository-specific Python verification requirements. Run Python commands through uv run; post-edit hooks own baseline formatting and linting.
 origin: ECC (narrowed — general pytest workflow is owned by superpowers:test-driven-development)
 ---
 
@@ -23,17 +23,18 @@ uv run pytest
 
 pytest does not recursively discover hidden directories (`.claude/`, `.codex/`) by default. Always pass the paths explicitly.
 
-## Linting and Type Checking
+## Explicit Full-Repository Checks
 
 ```bash
-# Lint
-uv run ruff check --fix .
+# Check-only Ruff verification; use only for hook changes/debugging, an explicit commit workflow, or when requested.
+uv run ruff check .
+uv run ruff format --check .
 
 # Type gate — run against the whole project, not a single file
 uv run mypy .
 ```
 
-Do not use single-file mypy as final evidence of type correctness. `uv run mypy .` is the accepted gate.
+Do not use single-file mypy as final evidence of type correctness. `uv run mypy .` is the accepted gate. Ruff's post-edit hook owns formatting and linting for touched files; do not run the full-repository Ruff commands merely to create evidence.
 
 ## Hook Test Location
 

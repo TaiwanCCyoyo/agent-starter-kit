@@ -38,7 +38,7 @@ Do not repeat an unverified workaround: investigate the root cause, surface any 
 - For non-trivial changes, state the goal and verification commands before editing.
 - Run the stated verification commands and share the output as evidence.
 - Do not claim completion without verification evidence.
-- Rely on configured hooks for baseline hygiene; rerun them only when changing or debugging hooks or during an explicit commit workflow.
+- A successful post-edit hygiene hook is the verification evidence for its touched files; do not manually rerun its checks. Rerun hook-backed checks only when changing or debugging hooks or during an explicit commit workflow.
 - Run additional task-specific checks when the change affects behavior, generated output, hooks, commands, documentation links, or user-facing workflows.
 - When adding or modifying a hook or script, include at least one functional test for it before marking done.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk explicitly.

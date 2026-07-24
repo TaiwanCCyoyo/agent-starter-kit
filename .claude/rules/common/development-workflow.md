@@ -17,7 +17,7 @@ Each phase has a designated owner — use it rather than re-deriving the workflo
 | Plan          | Native Plan Mode / optional OpenSpec project files / `superpowers:writing-plans` + `executing-plans` / `plan-reviewer` |
 | TDD           | `superpowers:test-driven-development`                                                                                  |
 | Debug         | `superpowers:systematic-debugging`                                                                                     |
-| Review        | `implementation-reviewer` → `code-reviewer` → `superpowers:requesting-code-review`                                     |
+| Review        | `implementation-reviewer` or built-in `/code-review` → `superpowers:requesting-code-review`                            |
 | Verify        | `superpowers:verification-before-completion`                                                                           |
 | Commit        | `/gen-commit` (`commit-helper` skill)                                                                                  |
 | Prepare PR    | `github-ops` skill (full branch history, `base...HEAD` diff, summary, test plan)                                       |
