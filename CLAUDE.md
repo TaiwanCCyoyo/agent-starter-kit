@@ -35,11 +35,11 @@ Do not repeat an unverified workaround: investigate the root cause, surface any 
 
 ## Verification
 
-- For non-trivial changes, state the goal and verification commands before editing.
-- Run the stated verification commands and share the output as evidence.
-- Do not claim completion without verification evidence.
-- A successful post-edit hygiene hook is the verification evidence for its touched files; do not manually rerun its checks. Rerun hook-backed checks only when changing or debugging hooks or during an explicit commit workflow.
-- Run additional task-specific checks when the change affects behavior, generated output, hooks, commands, documentation links, or user-facing workflows.
+- For non-trivial changes, state the goal and task-specific verification before editing.
+- Run the stated task-specific verification and share the output as evidence.
+- Base completion claims on verification evidence.
+- Use post-edit hooks for touched-file hygiene, pre-commit for staged gates, and CI for repository-wide gates.
+- Run additional task-specific tests when the change affects behavior, generated output, hooks, commands, documentation links, or user-facing workflows.
 - When adding or modifying a hook or script, include at least one functional test for it before marking done.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk explicitly.
 

@@ -21,6 +21,26 @@ def test_pre_commit_mypy_receives_targeted_python_files() -> None:
     assert mypy_hook["types"] == ["python"]
 
 
+def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
+    config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
+    hook_ids = {hook["id"] for repo in config["repos"] for hook in repo["hooks"]}
+    instruction_files = [
+        ROOT / "CLAUDE.md",
+        ROOT / ".codex" / "AGENTS.md",
+        *sorted((ROOT / ".agent" / "rules").rglob("*.md")),
+        *sorted((ROOT / ".agent" / "skills").rglob("*.md")),
+        *sorted((ROOT / ".claude" / "rules").rglob("*.md")),
+        *sorted((ROOT / ".claude" / "skills").rglob("*.md")),
+        *sorted((ROOT / ".codex" / "skills").rglob("*.md")),
+    ]
+
+    assert {"mypy", "ruff", "ruff-format"} <= hook_ids
+    for path in instruction_files:
+        content = path.read_text(encoding="utf-8").lower()
+        assert "uv run ruff" not in content, path
+        assert "uv run mypy" not in content, path
+
+
 def test_ruff_uses_inline_e402_suppression_for_session_hook_bootstrap() -> None:
     ruff_config = (ROOT / "ruff.toml").read_text(encoding="utf-8")
 

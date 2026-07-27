@@ -8,17 +8,13 @@ description: Apply repository-specific verification requirements to Python scrip
 Use this skill when Python scripts, hooks, or reusable tooling change.
 Use `python-development` separately for coding style, typing, logging, secrets, security routing, and FastAPI design.
 
-## Repository Checks
+## Repository Tests
 
 - Run Python commands through the project-managed environment with `uv run`.
 - Use `uv run python -m pytest scripts/tests .codex/hooks/tests` for the complete repository test suite so the repository root is importable on Windows and Codex hook tests are included.
 - Use `uv run python -m pytest .codex/hooks/tests` for focused Codex hook verification.
-- Do not use `uv run pytest` as final evidence on this repository; its console entry point may omit the repository root from `sys.path`.
-- Do not rely on pytest's default recursive discovery for Codex hook tests because hidden directories such as `.codex/` are excluded by default.
-- A successful post-edit hygiene hook is sufficient Ruff evidence for its touched files; do not rerun Ruff by default.
-- For an explicit full-repository check (hook changes/debugging, commit workflow, or user request), use `uv run ruff check .` and `uv run ruff format --check .` so verification does not modify files.
-- Use `uv run mypy .` as the full-project type gate.
-- Do not treat single-file mypy results as final evidence because project context can affect type checking.
+- Invoke pytest through `uv run python -m pytest` so the repository root remains importable on Windows.
+- Pass hidden hook test directories explicitly because pytest discovery excludes them.
 
 ## Hook And Script Coverage
 

@@ -5,7 +5,7 @@ description: Use when creating, modifying, or reviewing non-test Python producti
 
 # Python Development
 
-Apply the repository's Python development baseline without duplicating test commands owned by `python-testing`.
+Apply the repository's Python development baseline.
 
 ## Core Rules
 
@@ -25,9 +25,8 @@ Apply the repository's Python development baseline without duplicating test comm
 
 ## Hooks And Verification
 
-- Treat `.codex/hooks/post_tool_use_hygiene.py` as authoritative targeted feedback for Codex edits. A successful result is sufficient evidence for the touched file; do not manually rerun Ruff.
-- Keep full-project mypy as an explicit or CI gate rather than a pre-commit or post-edit hook.
-- Use `python-testing` for exact pytest, Ruff, mypy, coverage, hook-fixture, and Windows-path verification.
+- Use Codex post-edit hooks for touched-file feedback and pre-commit for staged gates.
+- Use `python-testing` for pytest, coverage, hook fixtures, and Windows-path verification.
 
 ## FastAPI
 

@@ -1,6 +1,6 @@
 ---
 name: python-testing
-description: Repository-specific Python verification requirements. Run Python commands through uv run; post-edit hooks own baseline formatting and linting.
+description: Repository-specific Python behavioral test, hook fixture, Windows path, and optional coverage requirements.
 origin: ECC (narrowed — general pytest workflow is owned by superpowers:test-driven-development)
 ---
 
@@ -17,31 +17,16 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 # Claude hook tests only
 uv run python -m pytest .claude/hooks/tests
 
-# Wrong on Windows — console entry point does not place repo root on sys.path
-uv run pytest
 ```
 
-pytest does not recursively discover hidden directories (`.claude/`, `.codex/`) by default. Always pass the paths explicitly.
-
-## Explicit Full-Repository Checks
-
-```bash
-# Check-only Ruff verification; use only for hook changes/debugging, an explicit commit workflow, or when requested.
-uv run ruff check .
-uv run ruff format --check .
-
-# Type gate — run against the whole project, not a single file
-uv run mypy .
-```
-
-Do not use single-file mypy as final evidence of type correctness. `uv run mypy .` is the accepted gate. Ruff's post-edit hook owns formatting and linting for touched files; do not run the full-repository Ruff commands merely to create evidence.
+Invoke pytest through `uv run python -m pytest` so the repository root remains importable on Windows. Pass hidden hook test directories (`.claude/`, `.codex/`) explicitly because pytest discovery excludes them.
 
 ## Hook Test Location
 
 - Keep Claude-specific hook contract tests under `.claude/hooks/tests/`.
 - Keep Codex-specific hook contract tests under `.codex/hooks/tests/`.
 - Keep cross-agent script tests (e.g. `scripts/file_hygiene.py`) under `scripts/tests/`.
-- Do not use Codex hook tests as evidence for Claude hook contracts, or vice versa.
+- Use each agent's own hook tests as evidence for that agent's contracts.
 - Give test files agent-prefixed basenames (e.g. `test_claude_post_tool_use_hygiene.py`) to avoid pytest module name collisions when the same logical test exists in both `.claude/` and `.codex/` directories.
 
 ## Hook and Script Tests

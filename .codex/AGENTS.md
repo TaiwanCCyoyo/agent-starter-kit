@@ -54,24 +54,21 @@
 
 ## Verification
 
-- After editing, run those checks and report the evidence.
+- After editing, run task-specific tests and report the evidence.
 - Add the smallest direct test for changed behavior and failure modes.
 - Add integration tests when a change crosses a real component, process, database, filesystem, or network boundary.
 - Add E2E tests only for critical user flows when the repository has an E2E harness.
 - Run coverage when requested or when risk makes untested paths important; do not impose a universal percentage.
 - Use descriptive test names and the Arrange-Act-Assert structure when it improves clarity.
-- A successful post-edit hygiene hook is verification evidence for its touched files; do not manually rerun hook-backed checks only to create evidence.
-- Run additional task-specific checks when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
-- Manually rerun hook-backed checks only when changing hook scripts, validating hook behavior, debugging an uncertain or failed hook, or performing an explicit commit/pre-commit workflow.
+- Use agent post-tool hooks for touched-file hygiene, pre-commit for staged gates, and CI for repository-wide gates.
+- Run additional task-specific tests when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
 - When adding or modifying a hook or script, include at least one functional regression test.
-- Treat agent post-tool hooks as fast feedback and pre-commit/CI as commit-blocking gates.
-- Keep full-project `mypy .` in CI or explicit verification rather than pre-commit or Codex post-edit hooks.
 
 ## Skills And Subagents
 
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
-- Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python verification commands and test fixtures.
+- Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python test commands and fixtures.
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
 - Before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or other commands expected to produce large stdout or logs, route the command to `signal_miner` when delegation is authorized; do not first flood the main context to confirm that the output is large.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main agent or the designated reviewer.
