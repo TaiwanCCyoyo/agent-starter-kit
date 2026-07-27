@@ -12,4 +12,4 @@ The repository hook in `.claude/settings.json` runs `.claude/hooks/post_tool_use
 
 ## Warnings
 
-- Full-project `uv run mypy .` remains a pre-commit or explicit verification gate.
+- Full-project `uv run mypy .` remains a CI or explicit verification gate.

@@ -33,10 +33,9 @@ repos:
             types: [text]
             exclude: ^(uv\.lock|.*\.json)$ # Optional: exclude specific auto-generated files if needed
           - id: mypy
-            name: Mypy (Project Type Check)
-            entry: uv run mypy .
+            name: Mypy (Targeted Python Check)
+            entry: uv run mypy
             language: system
-            pass_filenames: false
             types: [python]
 
     # Ruff (Python Linter & Formatter)

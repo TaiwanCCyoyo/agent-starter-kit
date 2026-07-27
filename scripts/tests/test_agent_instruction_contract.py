@@ -1,12 +1,24 @@
 import tomllib
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_HOOKS = (
     ROOT / ".agent" / "hooks" / "session_start.py",
     ROOT / ".claude" / "hooks" / "session_start.py",
     ROOT / ".codex" / "hooks" / "session_start.py",
 )
+
+
+def test_pre_commit_mypy_receives_targeted_python_files() -> None:
+    config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
+    local_repo = next(repo for repo in config["repos"] if repo["repo"] == "local")
+    mypy_hook = next(hook for hook in local_repo["hooks"] if hook["id"] == "mypy")
+
+    assert mypy_hook["entry"] == "uv run mypy"
+    assert mypy_hook.get("pass_filenames", True) is True
+    assert mypy_hook["types"] == ["python"]
 
 
 def test_ruff_uses_inline_e402_suppression_for_session_hook_bootstrap() -> None:

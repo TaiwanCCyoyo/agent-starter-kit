@@ -66,7 +66,7 @@
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
 - When adding or modifying a hook or script, include at least one functional regression test.
 - Treat agent post-tool hooks as fast feedback and pre-commit/CI as commit-blocking gates.
-- Keep full-project `mypy .` in pre-commit or CI rather than Codex post-edit hooks.
+- Keep full-project `mypy .` in CI or explicit verification rather than pre-commit or Codex post-edit hooks.
 
 ## Skills And Subagents
 
