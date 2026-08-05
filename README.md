@@ -18,7 +18,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 - **Shared development rules**: Codex and Claude Code now use the same phase routing model: native planning for in-session plans, optional downstream OpenSpec files for durable planning handoff, Superpowers for TDD/debugging/verification/branch completion, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
 - **OpenSpec CLI dependency**: Spec-driven planning expects the OpenSpec CLI to be installed by the user. Run `openspec init` in each downstream project or workspace that wants OpenSpec planning, then treat the generated specs, changes, and tasks as normal project files and commit them when they are part of the project record.
-- **Ruff with fixes enabled**: Local hooks, pre-commit, and CI examples use `ruff check --fix` plus `ruff format` so import cleanup and auto-fixable lint issues are handled consistently.
+- **Layered verification**: Claude Code uses the official Pyright LSP plugin plus a read-only Ruff check for `E722,F601,F602,F634`; Codex uses a broader read-only `F` check because it has no Python LSP. Both use pre-commit before completion for authoritative formatting, linting, type checking, and file validation.
 - **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
 - **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
 
@@ -54,17 +54,17 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 
 This repository uses agent-native hooks to maintain system integrity:
 
-| Agent           | Hook Type      | Purpose                                                                                                                                                               | Script                                                             |
-| :-------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                                                                                             | `.codex/hooks/session_start.py`                                    |
-| **Codex**       | `PostToolUse`  | Runs targeted post-edit hygiene. Python files use Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`. | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                                                                                               | `.codex/hooks/memory_health_check.py`                              |
-| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context.                                                                                                    | `.claude/hooks/session_start.py`                                   |
-| **Claude Code** | `PostToolUse`  | Python uses Ruff; JSON uses Prettier; TOML uses Taplo; all text files run file hygiene. Ruff blocks `print()` calls via `T201`.                                       | `.claude/hooks/post_tool_use_hygiene.py`                           |
-| **Claude Code** | `Stop`         | Checks memory size limits and taxonomy.                                                                                                                               | `.claude/hooks/memory_health_check.py`                             |
-| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.                                                                                    | `.agent/hooks/session_start.py`                                    |
-| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                                                                                                    | `.agent/hooks/post_tool_use_hygiene.py`                            |
-| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                                                                                        | `.agent/hooks/stop_memory_check.py`                                |
+| Agent           | Hook Type      | Purpose                                                                                         | Script                                   |
+| :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                       | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                         | `.codex/hooks/memory_health_check.py`    |
+| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context.                              | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `Stop`         | Checks memory size limits and taxonomy.                                                         | `.claude/hooks/memory_health_check.py`   |
+| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.              | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                              | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                  | `.agent/hooks/stop_memory_check.py`      |
 
 ### Troubleshooting Hooks
 

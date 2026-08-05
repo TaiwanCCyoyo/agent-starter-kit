@@ -60,7 +60,7 @@
 - Add E2E tests only for critical user flows when the repository has an E2E harness.
 - Run coverage when requested or when risk makes untested paths important; do not impose a universal percentage.
 - Use descriptive test names and the Arrange-Act-Assert structure when it improves clarity.
-- Use agent post-tool hooks for touched-file hygiene, pre-commit for staged gates, and CI for repository-wide gates.
+- Before reporting implementation work complete, run pre-commit against the changed files. If formatters modify files, inspect the diff and rerun the relevant checks. CI owns repository-wide gates.
 - Run additional task-specific tests when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
 - When adding or modifying a hook or script, include at least one functional regression test.

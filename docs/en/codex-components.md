@@ -103,12 +103,12 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 | Layer                                   | Responsibility                                                                        |
 | :-------------------------------------- | :------------------------------------------------------------------------------------ |
 | `.codex/hooks/session_start.py`         | Initializes `.memories/`, SQLite schema, and bounded session context                  |
-| `.codex/hooks/post_tool_use_hygiene.py` | Targeted formatting, lint, file hygiene, and Ruff-backed Python print blocking        |
+| `.codex/hooks/post_tool_use_hygiene.py` | Read-only targeted Ruff `F` diagnostics for edited Python files                       |
 | `.codex/hooks/memory_health_check.py`   | Memory limits, taxonomy, and planning-location guidance                               |
-| `.pre-commit-config.yaml`               | File hygiene, detect-secrets, Ruff including T201 print blocking, and targeted mypy   |
+| `.pre-commit-config.yaml`               | Formatting, file hygiene, detect-secrets, Ruff including T201, and targeted mypy      |
 | `.vscode/settings.json`                 | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 
-Python verification uses `uv run python -m pytest`, `uv run ruff check --fix .`, and `uv run mypy .`. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
+Python verification uses targeted `uv run python -m pytest` commands while developing and pre-commit against changed files before completion. If formatters modify files, the agent inspects the diff and reruns the relevant checks. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 
 ## Deferred Capabilities
 

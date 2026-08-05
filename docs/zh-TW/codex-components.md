@@ -103,12 +103,12 @@ Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 
 | 元件                                    | 用途                                                                            |
 | :-------------------------------------- | :------------------------------------------------------------------------------ |
 | `.codex/hooks/session_start.py`         | 初始化 `.memories/`、SQLite schema 與 bounded session context                   |
-| `.codex/hooks/post_tool_use_hygiene.py` | 聚焦格式化、lint、file hygiene，並透過 Ruff 阻擋 Python print calls             |
+| `.codex/hooks/post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
 | `.codex/hooks/memory_health_check.py`   | Memory limits、taxonomy 與 plan routing                                         |
-| `.pre-commit-config.yaml`               | File hygiene、detect-secrets、Ruff T201 print blocking 與目標檔案 mypy          |
+| `.pre-commit-config.yaml`               | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
 | `.vscode/settings.json`                 | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 
-Python verification 使用 `uv run python -m pytest`、`uv run ruff check --fix .` 與 `uv run mypy .`。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
+Python verification 在開發期間使用目標式 `uv run python -m pytest`，並在完成前針對變更檔案執行 pre-commit。若 formatter 修改檔案，agent 會檢查 diff 並重跑相關 checks。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 
 ## 延後能力
 

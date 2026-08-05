@@ -23,9 +23,10 @@ Apply the repository's Python development baseline.
 - Use `security_reviewer` for authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, or sensitive data flows.
 - Rely on the repository's configured `detect-secrets` commit gate.
 
-## Hooks And Verification
+## Verification
 
-- Use Codex post-edit hooks for touched-file feedback and pre-commit for staged gates.
+- Run targeted tests while developing, then run pre-commit against changed files before reporting implementation work complete.
+- If a formatter changes files, inspect the resulting diff and rerun the relevant checks.
 - Use `python-testing` for pytest, coverage, hook fixtures, and Windows-path verification.
 
 ## FastAPI

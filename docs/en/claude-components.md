@@ -153,13 +153,15 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 Hooks are Python scripts executed automatically by the Claude Code harness.
 
-| Hook                       | Trigger             | What it does                                                                                                                                                                                             |
-| -------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `session_start.py`         | Session start       | Injects `CLAUDE.md`, `.memories/memories/MEMORY.md`, and `USER.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies the approved memory layout into new worktrees. |
-| `post_tool_use_hygiene.py` | After Edit or Write | For `.py`: runs `ruff format`, `ruff check --fix`, `mypy`, warns on `print()`; for `.md/.py/.toml/.json/.yaml/.yml`: runs `file_hygiene.py`                                                              |
-| `memory_health_check.py`   | After each response | Checks bounded-memory limits and taxonomy                                                                                                                                                                |
+| Hook                       | Trigger                 | What it does                                                                                                                                                                                             |
+| -------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `session_start.py`         | Session start           | Injects `CLAUDE.md`, `.memories/memories/MEMORY.md`, and `USER.md` into context once (frozen snapshot — system prompt is not re-read mid-session). Copies the approved memory layout into new worktrees. |
+| `post_tool_use_hygiene.py` | After Python Edit/Write | Runs read-only Ruff `E722,F601,F602,F634` diagnostics that complement Pyright; it does not format or modify files.                                                                                       |
+| `memory_health_check.py`   | After each response     | Checks bounded-memory limits and taxonomy                                                                                                                                                                |
 
 Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
+
+Claude Code uses the official Pyright plugin for immediate type-aware navigation and diagnostics. Its PostToolUse hook adds a read-only targeted Ruff check for `E722,F601,F602,F634`, which complements Pyright without repeating its common undefined-name and unused-symbol diagnostics. Complete Ruff linting and formatting are deferred to pre-commit, so normal edits do not trigger repository-wide formatting. Before completion, the agent runs pre-commit against changed files, and pre-commit owns formatting and validation.
 
 ### ECC hook concepts noted but not ported
 

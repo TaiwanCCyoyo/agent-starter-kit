@@ -1,45 +1,4 @@
-"""Run targeted hygiene checks after Codex edit tools.
-
-Expected PostToolUse payload shapes:
-
-Write/Edit-style tools usually provide one direct path:
-
-{
-  "cwd": "C:/repo",
-  "tool_name": "Write",
-  "tool_input": {"file_path": "docs/example.md"}
-}
-
-Some tools may provide multiple direct paths:
-
-{
-  "cwd": "C:/repo",
-  "tool_name": "Edit",
-  "tool_input": {"files": ["docs/a.md", "src/b.py"]}
-}
-
-Codex apply_patch provides patch text rather than a direct file_path. The hook
-extracts targets from patch headers:
-
-{
-  "cwd": "C:/repo",
-  "tool_name": "apply_patch",
-  "tool_input": {
-    "cmd": "*** Begin Patch\n*** Update File: docs/example.md\n*** End Patch\n"
-  }
-}
-
-Design note — two-tier file resolution:
-
-1. Explicit paths (preferred): when tool_input advertises one or more file
-   paths (or patch headers), only those files are checked. This is the fast,
-   precise path.
-
-2. Dirty-worktree fallback: when no paths can be extracted (unexpected JSON
-   shape or a tool that doesn't report its target), the hook falls back to
-   `git status --porcelain`. This ensures hygiene still runs even if the
-   event format changes, so the hook never silently becomes a no-op.
-"""
+"""Report high-value Ruff correctness diagnostics after Codex edits."""
 
 import json
 import re
@@ -47,43 +6,60 @@ import subprocess
 import sys
 from pathlib import Path
 
-TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".yaml", ".yml"}
-FORMATTER_HOOKS = {".py": ("ruff", "ruff-format"), ".json": ("prettier",), ".toml": ("taplo-format",)}
+PYTHON_SUFFIXES = {".py", ".pyi"}
+RUFF_ARGS = (
+    "ruff",
+    "check",
+    "--select",
+    "F",
+    "--ignore",
+    "F401,F841,F842",
+    "--output-format",
+    "concise",
+)
 PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$")
 PATCH_MOVE_RE = re.compile(r"^\*\*\* Move to: (.+)$")
 
 
 def repo_root(cwd: str) -> Path:
-    """Return the Git repository root for the hook cwd, or cwd itself."""
+    """Return the Git repository root for the hook cwd."""
     try:
-        root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], cwd=cwd, text=True, encoding="utf-8").strip()
-        return Path(root)
-    except Exception:
+        root = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=cwd,
+            text=True,
+            encoding="utf-8",
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
         return Path(cwd).resolve()
+    return Path(root).resolve()
 
 
 def run(root: Path, args: list[str]) -> tuple[int, str, str]:
-    """Run a hygiene command from the repo root and normalize text output."""
-    result = subprocess.run(args, cwd=root, text=True, capture_output=True, encoding="utf-8", errors="replace")
+    """Run a project command without invoking a shell."""
+    try:
+        result = subprocess.run(
+            args,
+            cwd=root,
+            text=True,
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        return 127, "", str(exc)
     return result.returncode, result.stdout.strip(), result.stderr.strip()
 
 
-def run_hook(root: Path, hook: str, rel_path: str) -> tuple[int, str, str]:
-    """Run a targeted pre-commit hook, retrying after an expected rewrite."""
-    args = ["uv", "run", "pre-commit", "run", hook, "--files", rel_path]
-    code, stdout, stderr = run(root, args)
-    if code == 1 and "files were modified by this hook" in stdout:
-        return run(root, args)
-    return code, stdout, stderr
-
-
 def to_relative_path(root: Path, file_path: str) -> str:
-    """Convert an absolute or repo-local path to a POSIX repo-relative path."""
+    """Convert a direct event path to a safe repository-relative POSIX path."""
     path = Path(file_path)
+    if not path.is_absolute():
+        path = root / path
     try:
-        return path.resolve().relative_to(root).as_posix()
+        return path.resolve().relative_to(root.resolve()).as_posix()
     except (OSError, ValueError):
-        return path.as_posix()
+        return ""
 
 
 def patch_files(patch_text: str) -> list[str]:
@@ -97,112 +73,72 @@ def patch_files(patch_text: str) -> list[str]:
 
 
 def string_values(value: object) -> list[str]:
-    """Collect strings from unknown nested tool_input JSON structures."""
+    """Collect strings from nested tool input values."""
     if isinstance(value, str):
         return [value]
     if isinstance(value, dict):
-        strings: list[str] = []
-        for item in value.values():
-            strings.extend(string_values(item))
-        return strings
+        return [item for child in value.values() for item in string_values(child)]
     if isinstance(value, list):
-        strings = []
-        for item in value:
-            strings.extend(string_values(item))
-        return strings
+        return [item for child in value for item in string_values(child)]
     return []
 
 
-def changed_files(root: Path) -> list[str]:
-    """Return all dirty tracked files from git status as a fallback list."""
-    result = subprocess.run(
-        ["git", "status", "--porcelain"],
-        cwd=root,
-        text=True,
-        capture_output=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    files: list[str] = []
-    for line in result.stdout.splitlines():
-        if not line.strip():
-            continue
-        path = line[3:].strip()
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1].strip()
-        if path and (root / path).is_file():
-            files.append(path)
-    return files
-
-
-def event_files(event: dict, root: Path) -> list[str]:
-    """Return files to check for this post-tool event.
-
-    Prefer paths explicitly listed in tool_input or patch headers (fast,
-    precise). Fall back to changed_files() only when tool_input carries no
-    recognisable path — this keeps the hook alive if the event JSON format
-    is unexpected.
-    """
+def event_files(event: dict[str, object], root: Path) -> list[str]:
+    """Extract only explicit existing file paths from a Codex event."""
     tool_input = event.get("tool_input") or {}
-    files: list[str] = []
+    candidates: list[str] = []
     if isinstance(tool_input, dict):
-        # Write/Edit-style tools commonly pass a single file_path.
         file_path = tool_input.get("file_path")
         if isinstance(file_path, str) and file_path:
-            files.append(file_path)
-
-        # Keep a small allowlist for batch-style path fields without scanning Git.
+            candidates.append(file_path)
         for key in ("files", "file_paths", "paths"):
             value = tool_input.get(key)
             if isinstance(value, list):
-                files.extend(item for item in value if isinstance(item, str))
+                candidates.extend(item for item in value if isinstance(item, str))
+        for value in string_values(tool_input):
+            if "*** Begin Patch" in value:
+                candidates.extend(patch_files(value))
 
-    # apply_patch can place patch text under different tool_input keys, so scan
-    # all nested string values for patch headers instead of depending on one key.
-    for value in string_values(tool_input):
-        if "*** Begin Patch" in value:
-            files.extend(patch_files(value))
-
-    # Deleted files and non-text paths are ignored by callers after this point.
-    existing_files: list[str] = []
-    for file_path in files:
-        rel_path = to_relative_path(root, file_path)
-        if (root / rel_path).is_file() or Path(file_path).is_file():
-            existing_files.append(rel_path)
-
-    return existing_files or changed_files(root)
+    files: list[str] = []
+    for candidate in candidates:
+        rel_path = to_relative_path(root, candidate)
+        if rel_path and (root / rel_path).is_file():
+            files.append(rel_path)
+    return list(dict.fromkeys(files))
 
 
 def main() -> int:
-    """Read a PostToolUse event from stdin and emit blocking JSON on failure."""
+    """Emit Codex diagnostics without modifying files."""
     try:
         event = json.load(sys.stdin)
-    except Exception:
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return 0
+    if not isinstance(event, dict):
         return 0
 
-    root = repo_root(event.get("cwd") or ".")
-    if not root.exists():
+    root = repo_root(str(event.get("cwd") or "."))
+    if not root.is_dir():
         return 0
 
-    checks: list[str] = []
+    diagnostics: list[str] = []
+    for rel_path in event_files(event, root):
+        if Path(rel_path).suffix.lower() not in PYTHON_SUFFIXES:
+            continue
+        code, stdout, stderr = run(root, ["uv", "run", "--project", str(root), *RUFF_ARGS, rel_path])
+        if code == 0:
+            continue
+        details = "\n".join(part for part in (stdout, stderr) if part)
+        diagnostics.append(f"`ruff check` failed on `{rel_path}`.\n{details}".rstrip())
 
-    files = [f for f in event_files(event, root) if Path(f).suffix.lower() in TEXT_SUFFIXES]
-    for rel_path in dict.fromkeys(files):
-        suffix = Path(rel_path).suffix.lower()
-
-        for formatter_hook in FORMATTER_HOOKS.get(suffix, ()):
-            code, stdout, stderr = run_hook(root, formatter_hook, rel_path)
-            if code != 0:
-                checks.append(f"`{formatter_hook}` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
-
-        code, stdout, stderr = run_hook(root, "file-validation", rel_path)
-        if code != 0:
-            checks.append(f"`file-validation` failed on `{rel_path}`.\n" + "\n".join(part for part in [stdout, stderr] if part))
-
-    if checks:
-        message = "\n\n".join(checks)
-        sys.stdout.write(json.dumps({"systemMessage": message, "continue": False, "stopReason": "Codex post-edit hygiene check failed."}) + "\n")
-
+    if diagnostics:
+        sys.stdout.write(
+            json.dumps({
+                "systemMessage": "\n\n".join(diagnostics),
+                "continue": False,
+                "stopReason": "Codex post-edit Ruff check failed.",
+            })
+            + "\n"
+        )
     return 0
 
 

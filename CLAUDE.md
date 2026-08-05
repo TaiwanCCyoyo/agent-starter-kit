@@ -38,7 +38,7 @@ Do not repeat an unverified workaround: investigate the root cause, surface any 
 - For non-trivial changes, state the goal and task-specific verification before editing.
 - Run the stated task-specific verification and share the output as evidence.
 - Base completion claims on verification evidence.
-- Use post-edit hooks for touched-file hygiene, pre-commit for staged gates, and CI for repository-wide gates.
+- Before reporting implementation work complete, run pre-commit against the changed files. If formatters modify files, inspect the diff and rerun the relevant checks. CI owns repository-wide gates.
 - Run additional task-specific tests when the change affects behavior, generated output, hooks, commands, documentation links, or user-facing workflows.
 - When adding or modifying a hook or script, include at least one functional test for it before marking done.
 - If verification is skipped or hook coverage is insufficient, state the reason and residual risk explicitly.

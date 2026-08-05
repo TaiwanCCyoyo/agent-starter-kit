@@ -27,7 +27,7 @@ Invoke pytest through `uv run python -m pytest` so the repository root remains i
 - Keep Codex-specific hook contract tests under `.codex/hooks/tests/`.
 - Keep cross-agent script tests (e.g. `scripts/file_hygiene.py`) under `scripts/tests/`.
 - Use each agent's own hook tests as evidence for that agent's contracts.
-- Give test files agent-prefixed basenames (e.g. `test_claude_post_tool_use_hygiene.py`) to avoid pytest module name collisions when the same logical test exists in both `.claude/` and `.codex/` directories.
+- Give test files agent-prefixed basenames (e.g. `test_claude_session_start.py`) to avoid pytest module name collisions when the same logical test exists in both `.claude/` and `.codex/` directories.
 
 ## Hook and Script Tests
 

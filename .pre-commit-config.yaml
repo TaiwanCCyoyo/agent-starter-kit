@@ -34,9 +34,10 @@ repos:
             exclude: ^(uv\.lock|.*\.json)$ # Optional: exclude specific auto-generated files if needed
           - id: mypy
             name: Mypy (Targeted Python Check)
-            entry: uv run mypy
+            entry: uv run mypy --explicit-package-bases
             language: system
             types: [python]
+            exclude: ^(?:\.claude|\.codex)/hooks/
 
     # Ruff (Python Linter & Formatter)
     - repo: https://github.com/astral-sh/ruff-pre-commit

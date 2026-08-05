@@ -16,7 +16,7 @@
 ## 目前預設值
 
 - **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，Superpowers 負責 TDD、debugging、verification 與 branch completion，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
-- **Ruff 啟用自動修正**：本地 hooks、pre-commit 與 CI 範例皆使用 `ruff check --fix` 搭配 `ruff format`，讓 import cleanup 與可自動修正的 lint 問題保持一致。
+- **分層驗證**：Claude Code 透過官方 Pyright LSP plugin 與唯讀的 Ruff `E722,F601,F602,F634` check 取得即時 diagnostics；Codex 因沒有 Python LSP，對 Python 編輯使用較廣的唯讀 Ruff `F` check。兩者都會在完成前執行 pre-commit，由其統一負責 formatting、linting、型別檢查與檔案驗證。
 - **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
 - **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
 
@@ -52,17 +52,17 @@
 
 本 repository 使用各 Agent 原生 hooks 維護系統一致性：
 
-| Agent           | Hook 類型      | 用途                                                                                                                                                              | Script                                                             |
-| :-------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
-| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。                                                                                                       | `.codex/hooks/session_start.py`                                    |
-| **Codex**       | `PostToolUse`  | 執行 targeted post-edit hygiene。Python 檔會 format、lint、檢查 file hygiene；文件與設定檔只跑 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。              | `.codex/hooks/post_tool_use_hygiene.py`, `scripts/file_hygiene.py` |
-| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                                                                                                     | `.codex/hooks/memory_health_check.py`                              |
-| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。                                                                                                              | `.claude/hooks/session_start.py`                                   |
-| **Claude Code** | `PostToolUse`  | 針對 `.py` 檔：自動執行 `ruff format` 排版、`ruff check --fix` lint，並驗證 file hygiene。Ruff 透過 `T201` 阻擋 `print()` calls。針對設定檔與文件：驗證檔案衛生。 | `.claude/hooks/post_tool_use_hygiene.py`                           |
-| **Claude Code** | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                                                                                                     | `.claude/hooks/memory_health_check.py`                             |
-| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。                                                                                                   | `.agent/hooks/session_start.py`                                    |
-| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                                                                                                                     | `.agent/hooks/post_tool_use_hygiene.py`                            |
-| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                                                                                                                    | `.agent/hooks/stop_memory_check.py`                                |
+| Agent           | Hook 類型      | 用途                                                             | Script                                   |
+| :-------------- | :------------- | :--------------------------------------------------------------- | :--------------------------------------- |
+| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。      | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。          | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                    | `.codex/hooks/memory_health_check.py`    |
+| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。             | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。 | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Claude Code** | `Stop`         | 檢查記憶大小限制與 taxonomy。                                    | `.claude/hooks/memory_health_check.py`   |
+| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。  | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                    | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                   | `.agent/hooks/stop_memory_check.py`      |
 
 ### Hook 疑難排解
 

@@ -42,100 +42,55 @@ def invoke_main(payload: object, root: Path, run_results: list[tuple[int, str, s
     return exit_code, stdout.getvalue(), commands
 
 
-def test_valid_json_with_clean_markdown_produces_no_output(tmp_path: Path) -> None:
-    target = tmp_path / "docs" / "sample.md"
-    target.parent.mkdir()
-    target.write_text("clean\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "prettier", "--files", "docs/sample.md"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/sample.md"],
+def expected_command(root: Path, rel_path: str) -> list[str]:
+    return [
+        "uv",
+        "run",
+        "--project",
+        str(root),
+        "ruff",
+        "check",
+        "--no-fix",
+        "--select",
+        "E722,F601,F602,F634",
+        "--output-format",
+        "concise",
+        rel_path,
     ]
 
 
-def test_failed_check_returns_claude_blocking_json(tmp_path: Path) -> None:
-    target = tmp_path / "docs" / "sample.md"
-    target.parent.mkdir()
-    target.write_text("bad\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, _commands = invoke_main(payload, tmp_path, [(0, "", ""), (1, "", "invalid content")])
-
-    assert exit_code == 0
-    assert json.loads(output) == {
-        "decision": "block",
-        "reason": "`file-validation` failed on `docs/sample.md`.\ninvalid content",
-    }
-
-
-def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
+def test_clean_python_edit_runs_only_read_only_ruff_check(tmp_path: Path) -> None:
     target = tmp_path / "src" / "sample.py"
     target.parent.mkdir()
-    target.write_text("print('hello')\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-    run_results = [
-        (1, "T201 `print` found", ""),  # ruff
-        (0, "", ""),  # ruff-format
-        (0, "", ""),  # file-validation
-    ]
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, run_results)
-
-    assert exit_code == 0
-    assert json.loads(output) == {
-        "decision": "block",
-        "reason": "`ruff` failed on `src/sample.py`.\nT201 `print` found",
-    }
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "ruff", "--files", "src/sample.py"],
-        ["uv", "run", "pre-commit", "run", "ruff-format", "--files", "src/sample.py"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "src/sample.py"],
-    ]
-
-
-@pytest.mark.parametrize(
-    ("suffix", "hook"),
-    [(".toml", "taplo-format"), (".ts", "prettier"), (".html", "prettier"), (".yaml", "prettier")],
-)
-def test_config_files_run_their_formatter_before_hygiene(tmp_path: Path, suffix: str, hook: str) -> None:
-    target = tmp_path / f"config{suffix}"
-    target.write_text("content\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", hook, "--files", f"config{suffix}"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", f"config{suffix}"],
-    ]
-
-
-def test_json_files_run_prettier_but_skip_file_validation(tmp_path: Path) -> None:
-    # Mirrors the `exclude: ^(uv\.lock|.*\.json)$` on the file-validation hook
-    # in .pre-commit-config.yaml, so the two stay in agreement.
-    target = tmp_path / "config.json"
-    target.write_text("{}\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
+    target.write_text("value = 1\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
 
     exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "prettier", "--files", "config.json"]]
+    assert commands == [expected_command(tmp_path, "src/sample.py")]
 
 
-def test_binary_file_is_skipped_entirely(tmp_path: Path) -> None:
-    # A binary file must never reach file-validation, which hard-fails on
-    # UnicodeDecodeError and would otherwise block every binary edit.
-    target = tmp_path / "image.png"
-    target.write_bytes(b"\x89PNG\r\n\x1a\n")
+def test_ruff_failure_returns_claude_blocking_json(tmp_path: Path) -> None:
+    target = tmp_path / "src" / "sample.py"
+    target.parent.mkdir()
+    target.write_text('{"a": 1, "a": 2}\n', encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
+
+    exit_code, output, _commands = invoke_main(payload, tmp_path, [(1, "F601 duplicate key", "")])
+
+    assert exit_code == 0
+    assert json.loads(output) == {
+        "decision": "block",
+        "reason": "`ruff check` failed on `src/sample.py`.\nF601 duplicate key",
+    }
+
+
+def test_non_python_edit_is_ignored(tmp_path: Path) -> None:
+    target = tmp_path / "docs" / "sample.md"
+    target.parent.mkdir()
+    target.write_text("content\n", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
 
     exit_code, output, commands = invoke_main(payload, tmp_path, [])
@@ -145,56 +100,8 @@ def test_binary_file_is_skipped_entirely(tmp_path: Path) -> None:
     assert commands == []
 
 
-def test_formatter_retry_after_rewrite_does_not_block(tmp_path: Path) -> None:
-    target = tmp_path / "config.toml"
-    target.write_text("content\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(1, "files were modified by this hook", ""), (0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
-        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "config.toml"],
-    ]
-
-
-@pytest.mark.parametrize("path_style", ["backslash", "forward-slash"])
-def test_windows_path_input_becomes_repo_relative_cli_argument(tmp_path: Path, path_style: str) -> None:
-    target = tmp_path / "docs" / "windows.md"
-    target.parent.mkdir()
-    target.write_text("clean\n", encoding="utf-8")
-    windows_path = str(target).replace("/", "\\") if path_style == "backslash" else target.as_posix()
-    payload = {"cwd": str(tmp_path), "tool_input": {"file_path": windows_path}}
-
-    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
-
-    assert commands[-1][-1] == "docs/windows.md"
-
-
-def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> None:
-    # When no file_path is found in tool_input, the hook falls back to
-    # changed_files() so hygiene still runs if the JSON format is unexpected.
-    dirty = tmp_path / "docs" / "unrelated.md"
-    dirty.parent.mkdir()
-    dirty.write_text("unrelated\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Bash", "tool_input": {"command": "echo hi"}}
-
-    with patch.object(HOOK, "changed_files", return_value=["docs/unrelated.md"]):
-        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "prettier", "--files", "docs/unrelated.md"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/unrelated.md"],
-    ]
-
-
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])
-def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
+def test_invalid_json_is_ignored(raw_input: str) -> None:
     stdin = io.StringIO(raw_input)
     stdout = io.StringIO()
 
@@ -205,21 +112,27 @@ def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
     assert stdout.getvalue() == ""
 
 
-def test_repo_root_prefers_claude_project_dir_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    submodule = tmp_path / "nested-submodule"
-    submodule.mkdir()
-    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+@pytest.mark.parametrize("path_style", ["backslash", "forward-slash"])
+def test_windows_path_input_becomes_repo_relative_argument(tmp_path: Path, path_style: str) -> None:
+    target = tmp_path / "src" / "windows.py"
+    target.parent.mkdir()
+    target.write_text("value = 1\n", encoding="utf-8")
+    file_path = str(target).replace("/", "\\") if path_style == "backslash" else target.as_posix()
+    payload = {"cwd": str(tmp_path), "tool_input": {"file_path": file_path}}
 
-    assert HOOK.repo_root(str(submodule)) == tmp_path.resolve()
+    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert commands == [expected_command(tmp_path, "src/windows.py")]
 
 
-def test_repo_root_ignores_nonexistent_claude_project_dir_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path / "does-not-exist"))
+def test_unknown_payload_does_not_scan_unrelated_dirty_files(tmp_path: Path) -> None:
+    dirty = tmp_path / "src" / "unrelated.py"
+    dirty.parent.mkdir()
+    dirty.write_text("value = 1\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Bash", "tool_input": {"command": "echo hi"}}
 
-    assert HOOK.repo_root(str(tmp_path)) == tmp_path.resolve()
+    exit_code, output, commands = invoke_main(payload, tmp_path, [])
 
-
-def test_repo_root_falls_back_to_cwd_when_env_unset_and_not_a_git_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("CLAUDE_PROJECT_DIR", raising=False)
-
-    assert HOOK.repo_root(str(tmp_path)) == tmp_path.resolve()
+    assert exit_code == 0
+    assert output == ""
+    assert commands == []

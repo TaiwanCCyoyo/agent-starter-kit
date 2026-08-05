@@ -1,3 +1,4 @@
+import json
 import tomllib
 from pathlib import Path
 
@@ -19,6 +20,31 @@ def test_pre_commit_mypy_receives_targeted_python_files() -> None:
     assert mypy_hook["entry"] == "uv run mypy"
     assert mypy_hook.get("pass_filenames", True) is True
     assert mypy_hook["types"] == ["python"]
+
+
+def test_claude_uses_pyright_lsp_without_project_ruff_lsp() -> None:
+    settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+
+    assert settings["enabledPlugins"]["pyright-lsp@claude-plugins-official"] is True
+    assert "ruff-lsp@agent-starter-kit" not in settings["enabledPlugins"]
+    assert "agent-starter-kit" not in settings["extraKnownMarketplaces"]
+    assert not (ROOT / ".claude" / "marketplace").exists()
+
+
+def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
+    claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    codex_hooks = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+
+    assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
+    assert codex_hooks["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
+    assert (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").exists()
+    assert (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").exists()
+
+    claude_hook = (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
+    codex_hook = (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
+    assert '"E722,F601,F602,F634"' in claude_hook
+    assert '"--no-fix"' in claude_hook
+    assert '"F401,F841,F842"' in codex_hook
 
 
 def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:

@@ -42,30 +42,33 @@ def invoke_main(payload: object, root: Path, run_results: list[tuple[int, str, s
     return exit_code, stdout.getvalue(), commands
 
 
-def test_valid_json_with_clean_markdown_produces_no_output(tmp_path: Path) -> None:
-    target = tmp_path / "docs" / "sample.md"
+def expected_command(root: Path, rel_path: str) -> list[str]:
+    return [
+        "uv",
+        "run",
+        "--project",
+        str(root),
+        "ruff",
+        "check",
+        "--select",
+        "F",
+        "--ignore",
+        "F401,F841,F842",
+        "--output-format",
+        "concise",
+        rel_path,
+    ]
+
+
+def test_apply_patch_python_target_runs_read_only_ruff_check(tmp_path: Path) -> None:
+    target = tmp_path / "src" / "sample.py"
     target.parent.mkdir()
-    target.write_text("clean\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "apply_patch", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/sample.md"]]
-
-
-def test_apply_patch_uses_patch_paths_instead_of_dirty_worktree(tmp_path: Path) -> None:
-    target = tmp_path / "docs" / "target.md"
-    dirty = tmp_path / "docs" / "dirty.md"
-    target.parent.mkdir()
-    target.write_text("clean\n", encoding="utf-8")
-    dirty.write_text("unrelated\n", encoding="utf-8")
+    target.write_text("value = 1\n", encoding="utf-8")
     patch_text = """*** Begin Patch
-*** Update File: docs/target.md
+*** Update File: src/sample.py
 @@
--old
-+clean
+-value = 0
++value = 1
 *** End Patch
 """
     payload = {"cwd": str(tmp_path), "tool_name": "apply_patch", "tool_input": {"cmd": patch_text}}
@@ -74,114 +77,40 @@ def test_apply_patch_uses_patch_paths_instead_of_dirty_worktree(tmp_path: Path) 
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/target.md"]]
+    assert commands == [expected_command(tmp_path, "src/sample.py")]
 
 
-def test_failed_check_returns_codex_blocking_json(tmp_path: Path) -> None:
-    target = tmp_path / "docs" / "sample.md"
-    target.parent.mkdir()
-    target.write_text("bad\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, _commands = invoke_main(payload, tmp_path, [(1, "", "invalid content")])
-
-    assert exit_code == 0
-    assert json.loads(output) == {
-        "systemMessage": "`file-validation` failed on `docs/sample.md`.\ninvalid content",
-        "continue": False,
-        "stopReason": "Codex post-edit hygiene check failed.",
-    }
-
-
-def test_python_print_failure_returns_blocking_json(tmp_path: Path) -> None:
+def test_ruff_failure_returns_codex_blocking_json(tmp_path: Path) -> None:
     target = tmp_path / "src" / "sample.py"
     target.parent.mkdir()
-    target.write_text("print('hello')\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-    run_results = [
-        (1, "T201 `print` found", ""),
-        (0, "", ""),
-        (0, "", ""),
-    ]
+    target.write_text("value = missing_name\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Write", "tool_input": {"file_path": str(target)}}
 
-    exit_code, output, commands = invoke_main(payload, tmp_path, run_results)
+    exit_code, output, _commands = invoke_main(payload, tmp_path, [(1, "F821 undefined name", "")])
 
     assert exit_code == 0
     assert json.loads(output) == {
-        "systemMessage": "`ruff` failed on `src/sample.py`.\nT201 `print` found",
+        "systemMessage": "`ruff check` failed on `src/sample.py`.\nF821 undefined name",
         "continue": False,
-        "stopReason": "Codex post-edit hygiene check failed.",
+        "stopReason": "Codex post-edit Ruff check failed.",
     }
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "ruff", "--files", "src/sample.py"],
-        ["uv", "run", "pre-commit", "run", "ruff-format", "--files", "src/sample.py"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "src/sample.py"],
-    ]
 
 
-@pytest.mark.parametrize(("suffix", "hook"), [(".json", "prettier"), (".toml", "taplo-format")])
-def test_config_files_run_their_formatter_before_hygiene(tmp_path: Path, suffix: str, hook: str) -> None:
-    target = tmp_path / f"config{suffix}"
-    target.write_text("content\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", hook, "--files", f"config{suffix}"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", f"config{suffix}"],
-    ]
-
-
-def test_formatter_retry_after_rewrite_does_not_block(tmp_path: Path) -> None:
-    target = tmp_path / "config.toml"
-    target.write_text("content\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
-
-    exit_code, output, commands = invoke_main(payload, tmp_path, [(1, "files were modified by this hook", ""), (0, "", ""), (0, "", "")])
-
-    assert exit_code == 0
-    assert output == ""
-    assert commands == [
-        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
-        ["uv", "run", "pre-commit", "run", "taplo-format", "--files", "config.toml"],
-        ["uv", "run", "pre-commit", "run", "file-validation", "--files", "config.toml"],
-    ]
-
-
-@pytest.mark.parametrize("path_style", ["backslash", "forward-slash"])
-def test_windows_path_input_becomes_repo_relative_cli_argument(tmp_path: Path, path_style: str) -> None:
-    target = tmp_path / "docs" / "windows.md"
+def test_non_python_edit_is_ignored(tmp_path: Path) -> None:
+    target = tmp_path / "docs" / "sample.md"
     target.parent.mkdir()
-    target.write_text("clean\n", encoding="utf-8")
-    windows_path = str(target).replace("/", "\\") if path_style == "backslash" else target.as_posix()
-    payload = {"cwd": str(tmp_path), "tool_input": {"file_path": windows_path}}
+    target.write_text("content\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "Edit", "tool_input": {"file_path": str(target)}}
 
-    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
-
-    assert commands[-1][-1] == "docs/windows.md"
-
-
-def test_tool_without_file_path_falls_back_to_changed_files(tmp_path: Path) -> None:
-    # When no file_path or patch header is found, the hook falls back to
-    # changed_files() so hygiene still runs if the JSON format is unexpected.
-    dirty = tmp_path / "docs" / "unrelated.md"
-    dirty.parent.mkdir()
-    dirty.write_text("unrelated\n", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "tool_name": "shell", "tool_input": {"command": "echo hi"}}
-
-    with patch.object(HOOK, "changed_files", return_value=["docs/unrelated.md"]):
-        exit_code, output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+    exit_code, output, commands = invoke_main(payload, tmp_path, [])
 
     assert exit_code == 0
     assert output == ""
-    assert commands == [["uv", "run", "pre-commit", "run", "file-validation", "--files", "docs/unrelated.md"]]
+    assert commands == []
 
 
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])
-def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
+def test_invalid_json_is_ignored(raw_input: str) -> None:
     stdin = io.StringIO(raw_input)
     stdout = io.StringIO()
 
@@ -190,3 +119,29 @@ def test_invalid_json_is_ignored_without_output(raw_input: str) -> None:
 
     assert exit_code == 0
     assert stdout.getvalue() == ""
+
+
+@pytest.mark.parametrize("path_style", ["backslash", "forward-slash"])
+def test_windows_path_input_becomes_repo_relative_argument(tmp_path: Path, path_style: str) -> None:
+    target = tmp_path / "src" / "windows.py"
+    target.parent.mkdir()
+    target.write_text("value = 1\n", encoding="utf-8")
+    file_path = str(target).replace("/", "\\") if path_style == "backslash" else target.as_posix()
+    payload = {"cwd": str(tmp_path), "tool_input": {"file_path": file_path}}
+
+    _exit_code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert commands == [expected_command(tmp_path, "src/windows.py")]
+
+
+def test_unknown_payload_does_not_scan_unrelated_dirty_files(tmp_path: Path) -> None:
+    dirty = tmp_path / "src" / "unrelated.py"
+    dirty.parent.mkdir()
+    dirty.write_text("value = 1\n", encoding="utf-8")
+    payload = {"cwd": str(tmp_path), "tool_name": "shell", "tool_input": {"command": "echo hi"}}
+
+    exit_code, output, commands = invoke_main(payload, tmp_path, [])
+
+    assert exit_code == 0
+    assert output == ""
+    assert commands == []

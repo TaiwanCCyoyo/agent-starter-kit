@@ -153,13 +153,15 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
-| Hook                       | 觸發時機           | 執行內容                                                                                                                                                                 |
-| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `session_start.py`         | 工作階段開始       | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
-| `post_tool_use_hygiene.py` | Edit 或 Write 之後 | 對 `.py` 檔案：執行 `ruff format`、`ruff check --fix`、`mypy`，並對 `print()` 發出警告；對 `.md/.py/.toml/.json/.yaml/.yml` 檔案：執行 `file_hygiene.py`                 |
-| `memory_health_check.py`   | 每次回覆後         | 檢查 bounded memory 限制與 taxonomy                                                                                                                                      |
+| Hook                       | 觸發時機             | 執行內容                                                                                                                                                                 |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `session_start.py`         | 工作階段開始         | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
+| `post_tool_use_hygiene.py` | Python Edit/Write 後 | 執行補充 Pyright 的唯讀 Ruff `E722`、`F601`、`F602`、`F634` diagnostics；不會格式化或修改檔案。                                                                          |
+| `memory_health_check.py`   | 每次回覆後           | 檢查 bounded memory 限制與 taxonomy                                                                                                                                      |
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
+
+Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 另外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
 
 ### 已注意但未從 ECC 移植的 hook 概念
 

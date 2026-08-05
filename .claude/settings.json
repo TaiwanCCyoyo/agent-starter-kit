@@ -4,7 +4,6 @@
         "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "0"
     },
     "permissions": {
-        "defaultMode": "auto",
         "allow": [
             "Read(**)",
             "Bash(ls *)",
@@ -64,10 +63,10 @@
             "Bash(rm -r .git *)",
             "Bash(rm -r .git)"
         ],
-        "ask": ["Bash(git push *)", "Bash(git push)"]
+        "ask": ["Bash(git push *)", "Bash(git push)"],
+        "defaultMode": "auto"
     },
     "model": "opusplan",
-    "advisorModel": "opus",
     "enabledMcpjsonServers": ["memory-db"],
     "hooks": {
         "SessionStart": [
@@ -96,11 +95,13 @@
                         "command": "uv",
                         "args": [
                             "run",
+                            "--project",
+                            "${CLAUDE_PROJECT_DIR}",
                             "python",
                             "${CLAUDE_PROJECT_DIR}/.claude/hooks/post_tool_use_hygiene.py"
                         ],
-                        "timeout": 60,
-                        "statusMessage": "Checking file hygiene"
+                        "timeout": 30,
+                        "statusMessage": "Checking Python diagnostics"
                     }
                 ]
             }
@@ -126,6 +127,15 @@
     "worktree": {
         "baseRef": "head"
     },
+    "enabledPlugins": {
+        "superpowers@claude-plugins-official": true,
+        "github@claude-plugins-official": true,
+        "ponytail@ponytail": true,
+        "skill-creator@claude-plugins-official": true,
+        "plugin-dev@claude-plugins-official": true,
+        "andrej-karpathy-skills@karpathy-skills": true,
+        "pyright-lsp@claude-plugins-official": true
+    },
     "extraKnownMarketplaces": {
         "karpathy-skills": {
             "source": {
@@ -134,13 +144,6 @@
             }
         }
     },
-    "enabledPlugins": {
-        "superpowers@claude-plugins-official": true,
-        "github@claude-plugins-official": true,
-        "ponytail@ponytail": true,
-        "skill-creator@claude-plugins-official": true,
-        "plugin-dev@claude-plugins-official": true,
-        "andrej-karpathy-skills@karpathy-skills": true
-    },
+    "advisorModel": "opus",
     "teammateMode": "tmux"
 }
