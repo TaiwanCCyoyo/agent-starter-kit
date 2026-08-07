@@ -65,13 +65,12 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 | Command               | 用途                                                              |
 | --------------------- | ----------------------------------------------------------------- |
-| `/compress-memory`    | 當 bounded memory 過大時進行壓縮                                  |
 | `/gen-commit`         | 透過 `commit-specialist` 產生符合 Conventional Commits 格式的訊息 |
 | `/learn-eval`         | 以整體品質門評估 session 模式；核准後萃取為 skills                |
 | `/memory-maintenance` | 初始化、更新、審查或整合專案記憶體                                |
-| `/memory-sql`         | 透過 memory-db MCP server 查詢或寫入 `.memories/memory_store.db`  |
-| `/save-memory`        | 將長期事實儲存至適當的 bounded file 或 SQLite store               |
 | `/worktree`           | 建立、管理並合併 Git worktree，同時保留記憶體                     |
+
+`/compress-memory`、`/memory-sql` 與 `/save-memory` 無指令包裝檔（2026-08-07 移除為冗餘）：Claude Code 將各個 `.claude/skills/<name>/SKILL.md` 以其本身的 `name` 註冊，因此 `/compress-memory`、`/memory-sql` 與 `/save-memory` 會直接解析至該同名 skill，無需 `.claude/commands/` 檔案。
 
 Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 使用原生 Git/GitHub 操作，並需要使用者明確授權。
 
