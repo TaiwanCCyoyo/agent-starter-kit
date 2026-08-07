@@ -8,29 +8,9 @@ paths:
 
 > Python specific style. General style expectations live in `CLAUDE.md`; review heuristics live in [common/code-review.md](../common/code-review.md).
 
-## Standards
-
-- Follow **PEP 8** conventions
-- Use **type annotations** on all function signatures
-
 ## Immutability
 
-Prefer immutable data structures:
-
-```python
-from dataclasses import dataclass
-
-@dataclass(frozen=True)
-class User:
-    name: str
-    email: str
-
-from typing import NamedTuple
-
-class Point(NamedTuple):
-    x: float
-    y: float
-```
+Prefer immutable data structures (frozen dataclasses, `NamedTuple`) over mutable ones.
 
 ## Formatting
 

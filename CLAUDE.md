@@ -30,7 +30,6 @@ Do not repeat an unverified workaround: investigate the root cause, surface any 
 
 - `.memories/` is git-ignored cross-agent state; keep `MEMORY.md` at most 2,200 chars and `USER.md` at most 500 chars.
 - Use `/memory-maintenance` for routing, `/memory-sql` for every database operation, and the explicit save or compression workflow for durable writes.
-- Keep plans, raw transcripts, command narration, secrets, credentials, and private user data outside memory.
 - Treat session-start memory and database query results as context until explicitly curated; subagents never write durable memory directly.
 
 ## Verification
