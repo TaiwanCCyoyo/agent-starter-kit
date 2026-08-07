@@ -9,17 +9,12 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 ## Pre-commit Checklist
 
-1. **Hook Awareness**: Ensure `pre-commit` hooks are active. If a commit is blocked by hooks, fix the specific issue and re-stage before retrying.
-2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only. The `commit_specialist` performs the full staged-content review with `git status` and `git diff --cached` to ensure only intended changes are staged.
-3. **Local State Guard**: Avoid staging `.env`, credentials, temporary build artifacts, generated junk, or ignored local memory state.
-4. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit_specialist`. The specialist verifies it and must not commit inside a submodule.
+1. **Scope Verification**: The main agent performs filename-level staged-scope preflight only. The `commit_specialist` performs the full staged-content review with `git status` and `git diff --cached` to ensure only intended changes are staged.
+2. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit_specialist`. The specialist verifies it and must not commit inside a submodule.
 
 ## Security And Hygiene
 
-1. **Sensitive Data**: Never commit `.env` files, private keys, tokens, passwords, or credentials.
-2. **No Junk**: Reject or warn if generated binaries, temporary build artifacts, unrelated `__pycache__` files, or local settings are staged.
-3. **Local State Safety**: Never include ignored local state under `.memories/`.
-4. **Surgical Changes**: Ensure changes are relevant to the requested task. Reject unrelated cleanup or noisy diffs unless requested.
+Beyond the general git safety protocol (never commit secrets, avoid unrelated or generated-junk files): never include ignored local state under `.memories/`, and reject unrelated cleanup or noisy diffs unless requested.
 
 ## Commit Message Standard
 
@@ -68,13 +63,11 @@ Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
 
 ## Execution And Failure Mitigation
 
-- Commit execution is delegated to the `commit_specialist` subagent, including staged-content analysis, security and hygiene checks, running `git commit`, reading hook output, and retrying after fixes.
-- If `git commit` fails due to hooks, enter Fix Mode: read the specific error output, apply the minimal fix, re-stage changed files, and retry.
-- Do not bypass hooks unless the user explicitly authorizes it.
+Commit execution is delegated to the `commit_specialist` subagent: staged-content analysis, security and hygiene checks, and running `git commit`. Hook-failure handling follows the standard git safety protocol (fix the specific issue, re-stage, retry; never bypass hooks without explicit authorization) — not restated here.
 
 ## Post-Commit Memory Check
 
-After a successful commit:
+This check is the **main agent's** responsibility, run after `commit_specialist` reports a successful commit — the subagent only sees the delegated staged diff, not the full session, so it cannot judge these criteria itself:
 
 1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
 2. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.

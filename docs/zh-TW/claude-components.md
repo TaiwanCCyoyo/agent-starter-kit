@@ -120,12 +120,17 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
-| Skill                        | 用途                                                                                                                                     |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `cost-aware-llm-pipeline`    | LLM 成本控制：模型路由、預算追蹤、提示快取                                                                                               |
-| `github-ops`                 | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
-| `llm-trading-agent-security` | 交易代理安全性：消費上限、斷路器、金鑰處理                                                                                               |
-| `python-testing`             | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+| Skill            | 用途                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-ops`     | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
+| `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+
+### 已移除（2026-08-07 清理——待機設計 ECC demo skills，無下游使用方）
+
+| Skill                        | 原因                                                                                                                                                                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cost-aware-llm-pipeline`    | 本 repo 未呼叫任何 LLM API（僅為 meta-tooling），因此此 skill 只能透過描述在下游專案中符合條件；其硬編碼了陳舊的模型 ID（`claude-sonnet-4-6`）與 2025-2026 年度價格表，可能滲入產生的程式碼。待有實際呼叫 LLM API 的專案建置自此 kit 時，再從 ECC 重新加入。 |
+| `llm-trading-agent-security` | 本 repo 無交易代理功能。移除它會縮小下方 `security-review` 的涵蓋聲明——若開始交易代理工作，可視需要恢復。                                                                                                                                                    |
 
 ### 已移除（2026-06-08 清理——Claude 原生 verification 現已涵蓋這些功能）
 
@@ -143,7 +148,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `python-patterns`                          | PEP 8 格式化由 ruff 處理；慣例由 `python-reviewer` agent 涵蓋                                                                                      |
 | `deep-research`                            | 需要 firecrawl + exa MCP——延後至 MCP 設定完成                                                                                                      |
 | `api-design`、`backend-patterns`           | 本股票專案非 web backend                                                                                                                           |
-| `security-review`                          | 已由 `security-reviewer` agent 和 `llm-trading-agent-security` 涵蓋                                                                                |
+| `security-review`                          | 已由 `security-reviewer` agent 涵蓋；交易相關模式（消費上限、斷路器）因 `llm-trading-agent-security` 於 2026-08-07 移除而不再涵蓋                  |
 | 非 Python 語言模式                         | 未使用的語言                                                                                                                                       |
 | `homelab-*`、`network-*`、`healthcare-*`   | 領域不符                                                                                                                                           |
 | `angular-developer`、`react-*`、`nextjs-*` | 未規劃前端                                                                                                                                         |

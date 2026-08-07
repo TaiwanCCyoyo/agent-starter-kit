@@ -65,13 +65,12 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 | Command               | Purpose                                                                                     |
 | --------------------- | ------------------------------------------------------------------------------------------- |
-| `/compress-memory`    | Compress bounded memory when it grows too large                                             |
 | `/gen-commit`         | Generate a Conventional Commit message via `commit-specialist`                              |
 | `/learn-eval`         | Evaluate session patterns through a holistic quality gate; extract as skills after approval |
 | `/memory-maintenance` | Initialize, update, audit, or consolidate project memory                                    |
-| `/memory-sql`         | Query or write to `.memories/memory_store.db` via the memory-db MCP server                  |
-| `/save-memory`        | Save durable facts to the appropriate bounded file or SQLite store                          |
 | `/worktree`           | Create, manage, and merge Git worktrees with memory preservation                            |
+
+`/compress-memory`, `/memory-sql`, and `/save-memory` have no command wrapper file (removed 2026-08-07 as redundant): Claude Code registers each `.claude/skills/<name>/SKILL.md` under its own `name`, so `/compress-memory`, `/memory-sql`, and `/save-memory` resolve directly to the identically-named skill without a `.claude/commands/` file.
 
 Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion use native Git/GitHub operations and explicit user authorization.
 
@@ -120,12 +119,17 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
-| Skill                        | Purpose                                                                                                                                                                            |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cost-aware-llm-pipeline`    | LLM cost control: model routing, budget tracking, prompt caching                                                                                                                   |
-| `github-ops`                 | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
-| `llm-trading-agent-security` | Trading agent security: spend limits, circuit breakers, key handling                                                                                                               |
-| `python-testing`             | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
+| Skill            | Purpose                                                                                                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-ops`     | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
+| `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
+
+### Removed (2026-08-07 cleanup — dormant-by-design ECC demo skills, no downstream usage)
+
+| Skill                        | Reason                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cost-aware-llm-pipeline`    | This repo never calls an LLM API (meta-tooling only), so the skill only matched by description in a downstream project; it hardcoded a stale model ID (`claude-sonnet-4-6`) and a 2025-2026 price table that would leak into generated code. Re-add from ECC when a project built from this kit actually calls an LLM API. |
+| `llm-trading-agent-security` | No trading-agent functionality in this repo. Removing it narrows the `security-review` coverage claim below — restore if trading-agent work begins.                                                                                                                                                                        |
 
 ### Removed (2026-06-08 cleanup — native Claude verification now covers these)
 
@@ -143,7 +147,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `python-patterns`                          | PEP 8 formatting handled by ruff; idioms covered by `python-reviewer` agent                                                                                                               |
 | `deep-research`                            | Requires firecrawl + exa MCP — deferred until MCP configured                                                                                                                              |
 | `api-design`, `backend-patterns`           | Stock project is not a web backend                                                                                                                                                        |
-| `security-review`                          | Covered by `security-reviewer` agent + `llm-trading-agent-security`                                                                                                                       |
+| `security-review`                          | Covered by `security-reviewer` agent; trading-specific patterns (spend limits, circuit breakers) no longer covered since `llm-trading-agent-security` was removed 2026-08-07              |
 | Non-Python language patterns               | Unused languages                                                                                                                                                                          |
 | `homelab-*`, `network-*`, `healthcare-*`   | Domain mismatch                                                                                                                                                                           |
 | `angular-developer`, `react-*`, `nextjs-*` | No frontend planned                                                                                                                                                                       |

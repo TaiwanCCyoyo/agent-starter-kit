@@ -56,16 +56,7 @@ gh issue comment <number> --body "Thanks for reporting. Could you share reproduc
 
 ### PR Creation Preparation
 
-Before creating a pull request:
-
-1. Identify the target base branch.
-2. Review the complete branch commit history, not only the latest commit.
-3. Inspect the complete branch diff with `git diff <base-branch>...HEAD`.
-4. Draft a summary that covers all material changes in the branch.
-5. Draft a test plan from fresh verification evidence.
-
-Use native Git and GitHub operations to push the branch and create the pull request after
-this preparation is complete, and only with explicit user authorization.
+Follow the standard PR-preparation workflow (full branch history, `base...HEAD` diff, summary, test plan). Push and PR creation require explicit user authorization — do not treat a prior push approval as blanket consent for later pushes.
 
 ### Review Checklist
 

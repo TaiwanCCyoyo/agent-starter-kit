@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 MEMORY_CHAR_LIMIT = 2200
@@ -10,6 +11,8 @@ USER_CHAR_LIMIT = 500
 MEMORY_ROOT = Path(".memories")
 MEMORY_DIR = MEMORY_ROOT / "memories"
 STATE_FILE = MEMORY_ROOT / ".claude_stop_memory_state.json"
+LEARN_EVAL_STATE_FILE = MEMORY_ROOT / ".claude_learn_eval_state.json"
+LEARN_EVAL_REMINDER_INTERVAL_SECONDS = 7 * 24 * 60 * 60
 APPROVED_ROOT_FILES = {"memory_store.db"}
 APPROVED_ROOT_DIRS = {"memories"}
 APPROVED_MEMORY_FILES = {"MEMORY.md", "USER.md"}
@@ -143,6 +146,28 @@ def user_health_message(root: Path) -> str:
     )
 
 
+def learn_eval_reminder_message(root: Path) -> str:
+    path = root / LEARN_EVAL_STATE_FILE
+    now = time.time()
+    last_reminder_at = 0.0
+    if path.exists():
+        try:
+            last_reminder_at = float(json.loads(path.read_text(encoding="utf-8")).get("last_reminder_at", 0.0))
+        except Exception:
+            last_reminder_at = 0.0
+
+    if now - last_reminder_at < LEARN_EVAL_REMINDER_INTERVAL_SECONDS:
+        return ""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"last_reminder_at": now}, indent=2), encoding="utf-8")
+    return (
+        "Skill review reminder: it has been a week since the last reminder. "
+        "If this session included a user correction, a non-obvious technique, or a reusable workflow, "
+        "run `/learn-eval`. Consider a skill lifecycle audit (active/stale/archived) via `/memory-maintenance` as well."
+    )
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -163,6 +188,9 @@ def main() -> int:
     taxonomy_message = memory_taxonomy_message(root)
     if taxonomy_message:
         messages.append(taxonomy_message)
+    learn_eval_message = learn_eval_reminder_message(root)
+    if learn_eval_message:
+        messages.append(learn_eval_message)
     write_state(root, state)
 
     if messages:

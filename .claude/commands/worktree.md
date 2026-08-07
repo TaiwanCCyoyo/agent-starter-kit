@@ -4,41 +4,4 @@ description: Create, manage, finish, merge, or clean up Git worktrees while pres
 
 # Worktree Manager
 
-Follow `.claude/skills/worktree-memory-sync/SKILL.md` for the repository-specific `.memories/` synchronization rules. Use native Git worktree operations for creation, branching, setup, finish, and cleanup.
-
-## Creation
-
-Use native Git worktree operations for detection, consent, creation, setup, and baseline verification. After creation, copy only missing `.memories/` items and never overwrite worktree-local `MEMORY.md`, `USER.md`, or `memory_store.db`.
-
-## Active Development
-
-- Keep durable memory within the approved `.memories/` taxonomy.
-- Keep durable planning handoff in the relevant project planning or specification content.
-- Use `/memory-sql` for searchable facts and recurring-problem history.
-
-## Finish
-
-Before removing a worktree:
-
-1. Verify the definition of done.
-2. Run relevant tests or checks.
-3. Read the worktree memory and main repository memory.
-4. Consolidate durable, non-duplicate memory into the current main-workspace state.
-5. Use native Git and the `github-ops` skill for merge, PR preparation, preservation, or cleanup, with explicit user authorization for publishing or destructive actions.
-
-## Consolidation
-
-When consolidating worktree memory:
-
-1. Identify source and destination `.memories/` directories.
-2. Compare bounded files and query structured memory before writes.
-3. Transfer only durable, non-duplicate facts and verified resolutions.
-4. Preserve newer main-workspace entries.
-5. Update the related project planning or specification content with status, verification, or spec changes when relevant.
-6. Report consolidated items and skipped duplicates.
-
-## Safety
-
-- Do not delete a worktree with uncommitted work unless the user explicitly authorizes it.
-- Do not discard branch-specific memory before consolidation.
-- Do not force-delete branches unless explicitly requested.
+Use the `worktree-memory-sync` skill for the full worktree lifecycle: creation, active development, finish, consolidation, and safety rules. Worktree lifecycle mechanics (creation, branching, setup, finish, cleanup) use native Git worktree operations; the skill owns only the repository-specific `.memories/` synchronization that Git cannot provide.

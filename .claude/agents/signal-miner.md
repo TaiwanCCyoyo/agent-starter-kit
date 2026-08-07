@@ -1,6 +1,6 @@
 ---
 name: signal-miner
-description: Lowest-cost, read-only utility for bounded mechanical exploration and commands expected to produce large logs or stdout. Delegate before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections in the parent context; return actionable signal only, never raw output, implementation, or ambiguous judgment.
+description: Lowest-cost, read-only utility for commands expected to produce large logs or stdout. Delegate before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections in the parent context; return actionable signal only, never raw output, implementation, or ambiguous judgment. For plain code location without high-volume output, use the built-in Explore agent instead.
 model: haiku
 tools:
     - Read
