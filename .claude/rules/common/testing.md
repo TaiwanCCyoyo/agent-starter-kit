@@ -1,3 +1,8 @@
+---
+paths:
+    - "*"
+---
+
 # Testing Requirements
 
 ## Risk-Based Coverage
@@ -7,7 +12,7 @@
 - Add E2E tests only for critical user flows when the project has an E2E harness.
 - Run coverage when requested or when risk makes untested paths important. Do not impose a universal percentage.
 
-TDD workflow is provided by `superpowers:test-driven-development`. Repository-specific commands are in `skill: python-testing`.
+Use a native test-first workflow when it improves confidence. Repository-specific commands and fixtures are defined in `skill: python-testing`.
 
 ## Test Structure (AAA Pattern)
 

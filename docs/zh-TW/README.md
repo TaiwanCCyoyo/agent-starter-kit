@@ -15,7 +15,7 @@
 
 ## 目前預設值
 
-- **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，Superpowers 負責 TDD、debugging、verification 與 branch completion，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
+- **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，repository-owned skills 與直接驗證負責實作工作，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
 - **分層驗證**：Claude Code 透過官方 Pyright LSP plugin 與唯讀的 Ruff `E722,F601,F602,F634` check 取得即時 diagnostics；Codex 因沒有 Python LSP，對 Python 編輯使用較廣的唯讀 Ruff `F` check。兩者都會在完成前執行 pre-commit，由其統一負責 formatting、linting、型別檢查與檔案驗證。
 - **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
 - **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
@@ -179,17 +179,17 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 ### Agent workflow plugins 與 skills 整合
 
-本儲存庫依不同 Agent 採用不同方式整合 workflow plugins 與 guidance：
+本儲存庫依不同 Agent 採用不同方式整合原生能力、project-owned skills 與選用的 plugins：
 
-- **Claude Code**：透過 Claude 的 plugin/skill layer 使用 Superpowers、Ponytail 與 Karpathy behavioral guidance。專案內的 `.claude/` rules 只保留 repository-specific routing 與 safety policy。
-- **Codex**：Superpowers 與 Ponytail 是外部 Codex plugins，使用前需要在 Codex 環境手動安裝。Karpathy guidance 在本 starter kit 中沒有獨立 Codex 安裝指令，因此以 condensed guidance 整合進 `.codex/AGENTS.md`，並將完整 skill 複製到 `.codex/skills/karpathy-guidelines/`。
+- **Claude Code**：專案設定刻意停用 Superpowers、Ponytail 與 Karpathy plugins。工作流程由 Claude 原生能力，以及 project-owned 的 `.claude/` agents、commands、skills、rules 與 hooks 提供；GitHub、skill-creator 與 Pyright LSP 仍維持啟用。
+- **Codex**：不依賴 Superpowers 或 Ponytail。工作流程由 Codex 原生能力、project-scoped agents 與 skills，以及本地的 `.codex/skills/karpathy-guidelines/` 提供；GitHub 整合則由可用的 GitHub plugin 提供。
 - **Antigravity**：使用既有 `.agent/skills/`、`.agent/rules/` 與 `.agent/workflows/` 內容；其 plugin 與 skill set 尚未與 Claude Code、Codex 的 plugin layer 對齊。
 
 ## 設計來源
 
 本 starter kit 的架構設計受到兩個開源專案的啟發：
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode、Superpowers 與 autoloaded skills 取代。
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode 與 autoloaded project skills 取代。
 
 - **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot、SQLite FTS5 session recall 與 learning loop，再依 starter kit 需求改編，而不是直接移植 Hermes。
 

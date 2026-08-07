@@ -128,12 +128,11 @@
         "baseRef": "head"
     },
     "enabledPlugins": {
-        "superpowers@claude-plugins-official": true,
+        "superpowers@claude-plugins-official": false,
         "github@claude-plugins-official": true,
-        "ponytail@ponytail": true,
+        "ponytail@ponytail": false,
         "skill-creator@claude-plugins-official": true,
-        "plugin-dev@claude-plugins-official": true,
-        "andrej-karpathy-skills@karpathy-skills": true,
+        "andrej-karpathy-skills@karpathy-skills": false,
         "pyright-lsp@claude-plugins-official": true
     },
     "extraKnownMarketplaces": {

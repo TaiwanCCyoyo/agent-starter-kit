@@ -1,3 +1,8 @@
+---
+paths:
+    - "*"
+---
+
 # Security Routing
 
 ## Security-Sensitive Triggers

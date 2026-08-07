@@ -16,7 +16,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 ## Current Defaults
 
-- **Shared development rules**: Codex and Claude Code now use the same phase routing model: native planning for in-session plans, optional downstream OpenSpec files for durable planning handoff, Superpowers for TDD/debugging/verification/branch completion, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
+- **Shared development rules**: Codex and Claude Code use the same phase routing model: native planning for in-session plans, optional downstream OpenSpec files for durable planning handoff, repository-owned skills and direct verification for implementation work, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
 - **OpenSpec CLI dependency**: Spec-driven planning expects the OpenSpec CLI to be installed by the user. Run `openspec init` in each downstream project or workspace that wants OpenSpec planning, then treat the generated specs, changes, and tasks as normal project files and commit them when they are part of the project record.
 - **Layered verification**: Claude Code uses the official Pyright LSP plugin plus a read-only Ruff check for `E722,F601,F602,F634`; Codex uses a broader read-only `F` check because it has no Python LSP. Both use pre-commit before completion for authoritative formatting, linting, type checking, and file validation.
 - **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
@@ -181,17 +181,17 @@ After copying, replace `.memories/memories/MEMORY.md` with the target project's 
 
 ### Agent Workflow Plugin And Skill Integration
 
-This repository integrates workflow plugins and guidance differently per agent:
+This repository integrates native capabilities, project-owned skills, and selected plugins differently per agent:
 
-- **Claude Code**: Uses Superpowers, Ponytail, and Karpathy behavioral guidance through Claude's plugin/skill layer. The project-level `.claude/` rules keep only repository-specific routing and safety policy.
-- **Codex**: Superpowers and Ponytail are external Codex plugins and must be installed in the Codex environment before use. Karpathy guidance has no separate Codex install command in this starter kit, so the condensed guidance is integrated into `.codex/AGENTS.md` and the full skill is copied under `.codex/skills/karpathy-guidelines/`.
+- **Claude Code**: The project settings intentionally disable the Superpowers, Ponytail, and Karpathy plugins. Native Claude capabilities, project-owned `.claude/` agents, commands, skills, rules, and hooks provide the workflow; GitHub, skill-creator, and Pyright LSP remain enabled.
+- **Codex**: Does not depend on Superpowers or Ponytail. Native Codex capabilities, project-scoped agents and skills, and the local `.codex/skills/karpathy-guidelines/` skill provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
 - **Antigravity**: Uses the existing `.agent/skills/`, `.agent/rules/`, and `.agent/workflows/` content. Its plugin and skill set is not aligned with the Claude Code and Codex plugin layers.
 
 ## Design Influences
 
 This starter kit is shaped by two open-source projects:
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode, Superpowers, and autoloaded skills.
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
 
 - **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's bounded `MEMORY.md` and `USER.md`, frozen prompt snapshots, SQLite FTS5 session recall, and learning-loop design. This starter kit adapts those mechanisms rather than directly porting Hermes.
 

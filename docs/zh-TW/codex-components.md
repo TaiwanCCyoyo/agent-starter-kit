@@ -8,7 +8,7 @@ Codex 使用 Native Plan Mode、repo-scoped skills、專用 subagents、project 
 | :------------------------------------------- | :------------------------------------------------------ |
 | 規劃                                         | Native Plan Mode 與 `<proposed_plan>`                   |
 | 計畫品質審查                                 | 唯讀 `plan_reviewer` agent                              |
-| TDD、除錯、worktree、完成前驗證              | 已安裝的 Superpowers plugin                             |
+| TDD、除錯、worktree、完成前驗證              | Codex 原生能力、project skills 與明確檢查               |
 | GitHub issues、PR、CI、review comments、發布 | 已安裝的 GitHub plugin                                  |
 | Slash commands                               | 自然語言 skill triggers                                 |
 | 跨 session planning                          | Native planning 加上選用的 project-owned OpenSpec files |
@@ -60,8 +60,8 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | :----------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/plan`                                                      | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化 PRD-based 或跨 session planning handoff 可在 OpenSpec files 存在時使用。                                               |
 | `plan-reviewer`                                              | 已移植                   | 獨立 plan critique 有價值，且不重複 plan creation。                                                                                                            |
-| `/feature-dev`                                               | Superpowers／原生取代    | Brainstorming、Plan Mode、TDD、verification 與 review 已構成完整流程。                                                                                         |
-| `/build-fix`                                                 | Superpowers／原生取代    | Systematic debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                         |
+| `/feature-dev`                                               | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
+| `/build-fix`                                                 | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
 | `/code-review`                                               | 原生／plugin 取代        | Local review 使用 Codex review stance 與 agents；PR review 使用 GitHub plugin。                                                                                |
 | `/python-review`                                             | Skill 取代               | `python-testing` 提供 repo 支援的 Ruff、mypy、pytest 與選配 coverage。                                                                                         |
 | `/security-scan`                                             | Agent 與 gates 取代      | 已有 `security_reviewer`、detect-secrets、hooks、pre-commit；未安裝 AgentShield。                                                                              |
@@ -70,26 +70,24 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `cost-aware-llm-pipeline`                                    | 不移植                   | 它是 application-domain 指引，含 provider-specific model names 與易變價格，不是 Codex 工作流。待 repo 真正建立 LLM API pipeline 時，再依官方資料做共享 skill。 |
 | `eval-harness`                                               | 已移除／延後             | 它引用不存在的 `/eval` commands，且沒有 runner、grader、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。                             |
 | `llm-trading-agent-security`                                 | 不移植                   | 僅適用會簽交易或有 wallet authority 的 agents；repo 出現該執行面時再共享。                                                                                     |
-| `architect`、`code-simplifier`、`loop-operator`、`tdd-guide` | 不鏡像                   | Codex 由 main agent 負責 planning/implementation，並使用 Superpowers；複製 write-capable specialists 會造成權責重疊。                                          |
+| `architect`、`code-simplifier`、`loop-operator`、`tdd-guide` | 不鏡像                   | Codex 由 main agent 負責 planning/implementation，並使用 project-scoped skills；複製 write-capable specialists 會造成權責重疊。                                |
 | `code-reviewer`、`silent-failure-hunter`、`python-reviewer`  | 已整併                   | `implementation_reviewer`、`security_reviewer`、Python skills 與 systematic debugging 已涵蓋有效面向。                                                         |
 | `performance-optimizer`                                      | 主代理審查               | 僅在有量測到的瓶頸時，才要求針對性的效能分析。                                                                                                                 |
 
 ## 共享政策對齊
 
-| 共享行為                                                          | Codex owner                                               |
-| :---------------------------------------------------------------- | :-------------------------------------------------------- |
-| Operating contract、prompt defense、scoped changes                | `.codex/AGENTS.md`                                        |
-| 實作前 research 與 reuse                                          | `.codex/AGENTS.md` engineering discipline                 |
-| Review severity 與 CRITICAL/HIGH completion policy                | `.codex/AGENTS.md` review and security section            |
-| Security triggers 與 secret handling                              | `.codex/AGENTS.md` 加上 `security_reviewer`               |
-| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                   |
-| Python development rules                                          | `python-development`                                      |
-| Repository Python verification                                    | `python-testing`                                          |
-| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 Superpowers phase routing |
+| 共享行為                                                          | Codex owner                                             |
+| :---------------------------------------------------------------- | :------------------------------------------------------ |
+| Operating contract、prompt defense、scoped changes                | `.codex/AGENTS.md`                                      |
+| 實作前 research 與 reuse                                          | `.codex/AGENTS.md` engineering discipline               |
+| Review severity 與 CRITICAL/HIGH completion policy                | `.codex/AGENTS.md` review and security section          |
+| Security triggers 與 secret handling                              | `.codex/AGENTS.md` 加上 `security_reviewer`             |
+| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                 |
+| Python development rules                                          | `python-development`                                    |
+| Repository Python verification                                    | `python-testing`                                        |
+| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
 
-Superpowers 已在 Codex 啟用。它提供 workflow guidance，但不得繞過 user intent、sandbox approvals、dirty-worktree protections、repository ownership，或 delegation、commit、destructive action、push、merge 與 pull request 所需的明確授權。Codex 的 PR 準備與發布行為由 GitHub plugin workflows 擁有。
-
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode、選用的 project-owned OpenSpec files，或 Superpowers planning skills；test/debug 透過 Superpowers；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備交給 GitHub plugin；branch completion 則由 Superpowers 在 Codex approval 規則內處理。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或選用的 project-owned OpenSpec files；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；branch completion 則透過明確的原生 Git 操作，並遵守 Codex approval 規則。
 
 ## Plans、Memory 與 Commits
 

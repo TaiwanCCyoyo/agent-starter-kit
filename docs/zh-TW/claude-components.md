@@ -7,6 +7,8 @@
 **ECC 整合日期**：2026-06-02
 **記憶設計來源**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；本專案改編其有限 session context、SQLite 可搜尋歷史與學習檢查循環
 
+本專案設定刻意停用外部的 Superpowers、Ponytail 與 Karpathy plugins。本參考文件描述 repository-owned 的 Claude 元件與 Claude 原生能力；GitHub、skill-creator 與 Pyright LSP 仍在 `.claude/settings.json` 中啟用。
+
 ---
 
 ## Agents
@@ -33,17 +35,17 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ### 未從 ECC 移植（含原因）
 
-| Agent                                                                                                                                              | 原因                                                                                                                    |
-| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代                                            |
-| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能、聚焦 reviewer 與已安裝的 Superpowers/Ponytail workflows 已涵蓋其責任，無須重複委派。 |
-| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python                                                        |
-| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                                                              |
-| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                                                                    |
-| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                                                            |
-| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                                                                |
-| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                                                                |
-| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                                                          |
+| Agent                                                                                                                                              | 原因                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代  |
+| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能與聚焦 reviewer 已涵蓋其責任，無須重複委派。 |
+| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python              |
+| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                    |
+| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                          |
+| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                  |
+| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                      |
+| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                      |
+| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                |
 
 ---
 
@@ -71,15 +73,15 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | `/save-memory`        | 將長期事實儲存至適當的 bounded file 或 SQLite store               |
 | `/worktree`           | 建立、管理並合併 Git worktree，同時保留記憶體                     |
 
-Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 仍由 Superpowers finishing workflow 加上使用者明確授權把關。
+Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 使用原生 Git/GitHub 操作，並需要使用者明確授權。
 
-### 已移除（2026-06-10 清理——agents、Superpowers 與內建 `/code-review` 已涵蓋）
+### 已移除（2026-06-10 清理——agents 與內建 `/code-review` 已涵蓋）
 
 | Command          | 替代方案                                                                       |
 | ---------------- | ------------------------------------------------------------------------------ |
-| `/build-fix`     | Superpowers systematic debugging + `python-testing` skill                      |
+| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill                        |
 | `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ `implementation-reviewer` agent |
-| `/feature-dev`   | Native Plan Mode + Superpowers TDD + `signal-miner` agent                      |
+| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent             |
 | `/python-review` | `python-testing` skill 與 `implementation-reviewer`                            |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                              |
 | `/test-coverage` | `python-testing` skill（`pytest --cov`）                                       |
@@ -106,32 +108,32 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 記憶體與工作流程（原創——非來自 ECC）
 
-| Skill                  | 用途                                                                                                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commit-helper`        | Conventional Commits 格式、pre-commit 檢查清單                                                                                                          |
-| `memory-manager`       | Memory 初始化、讀取、audit、taxonomy、health checks 與 operation routing                                                                                |
-| `save-memory`          | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff                                                                                 |
-| `compress-memory`      | Bounded-file 清理、去重與低頻知識 graduation                                                                                                            |
-| `memory-sql`           | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions                                                                |
-| `skill-curator`        | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引                                                                   |
-| `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期由 Superpowers 提供。 |
+| Skill                  | 用途                                                                                                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commit-helper`        | Conventional Commits 格式、pre-commit 檢查清單                                                                                                        |
+| `memory-manager`       | Memory 初始化、讀取、audit、taxonomy、health checks 與 operation routing                                                                              |
+| `save-memory`          | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff                                                                               |
+| `compress-memory`      | Bounded-file 清理、去重與低頻知識 graduation                                                                                                          |
+| `memory-sql`           | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions                                                              |
+| `skill-curator`        | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引                                                                 |
+| `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期使用原生 Git 操作。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
-| Skill                        | 用途                                                                                                                              |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `cost-aware-llm-pipeline`    | LLM 成本控制：模型路由、預算追蹤、提示快取                                                                                        |
-| `github-ops`                 | CI/CD 除錯、版本管理、Dependabot 監控                                                                                             |
-| `llm-trading-agent-security` | 交易代理安全性：消費上限、斷路器、金鑰處理                                                                                        |
-| `python-testing`             | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。通用 TDD 由 Superpowers 提供。 |
+| Skill                        | 用途                                                                                                                                     |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `cost-aware-llm-pipeline`    | LLM 成本控制：模型路由、預算追蹤、提示快取                                                                                               |
+| `github-ops`                 | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
+| `llm-trading-agent-security` | 交易代理安全性：消費上限、斷路器、金鑰處理                                                                                               |
+| `python-testing`             | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
 
-### 已移除（2026-06-08 清理——Superpowers 現已涵蓋這些功能）
+### 已移除（2026-06-08 清理——Claude 原生 verification 現已涵蓋這些功能）
 
 | Skill               | 原因                                                                                                                 |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `coding-standards`  | Superpowers + 縮減後的 `coding-style` rule 已涵蓋                                                                    |
-| `tdd-workflow`      | 由 `superpowers:test-driven-development` 取代                                                                        |
-| `verification-loop` | 由 Superpowers TDD/debugging/completion-verification 取代                                                            |
+| `coding-standards`  | Claude 原生 guidance 與縮減後的 `coding-style` rule 已涵蓋                                                           |
+| `tdd-workflow`      | 由原生 test-first workflow 取代                                                                                      |
+| `verification-loop` | 由原生 testing、review 與 pre-commit verification 取代                                                               |
 | `git-workflow`      | 716 行 Git 教科書；repo 提交規範現在僅在 `commit-helper` skill（`git-workflow` rule 也於 2026-06-13 清理中一併移除） |
 
 ### 未從 ECC 移植（含原因）
@@ -176,20 +178,20 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                                      |
-| --------------- | --------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops`、`superpowers:finishing-a-development-branch` 與 CLAUDE.md `Subagents` 擁有。 |
-| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                                                 |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                                      |
+| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                      |
+| --------------- | --------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作與 CLAUDE.md `Subagents` 擁有。 |
+| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                 |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                      |
 
 Common rules 刻意維持精簡。Security triggers 集中在 `rules/common/security.md`，severity handling 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 
-| 規則                        | 原因                                                                                                                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/git-workflow` | commit 格式由 `commit-helper` 擁有；PR 準備由 `github-ops` 擁有（完整 history、`base...HEAD` diff、摘要、test plan）；push 與建立由 `superpowers:finishing-a-development-branch` 擁有 |
-| `rules/common/agents`       | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此                                                                                                            |
+| 規則                        | 原因                                                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/git-workflow` | commit 格式由 `commit-helper` 擁有；PR 準備由 `github-ops` 擁有（完整 history、`base...HEAD` diff、摘要、test plan）；push 與建立使用原生 Git/GitHub 操作並需明確授權 |
+| `rules/common/agents`       | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此                                                                                            |
 
 ### 未從 ECC 移植（含原因）
 

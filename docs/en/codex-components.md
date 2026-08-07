@@ -4,15 +4,15 @@ Codex uses Native Plan Mode, repo-scoped skills, specialist subagents, project h
 
 ## Native And Plugin Equivalents
 
-| Capability                                          | Codex implementation                                       |
-| :-------------------------------------------------- | :--------------------------------------------------------- |
-| Planning                                            | Native Plan Mode and `<proposed_plan>`                     |
-| Plan quality review                                 | Read-only `plan_reviewer` agent                            |
-| TDD, debugging, worktrees, completion verification  | Installed Superpowers plugin                               |
-| GitHub issues, PRs, CI, review comments, publishing | Installed GitHub plugin                                    |
-| Slash commands                                      | Natural-language skill triggers                            |
-| Cross-session planning                              | Native planning plus optional project-owned OpenSpec files |
-| Searchable memory                                   | Project-scoped `memory-db` MCP server                      |
+| Capability                                          | Codex implementation                                           |
+| :-------------------------------------------------- | :------------------------------------------------------------- |
+| Planning                                            | Native Plan Mode and `<proposed_plan>`                         |
+| Plan quality review                                 | Read-only `plan_reviewer` agent                                |
+| TDD, debugging, worktrees, completion verification  | Native Codex capabilities, project skills, and explicit checks |
+| GitHub issues, PRs, CI, review comments, publishing | Installed GitHub plugin                                        |
+| Slash commands                                      | Natural-language skill triggers                                |
+| Cross-session planning                              | Native planning plus optional project-owned OpenSpec files     |
+| Searchable memory                                   | Project-scoped `memory-db` MCP server                          |
 
 Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
 
@@ -60,8 +60,8 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | :----------------------------------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/plan`                                                      | Native/optional artifact replacement | Conversational planning is provided by native Plan Mode. Durable PRD-based or cross-session planning handoff may use project-owned OpenSpec files when present.                                          |
 | `plan-reviewer`                                              | Ported                               | Independent plan critique is useful and does not duplicate plan creation.                                                                                                                                |
-| `/feature-dev`                                               | Superpowers/native replacement       | Brainstorming, Plan Mode, TDD, verification, and review already form the workflow.                                                                                                                       |
-| `/build-fix`                                                 | Superpowers/native replacement       | Systematic debugging plus repository verification covers incremental diagnosis and repair.                                                                                                               |
+| `/feature-dev`                                               | Native replacement                   | Brainstorming, Plan Mode, test-first development, verification, and review already form the workflow.                                                                                                    |
+| `/build-fix`                                                 | Native replacement                   | Evidence-driven debugging plus repository verification covers incremental diagnosis and repair.                                                                                                          |
 | `/code-review`                                               | Native/plugin replacement            | Local review uses Codex review stance and agents; PR review uses the GitHub plugin.                                                                                                                      |
 | `/python-review`                                             | Skill replacement                    | `python-testing` provides repository-supported Ruff, mypy, pytest, and optional coverage commands.                                                                                                       |
 | `/security-scan`                                             | Agent and gate replacement           | `security_reviewer`, detect-secrets, hooks, and pre-commit are installed; AgentShield is not.                                                                                                            |
@@ -70,26 +70,24 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `cost-aware-llm-pipeline`                                    | Not ported                           | It is application-domain guidance with provider-specific model names and volatile pricing, not a Codex workflow. Create a shared, vendor-verified skill when this repository builds an LLM API pipeline. |
 | `eval-harness`                                               | Removed/deferred                     | It referenced nonexistent `/eval` commands and lacked a runner, grader implementation, baseline format, Python commands, and CI integration. Restore only after those capabilities exist.                |
 | `llm-trading-agent-security`                                 | Not ported                           | It is domain-specific to transaction-signing or wallet-authorized agents. Share it when the repository contains that execution surface.                                                                  |
-| `architect`, `code-simplifier`, `loop-operator`, `tdd-guide` | Not mirrored                         | Codex keeps planning and implementation in the main agent and uses Superpowers workflows; duplicating write-capable specialists would add overlapping authority.                                         |
+| `architect`, `code-simplifier`, `loop-operator`, `tdd-guide` | Not mirrored                         | Codex keeps planning and implementation in the main agent and uses project-scoped skills; duplicating write-capable specialists would add overlapping authority.                                         |
 | `code-reviewer`, `silent-failure-hunter`, `python-reviewer`  | Consolidated                         | `implementation_reviewer`, `security_reviewer`, Python skills, and systematic debugging cover the useful review dimensions.                                                                              |
 | `performance-optimizer`                                      | Main-agent review                    | Require a measured bottleneck before requesting targeted performance analysis.                                                                                                                           |
 
 ## Shared Policy Alignment
 
-| Shared behavior                                                   | Codex owner                                                 |
-| :---------------------------------------------------------------- | :---------------------------------------------------------- |
-| Operating contract, prompt defense, scoped changes                | `.codex/AGENTS.md`                                          |
-| Research and reuse before implementation                          | `.codex/AGENTS.md` engineering discipline                   |
-| Review severity and CRITICAL/HIGH completion policy               | `.codex/AGENTS.md` review and security section              |
-| Security triggers and secret handling                             | `.codex/AGENTS.md` plus `security_reviewer`                 |
-| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                     |
-| Python development rules                                          | `python-development`                                        |
-| Repository Python verification                                    | `python-testing`                                            |
-| Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and Superpowers phase routing |
+| Shared behavior                                                   | Codex owner                                               |
+| :---------------------------------------------------------------- | :-------------------------------------------------------- |
+| Operating contract, prompt defense, scoped changes                | `.codex/AGENTS.md`                                        |
+| Research and reuse before implementation                          | `.codex/AGENTS.md` engineering discipline                 |
+| Review severity and CRITICAL/HIGH completion policy               | `.codex/AGENTS.md` review and security section            |
+| Security triggers and secret handling                             | `.codex/AGENTS.md` plus `security_reviewer`               |
+| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                   |
+| Python development rules                                          | `python-development`                                      |
+| Repository Python verification                                    | `python-testing`                                          |
+| Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
 
-Superpowers is active in Codex. It provides workflow guidance but cannot bypass user intent, sandbox approvals, dirty-worktree protections, repository ownership, or explicit authorization for delegation, commits, destructive actions, pushes, merges, and pull requests. GitHub plugin workflows own Codex PR preparation and publishing behavior.
-
-Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode, optional project-owned OpenSpec files, or Superpowers planning skills; test and debug through Superpowers; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin; and finish branches through Superpowers within Codex approval rules.
+Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or optional project-owned OpenSpec files; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and finish branches through explicit native Git operations within Codex approval rules.
 
 ## Plans, Memory, And Commits
 

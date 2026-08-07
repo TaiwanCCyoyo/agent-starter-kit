@@ -4,11 +4,11 @@ description: Create, manage, finish, merge, or clean up Git worktrees while pres
 
 # Worktree Manager
 
-Follow `.claude/skills/worktree-memory-sync/SKILL.md` for the repository-specific `.memories/` synchronization rules. Worktree lifecycle (creation, branching, setup, finish, cleanup) is provided by Superpowers.
+Follow `.claude/skills/worktree-memory-sync/SKILL.md` for the repository-specific `.memories/` synchronization rules. Use native Git worktree operations for creation, branching, setup, finish, and cleanup.
 
 ## Creation
 
-Use the Superpowers worktree workflow for detection, consent, creation, setup, and baseline verification. After creation, copy only missing `.memories/` items and never overwrite worktree-local `MEMORY.md`, `USER.md`, or `memory_store.db`.
+Use native Git worktree operations for detection, consent, creation, setup, and baseline verification. After creation, copy only missing `.memories/` items and never overwrite worktree-local `MEMORY.md`, `USER.md`, or `memory_store.db`.
 
 ## Active Development
 
@@ -24,7 +24,7 @@ Before removing a worktree:
 2. Run relevant tests or checks.
 3. Read the worktree memory and main repository memory.
 4. Consolidate durable, non-duplicate memory into the current main-workspace state.
-5. Follow Superpowers for merge, PR, preservation, or cleanup.
+5. Use native Git and the `github-ops` skill for merge, PR preparation, preservation, or cleanup, with explicit user authorization for publishing or destructive actions.
 
 ## Consolidation
 

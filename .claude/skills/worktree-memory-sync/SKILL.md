@@ -5,11 +5,11 @@ description: Use when the user says /worktree, worktree create, worktree finish,
 
 # Worktree Memory Sync
 
-Worktree lifecycle (creation, branching, setup, baseline verification, finish, cleanup) is provided by Superpowers. This skill contains only the repository-specific `.memories/` synchronization behavior that Superpowers cannot provide for this project's git-ignored memory state.
+Worktree lifecycle (creation, branching, setup, baseline verification, finish, cleanup) uses native Git operations. This skill contains the repository-specific `.memories/` synchronization behavior that Git cannot provide for this project's git-ignored memory state.
 
 ## Starting a Worktree (Memory Setup)
 
-After Superpowers creates the worktree:
+After the native Git workflow creates the worktree:
 
 1. Copy only **missing** `.memories/` items from the main workspace into the worktree.
 2. Never overwrite worktree-local bounded files (`memories/MEMORY.md`, `memories/USER.md`) or SQLite state (`memory_store.db`) if they already exist.
@@ -23,7 +23,7 @@ After Superpowers creates the worktree:
 
 ## Finishing a Worktree (Memory Consolidation)
 
-Before Superpowers removes the worktree:
+Before the native Git workflow removes the worktree:
 
 1. Compare worktree memory against the current main-workspace versions.
 2. Merge only **durable, non-duplicate** facts and verified resolutions into the main workspace.

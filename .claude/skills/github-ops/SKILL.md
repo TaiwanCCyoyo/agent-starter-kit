@@ -64,8 +64,8 @@ Before creating a pull request:
 4. Draft a summary that covers all material changes in the branch.
 5. Draft a test plan from fresh verification evidence.
 
-Use `superpowers:finishing-a-development-branch` to push the branch and create the pull
-request after this preparation is complete.
+Use native Git and GitHub operations to push the branch and create the pull request after
+this preparation is complete, and only with explicit user authorization.
 
 ### Review Checklist
 

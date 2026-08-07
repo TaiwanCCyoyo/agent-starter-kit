@@ -1,12 +1,12 @@
 ---
 name: python-testing
 description: Repository-specific Python behavioral test, hook fixture, Windows path, and optional coverage requirements.
-origin: ECC (narrowed — general pytest workflow is owned by superpowers:test-driven-development)
+origin: ECC (narrowed — repository-specific verification requirements)
 ---
 
 # Python Testing — Repository-Specific Requirements
 
-General TDD workflow is provided by `superpowers:test-driven-development`. This skill contains only the requirements specific to this repository.
+This skill contains the verification requirements specific to this repository. Use the native test-first workflow when appropriate.
 
 ## Running Tests
 

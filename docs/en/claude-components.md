@@ -7,6 +7,8 @@ Intended for Python and SystemVerilog/UVM developers.
 **ECC integration date**: 2026-06-02
 **Memory design influence**: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent); this project adapts bounded session context, searchable SQLite history, and a learning review loop
 
+The project settings intentionally disable the external Superpowers, Ponytail, and Karpathy plugins. This reference describes the repository-owned Claude components plus native Claude capabilities; GitHub, skill-creator, and Pyright LSP remain enabled in `.claude/settings.json`.
+
 ---
 
 ## Agents
@@ -33,17 +35,17 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 ### Not ported from ECC (with reasons)
 
-| Agent                                                                                                                                              | Reason                                                                                                                                                                        |
-| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `planner`                                                                                                                                          | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`)                                                                                          |
-| `architect`, `code-reviewer`, `code-simplifier`, `loop-operator`, `performance-optimizer`, `python-reviewer`, `silent-failure-hunter`, `tdd-guide` | Removed 2026-07-13 — native Claude capabilities, focused reviewers, and installed Superpowers/Ponytail workflows cover their responsibilities without overlapping delegation. |
-| `refactor-cleaner`                                                                                                                                 | Depends on Node.js tools (knip, depcheck, ts-prune); Python project                                                                                                           |
-| `harness-optimizer`                                                                                                                                | Requires ECC-internal `/harness-audit`; not portable                                                                                                                          |
-| All `*-build-resolver` (11 agents)                                                                                                                 | Non-Python languages not in use                                                                                                                                               |
-| Language reviewers (non-Python)                                                                                                                    | Unused languages                                                                                                                                                              |
-| `gan-*`, `seo-specialist`                                                                                                                          | Out of scope                                                                                                                                                                  |
-| `homelab-*`, `network-*`, `healthcare-reviewer`                                                                                                    | Domain mismatch                                                                                                                                                               |
-| `marketing-agent`                                                                                                                                  | Deferred — add when short-form video planning starts                                                                                                                          |
+| Agent                                                                                                                                              | Reason                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `planner`                                                                                                                                          | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`)                                               |
+| `architect`, `code-reviewer`, `code-simplifier`, `loop-operator`, `performance-optimizer`, `python-reviewer`, `silent-failure-hunter`, `tdd-guide` | Removed 2026-07-13 — native Claude capabilities and focused reviewers cover their responsibilities without overlapping delegation. |
+| `refactor-cleaner`                                                                                                                                 | Depends on Node.js tools (knip, depcheck, ts-prune); Python project                                                                |
+| `harness-optimizer`                                                                                                                                | Requires ECC-internal `/harness-audit`; not portable                                                                               |
+| All `*-build-resolver` (11 agents)                                                                                                                 | Non-Python languages not in use                                                                                                    |
+| Language reviewers (non-Python)                                                                                                                    | Unused languages                                                                                                                   |
+| `gan-*`, `seo-specialist`                                                                                                                          | Out of scope                                                                                                                       |
+| `homelab-*`, `network-*`, `healthcare-reviewer`                                                                                                    | Domain mismatch                                                                                                                    |
+| `marketing-agent`                                                                                                                                  | Deferred — add when short-form video planning starts                                                                               |
 
 ---
 
@@ -71,15 +73,15 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | `/save-memory`        | Save durable facts to the appropriate bounded file or SQLite store                          |
 | `/worktree`           | Create, manage, and merge Git worktrees with memory preservation                            |
 
-Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion remain guarded by Superpowers finishing workflow and explicit user authorization.
+Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion use native Git/GitHub operations and explicit user authorization.
 
-### Removed (2026-06-10 cleanup — agents, Superpowers, and built-in `/code-review` now cover these)
+### Removed (2026-06-10 cleanup — agents and built-in `/code-review` now cover these)
 
 | Command          | Replacement                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------- |
-| `/build-fix`     | Superpowers systematic debugging + `python-testing` skill                              |
+| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                              |
 | `/code-review`   | Built-in `/code-review` (incl. `ultra` cloud review) + `implementation-reviewer` agent |
-| `/feature-dev`   | Native Plan Mode + Superpowers TDD + `signal-miner` agent                              |
+| `/feature-dev`   | Native Plan Mode + native test-first workflow + `signal-miner` agent                   |
 | `/python-review` | `python-testing` skill and `implementation-reviewer`                                   |
 | `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                                      |
 | `/test-coverage` | `python-testing` skill (`pytest --cov`)                                                |
@@ -114,24 +116,24 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `compress-memory`      | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge                                                                                                                                           |
 | `memory-sql`           | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions                                                                                                                   |
 | `skill-curator`        | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance                                                                                                        |
-| `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle is provided by Superpowers. |
+| `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle uses native Git operations. |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
-| Skill                        | Purpose                                                                                                                                                            |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cost-aware-llm-pipeline`    | LLM cost control: model routing, budget tracking, prompt caching                                                                                                   |
-| `github-ops`                 | CI/CD debugging, release management, Dependabot monitoring                                                                                                         |
-| `llm-trading-agent-security` | Trading agent security: spend limits, circuit breakers, key handling                                                                                               |
-| `python-testing`             | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. General TDD provided by Superpowers. |
+| Skill                        | Purpose                                                                                                                                                                            |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cost-aware-llm-pipeline`    | LLM cost control: model routing, budget tracking, prompt caching                                                                                                                   |
+| `github-ops`                 | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
+| `llm-trading-agent-security` | Trading agent security: spend limits, circuit breakers, key handling                                                                                                               |
+| `python-testing`             | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
 
-### Removed (2026-06-08 cleanup — Superpowers now covers these)
+### Removed (2026-06-08 cleanup — native Claude verification now covers these)
 
 | Skill               | Reason                                                                                                                                                    |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `coding-standards`  | Superpowers + narrowed `coding-style` rule cover this                                                                                                     |
-| `tdd-workflow`      | Replaced by `superpowers:test-driven-development`                                                                                                         |
-| `verification-loop` | Replaced by Superpowers TDD/debugging/completion-verification                                                                                             |
+| `coding-standards`  | Native guidance plus the narrowed `coding-style` rule cover this                                                                                          |
+| `tdd-workflow`      | Replaced by the native test-first workflow                                                                                                                |
+| `verification-loop` | Replaced by native testing, review, and pre-commit verification                                                                                           |
 | `git-workflow`      | 716-line Git textbook; repo commit policy is now solely in the `commit-helper` skill (the `git-workflow` rule was also removed in the 2026-06-13 cleanup) |
 
 ### Not ported from ECC (with reasons)
@@ -176,20 +178,20 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                     |
-| --------------- | --------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, `superpowers:finishing-a-development-branch`, and CLAUDE.md `Subagents`. |
-| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                                            |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                 |
+| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                              |
+| --------------- | --------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, and CLAUDE.md `Subagents`. |
+| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                     |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                          |
 
 The common rules intentionally stay small. Security triggers are centralized in `rules/common/security.md`, severity handling in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
-| Rule                        | Reason                                                                                                                                                                                                       |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `rules/common/git-workflow` | Commit format owned by `commit-helper`; PR preparation owned by `github-ops` (full history, `base...HEAD` diff, summary, test plan); push and creation owned by `superpowers:finishing-a-development-branch` |
-| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                       |
+| Rule                        | Reason                                                                                                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/git-workflow` | Commit format owned by `commit-helper`; PR preparation owned by `github-ops` (full history, `base...HEAD` diff, summary, test plan); push and creation use native Git/GitHub operations with explicit authorization |
+| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                              |
 
 ### Not ported from ECC (with reasons)
 

@@ -17,7 +17,7 @@ def test_pre_commit_mypy_receives_targeted_python_files() -> None:
     local_repo = next(repo for repo in config["repos"] if repo["repo"] == "local")
     mypy_hook = next(hook for hook in local_repo["hooks"] if hook["id"] == "mypy")
 
-    assert mypy_hook["entry"] == "uv run mypy"
+    assert mypy_hook["entry"] == "uv run mypy --explicit-package-bases"
     assert mypy_hook.get("pass_filenames", True) is True
     assert mypy_hook["types"] == ["python"]
 
@@ -29,6 +29,17 @@ def test_claude_uses_pyright_lsp_without_project_ruff_lsp() -> None:
     assert "ruff-lsp@agent-starter-kit" not in settings["enabledPlugins"]
     assert "agent-starter-kit" not in settings["extraKnownMarketplaces"]
     assert not (ROOT / ".claude" / "marketplace").exists()
+
+
+def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> None:
+    settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    plugins = settings["enabledPlugins"]
+
+    assert plugins["superpowers@claude-plugins-official"] is False
+    assert plugins["ponytail@ponytail"] is False
+    assert plugins["andrej-karpathy-skills@karpathy-skills"] is False
+    assert plugins["github@claude-plugins-official"] is True
+    assert plugins["skill-creator@claude-plugins-official"] is True
 
 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:

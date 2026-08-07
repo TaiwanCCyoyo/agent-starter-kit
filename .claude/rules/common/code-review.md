@@ -1,3 +1,8 @@
+---
+paths:
+    - "*"
+---
+
 # Code Review Standards
 
 ## Severity Levels
