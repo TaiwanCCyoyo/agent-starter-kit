@@ -33,7 +33,8 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 
 | Tier                        | Model                        | Roles                                                                            |
 | --------------------------- | ---------------------------- | -------------------------------------------------------------------------------- |
-| High-confidence review      | `gpt-5.6` / high             | Plan, implementation, and security review                                        |
+| High-confidence review      | `gpt-5.6-sol` / high         | Plan and implementation review                                                   |
+| Security review             | `gpt-5.6-luna` / xhigh       | Security review                                                                  |
 | Balanced judgment           | `gpt-5.6-terra` / low-medium | Memory compression                                                               |
 | Bounded implementation      | `gpt-5.6-terra` / medium     | Routine, explicitly scoped implementation through `task_worker`                  |
 | High-volume mechanical work | `gpt-5.6-luna` / medium      | Signal mining, commits, documentation synchronization, and memory classification |

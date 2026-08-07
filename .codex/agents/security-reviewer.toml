@@ -1,7 +1,7 @@
 name = "security_reviewer"
 description = "Read-only security reviewer focused on secrets, unsafe commands, injection risks, dependency surfaces, and permission boundaries."
-model = "gpt-5.6"
-model_reasoning_effort = "high"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 nickname_candidates = ["Security", "Gatekeeper", "Riskwatch"]
 

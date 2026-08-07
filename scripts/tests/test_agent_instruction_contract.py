@@ -111,9 +111,9 @@ def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
 
 def test_codex_agent_model_routing_uses_current_tiers() -> None:
     expected = {
-        "plan_reviewer": ("gpt-5.6", "high"),
-        "implementation_reviewer": ("gpt-5.6", "high"),
-        "security_reviewer": ("gpt-5.6", "high"),
+        "plan_reviewer": ("gpt-5.6-sol", "high"),
+        "implementation_reviewer": ("gpt-5.6-sol", "high"),
+        "security_reviewer": ("gpt-5.6-luna", "xhigh"),
         "task_worker": ("gpt-5.6-terra", "medium"),
         "signal_miner": ("gpt-5.6-luna", "medium"),
         "commit_specialist": ("gpt-5.6-luna", "medium"),

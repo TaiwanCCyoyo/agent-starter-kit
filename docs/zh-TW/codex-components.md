@@ -31,12 +31,13 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 ### 模型路由
 
-| 層級           | 模型                         | 角色                                          |
-| -------------- | ---------------------------- | --------------------------------------------- |
-| 高可信審查     | `gpt-5.6` / high             | Plan、implementation 與 security review       |
-| 平衡判斷       | `gpt-5.6-terra` / low-medium | Memory compression                            |
-| 有界實作       | `gpt-5.6-terra` / medium     | 由 `task_worker` 執行明確限定範圍的一般實作   |
-| 高流量機械工作 | `gpt-5.6-luna` / medium      | Signal mining、commit、文件同步與 memory 分類 |
+| 層級            | 模型                         | 角色                                          |
+| --------------- | ---------------------------- | --------------------------------------------- |
+| 高可信審查      | `gpt-5.6-sol` / high         | Plan 與 implementation review                 |
+| Security review | `gpt-5.6-luna` / xhigh       | Security review                               |
+| 平衡判斷        | `gpt-5.6-terra` / low-medium | Memory compression                            |
+| 有界實作        | `gpt-5.6-terra` / medium     | 由 `task_worker` 執行明確限定範圍的一般實作   |
+| 高流量機械工作  | `gpt-5.6-luna` / medium      | Signal mining、commit、文件同步與 memory 分類 |
 
 `plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 
