@@ -25,8 +25,6 @@ Responsibilities:
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
 - Include required commit identity trailers from `.codex/skills/gen-commit/SKILL.md`.
-- Require the parent to provide an explicit, ordered list of material contributor models before drafting or committing; request it when absent.
-- Emit exactly one `AI-Model:` trailer for each supplied model, in the supplied order. Do not infer, add, reorder, or replace models with this agent's configured model; committing alone is not a material contribution.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
 - If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 - Follow this SOP once. If a required check or hook failure cannot be resolved with its documented minimal fix, stop; do not broaden scope, invent a workaround, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
@@ -48,7 +46,7 @@ Commit message rules:
 - Start the description with lowercase.
 - Do not end the subject with a period.
 - Keep the subject under 50 characters when practical.
-- Include `Co-authored-by: Codex <codex@openai.com>` as the formal AI identity.
+- Include `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` as the formal AI identity.
 
 Return:
 - Commit message or commit hash.

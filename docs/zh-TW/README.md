@@ -182,7 +182,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 本儲存庫依不同 Agent 採用不同方式整合原生能力、project-owned skills 與選用的 plugins：
 
 - **Claude Code**：專案設定刻意停用 Superpowers、Ponytail 與 Karpathy plugins。工作流程由 Claude 原生能力，以及 project-owned 的 `.claude/` agents、commands、skills、rules 與 hooks 提供；GitHub、skill-creator 與 Pyright LSP 仍維持啟用。
-- **Codex**：不依賴 Superpowers 或 Ponytail。工作流程由 Codex 原生能力、project-scoped agents 與 skills，以及本地的 `.codex/skills/karpathy-guidelines/` 提供；GitHub 整合則由可用的 GitHub plugin 提供。
+- **Codex**：不依賴 Superpowers、Ponytail 或外部 Karpathy skills。工作流程由 Codex 原生能力、project-scoped agents 與 skills 提供；GitHub 整合則由可用的 GitHub plugin 提供。
 - **Antigravity**：使用既有 `.agent/skills/`、`.agent/rules/` 與 `.agent/workflows/` 內容；其 plugin 與 skill set 尚未與 Claude Code、Codex 的 plugin layer 對齊。
 
 ## 設計來源

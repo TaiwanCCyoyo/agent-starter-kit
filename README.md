@@ -184,7 +184,7 @@ After copying, replace `.memories/memories/MEMORY.md` with the target project's 
 This repository integrates native capabilities, project-owned skills, and selected plugins differently per agent:
 
 - **Claude Code**: The project settings intentionally disable the Superpowers, Ponytail, and Karpathy plugins. Native Claude capabilities, project-owned `.claude/` agents, commands, skills, rules, and hooks provide the workflow; GitHub, skill-creator, and Pyright LSP remain enabled.
-- **Codex**: Does not depend on Superpowers or Ponytail. Native Codex capabilities, project-scoped agents and skills, and the local `.codex/skills/karpathy-guidelines/` skill provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
+- **Codex**: Does not depend on Superpowers, Ponytail, or external Karpathy skills. Native Codex capabilities, project-scoped agents and skills provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
 - **Antigravity**: Uses the existing `.agent/skills/`, `.agent/rules/`, and `.agent/workflows/` content. Its plugin and skill set is not aligned with the Claude Code and Codex plugin layers.
 
 ## Design Influences

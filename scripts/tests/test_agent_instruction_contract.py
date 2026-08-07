@@ -40,6 +40,7 @@ def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> 
     assert plugins["andrej-karpathy-skills@karpathy-skills"] is False
     assert plugins["github@claude-plugins-official"] is True
     assert plugins["skill-creator@claude-plugins-official"] is True
+    assert not (ROOT / ".codex" / "skills" / "karpathy-guidelines").exists()
 
 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
@@ -265,12 +266,11 @@ def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
     claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
     for content in (codex_skill, codex_agent):
-        assert "Co-authored-by: Codex <codex@openai.com>" in content
+        assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in content
         assert "Agent: Codex" not in content
 
-    assert "AI-Model: gpt-5.6-luna" not in codex_skill
-    assert "main agent selects the ordered list" in codex_skill
-    assert "AI-Model: gpt-5.6-luna" not in codex_agent
+    assert "AI-Model:" not in codex_skill
+    assert "AI-Model:" not in codex_agent
 
     for content in (claude_skill, claude_agent):
         assert "Co-authored-by: Claude <resolved model display name> <noreply@anthropic.com>" in content
@@ -297,18 +297,17 @@ def test_commit_workflows_do_not_require_agent_status() -> None:
         assert "Agent-Status" not in path.read_text(encoding="utf-8")
 
 
-def test_commit_model_attribution_is_selected_by_the_parent_agent() -> None:
+def test_commit_model_attribution_uses_codex_coauthor_identity() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
     claude_command = (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8")
     claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
-    assert "ordered list of material contributor models" in codex_skill
-    assert "request it before drafting or committing" in codex_skill
-    assert "AI-Model: gpt-5.6\nAI-Model: gpt-5.6-terra" in codex_skill
-    assert "Do not infer, add, reorder, or replace" in codex_agent
-    assert "AI-Model: gpt-5.6-luna" not in codex_agent
+    assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in codex_skill
+    assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in codex_agent
+    assert "AI-Model:" not in codex_skill
+    assert "AI-Model:" not in codex_agent
 
     for content in (claude_skill, claude_command):
         assert "contributor-model context and roles" in content

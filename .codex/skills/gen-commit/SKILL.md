@@ -16,7 +16,7 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
 4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, generated state, or unrelated files.
 5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
-6. Select an explicit, ordered list of material contributor models, then delegate one concrete objective with explicit paths, requested output, acceptance criteria, the user's intent, filename-level staged scope, and every staged submodule gitlink state to `commit_specialist`. Do not inspect staged file contents in the main agent.
+6. Delegate one concrete objective with explicit paths, requested output, acceptance criteria, the user's intent, filename-level staged scope, and every staged submodule gitlink state to `commit_specialist`. Do not inspect staged file contents in the main agent.
 7. The specialist verifies each handed-off gitlink and must not commit inside a submodule. It must return a handoff failure for an uncommitted submodule, unexpected gitlink delta, or unresolved hook failure; the main agent decides the next step.
 8. If the user requested only a message, instruct `commit_specialist` to return the message without committing.
 9. If the user requested a commit, instruct `commit_specialist` to execute `git commit`, perform full staged-content review, run security and hygiene checks, and handle any hook failures or pre-commit fixes.
@@ -34,9 +34,7 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 
 ## AI Commit Trailers
 
-- Every commit drafted or executed by Codex must include `Co-authored-by: Codex <codex@openai.com>` as its formal AI identity.
-- The main agent selects the ordered list of models that materially contributed to the committed work and supplies it to `commit_specialist`; committing alone is not a material contribution.
-- Emit one `AI-Model:` trailer per supplied model, in that order. The commit specialist must request it before drafting or committing when the list is missing, and must not infer or substitute its configured model.
+- Every commit drafted or executed by Codex must include `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` as its formal AI identity.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
 - If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor. Do not invent contributor email addresses.
 - Example:
@@ -46,9 +44,7 @@ feat(codex): add targeted hygiene checks
 
 Add file-scoped hook checks and repository-level Python gates.
 
-AI-Model: gpt-5.6
-AI-Model: gpt-5.6-terra
-Co-authored-by: Codex <codex@openai.com>
+Co-authored-by: Codex gpt-5.6 <codex@openai.com>
 ```
 
 ## Safety
