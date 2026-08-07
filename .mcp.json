@@ -3,6 +3,8 @@
         "memory-db": {
             "command": "uvx",
             "args": [
+                "--with",
+                "mcp<2",
                 "mcp-server-sqlite",
                 "--db-path",
                 "${CLAUDE_PROJECT_DIR:-.}/.memories/memory_store.db"
