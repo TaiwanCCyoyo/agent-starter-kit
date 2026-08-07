@@ -17,8 +17,7 @@
 
 ## Engineering Discipline
 
-- Read the relevant implementation and tests before changing code.
-- Reuse existing local helpers and patterns before adding dependencies or abstractions.
+- Read the relevant implementation and tests; reuse local helpers and patterns before adding dependencies or abstractions.
 - Check primary vendor documentation when API behavior or version compatibility is uncertain.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 - Match the surrounding style and ownership boundaries before introducing new patterns.
@@ -26,18 +25,14 @@
 
 ## Review And Security
 
-- Classify review findings as `CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`.
-- Block completion for any `CRITICAL` security or data-loss risk.
-- Fix `HIGH` likely bugs or significant regressions before completion unless the user explicitly accepts the disclosed risk.
-- Treat `MEDIUM` maintainability concerns as informational and `LOW` style suggestions as optional.
-- Use `implementation_reviewer` for pre-commit correctness, the main Codex review stance for broader quality review, and `security_reviewer` for security-sensitive changes.
-- Security-sensitive triggers include authentication, authorization, untrusted input, database queries, filesystem access, external APIs, cryptography, payments, financial data, and other sensitive data flows.
+- Classify findings as `CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`; block `CRITICAL` security or data-loss risks, fix `HIGH` likely bugs or significant regressions unless the user accepts the risk, and treat `MEDIUM`/`LOW` as informational/optional.
+- Use `implementation_reviewer` for pre-commit correctness and `security_reviewer` for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payments, financial data, or other sensitive data flows.
 - If a security issue is found, stop normal implementation, use `security_reviewer`, rotate exposed secrets, and inspect for similar issues.
-- Store required secrets in environment variables or an existing secret manager, validate them at startup, and never inline them.
+- Store required secrets in environment variables or an existing secret manager and validate them at startup.
 
 ## Development Routing
 
-- Use Native Plan Mode or project-owned OpenSpec files for plans; use installed workflow skills for TDD, debugging, review, verification, commits, and branch completion.
+- Use Native Plan Mode or project-owned OpenSpec files for plans; use the appropriate installed workflow skills for implementation, verification, commits, and branch completion.
 - Use the GitHub plugin for repository, issue, PR, CI, review-comment, and publishing workflows.
 - Before integration review, confirm required automated checks pass, conflicts are resolved, and the branch is current with its target.
 
@@ -54,22 +49,17 @@
 
 ## Verification
 
-- After editing, run task-specific tests and report the evidence.
-- Add the smallest direct test for changed behavior and failure modes.
-- Add integration tests when a change crosses a real component, process, database, filesystem, or network boundary.
-- Add E2E tests only for critical user flows when the repository has an E2E harness.
-- Run coverage when requested or when risk makes untested paths important; do not impose a universal percentage.
-- Use descriptive test names and the Arrange-Act-Assert structure when it improves clarity.
+- After editing, run task-specific checks and report the evidence; add the smallest direct test for changed behavior and failures.
+- Add integration tests for real component, process, database, filesystem, or network boundaries; add E2E tests only for critical flows when a harness exists.
+- Run coverage when requested or when risk makes untested paths important; use descriptive test names and Arrange-Act-Assert when it improves clarity.
 - Before reporting implementation work complete, run pre-commit against the changed files. If formatters modify files, inspect the diff and rerun the relevant checks. CI owns repository-wide gates.
-- Run additional task-specific tests when the change affects behavior, generated output, hooks, skills, documentation links, or user-facing workflows.
-- If verification is skipped or hook coverage is insufficient, state the reason and residual risk.
-- When adding or modifying a hook or script, include at least one functional regression test.
+- When a hook or script changes, include a functional regression test. State the reason and residual risk when verification is skipped or insufficient.
 
 ## Skills And Subagents
 
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
 - Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python test commands and fixtures.
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
-- Before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or other commands expected to produce large stdout or logs, route the command to `signal_miner` when delegation is authorized; do not first flood the main context to confirm that the output is large.
+- When delegation is authorized, route commands expected to produce large output to `signal_miner`; use `explorer` for ordinary code location.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main agent or the designated reviewer.
 - The main agent owns canonical documents and all final durable-memory decisions.

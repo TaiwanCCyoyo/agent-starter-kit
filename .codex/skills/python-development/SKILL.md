@@ -9,11 +9,9 @@ Apply the repository's Python development baseline.
 
 ## Core Rules
 
-- Follow PEP 8 and add type annotations to all function signatures.
 - Use repository Ruff configuration for formatting, linting, and import sorting.
 - Use `logging` in production code; do not add `print()` calls.
 - Prefer immutable values when they reduce hidden state, while allowing clear local mutation.
-- Use `Protocol` for structural interfaces, dataclasses for data transfer objects, context managers for resource lifetimes, and generators for meaningful lazy iteration.
 - Read existing implementation and tests before introducing a new Python pattern or dependency.
 
 ## Secrets And Security

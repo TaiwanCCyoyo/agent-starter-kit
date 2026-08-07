@@ -20,7 +20,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 
 | Agent                                  | Access        | Purpose                                                                                                                                                                                         |
 | :------------------------------------- | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signal_miner`                         | Read-only     | Lowest-cost mechanical exploration and pre-execution routing for commands expected to produce large logs or stdout; returns concise signal instead of raw output                                |
+| `signal_miner`                         | Read-only     | Lowest-cost high-output command utility; when delegation is authorized, returns concise signal instead of raw output                                                                            |
 | `task_worker`                          | Bounded write | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands                                                                          |
 | `plan_reviewer`                        | Read-only     | Plan completeness, scope, sequencing, repository alignment, testability, and risk                                                                                                               |
 | `implementation_reviewer`              | Read-only     | Correctness, regression, test coverage, and unintended-diff review                                                                                                                              |
@@ -39,21 +39,21 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | Bounded implementation      | `gpt-5.6-terra` / medium     | Routine, explicitly scoped implementation through `task_worker`                  |
 | High-volume mechanical work | `gpt-5.6-luna` / medium      | Signal mining, commits, documentation synchronization, and memory classification |
 
-`plan_reviewer` critiques plans and never replaces Native Plan Mode. `signal_miner` is the lowest-cost read-only utility for mechanical exploration and bounded high-output commands. When tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, delegate before running them in the main context. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. Use `explorer` for ordinary code location. When delegation is authorized and tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, use `signal_miner` before running them in the main context. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 
 ## Skills
 
-| Skill                  | Purpose                                                                                                           |
-| :--------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `python-development`   | Python coding, typing, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
-| `python-testing`       | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                          |
-| `gen-commit`           | Commit review, Conventional Commits, post-commit plan update, memory routing, and skill review                    |
-| `memory-manager`       | Memory initialization, reading, audits, taxonomy, health checks, and operation routing                            |
-| `save-memory`          | Explicit durable writes, classification, bounded-file limits, and deduplication handoff                           |
-| `compress-memory`      | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge                                  |
-| `memory-sql`           | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions          |
-| `skill-review`         | Manual reusable-pattern quality gate and skill candidate routing                                                  |
-| `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees                                                  |
+| Skill                  | Purpose                                                                                                   |
+| :--------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `python-development`   | Python coding, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
+| `python-testing`       | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                  |
+| `gen-commit`           | Commit review, Conventional Commits, post-commit plan update, memory routing, and skill review            |
+| `memory-manager`       | Memory initialization, reading, audits, taxonomy, health checks, and operation routing                    |
+| `save-memory`          | Explicit durable writes, classification, bounded-file limits, and deduplication handoff                   |
+| `compress-memory`      | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge                          |
+| `memory-sql`           | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions  |
+| `skill-review`         | Manual reusable-pattern quality gate and skill candidate routing                                          |
+| `worktree-memory-sync` | Ignored memory initialization and consolidation across worktrees                                          |
 
 ## Claude Capability Decisions
 

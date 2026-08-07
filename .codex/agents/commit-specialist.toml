@@ -26,7 +26,6 @@ Responsibilities:
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
 - Include required commit identity trailers from `.codex/skills/gen-commit/SKILL.md`.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
-- If hooks fail, enter Fix Mode: read the error output, apply the minimal fix (e.g. restage files modified by `end-of-file-fixer`, fix ruff violations), and retry. Do not bypass hooks.
 - Follow this SOP once. If a required check or hook failure cannot be resolved with its documented minimal fix, stop; do not broaden scope, invent a workaround, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 
 Boundaries:
@@ -38,20 +37,11 @@ Boundaries:
 - Do not include secrets or ignored local memory state in commits.
 - Do not directly edit memory files unless the parent workflow explicitly asks.
 
-Commit message rules:
-- Format: `<type>[optional scope]: <description>`.
-- Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
-- Use English only.
-- Use imperative mood.
-- Start the description with lowercase.
-- Do not end the subject with a period.
-- Keep the subject under 50 characters when practical.
-- Include `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` as the formal AI identity.
+Commit-message format, types, trailers, and hook-failure handling are defined by `.codex/skills/gen-commit/SKILL.md`; apply them from there rather than restating them here.
 
 Return:
 - Commit message or commit hash.
 - Staged scope reviewed.
 - Hook result or reason commit was not executed.
-- Whether the parent should update a related shared plan and run memory or skill review after a successful commit.
 - On handoff failure: the failed step, exact error or ambiguity, attempted check, relevant paths, and the required parent-agent decision.
 """

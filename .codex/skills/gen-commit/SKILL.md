@@ -19,7 +19,8 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 6. Delegate one concrete objective with explicit paths, requested output, acceptance criteria, the user's intent, filename-level staged scope, and every staged submodule gitlink state to `commit_specialist`. Do not inspect staged file contents in the main agent.
 7. The specialist verifies each handed-off gitlink and must not commit inside a submodule. It must return a handoff failure for an uncommitted submodule, unexpected gitlink delta, or unresolved hook failure; the main agent decides the next step.
 8. If the user requested only a message, instruct `commit_specialist` to return the message without committing.
-9. If the user requested a commit, instruct `commit_specialist` to execute `git commit`, perform full staged-content review, run security and hygiene checks, and handle any hook failures or pre-commit fixes.
+9. If the user requested a commit, instruct `commit_specialist` to execute `git commit`, perform full staged-content review, run security and hygiene checks, and fix the specific hook failure, re-stage, and retry without bypassing hooks.
+10. After a successful commit, the main agent—not `commit_specialist`—runs the Post-Commit Review because only the main agent has the full session context.
 
 ## Commit Message Standard
 
