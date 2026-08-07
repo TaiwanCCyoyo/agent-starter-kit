@@ -178,13 +178,13 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                              |
-| --------------- | --------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-06-13 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, phase routing map, risk-based testing baseline, and coding style heuristics. `git-workflow` and `agents` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, and CLAUDE.md `Subagents`. |
-| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                     |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                          |
+| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | --------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-08-07 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, structural review heuristics, phase routing map, and the risk-based testing baseline. `git-workflow`, `agents`, and `coding-style` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, CLAUDE.md, and the applicable skill. |
+| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                                                         |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                              |
 
-The common rules intentionally stay small. Security triggers are centralized in `rules/common/security.md`, severity handling in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
+The common rules intentionally stay small and carry only decisions a model cannot derive on its own. Security triggers are centralized in `rules/common/security.md`, severity handling and review heuristics in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
@@ -192,6 +192,18 @@ The common rules intentionally stay small. Security triggers are centralized in 
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rules/common/git-workflow` | Commit format owned by `commit-helper`; PR preparation owned by `github-ops` (full history, `base...HEAD` diff, summary, test plan); push and creation use native Git/GitHub operations with explicit authorization |
 | `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                              |
+
+### Removed (2026-08-07 cleanup — model priors and CLAUDE.md already cover these)
+
+Because every `rules/common/` file matches `paths: "*"`, the set is injected on the first file access of any session, so its content competes with CLAUDE.md rather than deferring cost. Generic craft guidance was dropped and only non-derivable routing decisions were kept.
+
+| Rule                                      | Reason                                                                                                                                       |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/coding-style`               | Generic craft guidance duplicated CLAUDE.md `Engineering Discipline`; the structural review heuristic moved to `rules/common/code-review.md` |
+| `development-workflow` §Research & Reuse  | Verbatim duplicate of CLAUDE.md `Engineering Discipline`                                                                                     |
+| `development-workflow` §Pre-Review Checks | Generic pre-merge hygiene; CI and `github-ops` own it                                                                                        |
+| `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples; owned by `skill: python-testing`                                                               |
+| `code-review` §Security Review Triggers   | Pointer-only section; the reviewer routing list already links `security.md`                                                                  |
 
 ### Not ported from ECC (with reasons)
 

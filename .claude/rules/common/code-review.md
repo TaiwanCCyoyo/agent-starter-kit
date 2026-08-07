@@ -14,10 +14,6 @@ paths:
 | MEDIUM   | Maintainability concern                       | **INFO** — Consider fixing                                                  |
 | LOW      | Style or minor suggestion                     | **NOTE** — Optional                                                         |
 
-## Security Review Triggers
-
-Security-sensitive changes → see the trigger list in `security.md`; route to `security-reviewer`.
-
 ## Approval Criteria
 
 - **Approve**: No CRITICAL or HIGH issues
@@ -28,4 +24,8 @@ Security-sensitive changes → see the trigger list in `security.md`; route to `
 
 - Pre-commit correctness → `implementation-reviewer`
 - Broader quality review → built-in `/code-review` or `implementation-reviewer`
-- Security-sensitive changes → `security-reviewer`
+- Security-sensitive changes → `security-reviewer` (triggers in `security.md`)
+
+## Structural Heuristics
+
+File length, function length, parameter count, and nesting depth are signals for review, not universal failure thresholds. Request a split only when the current structure creates a concrete correctness, testing, or maintenance risk.

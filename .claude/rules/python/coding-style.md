@@ -6,7 +6,7 @@ paths:
 
 # Python Coding Style
 
-> This file extends [common/coding-style.md](../common/coding-style.md) with Python specific content.
+> Python specific style. General style expectations live in `CLAUDE.md`; review heuristics live in [common/code-review.md](../common/code-review.md).
 
 ## Standards
 

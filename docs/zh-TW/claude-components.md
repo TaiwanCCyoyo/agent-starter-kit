@@ -178,13 +178,13 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                      |
-| --------------- | --------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-06-13 清理） | 僅路由層：security triggers、review severity、reviewer routing、階段路由地圖、風險導向測試基線與 coding style heuristics。`git-workflow` 與 `agents` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作與 CLAUDE.md `Subagents` 擁有。 |
-| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                 |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                      |
+| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                      |
+| --------------- | --------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
+| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                                 |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                      |
 
-Common rules 刻意維持精簡。Security triggers 集中在 `rules/common/security.md`，severity handling 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
+Common rules 刻意維持精簡，只保留模型無法自行推導的決策。Security triggers 集中在 `rules/common/security.md`，severity handling 與 review heuristics 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 
@@ -192,6 +192,18 @@ Common rules 刻意維持精簡。Security triggers 集中在 `rules/common/secu
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rules/common/git-workflow` | commit 格式由 `commit-helper` 擁有；PR 準備由 `github-ops` 擁有（完整 history、`base...HEAD` diff、摘要、test plan）；push 與建立使用原生 Git/GitHub 操作並需明確授權 |
 | `rules/common/agents`       | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此                                                                                            |
+
+### 已移除（2026-08-07 清理——模型先驗與 CLAUDE.md 已涵蓋）
+
+由於 `rules/common/` 每個檔案的 `paths` 都是 `"*"`，整組會在 session 第一次存取任何檔案時注入，因此其內容是在與 CLAUDE.md 競爭 context，而非延後成本。此次移除通用工程常識，只保留無法推導的路由決策。
+
+| 規則                                      | 原因                                                                                                                   |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/coding-style`               | 通用工程常識，與 CLAUDE.md `Engineering Discipline` 重複；結構性 review heuristic 已移至 `rules/common/code-review.md` |
+| `development-workflow` §Research & Reuse  | 與 CLAUDE.md `Engineering Discipline` 逐字重複                                                                         |
+| `development-workflow` §Pre-Review Checks | 通用 pre-merge 常識，由 CI 與 `github-ops` 擁有                                                                        |
+| `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例，由 `skill: python-testing` 擁有                                                            |
+| `code-review` §Security Review Triggers   | 純指標區塊；reviewer routing 清單已連結 `security.md`                                                                  |
 
 ### 未從 ECC 移植（含原因）
 
