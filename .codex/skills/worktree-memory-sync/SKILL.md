@@ -5,7 +5,7 @@ description: Preserve and consolidate shared project memory when work happens in
 
 # Worktree Memory Sync
 
-Use Superpowers for worktree creation, setup, completion, and cleanup. Use this skill only for the ignored `.memories/` state that Git cannot carry between worktrees.
+Use native Git worktree operations for creation, setup, completion, and cleanup. Use this skill for the ignored `.memories/` state that Git cannot carry between worktrees.
 
 ## Initialize
 
