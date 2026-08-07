@@ -27,8 +27,8 @@ When the User runs `/gen-commit` (or asks you to generate a commit or stage file
     - Show the drafted commit message in an English code block.
     - Provide a brief summary of what changes are included in **Traditional Chinese (zh-TW)**.
 4.  **Confirm Execution**:
-    - If autonomous commit is enabled or requested, append `Agent: Antigravity` and `Agent-Status: autonomous` trailers to the body and run `git commit -m "<message>"`.
-    - If the user reviewed or explicitly approved the final staged diff or message, append `Agent: Antigravity` and `Agent-Status: assisted` trailers.
+    - If autonomous commit is enabled or requested, append the `Agent: Antigravity` trailer to the body and run `git commit -m "<message>"`.
+    - If the user reviewed or explicitly approved the final staged diff or message, append the `Agent: Antigravity` trailer.
     - Otherwise, wait for the user to explicitly confirm before executing the commit command.
 
 ## Step 4: Handle Failure & Fix Mode

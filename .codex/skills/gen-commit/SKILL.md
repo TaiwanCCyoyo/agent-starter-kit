@@ -1,6 +1,6 @@
 ---
 name: gen-commit
-description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; enforces staged-change review, secret checks, Conventional Commits, English metadata, hook failure handling, and agent identity trailers.
+description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; enforces staged-change review, secret checks, Conventional Commits, English metadata, hook failure handling, and AI identity trailers.
 ---
 
 # Gen Commit
@@ -37,11 +37,8 @@ Delegate staged-change content analysis, commit-message drafting, commit executi
 - Every commit drafted or executed by Codex must include `Co-authored-by: Codex <codex@openai.com>` as its formal AI identity.
 - The main agent selects the ordered list of models that materially contributed to the committed work and supplies it to `commit_specialist`; committing alone is not a material contribution.
 - Emit one `AI-Model:` trailer per supplied model, in that order. The commit specialist must request it before drafting or committing when the list is missing, and must not infer or substitute its configured model.
-- Every agent-created commit must include exactly one `Agent-Status` trailer:
-    - `Agent-Status: autonomous` when Codex staged and committed without manual review of the final staged diff.
-    - `Agent-Status: assisted` when the user reviewed or explicitly approved the final staged diff or commit message before commit execution.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
-- If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor and one shared `Agent-Status:` trailer for the commit execution mode. Do not invent contributor email addresses.
+- If multiple agents materially contributed before the commit, add one valid `Co-authored-by:` trailer per contributor. Do not invent contributor email addresses.
 - Example:
 
 ```text
@@ -49,7 +46,6 @@ feat(codex): add targeted hygiene checks
 
 Add file-scoped hook checks and repository-level Python gates.
 
-Agent-Status: autonomous
 AI-Model: gpt-5.6
 AI-Model: gpt-5.6-terra
 Co-authored-by: Codex <codex@openai.com>

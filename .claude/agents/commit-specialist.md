@@ -27,7 +27,7 @@ Your working directory is already the project root. Run git commands directly wi
 - Prefer one concise subject line when the change is simple.
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
-- Include the required `Agent:` and `Agent-Status:` trailers from `.claude/skills/commit-helper/SKILL.md`.
+- Include the required commit identity trailers from `.claude/skills/commit-helper/SKILL.md`.
 - Use the contributor-model context and roles supplied by the parent only for models that materially contributed; committing alone is not a material contribution.
 - Request contributor-model context from the parent before drafting or committing if it is missing and multiple agents materially contributed.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
@@ -57,7 +57,6 @@ Your working directory is already the project root. Run git commands directly wi
 - Otherwise include `Co-authored-by: Claude <noreply@anthropic.com>`.
 - Never emit the literal model placeholder and do not add a separate `AI-Model` trailer.
 - When contributor-model context lists multiple material contributors, add one `Co-authored-by: Claude <model> <noreply@anthropic.com>` trailer per contributor using each reliably known name; do not merge, omit, infer, or substitute contributors.
-- Include exactly one `Agent-Status: autonomous` or `Agent-Status: assisted` trailer.
 
 ## Return
 

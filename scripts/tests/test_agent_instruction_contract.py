@@ -271,6 +271,21 @@ def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
     assert "Follow `.claude/skills/commit-helper/SKILL.md` as the source of truth." in claude_agent
 
 
+def test_commit_workflows_do_not_require_agent_status() -> None:
+    commit_files = (
+        ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
+        ROOT / ".codex" / "agents" / "commit-specialist.toml",
+        ROOT / ".claude" / "commands" / "gen-commit.md",
+        ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
+        ROOT / ".claude" / "agents" / "commit-specialist.md",
+        ROOT / ".agent" / "workflows" / "gen-commit.md",
+        ROOT / ".agent" / "skills" / "commit-helper" / "SKILL.md",
+    )
+
+    for path in commit_files:
+        assert "Agent-Status" not in path.read_text(encoding="utf-8")
+
+
 def test_commit_model_attribution_is_selected_by_the_parent_agent() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
