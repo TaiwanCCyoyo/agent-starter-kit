@@ -259,7 +259,7 @@ def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
         assert "source diff" in content
 
 
-def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
+def test_only_codex_commit_workflow_requires_coauthor_identity() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
@@ -273,11 +273,9 @@ def test_commit_agents_use_formal_coauthor_identity_trailers() -> None:
     assert "AI-Model:" not in codex_agent
 
     for content in (claude_skill, claude_agent):
-        assert "Co-authored-by: Claude <resolved model display name> <noreply@anthropic.com>" in content
-        assert "Co-authored-by: Claude <noreply@anthropic.com>" in content
-        assert "Agent: Claude" not in content
+        assert "Co-authored-by:" not in content
+        assert "contributor-model" not in content
 
-    assert "Do not add an `AI-Model` trailer" in claude_skill
     assert "  - Edit" in claude_agent
     assert "Follow `.claude/skills/commit-helper/SKILL.md` as the source of truth." in claude_agent
 
@@ -297,7 +295,7 @@ def test_commit_workflows_do_not_require_agent_status() -> None:
         assert "Agent-Status" not in path.read_text(encoding="utf-8")
 
 
-def test_commit_model_attribution_uses_codex_coauthor_identity() -> None:
+def test_codex_attribution_does_not_require_claude_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
@@ -309,11 +307,32 @@ def test_commit_model_attribution_uses_codex_coauthor_identity() -> None:
     assert "AI-Model:" not in codex_skill
     assert "AI-Model:" not in codex_agent
 
-    for content in (claude_skill, claude_command):
-        assert "contributor-model context and roles" in content
-    assert "final discretion" not in claude_agent
-    assert "final discretion" not in claude_skill
-    assert "must request it before drafting or committing" in claude_skill
-    assert "Request contributor-model context from the parent" in claude_agent
-    assert "do not merge, omit, infer, or substitute contributors" in claude_agent
-    assert "Do not add an `AI-Model` trailer" in claude_skill
+    for content in (claude_skill, claude_command, claude_agent):
+        assert "Co-authored-by:" not in content
+        assert "contributor-model" not in content
+
+
+def test_commit_specialists_use_explicit_delegation_modes() -> None:
+    files = (
+        ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
+        ROOT / ".codex" / "agents" / "commit-specialist.toml",
+        ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
+        ROOT / ".claude" / "commands" / "gen-commit.md",
+        ROOT / ".claude" / "agents" / "commit-specialist.md",
+    )
+
+    for path in files:
+        content = path.read_text(encoding="utf-8").lower()
+        assert "execute supplied message" in content
+        assert "review supplied message" in content
+        assert "complete rough or missing message" in content
+
+    for path in (files[0], files[2]):
+        content = path.read_text(encoding="utf-8")
+        assert "Do not duplicate diff review" in content
+        assert "delegate it to `commit_specialist`" in content
+
+    for path in (files[0], files[1], files[2], files[4]):
+        content = path.read_text(encoding="utf-8")
+        assert "simple, directly actionable" in content
+        assert "retry once" in content

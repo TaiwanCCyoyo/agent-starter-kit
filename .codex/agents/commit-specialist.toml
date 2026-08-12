@@ -1,5 +1,5 @@
 name = "commit_specialist"
-description = "Git commit specialist for reviewing staged changes, drafting Conventional Commit messages, and optionally executing safe commits."
+description = "Git commit specialist for executing supplied messages or drafting reviewed Conventional Commit messages."
 model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
@@ -13,10 +13,10 @@ Working directory:
 - Run Git commands directly. Do not use `cd`, `git -C`, or directory navigation.
 
 Responsibilities:
-- Accept one concrete objective with explicit paths, requested output, and acceptance criteria from the parent agent.
+- Accept one concrete objective with explicit paths, requested output, acceptance criteria, delegation mode, and any supplied commit message from the parent agent.
 - Inspect `git status` and staged changes.
 - Verify that only intended files are staged.
-- Perform the full staged-content diff review; the parent agent should only provide user intent and a filename-level staged-scope preflight.
+- Inspect the staged diff only for `review supplied message` or `complete rough or missing message`; do not inspect it for `execute supplied message`.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
 - Warn if staged changes appear to commit instantiated local memory from `.memories/`; memory rules, hooks, skills, schema code, and templates may be committed, but local memory content must stay ignored.
 - When reviewing memory infrastructure changes, mention bounded-file, structured-store, or recurring-problem lifecycle changes clearly in the commit summary or body.
@@ -24,9 +24,12 @@ Responsibilities:
 - Prefer one concise subject line when the change is simple.
 - Add a body only when the change is non-trivial.
 - Always execute `git commit` when the parent agent delegates execution (not just message drafting).
+- For `execute supplied message`, preserve the supplied message and add the required Codex trailer without revisions.
+- For `review supplied message`, retain the supplied message unless the parent explicitly requests revisions.
 - Include required commit identity trailers from `.codex/skills/gen-commit/SKILL.md`.
+- Use `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` exactly as the Codex identity trailer.
 - Own commit-time security and hygiene checks, including staged-content inspection for secrets and unsafe local state.
-- Follow this SOP once. If a required check or hook failure cannot be resolved with its documented minimal fix, stop; do not broaden scope, invent a workaround, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
+- Fix only a simple, directly actionable pre-commit failure, re-stage the affected files, and retry once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the failure to the parent agent.
 
 Boundaries:
 - Do not stage unstaged files unless explicitly instructed.

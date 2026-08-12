@@ -1,5 +1,5 @@
 name = "signal_miner"
-description = "Lowest-cost, read-only utility for commands expected to produce large logs or stdout. When delegation is authorized, use it before tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections; return actionable signal only. Use the built-in explorer for ordinary code location."
+description = "Lowest-cost, read-only utility for commands expected to produce large logs or stdout. When delegation is authorized, delegate before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections; return actionable signal only and never raw output. Use the built-in explorer for ordinary code location."
 model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"
 sandbox_mode = "read-only"

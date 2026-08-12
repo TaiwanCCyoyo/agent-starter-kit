@@ -24,7 +24,6 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Language**: English only for all commit metadata: subject, body, and trailers.
 2. **Format**: `<type>[optional scope]: <description>`
-    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
 3. **Subject Line**:
     - Use imperative mood, such as `add` instead of `added`.
     - Start with lowercase.
@@ -38,7 +37,6 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 - Every commit drafted or executed by Antigravity must include `Agent: Antigravity`.
 - Place trailers after a blank line following the body, or after the subject if there is no body.
-- Do not use `Co-Authored-By` as the primary agent identity marker. Use it only when the user explicitly wants GitHub co-author attribution.
 - If multiple agents materially contributed before the commit, add one `Agent:` trailer per agent in contribution order.
 
 Example:
