@@ -1,6 +1,6 @@
 ---
 name: commit-helper
-description: Quality standards for Git commits, including pre-commit handoff, Conventional Commits, and high-quality log criteria.
+description: Quality standards and delegation rules for Git commits — pre-commit handoff, Conventional Commits format, and post-commit memory checks. Load this BEFORE staging, drafting a commit message, running `git commit`, or delegating to commit_specialist, for ANY commit request (not only when the user types /gen-commit) — triggers on "commit", "commit this", "commit changes", "write a commit message", or any request to record staged work as a commit.
 ---
 
 # Skill: Commit-Helper
