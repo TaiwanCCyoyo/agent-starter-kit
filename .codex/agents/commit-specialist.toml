@@ -1,4 +1,4 @@
-name = "commit_specialist"
+name = "commit-specialist"
 description = "Git commit specialist for executing supplied messages or drafting reviewed Conventional Commit messages."
 model = "gpt-5.6-luna"
 model_reasoning_effort = "medium"

@@ -27,7 +27,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `security_reviewer`                   | 唯讀     | Secrets、注入、依賴、權限、auth 與敏感資料                                                                                                    |
 | `memory_auditor`／`memory_compressor` | 唯讀     | Save 分類與 compression 草案的 advisory layer；final writes 仍由主代理與 memory skills 負責                                                   |
 | `doc_translator`                      | 有界寫入 | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main agent 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `commit_specialist`                   | 有界寫入 | 審查 staged changes，僅在明確要求時 commit                                                                                                    |
+| `commit-specialist`                   | 有界寫入 | 審查 staged changes，僅在明確要求時 commit                                                                                                    |
 
 ### 模型路由
 

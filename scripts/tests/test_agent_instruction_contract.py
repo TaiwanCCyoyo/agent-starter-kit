@@ -117,7 +117,7 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
         "security_reviewer": ("gpt-5.6-luna", "xhigh"),
         "task_worker": ("gpt-5.6-terra", "medium"),
         "signal_miner": ("gpt-5.6-luna", "medium"),
-        "commit_specialist": ("gpt-5.6-luna", "medium"),
+        "commit-specialist": ("gpt-5.6-luna", "medium"),
         "doc_translator": ("gpt-5.6-luna", "low"),
         "memory_auditor": ("gpt-5.6-luna", "medium"),
         "memory_compressor": ("gpt-5.6-terra", "medium"),
@@ -330,7 +330,7 @@ def test_commit_specialists_use_explicit_delegation_modes() -> None:
     for path in (files[0], files[2]):
         content = path.read_text(encoding="utf-8")
         assert "Do not duplicate diff review" in content
-        assert "delegate it to `commit_specialist`" in content
+        assert "delegate it to `commit-specialist`" in content
 
     for path in (files[0], files[1], files[2], files[4]):
         content = path.read_text(encoding="utf-8")
