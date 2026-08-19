@@ -42,6 +42,7 @@ In every execution mode, run the normal commit command. Fix only a simple, direc
 - The commit message itself is always in English.
 - The summary provided to the user must be in Traditional Chinese (zh-TW).
 - The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates one concrete objective with explicit paths, requested output, acceptance criteria, the delegation mode, any supplied commit message, and staged submodule gitlink state to `commit-specialist`.
+- `commit-specialist` never stages a file on its own initiative. When any target file is not yet staged, the delegation must explicitly list every file to stage by name; omitting this instruction leaves those files uncommitted.
 - For an uncommitted submodule, unexpected gitlink delta, or unresolved hook failure, `commit-specialist` stops and returns the failed step, evidence, and the precise parent-agent decision required.
 
 ## Post-Commit Memory Check
