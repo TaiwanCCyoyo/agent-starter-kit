@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import patch
@@ -108,3 +109,33 @@ def test_sync_memory_if_needed_copies_missing_items_from_main_repo(tmp_path: Pat
     assert "Copied memory from main repo" in status
     copied_file = worktree_root / HOOK.MEMORY_ROOT_REL_DIR / "MEMORY.md"
     assert copied_file.read_text(encoding="utf-8") == "shared memory\n"
+
+
+def test_main_output_does_not_inject_memory_content(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(tmp_path))
+
+    def fake_check_output(command: str, shell: bool, cwd: Path | None = None, text: bool = True, encoding: str = "utf-8") -> str:
+        if "branch" in command:
+            return "main\n"
+        if "worktree list" in command:
+            return f"{tmp_path} abc [main]\n"
+        return "commit message\n"
+
+    with patch.object(HOOK.subprocess, "check_output", side_effect=fake_check_output):
+        HOOK.main()
+
+    output = capsys.readouterr().out
+    memory_dir = tmp_path / HOOK.MEMORY_REL_DIR
+    assert (memory_dir / "MEMORY.md").exists()
+    assert "[MISSION REQUIRED]" not in output
+    assert "### [Project Context: MEMORY.md]" not in output
+    assert "### [User Context: USER.md]" not in output
+    assert "System: Session Auto-Initialization" in output
+
+
+def test_claude_hooks_use_exec_form_with_project_dir_placeholder() -> None:
+    config = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    for event in ("SessionStart", "PostToolUse"):
+        hook = config["hooks"][event][0]["hooks"][0]
+        assert hook["command"] == "uv"
+        assert any("${CLAUDE_PROJECT_DIR}" in arg for arg in hook["args"])

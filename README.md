@@ -8,7 +8,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 1. **Long-Term Memory Persistence**: Codex uses bounded files under `.memories/memories/` plus a Holographic-compatible SQLite `memory_store.db`.
 2. **Optional OpenSpec Planning Handoff**: Downstream projects may initialize OpenSpec and treat its specs, changes, and tasks as regular project files.
-3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer while sharing the same project memory.
+3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer. Codex and Antigravity share `.memories/` project memory; Claude Code uses its own built-in memory and stays custodian-only for `.memories/` (skeleton creation, worktree sync).
 4. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
 5. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
 6. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
@@ -24,11 +24,11 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 ## Memory Management Workflow
 
-This project uses a proactive memory system to maintain long-term context across sessions and worktrees.
+Codex and Antigravity use a proactive `.memories/` system to maintain long-term context across sessions and worktrees. Claude Code uses its own built-in memory instead and only acts as custodian of `.memories/` (skeleton creation, worktree sync) — see [Claude Code Components Reference](docs/en/claude-components.md).
 
 For a detailed architecture, setup model, and copy checklist, see [Memory System Introduction](docs/en/memory-system-introduction.md).
 
-### 1. Daily Usage
+### 1. Daily Usage (Codex, Antigravity)
 
 - **Save Memory**: Curate stable high-frequency facts in `.memories/memories/MEMORY.md`; store searchable facts and recurring-problem history in `.memories/memory_store.db`.
 - **Auto-Nudge**: Hooks remind agents to update memory after sustained work with pending changes.
@@ -47,24 +47,23 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 ### 3. Agent Workflows
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. Durable memory is Claude Code's built-in memory, not `.memories/` — see `rules/common/memory.md`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
 
 This repository uses agent-native hooks to maintain system integrity:
 
-| Agent           | Hook Type      | Purpose                                                                                         | Script                                   |
-| :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                       | `.codex/hooks/session_start.py`          |
-| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                         | `.codex/hooks/memory_health_check.py`    |
-| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, project memory, branch, and worktree context.                              | `.claude/hooks/session_start.py`         |
-| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop`         | Checks memory size limits and taxonomy.                                                         | `.claude/hooks/memory_health_check.py`   |
-| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.              | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                              | `.agent/hooks/post_tool_use_hygiene.py`  |
-| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                  | `.agent/hooks/stop_memory_check.py`      |
+| Agent           | Hook Type      | Purpose                                                                                                                 | Script                                   |
+| :-------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                                               | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.                                   | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                                                 | `.codex/hooks/memory_health_check.py`    |
+| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, branch, and worktree context; creates/syncs the `.memories/` skeleton without reading its content. | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files.                         | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.                                      | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                                                      | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                                          | `.agent/hooks/stop_memory_check.py`      |
 
 ### Troubleshooting Hooks
 

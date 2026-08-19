@@ -7,7 +7,7 @@
 ## 核心理念
 
 1. **長期記憶持久化**：Codex 透過 `.memories/memories/MEMORY.md` 與 `.memories/memory_store.db` 保存跨 session 的專案記憶。
-2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層，但共用同一份專案記憶。
+2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層。Codex 與 Antigravity 共用 `.memories/` 專案記憶；Claude Code 使用自身的內建記憶，並僅作為 `.memories/` 的保管者（建立骨架、同步 worktree）。
 3. **自動化維護**：格式化、lint、檔案衛生檢查與記憶提醒由 Agent hooks 與 repository 驗證腳本執行。
 4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
 5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
@@ -22,11 +22,11 @@
 
 ## 記憶管理流程
 
-本專案使用主動式記憶系統，維持跨 session 與 worktree 的長期上下文。
+Codex 與 Antigravity 使用主動式 `.memories/` 系統，維持跨 session 與 worktree 的長期上下文。Claude Code 改用自身的內建記憶，並僅作為 `.memories/` 的保管者（建立骨架、同步 worktree）——詳見 [Claude Code 元件參考](claude-components.md)。
 
 詳細架構、設定模型與複製清單請參考 [記憶系統介紹](memory-system-introduction.md)。
 
-### 1. 日常使用
+### 1. 日常使用（Codex、Antigravity）
 
 - **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.memories/memories/MEMORY.md` 或 `.memories/memory_store.db`。
 - **自動提醒**：當 Agent 已經進行多輪工作且仍有 pending changes 時，hook 會提醒更新記憶。
@@ -45,24 +45,23 @@
 ### 3. Agent 工作流程
 
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
-- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
+- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。持久記憶使用 Claude 的內建記憶，而非 `.memories/`——詳見 `rules/common/memory.md`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 
 ## 自動化 Hooks 與生命週期
 
 本 repository 使用各 Agent 原生 hooks 維護系統一致性：
 
-| Agent           | Hook 類型      | 用途                                                             | Script                                   |
-| :-------------- | :------------- | :--------------------------------------------------------------- | :--------------------------------------- |
-| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。      | `.codex/hooks/session_start.py`          |
-| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。          | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                    | `.codex/hooks/memory_health_check.py`    |
-| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、專案記憶、分支與 worktree 上下文。             | `.claude/hooks/session_start.py`         |
-| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。 | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Claude Code** | `Stop`         | 檢查記憶大小限制與 taxonomy。                                    | `.claude/hooks/memory_health_check.py`   |
-| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。  | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                    | `.agent/hooks/post_tool_use_hygiene.py`  |
-| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                   | `.agent/hooks/stop_memory_check.py`      |
+| Agent           | Hook 類型      | 用途                                                                                  | Script                                   |
+| :-------------- | :------------- | :------------------------------------------------------------------------------------ | :--------------------------------------- |
+| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。                           | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。                               | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                         | `.codex/hooks/memory_health_check.py`    |
+| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、分支與 worktree 上下文；建立/同步 `.memories/` 骨架，不讀取其內容。 | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。                      | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。                       | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                                         | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                                        | `.agent/hooks/stop_memory_check.py`      |
 
 ### Hook 疑難排解
 

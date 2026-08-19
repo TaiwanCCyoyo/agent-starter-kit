@@ -50,7 +50,7 @@ Hermes 的 `SOUL.md` 與 `state.db` 不在本契約內。Agent identity 繼續�
 ## 目前平台狀態
 
 - **Codex**：已遷移至 `.memories/` 與 `memory_store.db`。
-- **Claude Code**：已遷移至 `.memories/` 與 `memory_store.db`。
+- **Claude Code**：已退出（2026-08-20）——Claude 改用 Claude Code 的內建記憶。僅作為 `.memories/` 的保管者（建立骨架、同步 worktree），以供 Codex 與 Antigravity sessions 尋找其狀態；詳見 `.claude/rules/common/memory.md`。
 - **Antigravity**：adapter 已實作，尚待 runtime 驗證。
 
 ## Antigravity 生命週期

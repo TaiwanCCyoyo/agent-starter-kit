@@ -5,7 +5,7 @@
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC 整合日期**：2026-06-02
-**記憶設計來源**：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；本專案改編其有限 session context、SQLite 可搜尋歷史與學習檢查循環
+**記憶**：Claude 使用 Claude Code 的內建記憶。`.memories/`（設計來源：[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)）為 Codex/Antigravity 共有的共用狀態；Claude 建立並同步其骨架供 worktree 使用，但不讀取或寫入其內容——詳見 `rules/common/memory.md`。
 
 本專案設定刻意停用外部的 Superpowers、Ponytail 與 Karpathy plugins。本參考文件描述 repository-owned 的 Claude 元件與 Claude 原生能力；GitHub、skill-creator 與 Pyright LSP 仍在 `.claude/settings.json` 中啟用。
 
@@ -19,15 +19,13 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
 
-### 記憶體與工作流程（原創——非來自 ECC）
+### 工作流程（原創——非來自 ECC）
 
 | Agent                     | 模型            | 工具                                | 用途                                                                                                                                            |
 | ------------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `commit-specialist`       | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
 | `doc-translator`          | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
 | `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 唯讀程式碼審查：正確性、風格、安全性                                                                                                            |
-| `memory-auditor`          | haiku           | Read, Grep, Glob                    | 分類 save candidates 與 Do Not Save 項目；不直接寫入 memory                                                                                     |
-| `memory-compressor`       | sonnet          | Read, Grep, Glob                    | 草擬 bounded-file compression 與 graduation 提案；不直接寫入 memory                                                                             |
 | `plan-reviewer`           | opus（high）    | Read, Grep, Glob, Bash              | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性                                                                             |
 | `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 最低成本的機械式探索；在執行前承接預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                               |
 | `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
@@ -53,7 +51,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 - 互動工作：進入 Native Plan Mode；複雜或高風險計畫可選用 `plan-reviewer`；核准計畫後再回到執行模式。
 - 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入 OpenSpec 或受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
-- Claude-only 公司移植：保留非 memory instructions、rules、agents、skills 與 hygiene hooks；排除 memory agents、skills/commands/rules/hooks、`.memories/`、`memory-db` MCP server、memory permissions，以及複製後 agent prompts 中的 memory references。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
+- Claude-only 公司移植：保留 instructions、rules、agents、skills 與 hygiene hooks——Claude 已不包含任何消耗 `.memories/` 的 agents、skills、commands、hooks 或 MCP servers。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
 
 `REVIEW.md` 不屬於本機 baseline；只有 repository 加入 Claude 託管的 Team 或 Enterprise Code Review 時才加入。
 
@@ -61,15 +59,12 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ## Commands（斜線指令）
 
-### 記憶體與工作流程（原創——非來自 ECC）
+### 工作流程（原創——非來自 ECC）
 
-| Command               | 用途                                                              |
-| --------------------- | ----------------------------------------------------------------- |
-| `/gen-commit`         | 透過 `commit-specialist` 產生符合 Conventional Commits 格式的訊息 |
-| `/memory-maintenance` | 初始化、更新、審查或整合專案記憶體                                |
-| `/worktree`           | 建立、管理並合併 Git worktree，同時保留記憶體                     |
-
-`/compress-memory`、`/memory-sql` 與 `/save-memory` 無指令包裝檔（2026-08-07 移除為冗餘）：Claude Code 將各個 `.claude/skills/<name>/SKILL.md` 以其本身的 `name` 註冊，因此 `/compress-memory`、`/memory-sql` 與 `/save-memory` 會直接解析至該同名 skill，無需 `.claude/commands/` 檔案。
+| Command       | 用途                                                            |
+| ------------- | --------------------------------------------------------------- |
+| `/gen-commit` | 透過 `commit-specialist` 產生符合 Conventional Commits 格式訊息 |
+| `/worktree`   | 建立、管理並合併 Git worktree，同時同步共用記憶                 |
 
 Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 使用原生 Git/GitHub 操作，並需要使用者明確授權。
 
@@ -104,16 +99,12 @@ Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch his
 
 Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載入。
 
-### 記憶體與工作流程（原創——非來自 ECC）
+### 工作流程（原創——非來自 ECC）
 
-| Skill                  | 用途                                                                                                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commit-helper`        | Conventional Commits 格式、pre-commit 檢查清單                                                                                                        |
-| `memory-manager`       | Memory 初始化、讀取、audit、taxonomy、health checks 與 operation routing                                                                              |
-| `save-memory`          | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff                                                                               |
-| `compress-memory`      | Bounded-file 清理、去重與低頻知識 graduation                                                                                                          |
-| `memory-sql`           | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions                                                              |
-| `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期使用原生 Git 操作。 |
+| Skill                  | 用途                                                                                                                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commit-helper`        | Conventional Commits 格式、pre-commit 檢查清單                                                                                                                                               |
+| `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Claude 同步此狀態而不讀取或寫入其內容。Worktree 生命週期使用原生 Git 操作。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
@@ -121,6 +112,12 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `github-ops`     | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
 | `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+
+### 已移除（2026-08-20 清理——Claude 已退出共用 `.memories/` 系統）
+
+| Skill / Agent / Command / Hook                                                                                                                                                      | 原因                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `memory-manager`、`save-memory`、`compress-memory`、`memory-sql` skills；`memory-auditor`、`memory-compressor` agents；`/memory-maintenance`；`memory_health_check.py`；`.mcp.json` | `.memories/` 寫入需明確呼叫 skill，而 Claude Code 的內建記憶指示在系統提示中無條件生效——always-on 路徑每次都勝出，導致共用儲存從未接收 Claude 的寫入。Claude 現已改用內建記憶（`rules/common/memory.md`），並維持僅作為 `.memories/` 保管者（建立骨架、同步 worktree）的角色。 |
 
 ### 已移除（2026-08-19 清理——`/learn-eval` 未曾在實務中觸發）
 
@@ -165,13 +162,12 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 | Hook                       | 觸發時機             | 執行內容                                                                                                                                                                 |
 | -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `session_start.py`         | 工作階段開始         | 以凍結快照模式將 `CLAUDE.md`、`.memories/memories/MEMORY.md` 與 `USER.md` 注入上下文（session 執行中不重新讀取，保留 LLM 前綴快取）；並將記憶體分類結構複製到新 worktree |
+| `session_start.py`         | 工作階段開始         | 注入 `CLAUDE.md` 與 git/分支上下文（凍結快照——session 執行中不重新讀取）。建立 `.memories/` 骨架並複製到新 worktree，以供 Codex/Antigravity 尋找其狀態，但不注入其內容。 |
 | `post_tool_use_hygiene.py` | Python Edit/Write 後 | 執行補充 Pyright 的唯讀 Ruff `E722`、`F601`、`F602`、`F634` diagnostics；不會格式化或修改檔案。                                                                          |
-| `memory_health_check.py`   | 每次回覆後           | 檢查 bounded memory 限制與 taxonomy                                                                                                                                      |
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 
-Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 另外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
+Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
 
 ### 已注意但未從 ECC 移植的 hook 概念
 
@@ -186,11 +182,11 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                                  |
-| --------------- | --------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖、skill 撰寫與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
-| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                                             |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                                  |
+| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                                            |
+| --------------- | --------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖、skill 撰寫、記憶路由與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
+| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped 不觸碰保護：絕不暫存/提交 `.memories/`，絕不編輯其內容（除初始骨架建立）——內容擁有權屬於 Codex/Antigravity，不屬於 Claude。                                                                                                                                                         |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                                            |
 
 Common rules 刻意維持精簡，只保留模型無法自行推導的決策。Security triggers 集中在 `rules/common/security.md`，severity handling 與 review heuristics 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
 
@@ -224,25 +220,14 @@ Common rules 刻意維持精簡，只保留模型無法自行推導的決策。S
 
 ## 延後項目
 
-| 項目                                         | 類型                    | 前提條件                                                                                               |
-| -------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| **自動 transcript 捕捉 + FTS5 session 搜尋** | Hermes 移植             | Claude Code Stop hook 只接收 session_id，不接收對話內容                                                |
-| `deep-research` skill                        | ECC 移植                | 先設定 firecrawl + exa MCP                                                                             |
-| `marketing-agent` agent                      | ECC 移植                | 確認短片製作規劃啟動                                                                                   |
-| `uvm-patterns` skill                         | 自訂建置                | UVM 專案啟動                                                                                           |
-| `rules/systemverilog/`                       | 自訂建置                | UVM 專案啟動                                                                                           |
-| Eval-driven development harness              | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
+| 項目                            | 類型                    | 前提條件                                                                                               |
+| ------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `deep-research` skill           | ECC 移植                | 先設定 firecrawl + exa MCP                                                                             |
+| `marketing-agent` agent         | ECC 移植                | 確認短片製作規劃啟動                                                                                   |
+| `uvm-patterns` skill            | 自訂建置                | UVM 專案啟動                                                                                           |
+| `rules/systemverilog/`          | 自訂建置                | UVM 專案啟動                                                                                           |
+| Eval-driven development harness | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
 
 ### OpenSpec Planning Handoff
 
 OpenSpec 是選用的專案狀態，不是 starter kit 需要提交的內容。Specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。Plans 不屬於 durable memory。
-
-### 可搜尋記憶——SQLite FTS5
-
-**已實作**：`memory-db` MCP server 已配置在 `.mcp.json`，並直接以 `uvx mcp-server-sqlite` 啟動；資料庫路徑使用 `${CLAUDE_PROJECT_DIR:-.}`，因此可從專案內任何子目錄正確解析。Claude 透過 MCP `write_query` 明確寫入精選條目——已畢業的 lessons、decisions 與 session metadata。Stop hook 會提示 Claude upsert session 記錄並歸檔已畢業的條目。Schema 與查詢範例請參考 `.claude/skills/memory-sql/SKILL.md`。
-
-**仍延後——自動 transcript 搜尋**：[Hermes](https://github.com/NousResearch/hermes-agent) 會自動將所有 session 訊息儲存在本機 SQLite 資料庫，搭配 FTS5 全文搜尋，讓過去任何對話都能在約 20ms 內被召回，無需 LLM 彙整。本專案僅提供精選條目——自動捕捉仍延後，因為 Claude Code Stop hook 只接收 session_id，無法取得對話內容。實作自動記錄需要：
-
-1. 攔截每次 PostToolUse event 以捕捉工具輸入/輸出。
-2. 在 git-ignored 的 `.memories/` 根目錄下，將 session 記錄寫入專用資料表或資料庫。
-3. 新增 `/session-search <query>` 斜線指令支援 FTS5 查詢。

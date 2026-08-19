@@ -159,8 +159,6 @@ def test_claude_agent_model_routing_uses_current_aliases() -> None:
         "doc-translator": ("haiku", None),
         "signal-miner": ("haiku", None),
         "implementation-reviewer": ("opus", "high"),
-        "memory-auditor": ("haiku", None),
-        "memory-compressor": ("sonnet", "medium"),
         "plan-reviewer": ("opus", "high"),
         "security-reviewer": ("opus", "high"),
         "task-worker": ("sonnet", "medium"),

@@ -52,8 +52,7 @@
             "Bash(git config --get *)",
             "Bash(mypy *)",
             "Bash(cat .git/COMMIT_EDITMSG)",
-            "Bash(cat .git/HEAD)",
-            "mcp__memory-db__read_query"
+            "Bash(cat .git/HEAD)"
         ],
         "deny": [
             "Bash(git push --force *)",
@@ -67,7 +66,6 @@
         "defaultMode": "auto"
     },
     "model": "opusplan",
-    "enabledMcpjsonServers": ["memory-db"],
     "hooks": {
         "SessionStart": [
             {
@@ -102,23 +100,6 @@
                         ],
                         "timeout": 30,
                         "statusMessage": "Checking Python diagnostics"
-                    }
-                ]
-            }
-        ],
-        "Stop": [
-            {
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "uv",
-                        "args": [
-                            "run",
-                            "python",
-                            "${CLAUDE_PROJECT_DIR}/.claude/hooks/memory_health_check.py"
-                        ],
-                        "timeout": 30,
-                        "statusMessage": "Checking memory maintenance"
                     }
                 ]
             }

@@ -22,15 +22,14 @@
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
-Review severity, security triggers, phase ownership, skill authoring, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
+Review severity, security triggers, phase ownership, skill authoring, memory routing, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
 
 Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and use the memory or skill workflow only when the result is durable and reusable.
 
 ## Memory
 
-- `.memories/` is git-ignored cross-agent state; keep `MEMORY.md` at most 2,200 chars and `USER.md` at most 500 chars.
-- Use `/memory-maintenance` for routing, `/memory-sql` for every database operation, and the explicit save or compression workflow for durable writes.
-- Treat session-start memory and database query results as context until explicitly curated; subagents never write durable memory directly.
+- Claude's durable memory is Claude Code's built-in memory system, not `.memories/` — see `.claude/rules/common/memory.md`.
+- `.memories/` is Codex/Antigravity-owned shared state; Claude creates and syncs its skeleton for worktrees but does not read or write its content.
 
 ## Verification
 

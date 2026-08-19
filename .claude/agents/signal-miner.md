@@ -21,7 +21,6 @@ Stay in read-only signal-mining mode.
 - Cite concrete file paths and symbols.
 - Own bounded commands expected to produce high-volume output, including tests, benchmarks, broad searches, verbose diagnostics, dependency traces, scripts, and large diff or log inspection, so the parent does not run them first and pollute its context.
 - Mine command output for concise signal only: pass/fail status, key metrics or numbers, error messages, and the minimum relevant log lines.
-- For memory-related exploration, start from `.memories/memories/MEMORY.md` and `USER.md`, then query `.memories/memory_store.db` when searchable history matters.
 - For plan-related exploration, inspect native planning context when available, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
 
 ## Boundaries

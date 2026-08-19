@@ -95,15 +95,6 @@ def initialize_memory_taxonomy(root_dir: Path, branch: str) -> str:
     return "Memory skeleton exists"
 
 
-def read_text(path: Path, missing: str = "") -> str:
-    if not path.exists():
-        return missing
-    try:
-        return path.read_text(encoding="utf-8")
-    except Exception as exc:
-        return f"Error reading {path.name}: {exc}"
-
-
 def sync_memory_if_needed(current_root: Path):
     target_dir = current_root / MEMORY_ROOT_REL_DIR
 
@@ -179,28 +170,15 @@ def main():
     sync_status = sync_memory_if_needed(root_dir)
     taxonomy_init_status = initialize_memory_taxonomy(root_dir, branch)
     purpose = get_branch_purpose(branch)
-    memory_content = read_text(root_dir / MEMORY_REL_DIR / "MEMORY.md")
-    user_content = read_text(root_dir / MEMORY_REL_DIR / "USER.md")
-
-    mission_alert = ""
-    if "[MISSION REQUIRED]" in memory_content:
-        mission_alert = """
-> [!IMPORTANT]
-> **UNINITIALIZED PROJECT MEMORY DETECTED**
-> **ACTION REQUIRED**: Define only durable project mission and constraints in `MEMORY.md`.
-> Keep task goals, plans, and definition of done in native planning or OpenSpec.
-"""
 
     worktree_memory_alert = ""
     if is_worktree:
         worktree_memory_alert = """
 > [!NOTE]
-> **WORKTREE MEMORY INITIALIZATION**
-> Ignored memory is copied from the main repository without overwriting local worktree memory.
-> Review `MEMORY.md`, `USER.md`, and relevant facts or problem history in `memory_store.db`.
+> **WORKTREE MEMORY SYNC**
+> Ignored `.memories/` state was copied from the main repository for Codex and Antigravity;
+> Claude does not read or write its contents.
 """
-
-    user_section = f"\n### [User Context: USER.md]\n{user_content}\n" if user_content else ""
 
     additional_context = f"""
 ## [System: Session Auto-Initialization]
@@ -208,16 +186,12 @@ def main():
 - **Git Worktree Status**: {"Active Worktree" if is_worktree else "Main Workspace"}
 - **Memory Sync Status**: {sync_status if sync_status else "Up to date"}
 - **Memory Initialization Status**: {taxonomy_init_status if taxonomy_init_status else "Up to date"}
-{mission_alert}
 {worktree_memory_alert}
 
 ### [Goal Alignment Suggestion]
 Based on the branch name `{branch}`, you should focus on: **{purpose}**.
 **Context Clue (Last Commit)**: `{last_msg}`
 
-### [Project Context: MEMORY.md]
-{memory_content}
-{user_section}
 ---
 *This context was automatically injected by the Claude Code SessionStart hook.*
 """

@@ -17,8 +17,8 @@ After the native Git workflow creates the worktree:
 
 ## During Work
 
-- Keep stable cross-session facts in the bounded files.
-- Query and update structured facts through `/memory-sql`.
+- Claude syncs these files for Codex and Antigravity without owning their contents — see
+  `.claude/rules/common/memory.md`. Do not read or write `.memories/` content.
 - Keep plans in agent-native planning state, `.tmp/`, or maintained `docs/`.
 
 ## Finishing a Worktree (Memory Consolidation)

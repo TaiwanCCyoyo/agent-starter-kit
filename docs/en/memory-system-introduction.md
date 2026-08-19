@@ -50,7 +50,10 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 ## Current Platform Status
 
 - **Codex**: migrated to `.memories/` and `memory_store.db`.
-- **Claude Code**: migrated to `.memories/` and `memory_store.db`.
+- **Claude Code**: withdrawn (2026-08-20) — Claude uses Claude Code's built-in memory
+  instead. It stays custodian-only for `.memories/` (skeleton creation, worktree sync) so
+  Codex and Antigravity sessions still find their state; see `Claude Code Lifecycle` below
+  and `.claude/rules/common/memory.md`.
 - **Antigravity**: adapter implemented; runtime validation pending.
 
 ## Codex Lifecycle
@@ -61,13 +64,15 @@ Hermes `SOUL.md` and `state.db` are intentionally outside this contract. Agent i
 - `.codex/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
 - `.codex/config.toml` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
 
-## Claude Code Lifecycle
+## Claude Code Lifecycle (custodian only — see Current Platform Status)
 
-- `.claude/hooks/session_start.py` initializes the bounded files and SQLite schema, copies missing memory into worktrees, and injects `MEMORY.md` plus `USER.md`.
-- `.claude/hooks/memory_health_check.py` validates limits and taxonomy.
-- `.claude/skills/memory-manager/SKILL.md` defines routing.
-- `.claude/skills/memory-sql/SKILL.md` defines SQLite query and write workflows.
-- `.mcp.json` exposes `.memories/memory_store.db` through `mcp-server-sqlite`.
+- `.claude/hooks/session_start.py` creates the bounded files and SQLite schema if missing
+  and copies missing memory into worktrees, but does not read or inject their content.
+- Claude has no memory-content skill, agent, MCP server, or Stop-hook reminder — durable
+  facts and preferences route to Claude Code's built-in memory instead
+  (`.claude/rules/common/memory.md`).
+- `.claude/rules/memory/storage.md` is a hands-off guard: never stage/commit
+  `.memories/`, never edit its content beyond initial skeleton creation.
 
 ## Antigravity Lifecycle
 
