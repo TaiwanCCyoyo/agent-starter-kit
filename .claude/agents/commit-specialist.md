@@ -39,4 +39,4 @@ Your working directory is already the project root. Run Git commands directly wi
 - Hook result or reason commit was not executed.
 - On handoff failure: the failed step, exact error or ambiguity, attempted fix, relevant paths, and the required parent-agent decision.
 
-This agent has no visibility into the rest of the session, so it does not judge whether `/learn-eval` or a memory update is warranted. That decision belongs to the parent agent per `commit-helper` SKILL.md's Post-Commit Memory Check, performed after this agent reports success.
+This agent has no visibility into the rest of the session, so it does not judge whether a memory update is warranted. That decision belongs to the parent agent per `commit-helper` SKILL.md's Post-Commit Memory Check, performed after this agent reports success.

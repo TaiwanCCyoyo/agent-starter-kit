@@ -22,7 +22,7 @@
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
-Review severity, security triggers, phase ownership, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
+Review severity, security triggers, phase ownership, skill authoring, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
 
 Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and use the memory or skill workflow only when the result is durable and reusable.
 

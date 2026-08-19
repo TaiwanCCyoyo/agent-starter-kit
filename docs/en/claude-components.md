@@ -63,12 +63,11 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 ### Memory & Workflow (original — not from ECC)
 
-| Command               | Purpose                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------- |
-| `/gen-commit`         | Generate a Conventional Commit message via `commit-specialist`                              |
-| `/learn-eval`         | Evaluate session patterns through a holistic quality gate; extract as skills after approval |
-| `/memory-maintenance` | Initialize, update, audit, or consolidate project memory                                    |
-| `/worktree`           | Create, manage, and merge Git worktrees with memory preservation                            |
+| Command               | Purpose                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `/gen-commit`         | Generate a Conventional Commit message via `commit-specialist`   |
+| `/memory-maintenance` | Initialize, update, audit, or consolidate project memory         |
+| `/worktree`           | Create, manage, and merge Git worktrees with memory preservation |
 
 `/compress-memory`, `/memory-sql`, and `/save-memory` have no command wrapper file (removed 2026-08-07 as redundant): Claude Code registers each `.claude/skills/<name>/SKILL.md` under its own `name`, so `/compress-memory`, `/memory-sql`, and `/save-memory` resolve directly to the identically-named skill without a `.claude/commands/` file.
 
@@ -87,17 +86,17 @@ Claude Code PR preparation is owned by the `github-ops` skill: inspect full bran
 
 ### Not ported from ECC (with reasons)
 
-| Command                                         | Reason                                                                                |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `/pr`, `/review-pr`                             | PR workflow not needed                                                                |
-| `/multi-*` (5 commands)                         | Multi-agent orchestration premature                                                   |
-| `/learn`, `/skill-create`                       | Depend on ECC observation hooks and full instinct pipeline; replaced by `/learn-eval` |
-| `/evolve`                                       | Replaced by skill-curator lifecycle in `/learn-eval`                                  |
-| `/hookify-*` (4 commands)                       | ECC-internal hook management                                                          |
-| `/sessions`, `/save-session`, `/resume-session` | Replaced by the `.memories/` system                                                   |
-| Language-specific build/test/review             | Go/Rust/Kotlin/Java etc. not in use                                                   |
-| `/cost-report`, `/model-route`                  | Add later if needed                                                                   |
-| `/jira`, `/prp-*`, `/plan-prd`                  | No PM integration planned                                                             |
+| Command                                         | Reason                                                                                                                            |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `/pr`, `/review-pr`                             | PR workflow not needed                                                                                                            |
+| `/multi-*` (5 commands)                         | Multi-agent orchestration premature                                                                                               |
+| `/learn`, `/skill-create`                       | Depend on ECC observation hooks and full instinct pipeline; replaced by the `skill-authoring` rule and the `skill-creator` plugin |
+| `/evolve`                                       | Replaced by the `skill-authoring` rule and the `skill-creator` plugin                                                             |
+| `/hookify-*` (4 commands)                       | ECC-internal hook management                                                                                                      |
+| `/sessions`, `/save-session`, `/resume-session` | Replaced by the `.memories/` system                                                                                               |
+| Language-specific build/test/review             | Go/Rust/Kotlin/Java etc. not in use                                                                                               |
+| `/cost-report`, `/model-route`                  | Add later if needed                                                                                                               |
+| `/jira`, `/prp-*`, `/plan-prd`                  | No PM integration planned                                                                                                         |
 
 ---
 
@@ -114,7 +113,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | `save-memory`          | Explicit durable writes, classification, bounded-file limits, and deduplication handoff                                                                                                                                    |
 | `compress-memory`      | Bounded-file cleanup, deduplication, and graduation of lower-frequency knowledge                                                                                                                                           |
 | `memory-sql`           | Exclusive SQLite owner for schema discovery, reads, writes, recurring problems, and verified resolutions                                                                                                                   |
-| `skill-curator`        | Session extraction quality gate (holistic verdict), skill lifecycle (active/stale/archived), save-location guidance                                                                                                        |
 | `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Worktree lifecycle uses native Git operations. |
 
 ### Development (ported from ECC v2.0.0-rc.1)
@@ -123,6 +121,12 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `github-ops`     | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
 | `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
+
+### Removed (2026-08-19 cleanup — `/learn-eval` never triggered in practice)
+
+| Skill / Command                | Reason                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skill-curator`, `/learn-eval` | The manual port of ECC's holistic verdict gate and Hermes' curator lifecycle went untriggered — the only prompt was a weekly Stop-hook reminder. Replaced by the always-loaded `rules/common/skill-authoring.md` rule stating the durable intent (write a project skill when a task class will recur) plus the already-enabled `skill-creator` plugin for authoring. |
 
 ### Removed (2026-08-07 cleanup — dormant-by-design ECC demo skills, no downstream usage)
 
@@ -182,11 +186,11 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                                  |
-| --------------- | --------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-08-07 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, structural review heuristics, phase routing map, and the risk-based testing baseline. `git-workflow`, `agents`, and `coding-style` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, CLAUDE.md, and the applicable skill. |
-| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                                                         |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                              |
+| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | --------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-08-07 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, structural review heuristics, phase routing map, skill authoring, and the risk-based testing baseline. `git-workflow`, `agents`, and `coding-style` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, CLAUDE.md, and the applicable skill. |
+| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped storage safety: ignored-state protection, bounded-file limits, atomic separators, deduplication, frozen snapshots, prohibited content, and SQLite MCP-only access.                                                                                                                                                                          |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                                               |
 
 The common rules intentionally stay small and carry only decisions a model cannot derive on its own. Security triggers are centralized in `rules/common/security.md`, severity handling and review heuristics in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
 

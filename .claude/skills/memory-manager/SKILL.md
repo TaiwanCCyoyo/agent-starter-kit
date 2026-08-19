@@ -21,7 +21,6 @@ The Markdown files use Hermes-compatible atomic entries separated by `§` on its
 - Use `compress-memory` when bounded files are too large, duplicated, stale, or poorly routed.
 - Use `memory-sql` for database schema discovery, searches, inserts, recurring-problem history, and resolutions.
 - Use `worktree-memory-sync` for ignored memory state across Git worktrees.
-- Use `skill-curator` for periodic skill lifecycle review (active/stale/archived) during memory audits.
 - When delegated analysis is useful, use `memory-auditor` for read-only save recommendations or `memory-compressor` for a read-only compression draft. Route their output back through the owning skill; subagents never write memory.
 
 ## Repeated Problems

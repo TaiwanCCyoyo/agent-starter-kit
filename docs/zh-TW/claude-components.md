@@ -66,7 +66,6 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | Command               | 用途                                                              |
 | --------------------- | ----------------------------------------------------------------- |
 | `/gen-commit`         | 透過 `commit-specialist` 產生符合 Conventional Commits 格式的訊息 |
-| `/learn-eval`         | 以整體品質門評估 session 模式；核准後萃取為 skills                |
 | `/memory-maintenance` | 初始化、更新、審查或整合專案記憶體                                |
 | `/worktree`           | 建立、管理並合併 Git worktree，同時保留記憶體                     |
 
@@ -87,17 +86,17 @@ Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch his
 
 ### 未從 ECC 移植（含原因）
 
-| Command                                         | 原因                                                                       |
-| ----------------------------------------------- | -------------------------------------------------------------------------- |
-| `/pr`、`/review-pr`                             | 不需要 PR 工作流程                                                         |
-| `/multi-*`（共 5 個指令）                       | 多代理協作尚未成熟                                                         |
-| `/learn`、`/skill-create`                       | 依賴 ECC observation hooks 與完整 instinct pipeline；由 `/learn-eval` 取代 |
-| `/evolve`                                       | 由 `/learn-eval` 中的 skill-curator 生命週期取代                           |
-| `/hookify-*`（共 4 個指令）                     | ECC 內部 hook 管理                                                         |
-| `/sessions`、`/save-session`、`/resume-session` | 已由 `.memories/` 系統取代                                                 |
-| 語言專屬的建構／測試／審查指令                  | Go/Rust/Kotlin/Java 等語言未使用                                           |
-| `/cost-report`、`/model-route`                  | 有需要時再新增                                                             |
-| `/jira`、`/prp-*`、`/plan-prd`                  | 未規劃 PM 整合                                                             |
+| Command                                         | 原因                                                                                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/pr`、`/review-pr`                             | 不需要 PR 工作流程                                                                                        |
+| `/multi-*`（共 5 個指令）                       | 多代理協作尚未成熟                                                                                        |
+| `/learn`、`/skill-create`                       | 依賴 ECC observation hooks 與完整 instinct pipeline；由 `skill-authoring` 規則與 `skill-creator` 外掛取代 |
+| `/evolve`                                       | 由 `skill-authoring` 規則與 `skill-creator` 外掛取代                                                      |
+| `/hookify-*`（共 4 個指令）                     | ECC 內部 hook 管理                                                                                        |
+| `/sessions`、`/save-session`、`/resume-session` | 已由 `.memories/` 系統取代                                                                                |
+| 語言專屬的建構／測試／審查指令                  | Go/Rust/Kotlin/Java 等語言未使用                                                                          |
+| `/cost-report`、`/model-route`                  | 有需要時再新增                                                                                            |
+| `/jira`、`/prp-*`、`/plan-prd`                  | 未規劃 PM 整合                                                                                            |
 
 ---
 
@@ -114,7 +113,6 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | `save-memory`          | 明確 durable writes、分類、bounded-file limits 與 deduplication handoff                                                                               |
 | `compress-memory`      | Bounded-file 清理、去重與低頻知識 graduation                                                                                                          |
 | `memory-sql`           | SQLite 唯一 owner，負責 schema discovery、reads、writes、重複問題與 verified resolutions                                                              |
-| `skill-curator`        | session 萃取品質門（整體判定）、skill 生命週期（active/stale/archived）、儲存位置指引                                                                 |
 | `worktree-memory-sync` | Worktree 的 `.memories/` 同步：只複製缺少的項目、絕不覆寫 bounded files 或 SQLite、只合併非重複的 durable facts。Worktree 生命週期使用原生 Git 操作。 |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
@@ -123,6 +121,12 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `github-ops`     | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
 | `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+
+### 已移除（2026-08-19 清理——`/learn-eval` 未曾在實務中觸發）
+
+| Skill / Command                | 原因                                                                                                                                                                                                                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skill-curator`、`/learn-eval` | ECC 整體品質門與 Hermes curator 生命週期的手動移植未曾被觸發——唯一提示是每週的 Stop hook 提醒。已由常駐載入的 `rules/common/skill-authoring.md` 規則取代，該規則陳述耐用的意圖（當任務類別會重複出現時，撰寫 project skill），加上已啟用的 `skill-creator` 外掛用於撰寫。 |
 
 ### 已移除（2026-08-07 清理——待機設計 ECC demo skills，無下游使用方）
 
@@ -182,11 +186,11 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                      |
-| --------------- | --------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
-| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                                 |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                      |
+| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                                  |
+| --------------- | --------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖、skill 撰寫與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
+| `rules/memory/` | `.memories/**`        | 自訂                                       | Path-scoped storage safety：保護 ignored state、bounded-file limits、atomic separators、deduplication、frozen snapshots、禁止內容與僅限 SQLite MCP 存取。                                                                                                                             |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                                  |
 
 Common rules 刻意維持精簡，只保留模型無法自行推導的決策。Security triggers 集中在 `rules/common/security.md`，severity handling 與 review heuristics 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
 

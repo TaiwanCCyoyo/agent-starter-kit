@@ -47,7 +47,7 @@ When working with multiple worktrees, memories can diverge. To bring insights ba
 ### 3. Agent Workflows
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`, `/learn-eval`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle

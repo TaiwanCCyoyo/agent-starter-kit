@@ -22,7 +22,7 @@ Audit memory needs without modifying files.
     - Recurring problem identity: `problem_patterns`.
     - Concrete evidence per occurrence: `problem_occurrences`.
     - Root cause and fix: `resolutions`.
-    - Skill candidates: `facts` (`category='candidate'`) or `/learn-eval`.
+    - Skill candidates: `facts` (`category='candidate'`).
 - Flag repeated blockers, workarounds, mistaken assumptions, or hidden tradeoffs that should become memory entries.
 - Suggest whether bounded files need compression or pruning.
 

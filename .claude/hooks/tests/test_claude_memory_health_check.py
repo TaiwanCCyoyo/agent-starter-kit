@@ -19,7 +19,7 @@ def load_hook() -> ModuleType:
 HOOK = load_hook()
 
 
-def invoke_main(payload: object, root: Path, now: float) -> tuple[int, str]:
+def invoke_main(payload: object, root: Path) -> tuple[int, str]:
     stdin = io.StringIO(json.dumps(payload))
     stdout = io.StringIO()
 
@@ -27,68 +27,50 @@ def invoke_main(payload: object, root: Path, now: float) -> tuple[int, str]:
         patch.object(HOOK.sys, "stdin", stdin),
         patch.object(HOOK.sys, "stdout", stdout),
         patch.object(HOOK, "project_root", return_value=root),
-        patch.object(HOOK.time, "time", return_value=now),
     ):
         exit_code = HOOK.main()
 
     return exit_code, stdout.getvalue()
 
 
-def learn_eval_state_path(root: Path) -> Path:
-    return root / HOOK.LEARN_EVAL_STATE_FILE
-
-
 def seed_clean_memory(root: Path) -> None:
-    """Give MEMORY.md so memory_health_message stays quiet and the reminder message is isolated."""
+    """Give MEMORY.md so memory_health_message stays quiet and other messages are isolated."""
     memory_dir = root / HOOK.MEMORY_DIR
     memory_dir.mkdir(parents=True)
     (memory_dir / "MEMORY.md").write_text("stable fact\n", encoding="utf-8")
 
 
-def test_learn_eval_reminder_fires_on_first_run(tmp_path: Path) -> None:
-    seed_clean_memory(tmp_path)
+def test_memory_health_message_fires_when_memory_md_is_oversized(tmp_path: Path) -> None:
+    memory_dir = tmp_path / HOOK.MEMORY_DIR
+    memory_dir.mkdir(parents=True)
+    (memory_dir / "MEMORY.md").write_text("x" * (HOOK.MEMORY_CHAR_LIMIT + 1), encoding="utf-8")
     payload = {"cwd": str(tmp_path), "session_id": "s1"}
 
-    exit_code, output = invoke_main(payload, tmp_path, now=1_000_000.0)
+    exit_code, output = invoke_main(payload, tmp_path)
 
     assert exit_code == 0
     message = json.loads(output)["systemMessage"]
-    assert "/learn-eval" in message
-    assert "/memory-maintenance" in message
-    state = json.loads(learn_eval_state_path(tmp_path).read_text(encoding="utf-8"))
-    assert state["last_reminder_at"] == 1_000_000.0
+    assert "/compress-memory" in message
 
 
-def test_learn_eval_reminder_suppressed_within_interval(tmp_path: Path) -> None:
+def test_memory_taxonomy_message_fires_on_unexpected_file(tmp_path: Path) -> None:
     seed_clean_memory(tmp_path)
-    learn_eval_state_path(tmp_path).write_text(json.dumps({"last_reminder_at": 1_000_000.0}), encoding="utf-8")
+    (tmp_path / HOOK.MEMORY_ROOT / "notes.txt").write_text("scratch", encoding="utf-8")
     payload = {"cwd": str(tmp_path), "session_id": "s2"}
 
-    exit_code, output = invoke_main(payload, tmp_path, now=1_000_000.0 + 60)
+    exit_code, output = invoke_main(payload, tmp_path)
+
+    assert exit_code == 0
+    message = json.loads(output)["systemMessage"]
+    assert "Memory taxonomy reminder" in message
+    assert "notes.txt" in message
+
+
+def test_no_messages_when_memory_is_clean(tmp_path: Path) -> None:
+    seed_clean_memory(tmp_path)
+    payload = {"cwd": str(tmp_path), "session_id": "s3"}
+
+    exit_code, output = invoke_main(payload, tmp_path)
 
     assert exit_code == 0
     assert output == ""
-
-
-def test_learn_eval_reminder_fires_again_after_interval_elapses(tmp_path: Path) -> None:
-    seed_clean_memory(tmp_path)
-    learn_eval_state_path(tmp_path).write_text(json.dumps({"last_reminder_at": 1_000_000.0}), encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "session_id": "s3"}
-
-    exit_code, output = invoke_main(payload, tmp_path, now=1_000_000.0 + HOOK.LEARN_EVAL_REMINDER_INTERVAL_SECONDS + 1)
-
-    assert exit_code == 0
-    message = json.loads(output)["systemMessage"]
-    assert "/learn-eval" in message
-
-
-def test_learn_eval_reminder_survives_corrupt_state_file(tmp_path: Path) -> None:
-    seed_clean_memory(tmp_path)
-    learn_eval_state_path(tmp_path).write_text("{not-json", encoding="utf-8")
-    payload = {"cwd": str(tmp_path), "session_id": "s4"}
-
-    exit_code, output = invoke_main(payload, tmp_path, now=1_000_000.0)
-
-    assert exit_code == 0
-    message = json.loads(output)["systemMessage"]
-    assert "/learn-eval" in message

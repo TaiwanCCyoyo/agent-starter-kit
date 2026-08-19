@@ -14,6 +14,6 @@ This skill owns bounded-file compression. Use `save-memory` to persist graduated
 5. Before removing useful lower-frequency knowledge, use `save-memory` to graduate it after a `memory-sql` deduplication search.
 6. Preserve recurring-problem evidence and verified resolutions in structured tables.
 7. Recheck bounded-file limits and report what was preserved, graduated, merged, or dropped.
-8. Run `/learn-eval` when compression reveals reusable procedural guidance.
+8. Apply `skill-authoring` (`.claude/rules/common/skill-authoring.md`) when compression surfaces a reusable procedural pattern the repository does not already state: propose a new or extended skill to the user before writing it.
 
 When the user explicitly requests delegated analysis, `memory-compressor` may draft a proposal. The main agent owns final `.memories/` writes.
