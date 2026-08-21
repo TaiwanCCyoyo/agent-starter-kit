@@ -3,7 +3,7 @@
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, skill documents, and technical docs.
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
-- Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/` and `docs/zh-TW/`.
+- Keep Traditional Chinese content only in `.tmp/`, `.references/`, and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Do not commit, push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
@@ -22,14 +22,13 @@
 - Match the surrounding style and ownership boundaries before introducing new patterns.
 - Search GitHub or package registries only when local patterns and primary documentation are insufficient.
 
-Review severity, security triggers, phase ownership, skill authoring, memory routing, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
+Review severity, security triggers, phase ownership, skill authoring, and the testing baseline are routed in `.claude/rules/common/`; workflow procedures live in the applicable skill.
 
-Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and use the memory or skill workflow only when the result is durable and reusable.
+Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and update built-in memory, repository guidance, or a skill only when the result is durable and reusable.
 
 ## Memory
 
-- Claude's durable memory is Claude Code's built-in memory system, not `.memories/` — see `.claude/rules/common/memory.md`.
-- `.memories/` is Codex/Antigravity-owned shared state; Claude creates and syncs its skeleton for worktrees but does not read or write its content.
+- Claude's durable memory is Claude Code's built-in memory system; repository conventions and reusable workflows belong in checked-in guidance.
 
 ## Verification
 
@@ -47,4 +46,4 @@ Do not repeat an unverified workaround: investigate the root cause, surface any 
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
 - Before running tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or other commands expected to produce large stdout or logs, route the command to `signal-miner` when delegation is authorized; do not first flood the main context to confirm that the output is large.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main session or the designated reviewer; use `security-reviewer` for triggers in `.claude/rules/common/security.md`.
-- The main session owns canonical documents and all final durable-memory decisions.
+- The main session owns canonical documents and final changes to repository guidance.

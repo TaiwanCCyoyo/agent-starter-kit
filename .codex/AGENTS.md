@@ -3,7 +3,7 @@
 - Communicate with the user in Traditional Chinese.
 - Write project outputs in English: source code, comments, commit messages, configuration, `SKILL.md`, workflow documents, and technical docs.
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
-- Keep Traditional Chinese content only in `.memories/`, `.tmp/`, `.references/`, and `docs/zh-TW/`.
+- Keep Traditional Chinese content only in `.tmp/`, `.references/`, and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - Do not commit, push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
@@ -38,14 +38,21 @@
 
 ## Learning And Escalation
 
-- Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and use the memory or skill workflow only when the result is durable and reusable.
+- Do not repeat an unverified workaround: investigate the root cause, surface any external blocker, and update native memory, repository guidance, or a skill only when the result is durable and reusable.
+
+## Skill Authoring
+
+- Propose a new or extended project skill when a task class will recur and the repository does not already state the derived workflow.
+- Capture project-specific constraints, conventions, and acceptance requirements; omit general model knowledge and narration from a single task.
+- Write descriptions for retrieval using the intents and artifacts a future user would naturally mention.
+- Use the built-in `$skill-creator` when authoring or restructuring a skill, and obtain user approval before creating or materially changing one unless the user requested that work.
 
 ## Memory
 
-- `.memories/` is git-ignored cross-agent state; keep `MEMORY.md` at most 2,200 chars and `USER.md` at most 500 chars.
-- Use `memory-manager` for routing, `memory-sql` for every database operation, and the explicit save or compression skill for durable writes.
-- Keep plans, raw transcripts, command narration, secrets, credentials, and private user data outside memory.
-- Treat session-start memory and database query results as context until explicitly curated; subagents never write durable memory directly.
+- Codex uses its native local memories, enabled for this trusted project in `.codex/config.toml`; use `/memories` for chat-level controls.
+- Keep required team guidance, repository conventions, and reusable workflows in checked-in instructions, documentation, or skills rather than relying on memory.
+- Never store secrets, credentials, private user data, raw transcripts, plans, or command-by-command narration in memory.
+- Treat recalled memory as context rather than canonical repository truth.
 
 ## Verification
 
@@ -62,4 +69,4 @@
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
 - When delegation is authorized, route commands expected to produce large output to `signal_miner`; use `explorer` for ordinary code location.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main agent or the designated reviewer.
-- The main agent owns canonical documents and all final durable-memory decisions.
+- The main agent owns canonical documents and final changes to repository guidance.

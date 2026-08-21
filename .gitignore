@@ -1,6 +1,3 @@
-# Ignore instantiated memory while keeping tracked agent infrastructure available
-.memories/
-
 # Ignore local reference clones and disposable workspace files
 .references/
 .tmp/

@@ -11,7 +11,7 @@ Use `python-development` separately for coding style, typing, logging, secrets, 
 ## Repository Tests
 
 - Run Python commands through the project-managed environment with `uv run`.
-- Use `uv run python -m pytest scripts/tests .codex/hooks/tests` for the complete repository test suite so the repository root is importable on Windows and Codex hook tests are included.
+- Use `uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests` for the complete repository test suite so the repository root is importable on Windows and hidden hook tests are included.
 - Use `uv run python -m pytest .codex/hooks/tests` for focused Codex hook verification.
 - Invoke pytest through `uv run python -m pytest` so the repository root remains importable on Windows.
 - Pass hidden hook test directories explicitly because pytest discovery excludes them.

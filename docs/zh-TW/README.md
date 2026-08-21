@@ -2,13 +2,13 @@
 
 # AI Agent Starter Kit
 
-這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Codex、Claude Code 與 Antigravity。當你希望新專案中的各種 Agent 能快速理解任務、記憶、規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
+這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Codex、Claude Code 與 Antigravity。當你希望新專案中的各種 Agent 能快速理解規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
 
 ## 核心理念
 
-1. **長期記憶持久化**：Codex 透過 `.memories/memories/MEMORY.md` 與 `.memories/memory_store.db` 保存跨 session 的專案記憶。
-2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層。Codex 與 Antigravity 共用 `.memories/` 專案記憶；Claude Code 使用自身的內建記憶，並僅作為 `.memories/` 的保管者（建立骨架、同步 worktree）。
-3. **自動化維護**：格式化、lint、檔案衛生檢查與記憶提醒由 Agent hooks 與 repository 驗證腳本執行。
+1. **Agent 原生 Context**：Codex 與 Claude Code 使用各自的原生 local memory；必要專案知識保留在版本控制 guidance。
+2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層。
+3. **自動化維護**：格式化、lint 與檔案衛生檢查由 Agent hooks 與 repository 驗證腳本執行。
 4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
 5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
 6. **驗證優先**：Agent 在進行非瑣碎變更前須先說明驗證計畫，修改後執行驗證，並提供結果作為完成的證據。
@@ -20,48 +20,30 @@
 - **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
 - **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
 
-## 記憶管理流程
+## Agent 記憶與工作流程
 
-Codex 與 Antigravity 使用主動式 `.memories/` 系統，維持跨 session 與 worktree 的長期上下文。Claude Code 改用自身的內建記憶，並僅作為 `.memories/` 的保管者（建立骨架、同步 worktree）——詳見 [Claude Code 元件參考](claude-components.md)。
+- **Codex memory**：`.codex/config.toml` 會啟用原生 local memories，資料存放於 repository 外的使用者 Codex home；使用 `/memories` 控制單一 chat。必要 project rules 仍放在 checked-in guidance。
+- **Claude Code memory**：Claude 使用內建記憶，repository conventions 則寫入 `CLAUDE.md`、rules、文件或 skills。
+- **Antigravity**：本 repository 不提供跨 session 記憶庫；耐久知識應放在 checked-in artifacts 與 Git history。
 
-詳細架構、設定模型與複製清單請參考 [記憶系統介紹](memory-system-introduction.md)。
-
-### 1. 日常使用（Codex、Antigravity）
-
-- **儲存記憶**：完成有意義的子任務後，透過對應 Agent workflow 更新 `.memories/memories/MEMORY.md` 或 `.memories/memory_store.db`。
-- **自動提醒**：當 Agent 已經進行多輪工作且仍有 pending changes 時，hook 會提醒更新記憶。
-- **記憶壓縮**：當 `MEMORY.md` 過大時，系統會提醒進行壓縮。
-
-### 2. 多 Worktree 整合
-
-使用多個 worktree 時，各 worktree 的記憶可能逐漸分歧。要把洞見合併回主 repository：
-
-1. 使用目前 Agent 的 worktree workflow：
-    ```bash
-    /worktree finish <path/to/worktree>
-    ```
-2. Agent 會執行 AI semantic consolidation，將高價值的 `Lessons Learned` 與 `Done` 項目合併回主要 `MEMORY.md`。
-
-### 3. Agent 工作流程
+### Agent 工作流程
 
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
-- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。持久記憶使用 Claude 的內建記憶，而非 `.memories/`——詳見 `rules/common/memory.md`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
+- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 
 ## 自動化 Hooks 與生命週期
 
 本 repository 使用各 Agent 原生 hooks 維護系統一致性：
 
-| Agent           | Hook 類型      | 用途                                                                                  | Script                                   |
-| :-------------- | :------------- | :------------------------------------------------------------------------------------ | :--------------------------------------- |
-| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、專案記憶、分支與 worktree 上下文。                           | `.codex/hooks/session_start.py`          |
-| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。                               | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Codex**       | `Stop`         | 檢查記憶大小限制與 taxonomy。                                                         | `.codex/hooks/memory_health_check.py`    |
-| **Claude Code** | `SessionStart` | 注入 `CLAUDE.md`、分支與 worktree 上下文；建立/同步 `.memories/` 骨架，不讀取其內容。 | `.claude/hooks/session_start.py`         |
-| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。                      | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Antigravity** | `SessionStart` | 初始化 SQLite、複製 worktree 缺少的記憶，並注入 bounded files。                       | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                                         | `.agent/hooks/post_tool_use_hygiene.py`  |
-| **Antigravity** | `Stop`         | 檢查 bounded-file 限制與嚴格 memory taxonomy。                                        | `.agent/hooks/stop_memory_check.py`      |
+| Agent           | Hook 類型      | 用途                                                               | Script                                   |
+| :-------------- | :------------- | :----------------------------------------------------------------- | :--------------------------------------- |
+| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、branch、worktree 與 last-commit context。 | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Claude Code** | `SessionStart` | 注入 branch、worktree、goal-alignment 與 last-commit context。     | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                      | `.agent/hooks/post_tool_use_hygiene.py`  |
 
 ### Hook 疑難排解
 
@@ -71,7 +53,7 @@ Codex 與 Antigravity 使用主動式 `.memories/` 系統，維持跨 session �
     ```bash
     uv run pre-commit install
     ```
-2. Codex：檢查 `.codex/config.toml` 是否啟用 `codex_hooks`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
+2. Codex：檢查 `.codex/config.toml` 是否啟用 `hooks` 與 `memories`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
 3. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
 4. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
 5. 確認 Agent 已信任 project-local configuration layer。
@@ -166,7 +148,6 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 | Path                      | 用途                                                                                       |
 | :------------------------ | :----------------------------------------------------------------------------------------- |
-| `.memories/`              | Git-ignored 的本機長期記憶：`MEMORY.md`、`USER.md` 與 SQLite `memory_store.db`。           |
 | `.agent/`                 | Antigravity rules、skills、workflows。                                                     |
 | `.codex/`                 | Codex instructions、hooks、private command-like skills、specialist agents。                |
 | `.claude/`                | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
@@ -174,7 +155,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 | `scripts/`                | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。                     |
 | `.pre-commit-config.yaml` | Repository 層級驗證 hooks。                                                                |
 
-複製後，請初始化 `.memories/memories/MEMORY.md`，檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
+複製後，請檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
 
 ### Agent workflow plugins 與 skills 整合
 
@@ -186,11 +167,9 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 ## 設計來源
 
-本 starter kit 的架構設計受到兩個開源專案的啟發：
+本 starter kit 的架構設計受到一個開源專案的啟發：
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode 與 autoloaded project skills 取代。
-
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — 本專案參考其有限容量的 `MEMORY.md`／`USER.md`、frozen prompt snapshot、SQLite FTS5 session recall 與 learning loop，再依 starter kit 需求改編，而不是直接移植 Hermes。
 
 ## 初始化
 
@@ -208,16 +187,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
     ```bash
     uv run ruff check --fix .
     ```
-4. **設定 Antigravity MCP**
-
-    Antigravity 的 SQLite `memory-db` MCP server 必須設定在平台支援的全域設定中，例如使用者家目錄下的 `~/.mcp.json`。
-
-### 為新專案初始化記憶
-
-儲存庫初始化完成後：
-
-1. 請確認 `.memories/memories/MEMORY.md` 已記錄必要的專案長期資訊。
 
 ---
 
-本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/` 與 `.memories/`。
+本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/`、`.references/` 與 `.tmp/`。

@@ -21,17 +21,6 @@
                     }
                 ]
             }
-        ],
-        "Stop": [
-            {
-                "matcher": "*",
-                "hooks": [
-                    {
-                        "type": "command",
-                        "command": "uv run python .agent/hooks/stop_memory_check.py"
-                    }
-                ]
-            }
         ]
     }
 }

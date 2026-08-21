@@ -24,7 +24,6 @@ CJK_RE = re.compile(r"[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]")
 ALLOWED_PATH_MARKERS = [
     re.compile(r"(?:^|[./_-])plans?(?:$|[./_-])", re.IGNORECASE),
     re.compile(r"(?:^|[./_-])zh-tw(?:$|[./_-])", re.IGNORECASE),
-    re.compile(r"(?:^|[./_-])memor(?:y|ies)(?:$|[./_-])", re.IGNORECASE),
     re.compile(r"(?:^|/)\.references?(?:$|/)", re.IGNORECASE),
     re.compile(r"(?:^|[./_-])tmp(?:$|[./_-])", re.IGNORECASE),
 ]
@@ -71,9 +70,7 @@ def check_file_hygiene(filepath: str):
                 # this would still trigger. But based on is_path_allowed, we skip this whole block.
                 LOGGER.error("Error: Non-English (CJK) character or Mojibake found in %s at line %s:", filepath, i + 1)
                 LOGGER.error("  > %s", line.strip())
-                LOGGER.error(
-                    "Note: If this is intentional, use a path marked plan/plans or zh-TW, or move the content under .memories/, .references/, or .tmp/."
-                )
+                LOGGER.error("Note: If this is intentional, use a path marked plan/plans or zh-TW, or move the content under .references/ or .tmp/.")
                 return False
     else:
         # In allowed paths, we already did the UTF-8 encoding check above.

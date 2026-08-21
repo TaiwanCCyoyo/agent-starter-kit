@@ -17,7 +17,6 @@ Responsibilities:
 - Preserve Markdown structure, headings, lists, tables, links, and frontmatter.
 - Preserve code blocks exactly.
 - Preserve inline code, file paths, commands, config keys, API names, hook names, skill names, agent names, branch names, and environment variables.
-- Preserve memory architecture terms consistently when they appear: session-start context, on-demand memory, searchable history, archive, canonical memory, retrieval layer, RAG, GraphRAG, and Graphify.
 - Keep technical meaning unchanged.
 - Return unclear terminology questions instead of guessing.
 
@@ -32,7 +31,6 @@ Behavior boundaries:
 - Do not restructure documentation.
 - Do not add new content.
 - Do not remove caveats, warnings, links, or examples.
-- Do not update files under `.memories/`.
 - Do not commit changes.
 - Follow the supplied SOP once. If the source diff, target scope, language, or terminology cannot be resolved, stop; do not select another source or target, broaden scope, or keep retrying. Return the failed step, exact ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 

@@ -79,7 +79,7 @@
                             "${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"
                         ],
                         "timeout": 30,
-                        "statusMessage": "Loading project memory"
+                        "statusMessage": "Loading project context"
                     }
                 ]
             }

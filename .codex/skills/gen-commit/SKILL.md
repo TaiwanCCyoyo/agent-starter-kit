@@ -14,7 +14,7 @@ The main agent performs filename-level preflight and delegates execution or mess
 1. Confirm whether the user wants only a commit message or wants Codex to execute a commit.
 2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
 3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
-4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, `.memories/`, generated state, or unrelated files.
+4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, generated state, or unrelated files.
 5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
 6. Select and state the delegation mode based on the main agent's confidence in the staged changes. Do not duplicate diff review: if the main agent needs a diff review, delegate it to `commit-specialist` instead of reading the diff itself. Use **execute supplied message**, **review supplied message**, or **complete rough or missing message**.
 7. Delegate one concrete objective with explicit paths, requested output, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
@@ -49,7 +49,6 @@ Co-authored-by: Codex gpt-5.6 <codex@openai.com>
 ## Safety
 
 - Never stage or commit secrets.
-- Never include ignored local state under `.memories/`.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.
 - The main agent must not perform full staged-content diff review during this workflow; content-level review, secret detection, hygiene checks, and pre-commit remediation belong to `commit-specialist`.
@@ -69,6 +68,6 @@ For any execution mode, fix only a simple, directly actionable pre-commit failur
 After a successful commit:
 
 1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
-2. Decide whether the session produced durable facts, decisions, lessons, environment constraints, recurring problems, or verified resolutions worth routing through `save-memory` or `memory-sql`.
-3. Use `skill-review` for user corrections, non-obvious techniques, reusable workflows, or corrected skill guidance.
-4. Do not store commit narration, duplicate plan content, or transient failures in memory.
+2. Let Codex native memory retain useful user preferences and project context; put required repository rules in checked-in guidance instead of relying on recall.
+3. Apply the Skill Authoring section in `.codex/AGENTS.md` to user corrections, non-obvious techniques, reusable workflows, or corrected skill guidance.
+4. Do not preserve commit narration, duplicate plan content, or transient failures as durable knowledge.

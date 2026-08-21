@@ -11,14 +11,13 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 1. **Hook Awareness**: Ensure `pre-commit` hooks are active. If hooks block a commit, fix the concrete issue and re-stage before retrying.
 2. **Scope Verification**: Verify that only intended files are staged with `git status` and `git diff --cached`.
-3. **Local State Guard**: Avoid staging credentials, temporary build artifacts, generated junk, local settings, or ignored memory state.
+3. **Local State Guard**: Avoid staging credentials, temporary build artifacts, generated junk, or local settings.
 
 ## Security And Hygiene
 
 1. **Sensitive Data**: Never commit `.env` files, private keys, tokens, passwords, or credentials.
 2. **No Junk**: Reject or warn if generated binaries, temporary build artifacts, unrelated `__pycache__` files, or local settings are staged.
-3. **Memory Safety**: Never include ignored local state from `.memories/`.
-4. **Surgical Changes**: Ensure changes are relevant to the requested task. Reject unrelated cleanup or noisy diffs unless requested.
+3. **Surgical Changes**: Ensure changes are relevant to the requested task. Reject unrelated cleanup or noisy diffs unless requested.
 
 ## Commit Message Standard
 

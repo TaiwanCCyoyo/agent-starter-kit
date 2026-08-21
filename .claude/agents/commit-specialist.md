@@ -30,7 +30,7 @@ Your working directory is already the project root. Run Git commands directly wi
 - Do not commit inside a submodule or stage other files.
 - Do not amend previous commits unless explicitly instructed.
 - Do not modify unrelated files.
-- Do not directly edit memory files unless the parent workflow explicitly asks.
+- Do not edit Claude Code's built-in memory; the parent session owns durable-memory decisions.
 
 ## Return
 
@@ -39,4 +39,4 @@ Your working directory is already the project root. Run Git commands directly wi
 - Hook result or reason commit was not executed.
 - On handoff failure: the failed step, exact error or ambiguity, attempted fix, relevant paths, and the required parent-agent decision.
 
-This agent has no visibility into the rest of the session, so it does not judge whether a memory update is warranted. That decision belongs to the parent agent per `commit-helper` SKILL.md's Post-Commit Memory Check, performed after this agent reports success.
+This agent has no visibility into the rest of the session, so it does not judge whether a built-in memory update is warranted. That decision belongs to the parent agent per `commit-helper` SKILL.md's Post-Commit Memory Check, performed after this agent reports success.

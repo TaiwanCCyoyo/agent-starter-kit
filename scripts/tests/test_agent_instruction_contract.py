@@ -45,10 +45,10 @@ def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> 
 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
-    codex_hooks = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+    codex_config = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
 
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
-    assert codex_hooks["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
+    assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
     assert (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").exists()
     assert (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").exists()
 
@@ -79,7 +79,7 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
         assert "uv run mypy" not in content, path
 
 
-def test_ruff_uses_inline_e402_suppression_for_session_hook_bootstrap() -> None:
+def test_session_hooks_do_not_depend_on_shared_memory_bootstrap() -> None:
     ruff_config = (ROOT / "ruff.toml").read_text(encoding="utf-8")
 
     assert "[lint.per-file-ignores]" not in ruff_config
@@ -87,8 +87,23 @@ def test_ruff_uses_inline_e402_suppression_for_session_hook_bootstrap() -> None:
 
     for hook_path in SESSION_HOOKS:
         hook_content = hook_path.read_text(encoding="utf-8")
+        assert "def main(" in hook_content
 
-        assert "from scripts.memory_store import initialize_memory_store  # noqa: E402" in hook_content
+
+def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
+    config = tomllib.loads((ROOT / ".codex" / "config.toml").read_text(encoding="utf-8"))
+
+    assert config["features"]["hooks"] is True
+    assert config["features"]["memories"] is True
+    assert "mcp_servers" not in config
+
+
+def test_agent_hook_configs_have_no_stop_event() -> None:
+    codex = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+    antigravity = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
+
+    assert set(codex["hooks"]) == {"SessionStart", "PostToolUse"}
+    assert set(antigravity["hooks"]) == {"SessionStart", "PostToolUse"}
 
 
 def test_claude_instructions_use_direct_openspec_routing() -> None:
@@ -119,8 +134,6 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
         "signal_miner": ("gpt-5.6-luna", "medium"),
         "commit-specialist": ("gpt-5.6-luna", "medium"),
         "doc_translator": ("gpt-5.6-luna", "low"),
-        "memory_auditor": ("gpt-5.6-luna", "medium"),
-        "memory_compressor": ("gpt-5.6-terra", "medium"),
     }
     agent_dir = ROOT / ".codex" / "agents"
 
@@ -129,8 +142,6 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
         "doc-translator",
         "signal-miner",
         "implementation-reviewer",
-        "memory-auditor",
-        "memory-compressor",
         "plan-reviewer",
         "security-reviewer",
         "task-worker",

@@ -41,4 +41,4 @@ Prefer explicit tradeoffs over hidden assumptions. State what you know, what you
 
 ## 6. Process Debugging
 
-Treat repeated confusion or blockers as a process bug. If the same blocker, workaround, wrong assumption, or confusion appears twice, surface the pattern to the user and propose whether it should become a memory note, skill update, instruction update, or follow-up task.
+Treat repeated confusion or blockers as a process bug. If the same blocker, workaround, wrong assumption, or confusion appears twice, surface the pattern to the user and propose whether it should become a skill update, instruction update, or follow-up task.

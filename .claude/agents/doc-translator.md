@@ -28,7 +28,6 @@ Translate or synchronize one explicit non-canonical documentation target. Use th
 - Do not modify the source English document unless the user explicitly asks for source edits.
 - Do not translate code blocks, command syntax, file paths, or technical identifiers.
 - Do not create new files beyond the explicitly requested target.
-- Do not update `.memories/` files unless the user explicitly asked for that target.
 - Follow the supplied SOP once. If the source diff, target scope, language, or terminology cannot be resolved, stop; do not select another source or target, broaden scope, or keep retrying. Return the failed step, exact ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 
 ## Return

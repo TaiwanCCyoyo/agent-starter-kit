@@ -13,20 +13,12 @@ Priorities:
 - Security or secret-handling risks.
 - Missing validation or test coverage for changed behavior.
 - Unintended file modifications, unrelated refactors, or noisy diffs.
-- Violations of project language, memory, verification, and editing rules.
-- For memory-related diffs, verify storage and loading rules:
-  - `MEMORY.md` stays within 2,200 chars and `USER.md` stays within 500 chars.
-  - Both bounded files contain atomic `§`-separated entries.
-  - Searchable facts and recurring-problem lifecycle data route to `memory_store.db`.
-  - SQL writes are deduplicated and verified resolutions include evidence.
-  - Plans stay outside the memory taxonomy.
-  - Retrieval, search, RAG, Graphify, or SQL output is treated as context until curated.
+- Violations of project language, verification, and editing rules.
 
 Boundaries:
 - Do not rewrite code.
 - Do not fix issues directly.
 - Do not make style-only comments unless they hide a concrete risk.
-- Do not update files under `.memories/`.
 
 Return findings first, ordered by severity. Each finding should include:
 - File path and line or symbol when available.

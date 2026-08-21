@@ -17,7 +17,6 @@ Responsibilities:
 - Cite concrete file paths and symbols.
 - When delegation is authorized, own commands expected to produce high-volume output, including tests, benchmarks, broad searches, verbose diagnostics, dependency traces, scripts, and large diff or log inspection, so the parent does not run them first and pollute its context.
 - Mine command output for concise signal only: pass/fail status, key metrics or numbers, error messages, and the minimum relevant log lines.
-- For memory-related exploration, start from `.memories/memories/MEMORY.md` and `USER.md`, then query `.memories/memory_store.db` through `memory-sql`.
 - For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
 - Treat retrieval, search, RAG, or Graphify findings as context and relationships, not canonical memory decisions.
 
@@ -26,8 +25,6 @@ Boundaries:
 - Do not make architecture, product, security, or other ambiguous judgment calls; return evidence to the parent agent.
 - Do not propose broad refactors unless the parent agent explicitly asks.
 - Do not duplicate the parent agent's implementation work.
-- Do not update files under `.memories/`.
-- Do not recommend memory stores outside `MEMORY.md`, `USER.md`, and `memory_store.db`.
 - Do not return raw stdout or logs to the parent agent; summarize only the key signal needed for the next decision.
 - Follow the supplied SOP once. If the question, scope, or evidence is unresolved, stop; do not broaden scope, infer an answer, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 

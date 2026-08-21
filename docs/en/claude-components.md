@@ -5,7 +5,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 **ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC integration date**: 2026-06-02
-**Memory**: Claude uses Claude Code's built-in memory only. `.memories/` (design influence: [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)) is Codex/Antigravity-owned shared state; Claude creates and syncs its skeleton for worktrees but does not read or write its content — see `rules/common/memory.md`.
+**Memory**: Claude uses Claude Code's built-in memory only; required repository guidance remains checked in — see `rules/common/memory.md`.
 
 The project settings intentionally disable the external Superpowers, Ponytail, and Karpathy plugins. This reference describes the repository-owned Claude components plus native Claude capabilities; GitHub, skill-creator, and Pyright LSP remain enabled in `.claude/settings.json`.
 
@@ -51,7 +51,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 - Interactive work: enter Native Plan Mode, optionally use `plan-reviewer` for complex or high-risk plans, approve the plan, then return to execution mode.
 - Unattended work: use separate planning and execution sessions. The planning session writes an OpenSpec or maintained plan artifact; the execution session reads the approved artifact. Do not use a planner subagent as the main-session handoff.
-- Claude-only company copy: retain instructions, rules, agents, skills, and hygiene hooks as-is — Claude already carries no `.memories/`-consuming agents, skills, commands, hooks, or MCP servers. Use organization-approved model IDs or alias mappings rather than this repository's personal-Pro defaults.
+- Claude-only company copy: retain instructions, rules, agents, skills, and hygiene hooks as-is. Use organization-approved model IDs or alias mappings rather than this repository's personal-Pro defaults.
 
 `REVIEW.md` is not part of the local baseline. Add it only when the repository is enrolled in Claude's managed Team or Enterprise Code Review service.
 
@@ -61,10 +61,10 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 ### Workflow (original — not from ECC)
 
-| Command       | Purpose                                                         |
-| ------------- | --------------------------------------------------------------- |
-| `/gen-commit` | Generate a Conventional Commit message via `commit-specialist`  |
-| `/worktree`   | Create, manage, and merge Git worktrees with shared-memory sync |
+| Command       | Purpose                                                        |
+| ------------- | -------------------------------------------------------------- |
+| `/gen-commit` | Generate a Conventional Commit message via `commit-specialist` |
+| `/worktree`   | Create, verify, manage, merge, and clean up Git worktrees      |
 
 Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion use native Git/GitHub operations and explicit user authorization.
 
@@ -88,7 +88,7 @@ Claude Code PR preparation is owned by the `github-ops` skill: inspect full bran
 | `/learn`, `/skill-create`                       | Depend on ECC observation hooks and full instinct pipeline; replaced by the `skill-authoring` rule and the `skill-creator` plugin |
 | `/evolve`                                       | Replaced by the `skill-authoring` rule and the `skill-creator` plugin                                                             |
 | `/hookify-*` (4 commands)                       | ECC-internal hook management                                                                                                      |
-| `/sessions`, `/save-session`, `/resume-session` | Replaced by the `.memories/` system                                                                                               |
+| `/sessions`, `/save-session`, `/resume-session` | Replaced by Claude Code's built-in memory and session history                                                                     |
 | Language-specific build/test/review             | Go/Rust/Kotlin/Java etc. not in use                                                                                               |
 | `/cost-report`, `/model-route`                  | Add later if needed                                                                                                               |
 | `/jira`, `/prp-*`, `/plan-prd`                  | No PM integration planned                                                                                                         |
@@ -101,10 +101,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Workflow (original — not from ECC)
 
-| Skill                  | Purpose                                                                                                                                                                                                                                                                                    |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `commit-helper`        | Conventional Commits format, pre-commit checklist                                                                                                                                                                                                                                          |
-| `worktree-memory-sync` | Repository-specific `.memories/` synchronization for worktrees — copy missing items, never overwrite local bounded files or SQLite, merge only durable non-duplicate facts. Claude syncs this state without reading or writing its content. Worktree lifecycle uses native Git operations. |
+| Skill           | Purpose                                           |
+| --------------- | ------------------------------------------------- |
+| `commit-helper` | Conventional Commits format, pre-commit checklist |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
@@ -112,12 +111,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `github-ops`     | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
 | `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
-
-### Removed (2026-08-20 cleanup — Claude withdrew from the shared `.memories/` system)
-
-| Skill / Agent / Command / Hook                                                                                                                                                      | Reason                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `memory-manager`, `save-memory`, `compress-memory`, `memory-sql` skills; `memory-auditor`, `memory-compressor` agents; `/memory-maintenance`; `memory_health_check.py`; `.mcp.json` | `.memories/` writes required explicitly invoking a skill, while Claude Code's built-in memory instructions are unconditional in the system prompt — the always-on path won every time, so the shared store never received Claude's writes. Claude now uses built-in memory only (`rules/common/memory.md`) and stays only the custodian (skeleton creation, worktree sync) of `.memories/` for Codex and Antigravity. |
 
 ### Removed (2026-08-19 cleanup — `/learn-eval` never triggered in practice)
 
@@ -160,10 +153,10 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 Hooks are Python scripts executed automatically by the Claude Code harness.
 
-| Hook                       | Trigger                 | What it does                                                                                                                                                                                                                          |
-| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `session_start.py`         | Session start           | Injects `CLAUDE.md` and git/branch context once (frozen snapshot — system prompt is not re-read mid-session). Creates the `.memories/` skeleton and copies it into new worktrees for Codex/Antigravity without injecting its content. |
-| `post_tool_use_hygiene.py` | After Python Edit/Write | Runs read-only Ruff `E722,F601,F602,F634` diagnostics that complement Pyright; it does not format or modify files.                                                                                                                    |
+| Hook                       | Trigger                 | What it does                                                                                                       |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `session_start.py`         | Session start           | Injects git branch, worktree, goal-alignment, and last-commit context once.                                        |
+| `post_tool_use_hygiene.py` | After Python Edit/Write | Runs read-only Ruff `E722,F601,F602,F634` diagnostics that complement Pyright; it does not format or modify files. |
 
 Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
 
@@ -185,7 +178,6 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                                                                   |
 | --------------- | --------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-08-07 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, structural review heuristics, phase routing map, skill authoring, memory routing, and the risk-based testing baseline. `git-workflow`, `agents`, and `coding-style` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, CLAUDE.md, and the applicable skill. |
-| `rules/memory/` | `.memories/**`        | Custom                                         | Path-scoped hands-off guard: never stage/commit `.memories/`, never edit its content beyond initial skeleton creation — content ownership belongs to Codex/Antigravity, not Claude.                                                                                                                                                                                     |
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                                                               |
 
 The common rules intentionally stay small and carry only decisions a model cannot derive on its own. Security triggers are centralized in `rules/common/security.md`, severity handling and review heuristics in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.

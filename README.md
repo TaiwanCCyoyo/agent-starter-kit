@@ -2,14 +2,14 @@
 
 # AI Agent Starter Kit
 
-A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover the project mission, memory, rules, skills, workflows, and verification expectations quickly.
+A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover project rules, skills, workflows, and verification expectations quickly.
 
 ## Core Philosophy
 
-1. **Long-Term Memory Persistence**: Codex uses bounded files under `.memories/memories/` plus a Holographic-compatible SQLite `memory_store.db`.
+1. **Agent-Native Context**: Codex and Claude Code use their native local memory systems; required project knowledge stays in version-controlled guidance.
 2. **Optional OpenSpec Planning Handoff**: Downstream projects may initialize OpenSpec and treat its specs, changes, and tasks as regular project files.
-3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer. Codex and Antigravity share `.memories/` project memory; Claude Code uses its own built-in memory and stays custodian-only for `.memories/` (skeleton creation, worktree sync).
-4. **Automated Maintenance**: Formatting, linting, file hygiene, and memory nudges are enforced through agent hooks and repository verification scripts.
+3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer.
+4. **Automated Maintenance**: Formatting, linting, and file hygiene are enforced through agent hooks and repository verification scripts.
 5. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
 6. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
 7. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
@@ -22,48 +22,30 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 - **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
 - **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
 
-## Memory Management Workflow
+## Agent Memory And Workflows
 
-Codex and Antigravity use a proactive `.memories/` system to maintain long-term context across sessions and worktrees. Claude Code uses its own built-in memory instead and only acts as custodian of `.memories/` (skeleton creation, worktree sync) — see [Claude Code Components Reference](docs/en/claude-components.md).
+- **Codex memory**: Native local memories are enabled by `.codex/config.toml` and stored under the user's Codex home outside the repository; use `/memories` for chat-level controls. Required project rules remain in checked-in guidance.
+- **Claude Code memory**: Claude uses its built-in memory and routes repository conventions to `CLAUDE.md`, rules, documentation, or skills.
+- **Antigravity**: This repository does not provide a cross-session memory store; durable knowledge belongs in checked-in artifacts and Git history.
 
-For a detailed architecture, setup model, and copy checklist, see [Memory System Introduction](docs/en/memory-system-introduction.md).
-
-### 1. Daily Usage (Codex, Antigravity)
-
-- **Save Memory**: Curate stable high-frequency facts in `.memories/memories/MEMORY.md`; store searchable facts and recurring-problem history in `.memories/memory_store.db`.
-- **Auto-Nudge**: Hooks remind agents to update memory after sustained work with pending changes.
-- **Compression**: If `MEMORY.md` grows too large, the system suggests memory compression.
-
-### 2. Multi-Worktree Consolidation
-
-When working with multiple worktrees, memories can diverge. To bring insights back to the main repository:
-
-1. Use the active agent's worktree workflow:
-    ```bash
-    /worktree finish <path/to/worktree>
-    ```
-2. The agent performs AI semantic consolidation to merge high-signal `Lessons Learned` and `Done` items into the primary `MEMORY.md`.
-
-### 3. Agent Workflows
+### Agent Workflows
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. Durable memory is Claude Code's built-in memory, not `.memories/` — see `rules/common/memory.md`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
+- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
 
 This repository uses agent-native hooks to maintain system integrity:
 
-| Agent           | Hook Type      | Purpose                                                                                                                 | Script                                   |
-| :-------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, project memory, branch, and worktree context.                                               | `.codex/hooks/session_start.py`          |
-| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.                                   | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Codex**       | `Stop`         | Checks memory size limits and taxonomy.                                                                                 | `.codex/hooks/memory_health_check.py`    |
-| **Claude Code** | `SessionStart` | Injects `CLAUDE.md`, branch, and worktree context; creates/syncs the `.memories/` skeleton without reading its content. | `.claude/hooks/session_start.py`         |
-| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files.                         | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Antigravity** | `SessionStart` | Initializes SQLite, copies missing worktree memory, and injects the bounded files.                                      | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                                                      | `.agent/hooks/post_tool_use_hygiene.py`  |
-| **Antigravity** | `Stop`         | Checks bounded-file limits and rejects legacy memory taxonomy.                                                          | `.agent/hooks/stop_memory_check.py`      |
+| Agent           | Hook Type      | Purpose                                                                                         | Script                                   |
+| :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, branch, worktree, and last-commit context.                          | `.codex/hooks/session_start.py`          |
+| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/post_tool_use_hygiene.py`  |
+| **Claude Code** | `SessionStart` | Injects branch, worktree, goal-alignment, and last-commit context.                              | `.claude/hooks/session_start.py`         |
+| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/post_tool_use_hygiene.py` |
+| **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`          |
+| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                              | `.agent/hooks/post_tool_use_hygiene.py`  |
 
 ### Troubleshooting Hooks
 
@@ -73,7 +55,7 @@ If hooks are not firing:
     ```bash
     uv run pre-commit install
     ```
-2. For Codex, verify `.codex/config.toml` enables `codex_hooks` and `.codex/hooks.json` points to `.codex/hooks/`.
+2. For Codex, verify `.codex/config.toml` enables `hooks` and `memories`, and `.codex/hooks.json` points to `.codex/hooks/`.
 3. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
 4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
 5. Confirm the agent trusts the project-local configuration layer.
@@ -168,7 +150,6 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 | Path                      | Purpose                                                                                       |
 | :------------------------ | :-------------------------------------------------------------------------------------------- |
-| `.memories/`              | Git-ignored instantiated memory: bounded files and SQLite store.                              |
 | `.agent/`                 | Antigravity rules, skills, and workflows.                                                     |
 | `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                |
 | `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
@@ -176,7 +157,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `scripts/`                | Repository-level hygiene and formatting scripts used by Git and agent adapters.               |
 | `.pre-commit-config.yaml` | Repository-level verification hooks.                                                          |
 
-After copying, replace `.memories/memories/MEMORY.md` with the target project's durable facts, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
+After copying, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
 
 ### Agent Workflow Plugin And Skill Integration
 
@@ -188,11 +169,9 @@ This repository integrates native capabilities, project-owned skills, and select
 
 ## Design Influences
 
-This starter kit is shaped by two open-source projects:
+This starter kit is shaped by an open-source project:
 
 - **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
-
-- **[Hermes Agent (NousResearch)](https://github.com/NousResearch/hermes-agent)** — Inspired this project's bounded `MEMORY.md` and `USER.md`, frozen prompt snapshots, SQLite FTS5 session recall, and learning-loop design. This starter kit adapts those mechanisms rather than directly porting Hermes.
 
 ## Initialization
 
@@ -220,16 +199,6 @@ To initialize this repository and set up verification tools:
 
     This starter kit does not commit the `openspec/` directory created by initializing the template repository itself. Downstream projects should treat their own OpenSpec specs, changes, and tasks as regular project files and commit them when those artifacts define project planning or requirements.
 
-5. **Antigravity MCP Setup**
-
-    If you are using Antigravity, note that it requires MCP servers to be configured globally. Please configure your SQLite memory-db MCP server in your home directory (e.g., `~/.mcp.json`).
-
-### Initializing Memory for New Projects
-
-Once the repository is initialized:
-
-1. Ensure `.memories/memories/MEMORY.md` contains the target project's stable mission and constraints.
-
 ---
 
-This project enforces UTF-8 without BOM and English for source code, technical documentation, workflows, and configuration. Traditional Chinese content belongs in `docs/zh-TW/` and `.memories/`.
+This project enforces UTF-8 without BOM and English for source code, technical documentation, workflows, and configuration. Traditional Chinese content belongs in `docs/zh-TW/`, `.references/`, and `.tmp/`.

@@ -28,14 +28,12 @@
         ".worktrees/**": true,
         ".claude/worktrees/**": true,
         ".references/**": true,
-        ".memories/**": true,
         ".tmp/**": true
     },
     "files.watcherExclude": {
         ".worktrees/**": true,
         ".claude/worktrees/**": true,
         ".references/**": true,
-        ".memories/**": true,
         ".tmp/**": true,
         ".venv/**": true,
         ".uv/**": true,
@@ -48,8 +46,7 @@
         ".worktrees/**": true,
         ".claude/worktrees/**": true,
         ".tmp/**": true,
-        ".references/**": true,
-        ".memories/**": true
+        ".references/**": true
     },
     "[toml]": {
         "editor.defaultFormatter": "tamasfe.even-better-toml",
