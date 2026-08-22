@@ -40,7 +40,6 @@
 | :-------------- | :------------- | :----------------------------------------------------------------- | :--------------------------------------- |
 | **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`、branch、worktree 與 last-commit context。 | `.codex/hooks/session_start.py`          |
 | **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Claude Code** | `SessionStart` | 注入 branch、worktree、goal-alignment 與 last-commit context。     | `.claude/hooks/session_start.py`         |
 | **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`          |
 | **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                      | `.agent/hooks/post_tool_use_hygiene.py`  |

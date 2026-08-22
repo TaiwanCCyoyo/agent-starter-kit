@@ -7,7 +7,6 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_HOOKS = (
     ROOT / ".agent" / "hooks" / "session_start.py",
-    ROOT / ".claude" / "hooks" / "session_start.py",
     ROOT / ".codex" / "hooks" / "session_start.py",
 )
 
@@ -47,6 +46,7 @@ def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     codex_config = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
 
+    assert set(claude_settings["hooks"]) == {"PostToolUse"}
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
     assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
     assert (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").exists()
