@@ -51,6 +51,7 @@
             "Bash(git config --list)",
             "Bash(git config --get *)",
             "Bash(mypy *)",
+            "Bash(agy -p --mode plan --sandbox *)",
             "Bash(cat .git/COMMIT_EDITMSG)",
             "Bash(cat .git/HEAD)"
         ],

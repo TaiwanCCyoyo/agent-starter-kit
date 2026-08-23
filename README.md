@@ -20,6 +20,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 - **OpenSpec CLI dependency**: Spec-driven planning expects the OpenSpec CLI to be installed by the user. Run `openspec init` in each downstream project or workspace that wants OpenSpec planning, then treat the generated specs, changes, and tasks as normal project files and commit them when they are part of the project record.
 - **Layered verification**: Claude Code uses the official Pyright LSP plugin plus a read-only Ruff check for `E722,F601,F602,F634`; Codex uses a broader read-only `F` check because it has no Python LSP. Both use pre-commit before completion for authoritative formatting, linting, type checking, and file validation.
 - **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
+- **Low-cost external delegation**: When installed, Antigravity CLI may be invoked through `agy -p --mode plan --sandbox` for bounded, read-only research, inspection, review, or mechanical analysis. The caller retains final judgment and uses another route after an Antigravity quota-exhaustion response.
 - **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
 
 ## Agent Memory And Workflows
@@ -30,7 +31,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 ### Agent Workflows
 
-- **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
+- **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Its `antigravity-subagent` skill routes eligible low-cost external delegation through headless `agy -p`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
 - **Antigravity**: Uses root `GEMINI.md` for core operating contract, `.agent/workflows/` for custom slash commands (e.g. `/gen-commit`, `/worktree`), `.agent/skills/` for repo-scoped skills, and `.agent/hooks.json` for lifecycle hooks. For details, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 

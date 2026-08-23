@@ -69,3 +69,7 @@ Antigravity's subagent architecture relies on built-in native subagents (`resear
 
 - **Delegation Guidance**: Defined in root `GEMINI.md` (e.g. proactively routing heavy stdout commands like tests, benchmarks, traces, and large diffs to `signal-miner`, and security triggers to `security_reviewer`).
 - **Workflow Governance**: Complex, multi-step tasks are managed through **Native Planning Mode** and **Skills (`.agent/skills/`)**.
+
+## External Invocation
+
+Codex and Claude Code can invoke Antigravity CLI as a low-cost external subagent through headless `agy -p`. This repository reserves that route for bounded, read-only research, inspection, concise review, or mechanical analysis, using `agy -p --mode plan --sandbox` with explicit scope and acceptance criteria. The caller retains final judgment, must not pass `--dangerously-skip-permissions`, and must stop rather than retry if Antigravity reports `RESOURCE_EXHAUSTED` or `Individual quota reached`.

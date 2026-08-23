@@ -67,6 +67,7 @@
 - Keep Codex-specific reusable workflows in `.codex/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not in this file.
 - Use `python-development` for Python coding, logging, security, hooks, and FastAPI guidance; use `python-testing` for repository-specific Python test commands and fixtures.
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
+- Prefer the `antigravity-subagent` skill for eligible low-cost, bounded subagent work; use native agents when their specialized role or higher-confidence judgment is needed.
 - When delegation is authorized, route commands expected to produce large output to `signal_miner`; use `explorer` for ordinary code location.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main agent or the designated reviewer.
 - The main agent owns canonical documents and final changes to repository guidance.
