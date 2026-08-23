@@ -133,6 +133,15 @@ def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
         assert "## Karpathy Guidelines Condensed" not in content
 
 
+def test_codex_subagents_handoff_sandbox_failures_to_the_parent() -> None:
+    instructions = (ROOT / ".codex" / "AGENTS.md").read_text(encoding="utf-8")
+
+    assert "sandbox or permission failures as execution-boundary handoffs" in instructions
+    assert "subagents must stop and return the exact error" in instructions
+    assert "must not retry, debug permissions" in instructions
+    assert "or seek escalated access" in instructions
+
+
 def test_codex_agent_model_routing_uses_current_tiers() -> None:
     expected = {
         "plan_reviewer": ("gpt-5.6-sol", "high"),
