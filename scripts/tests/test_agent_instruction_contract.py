@@ -45,18 +45,24 @@ def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     codex_config = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
+    antigravity_config = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
 
     assert set(claude_settings["hooks"]) == {"PostToolUse"}
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
     assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
+    assert antigravity_config["hooks"]["PostToolUse"][0]["matcher"] == "*"
     assert (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").exists()
     assert (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").exists()
+    assert (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").exists()
 
     claude_hook = (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
     codex_hook = (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
+    antigravity_hook = (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
     assert '"E722,F601,F602,F634"' in claude_hook
     assert '"--no-fix"' in claude_hook
     assert '"F401,F841,F842"' in codex_hook
+    assert '"E722,F601,F602,F634"' in antigravity_hook
+    assert '"--no-fix"' in antigravity_hook
 
 
 def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
@@ -64,8 +70,9 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
     hook_ids = {hook["id"] for repo in config["repos"] for hook in repo["hooks"]}
     instruction_files = [
         ROOT / "CLAUDE.md",
+        ROOT / "GEMINI.md",
         ROOT / ".codex" / "AGENTS.md",
-        *sorted((ROOT / ".agent" / "rules").rglob("*.md")),
+        *sorted((ROOT / ".agent" / "workflows").rglob("*.md")),
         *sorted((ROOT / ".agent" / "skills").rglob("*.md")),
         *sorted((ROOT / ".claude" / "rules").rglob("*.md")),
         *sorted((ROOT / ".claude" / "skills").rglob("*.md")),
@@ -116,6 +123,7 @@ def test_claude_instructions_use_direct_openspec_routing() -> None:
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
     instructions = {
         ROOT / "CLAUDE.md": 80,
+        ROOT / "GEMINI.md": 90,
         ROOT / ".codex" / "AGENTS.md": 90,
     }
 

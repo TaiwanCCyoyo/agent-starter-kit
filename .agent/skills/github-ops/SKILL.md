@@ -54,6 +54,10 @@ gh issue comment <number> --body "Thanks for reporting. Could you share reproduc
 
 ## PR Management
 
+### PR Creation Preparation
+
+Follow the standard PR-preparation workflow (full branch history, `base...HEAD` diff, summary, test plan). Push and PR creation require explicit user authorization — do not treat a prior push approval as blanket consent for later pushes.
+
 ### Review Checklist
 
 1. Check CI status: `gh pr checks <number>`

@@ -30,7 +30,7 @@
 
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
-- **Antigravity**：使用 `.agent/workflows/`、`.agent/rules/` 與 `.agent/skills/`。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
+- **Antigravity**：使用根目錄 `GEMINI.md` 作為核心契約，並以 `.agent/workflows/` 提供自訂斜線指令（例如 `/gen-commit`、`/worktree`）、`.agent/skills/` 存放 repo-scoped skills，以及 `.agent/hooks.json` 定義生命週期勾子。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 
 ## 自動化 Hooks 與生命週期
 
@@ -42,7 +42,7 @@
 | **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/post_tool_use_hygiene.py`  |
 | **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | 針對修改檔案執行 Ruff、mypy 與 file hygiene。                      | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `E722,F601,F602,F634` 診斷。 | `.agent/hooks/post_tool_use_hygiene.py`  |
 
 ### Hook 疑難排解
 
@@ -147,7 +147,8 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 | Path                      | 用途                                                                                       |
 | :------------------------ | :----------------------------------------------------------------------------------------- |
-| `.agent/`                 | Antigravity rules、skills、workflows。                                                     |
+| `GEMINI.md`               | Antigravity 根目錄核心契約。                                                               |
+| `.agent/`                 | Antigravity hooks、workflows（斜線指令）與 repo-scoped skills。                            |
 | `.codex/`                 | Codex instructions、hooks、private command-like skills、specialist agents。                |
 | `.claude/`                | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
 | `.vscode/`                | 與 file hygiene 與 Python Ruff workflow 對齊的 workspace editor defaults。                 |
@@ -162,7 +163,7 @@ CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日�
 
 - **Claude Code**：專案設定刻意停用 Superpowers、Ponytail 與 Karpathy plugins。工作流程由 Claude 原生能力，以及 project-owned 的 `.claude/` agents、commands、skills、rules 與 hooks 提供；GitHub、skill-creator 與 Pyright LSP 仍維持啟用。
 - **Codex**：不依賴 Superpowers、Ponytail 或外部 Karpathy skills。工作流程由 Codex 原生能力、project-scoped agents 與 skills 提供；GitHub 整合則由可用的 GitHub plugin 提供。
-- **Antigravity**：使用既有 `.agent/skills/`、`.agent/rules/` 與 `.agent/workflows/` 內容；其 plugin 與 skill set 尚未與 Claude Code、Codex 的 plugin layer 對齊。
+- **Antigravity**：使用原生 Planning Mode、專屬根目錄 `GEMINI.md` 核心契約，以及 `.agent/skills/` 裡的 repo-scoped skills。其架構與 Claude Code、Codex 保持完全語意對齊，同時嚴格遵守命名空間隔離。
 
 ## 設計來源
 

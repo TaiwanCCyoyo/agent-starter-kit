@@ -10,6 +10,7 @@ REVIEWERS = (
 
 AGENT_INSTRUCTIONS = (
     ROOT / "CLAUDE.md",
+    ROOT / "GEMINI.md",
     ROOT / ".codex" / "AGENTS.md",
 )
 

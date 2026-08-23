@@ -1,40 +1,18 @@
 ---
-description: Generate a high-quality Git commit message using commit-helper standards.
+description: Generate or execute a Git commit following commit-helper standards.
 ---
 
-# Generate Commit Message SOP
+# Gen Commit
 
-When the User runs `/gen-commit` (or asks you to generate a commit or stage files), follow these precise steps, leveraging the `commit-helper` skill for quality standards.
+Follow `.agent/skills/commit-helper/SKILL.md` as the source of truth for all commit operations.
 
-## Step 1: Analyze Context & Collect Diff
+## Workflow
 
-1.  **Check Status**: Execute `git status` to verify staged and unstaged changes.
-2.  **Verify Staging**:
-    - If no changes are staged, inspect unstaged changes and ask the user before staging unless autonomous staging was explicitly requested.
-    - If changes are staged, execute `git diff --cached` to analyze the exact modifications.
-
-## Step 2: Security & Hygiene Audit
-
-1.  **Consult Standard**: Review the `Security & Hygiene` section of the **commit-helper** skill.
-2.  **Filter Secrets**: Ensure no sensitive files (e.g., `.env`, keys, credentials) are in the staged list. If found, unstage them immediately and warn the user.
-3.  **Clean Junk**: Verify no temporary artifacts (like `__pycache__` or binary outputs) are staged.
-
-## Step 3: Draft and Present Message
-
-1.  **Generate Message**: Draft an English commit message adhering strictly to the **commit-helper** quality standards (Conventional Commits, imperative mood, lowercase subject).
-2.  **Incorporate Context**: Integrate any additional instructions provided by the user in their request.
-3.  **Present to User**:
-    - Show the drafted commit message in an English code block.
-    - Provide a brief summary of what changes are included in **Traditional Chinese (zh-TW)**.
-4.  **Confirm Execution**:
-    - If autonomous commit is enabled or requested, append the `Agent: Antigravity` trailer to the body and run `git commit -m "<message>"`.
-    - If the user reviewed or explicitly approved the final staged diff or message, append the `Agent: Antigravity` trailer.
-    - Otherwise, wait for the user to explicitly confirm before executing the commit command.
-
-## Step 4: Handle Failure & Fix Mode
-
-If the commit is blocked by pre-commit hooks (e.g., Ruff format checker, trailing whitespace cleaner):
-
-1.  **Analyze Terminal Output**: Inspect the hook failure logs to identify the files and lines causing the error.
-2.  **Fix Directly**: Enter "Fix Mode" to modify the files and resolve the code quality issues.
-3.  **Re-stage & Retry**: Run `git add` for the modified files, and execute the commit command again.
+1. Confirm whether the user wants only a commit message or wants Antigravity to execute a commit.
+2. Perform a filename/status-level-only preflight of the staged (or, if nothing is staged, unstaged) scope.
+3. Stop and ask before proceeding if preflight shows obvious forbidden or suspicious paths. If nothing is staged, ask before staging unless autonomous staging was explicitly requested.
+4. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
+5. Select and state the execution mode: `execute supplied message`, `review supplied message`, or `complete rough or missing message`.
+6. Follow Conventional Commits format and append the required `Agent: Antigravity` commit trailer.
+7. Execute the commit and handle only simple, directly actionable pre-commit failures with a single retry.
+8. Present the summary to the user in Traditional Chinese (zh-TW) and the commit message in English.

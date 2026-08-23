@@ -32,7 +32,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
-- **Antigravity**: Uses `.agent/workflows/`, `.agent/rules/`, and `.agent/skills/`. For a full list of available components and hooks, see [Antigravity Components Reference](docs/en/antigravity-components.md).
+- **Antigravity**: Uses root `GEMINI.md` for core operating contract, `.agent/workflows/` for custom slash commands (e.g. `/gen-commit`, `/worktree`), `.agent/skills/` for repo-scoped skills, and `.agent/hooks.json` for lifecycle hooks. For details, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
 
@@ -44,7 +44,7 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/post_tool_use_hygiene.py`  |
 | **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | Runs targeted Ruff, mypy, and file-hygiene checks.                                              | `.agent/hooks/post_tool_use_hygiene.py`  |
+| **Antigravity** | `PostToolUse`  | Reports targeted Ruff `E722,F601,F602,F634` diagnostics without modifying files.                | `.agent/hooks/post_tool_use_hygiene.py`  |
 
 ### Troubleshooting Hooks
 
@@ -149,7 +149,8 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 | Path                      | Purpose                                                                                       |
 | :------------------------ | :-------------------------------------------------------------------------------------------- |
-| `.agent/`                 | Antigravity rules, skills, and workflows.                                                     |
+| `GEMINI.md`               | Antigravity root operating contract.                                                          |
+| `.agent/`                 | Antigravity hooks, workflows (slash commands), and repo-scoped skills.                        |
 | `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                |
 | `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
 | `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                  |
@@ -164,7 +165,7 @@ This repository integrates native capabilities, project-owned skills, and select
 
 - **Claude Code**: The project settings intentionally disable the Superpowers, Ponytail, and Karpathy plugins. Native Claude capabilities, project-owned `.claude/` agents, commands, skills, rules, and hooks provide the workflow; GitHub, skill-creator, and Pyright LSP remain enabled.
 - **Codex**: Does not depend on Superpowers, Ponytail, or external Karpathy skills. Native Codex capabilities, project-scoped agents and skills provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
-- **Antigravity**: Uses the existing `.agent/skills/`, `.agent/rules/`, and `.agent/workflows/` content. Its plugin and skill set is not aligned with the Claude Code and Codex plugin layers.
+- **Antigravity**: Uses native Planning Mode, the dedicated root `GEMINI.md` operating contract, and repo-scoped skills in `.agent/skills/`. Its architecture is fully aligned with the Claude Code and Codex layers while maintaining strict namespace isolation.
 
 ## Design Influences
 
