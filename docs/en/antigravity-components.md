@@ -38,8 +38,9 @@ The root **`GEMINI.md`** acts as Antigravity's constant, active core contract ac
 `.agent/skills/` contains focused, project-specific skills (legacy generic Superpowers skills are superseded by Antigravity's native Planning Mode):
 
 - **`commit-helper`**: Defines Conventional Commits format, pre-commit checklists, `Agent: Antigravity` commit attribution trailers, and submodule protection.
-- **`github-ops`**: Handles GitHub issue triage, PR lifecycle, CI/CD diagnostics, and release management using `gh` CLI.
 - **`python-testing`**: Specifies project-specific pytest commands, Windows path handling, hook fixtures, and optional coverage.
+
+Repository, issue, PR, CI, and release tasks use native GitHub or `gh` operations instead of a wrapper skill. PR and other remote mutations run only when explicitly requested.
 
 ---
 

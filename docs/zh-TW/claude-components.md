@@ -66,7 +66,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | `/gen-commit` | 透過 `commit-specialist` 產生符合 Conventional Commits 格式訊息 |
 | `/worktree`   | 建立、驗證、管理、合併與清理 Git worktree                       |
 
-Claude Code 的 PR 準備由 `github-ops` skill 負責：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 使用原生 Git/GitHub 操作，並需要使用者明確授權。
+只有在使用者明確要求 PR 時，Claude Code 才使用原生 Git/GitHub 操作準備 PR：檢查完整 branch history、比較 `base...HEAD`、撰寫 PR summary，並附上最新 test plan。Publishing、pushing 與 branch completion 都需要使用者明確授權。
 
 ### 已移除（2026-06-10 清理——agents 與內建 `/code-review` 已涵蓋）
 
@@ -101,16 +101,22 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 工作流程（原創——非來自 ECC）
 
-| Skill           | 用途                                           |
-| --------------- | ---------------------------------------------- |
-| `commit-helper` | Conventional Commits 格式、pre-commit 檢查清單 |
+| Skill                    | 用途                                           |
+| ------------------------ | ---------------------------------------------- |
+| `commit-helper`          | Conventional Commits 格式、pre-commit 檢查清單 |
+| `dependabot-remediation` | 唯讀警示擷取、最小安全升級與完成證據           |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
 | Skill            | 用途                                                                                                                                     |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `github-ops`     | CI/CD 除錯、版本管理、Dependabot 監控                                                                                                    |
 | `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+
+### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
+
+| Skill        | 原因                                                                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-ops` | 通用 Issue、PR、CI 與 release 指令重複 Claude 原生 `gh` 能力，並強加多人協作的 stale 政策。Dependabot 工作已移至 `dependabot-remediation`；PR 操作維持僅在明確要求時執行。 |
 
 ### 已移除（2026-08-19 清理——`/learn-eval` 未曾在實務中觸發）
 
@@ -191,10 +197,10 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 
-| 規則                        | 原因                                                                                                                                                                  |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/git-workflow` | commit 格式由 `commit-helper` 擁有；PR 準備由 `github-ops` 擁有（完整 history、`base...HEAD` diff、摘要、test plan）；push 與建立使用原生 Git/GitHub 操作並需明確授權 |
-| `rules/common/agents`       | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此                                                                                            |
+| 規則                        | 原因                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `rules/common/git-workflow` | commit 格式由 `commit-helper` 擁有；明確要求的 PR 準備使用原生 Git/GitHub 操作（完整 history、`base...HEAD` diff、摘要、test plan）；push 與建立都需明確授權 |
+| `rules/common/agents`       | agent 索引由 CLAUDE.md `Subagents` 擁有；parallel-execution 指引已遷移至此                                                                                   |
 
 ### 已移除（2026-08-07 清理——模型先驗與 CLAUDE.md 已涵蓋）
 
@@ -204,7 +210,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `rules/common/coding-style`               | 通用工程常識，與 CLAUDE.md `Engineering Discipline` 重複；結構性 review heuristic 已移至 `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | 與 CLAUDE.md `Engineering Discipline` 逐字重複                                                                         |
-| `development-workflow` §Pre-Review Checks | 通用 pre-merge 常識，由 CI 與 `github-ops` 擁有                                                                        |
+| `development-workflow` §Pre-Review Checks | 通用 pre-merge 常識，由 CI 與原生 GitHub 操作負責                                                                      |
 | `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例，由 `skill: python-testing` 擁有                                                            |
 | `code-review` §Security Review Triggers   | 純指標區塊；reviewer routing 清單已連結 `security.md`                                                                  |
 

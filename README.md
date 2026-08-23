@@ -124,16 +124,15 @@ jobs:
 
 Adjust the `pytest` step to match your project's test directory and the Python version to match `.python-version`.
 
-### When to Use the `github-ops` Skill
+### GitHub CLI Operations
 
-Once CI is configured, use the `github-ops` skill (via Claude Code) for operational tasks:
+Once CI is configured, use `gh` directly for operational tasks. Dependabot alert retrieval and remediation are owned by the shared `dependabot-remediation` skill.
 
-| Task                    | Command                                         |
-| :---------------------- | :---------------------------------------------- |
-| View failed run logs    | `gh run view <run-id> --log-failed`             |
-| Re-run failed steps     | `gh run rerun <run-id> --failed`                |
-| List recent failures    | `gh run list --status failure --limit 10`       |
-| Check Dependabot alerts | `gh api repos/{owner}/{repo}/dependabot/alerts` |
+| Task                 | Command                                   |
+| :------------------- | :---------------------------------------- |
+| View failed run logs | `gh run view <run-id> --log-failed`       |
+| Re-run failed steps  | `gh run rerun <run-id> --failed`          |
+| List recent failures | `gh run list --status failure --limit 10` |
 
 Requires `gh` CLI installed and authenticated (`gh auth login`).
 

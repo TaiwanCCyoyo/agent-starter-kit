@@ -33,7 +33,7 @@
 ## Development Routing
 
 - Use Native Planning Mode or project-owned OpenSpec files for plans; use the appropriate installed workflow skills for implementation, verification, commits, and branch completion.
-- Use `github-ops` for repository, issue, PR, CI, review-comment, and publishing workflows.
+- Use native GitHub operations for repository, issue, PR, CI, review-comment, and publishing workflows; require explicit authorization for remote mutations.
 - Before integration review, confirm required automated checks pass, conflicts are resolved, and the branch is current with its target.
 
 ## Learning And Escalation
@@ -63,7 +63,7 @@
 ## Skills And Subagents
 
 - Keep Antigravity-specific reusable workflows in `.agent/skills/`; workflow-specific instructions belong in each skill's `SKILL.md`, not this file.
-- Use `python-testing` for repository-specific Python test commands and fixtures; use `commit-helper` for Conventional Commits and pre-commit checks; use `github-ops` for repository operations.
+- Use `python-testing` for repository-specific Python test commands and fixtures; use `commit-helper` for Conventional Commits and pre-commit checks.
 - Delegate only when the active instructions authorize it, and give bounded agents one objective, exact scope, acceptance criteria, and verification.
 - Route commands expected to produce large output to `signal-miner` when delegation is authorized.
 - Keep ambiguous, architectural, product, and security-sensitive judgment with the main agent or the designated reviewer.

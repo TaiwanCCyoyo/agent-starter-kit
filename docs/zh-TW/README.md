@@ -122,16 +122,15 @@ jobs:
 
 請調整 `pytest` 步驟以符合你的專案測試目錄，並將 Python 版本調整為與 `.python-version` 一致。
 
-### 何時使用 `github-ops` 技能
+### GitHub CLI 操作
 
-CI 設定完成後，可透過 Claude Code 使用 `github-ops` 技能執行日常操作：
+CI 設定完成後，可直接使用 `gh` 執行日常操作。Dependabot 警示的讀取與修復由共用的 `dependabot-remediation` skill 負責。
 
-| 任務                 | 指令                                            |
-| :------------------- | :---------------------------------------------- |
-| 查看失敗執行的日誌   | `gh run view <run-id> --log-failed`             |
-| 重新執行失敗步驟     | `gh run rerun <run-id> --failed`                |
-| 列出最近的失敗記錄   | `gh run list --status failure --limit 10`       |
-| 檢查 Dependabot 警示 | `gh api repos/{owner}/{repo}/dependabot/alerts` |
+| 任務               | 指令                                      |
+| :----------------- | :---------------------------------------- |
+| 查看失敗執行的日誌 | `gh run view <run-id> --log-failed`       |
+| 重新執行失敗步驟   | `gh run rerun <run-id> --failed`          |
+| 列出最近的失敗記錄 | `gh run list --status failure --limit 10` |
 
 需先安裝 `gh` CLI 並完成驗證（`gh auth login`）。
 

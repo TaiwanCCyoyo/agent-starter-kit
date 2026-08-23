@@ -66,7 +66,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | `/gen-commit` | Generate a Conventional Commit message via `commit-specialist` |
 | `/worktree`   | Create, verify, manage, merge, and clean up Git worktrees      |
 
-Claude Code PR preparation is owned by the `github-ops` skill: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion use native Git/GitHub operations and explicit user authorization.
+When a PR is explicitly requested, Claude Code prepares it with native Git/GitHub operations: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion require explicit user authorization.
 
 ### Removed (2026-06-10 cleanup — agents and built-in `/code-review` now cover these)
 
@@ -101,16 +101,22 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Workflow (original — not from ECC)
 
-| Skill           | Purpose                                           |
-| --------------- | ------------------------------------------------- |
-| `commit-helper` | Conventional Commits format, pre-commit checklist |
+| Skill                    | Purpose                                                                   |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `commit-helper`          | Conventional Commits format, pre-commit checklist                         |
+| `dependabot-remediation` | Read-only alert retrieval, minimum-safe upgrades, and completion evidence |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
 | Skill            | Purpose                                                                                                                                                                            |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `github-ops`     | CI/CD debugging, release management, Dependabot monitoring                                                                                                                         |
 | `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
+
+### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
+
+| Skill        | Reason                                                                                                                                                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-ops` | Generic issue, PR, CI, and release commands duplicated Claude's native `gh` capability and imposed multi-contributor stale policies. Dependabot work moved to `dependabot-remediation`; PR operations remain explicit-only. |
 
 ### Removed (2026-08-19 cleanup — `/learn-eval` never triggered in practice)
 
@@ -191,10 +197,10 @@ Detailed procedures live in skills or agent definitions.
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
-| Rule                        | Reason                                                                                                                                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/git-workflow` | Commit format owned by `commit-helper`; PR preparation owned by `github-ops` (full history, `base...HEAD` diff, summary, test plan); push and creation use native Git/GitHub operations with explicit authorization |
-| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                              |
+| Rule                        | Reason                                                                                                                                                                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rules/common/git-workflow` | Commit format owned by `commit-helper`; explicitly requested PR preparation uses native Git/GitHub operations (full history, `base...HEAD` diff, summary, test plan); push and creation require explicit authorization |
+| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                                 |
 
 ### Removed (2026-08-07 cleanup — model priors and CLAUDE.md already cover these)
 
@@ -204,7 +210,7 @@ Because every `rules/common/` file matches `paths: "*"`, the set is injected on 
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `rules/common/coding-style`               | Generic craft guidance duplicated CLAUDE.md `Engineering Discipline`; the structural review heuristic moved to `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | Verbatim duplicate of CLAUDE.md `Engineering Discipline`                                                                                     |
-| `development-workflow` §Pre-Review Checks | Generic pre-merge hygiene; CI and `github-ops` own it                                                                                        |
+| `development-workflow` §Pre-Review Checks | Generic pre-merge hygiene; CI and native GitHub operations own it                                                                            |
 | `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples; owned by `skill: python-testing`                                                               |
 | `code-review` §Security Review Triggers   | Pointer-only section; the reviewer routing list already links `security.md`                                                                  |
 

@@ -38,8 +38,9 @@
 `.agent/skills/` 提供精準的專案專用技能（舊版通用 Superpowers 技能已由 Antigravity 原生 Planning Mode 取代）：
 
 - **`commit-helper`**：定義 Conventional Commits 格式、pre-commit 檢查清單、`Agent: Antigravity` commit trailer 與 submodule 提交防護。
-- **`github-ops`**：透過 `gh` CLI 處理 Issue 分類、PR 管理、CI/CD 除錯與發布流程。
 - **`python-testing`**：定義專案特定的 Python 測試指令、Windows 路徑處理、hook fixtures 與選配 coverage 規範。
+
+Repository、Issue、PR、CI 與 release 任務直接使用原生 GitHub 或 `gh` 操作，不另設包裝 skill。只有在使用者明確要求時才執行 PR 或其他遠端變更。
 
 ---
 
