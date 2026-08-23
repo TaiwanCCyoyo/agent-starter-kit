@@ -5,7 +5,8 @@
 - Keep root `README.md` English except for the first-line Traditional Chinese README link.
 - Keep Traditional Chinese content only in `.tmp/`, `.references/`, and `docs/zh-TW/`.
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
-- Do not commit, push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
+- After completing and successfully verifying a task, automatically commit only the agent-owned changes for that task unless the user asks not to; leave unrelated work unstaged.
+- Do not push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - Treat `.references/` as read-only upstream reference clones.
 - Use OpenSpec to communicate plans and specs across agents; treat its specs, changes, and tasks as regular project files.
