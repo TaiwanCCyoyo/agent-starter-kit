@@ -330,26 +330,42 @@ def test_codex_attribution_does_not_require_claude_attribution() -> None:
 
 
 def test_commit_specialists_use_explicit_delegation_modes() -> None:
-    files = (
+    codex_files = (
         ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
         ROOT / ".codex" / "agents" / "commit-specialist.toml",
+    )
+    claude_files = (
         ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
         ROOT / ".claude" / "commands" / "gen-commit.md",
         ROOT / ".claude" / "agents" / "commit-specialist.md",
     )
 
-    for path in files:
+    for path in codex_files:
+        content = path.read_text(encoding="utf-8").lower()
+        assert "accept supplied message" in content
+        assert "review supplied message" in content
+        assert "complete rough or missing message" in content
+
+    for path in claude_files:
         content = path.read_text(encoding="utf-8").lower()
         assert "execute supplied message" in content
         assert "review supplied message" in content
         assert "complete rough or missing message" in content
 
-    for path in (files[0], files[2]):
-        content = path.read_text(encoding="utf-8")
-        assert "Do not duplicate diff review" in content
-        assert "delegate it to `commit-specialist`" in content
+    codex_skill = codex_files[0].read_text(encoding="utf-8")
+    codex_agent = codex_files[1].read_text(encoding="utf-8")
+    assert "Do not duplicate staged diff review" in codex_skill
+    assert "Run pre-commit against the explicitly approved paths" in codex_agent
+    assert "execute `git commit` with the approved message" in codex_agent
+    assert "Never retry a sandbox-failed step" in codex_agent
+    assert "relocate or rebuild caches" in codex_agent
+    assert "change ACLs" in codex_agent
 
-    for path in (files[0], files[1], files[2], files[4]):
+    claude_skill = claude_files[0].read_text(encoding="utf-8")
+    assert "Do not duplicate diff review" in claude_skill
+    assert "delegate it to `commit-specialist`" in claude_skill
+
+    for path in (codex_files[0], claude_files[0], claude_files[2]):
         content = path.read_text(encoding="utf-8")
         assert "simple, directly actionable" in content
         assert "retry once" in content

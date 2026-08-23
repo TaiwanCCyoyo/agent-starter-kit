@@ -26,7 +26,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | `implementation_reviewer` | Read-only     | Correctness, regression, test coverage, and unintended-diff review                                                                                                                              |
 | `security_reviewer`       | Read-only     | Secrets, injection, dependencies, permissions, auth, and sensitive data                                                                                                                         |
 | `doc_translator`          | Bounded write | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main agent selects source and target, and its canonical document wins conflicts |
-| `commit-specialist`       | Bounded write | Reviews staged changes and commits only on explicit request                                                                                                                                     |
+| `commit-specialist`       | Bounded write | Reviews staged diffs, runs pre-commit, handles one ordinary hook fix, drafts the message, and commits; sandbox failures return to the main agent                                                |
 
 ### Model routing
 
@@ -45,7 +45,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | :--------------------- | :-------------------------------------------------------------------------------------------------------- |
 | `python-development`   | Python coding, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
 | `python-testing`       | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                  |
-| `gen-commit`           | Commit review, Conventional Commits, post-commit plan updates, and durable-guidance checks                |
+| `gen-commit`           | Specialist staged review, main-agent commit execution and hook recovery, post-commit checks               |
 | `antigravity-subagent` | Low-cost, bounded read-only delegation to Antigravity CLI through headless `agy -p`                       |
 
 ## Claude Capability Decisions
@@ -100,6 +100,8 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 | `.vscode/settings.json`                 | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 
 Python verification uses targeted `uv run python -m pytest` commands while developing and pre-commit against changed files before completion. If formatters modify files, the agent inspects the diff and reruns the relevant checks. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
+
+`gen-commit` keeps token-heavy staged diff review, pre-commit, one ordinary bounded hook fix, message drafting, and commit execution in `commit-specialist`; the main agent performs only filename-level scope and authorization checks. Because Codex sandbox behavior may evolve, the specialist attempts the normal workflow. If the Windows subagent sandbox denies `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, it stops immediately and returns the exact error. It does not retry that step, rebuild or relocate caches, change ACLs or cache environment variables, or bypass hooks. The main agent then resumes only the blocked step in its authorized context.
 
 ## Deferred Capabilities
 

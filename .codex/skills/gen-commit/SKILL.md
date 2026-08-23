@@ -1,26 +1,34 @@
 ---
 name: gen-commit
-description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; enforces staged-change review, secret checks, Conventional Commits, English metadata, hook failure handling, and AI identity trailers.
+description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; delegates detailed diff review, pre-commit, message drafting, and commit execution while retaining a sandbox-aware main-agent fallback.
 ---
 
 # Gen Commit
 
 This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
 
-The main agent performs filename-level preflight and delegates execution or message drafting to `commit-specialist`.
+The main agent owns filename-level scope preflight, staging authorization, sandbox fallback, and post-commit review. It delegates detailed staged-content review, pre-commit verification, bounded ordinary hook recovery, commit-message drafting, and commit execution to `commit-specialist`.
 
 ## Workflow
 
 1. Confirm whether the user wants only a commit message or wants Codex to execute a commit.
 2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
-3. If nothing is staged, inspect unstaged filenames/status only and ask before staging unless the user explicitly requested autonomous staging.
+3. If nothing is staged, inspect unstaged filenames/status only. Stage automatically when the operating contract authorizes a verified agent-owned commit or the user explicitly requested staging; otherwise ask first.
 4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, generated state, or unrelated files.
 5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
-6. Select and state the delegation mode based on the main agent's confidence in the staged changes. Do not duplicate diff review: if the main agent needs a diff review, delegate it to `commit-specialist` instead of reading the diff itself. Use **execute supplied message**, **review supplied message**, or **complete rough or missing message**.
-7. Delegate one concrete objective with explicit paths, requested output, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
-8. The specialist verifies each handed-off gitlink and must not commit inside a submodule. It must return a handoff failure for an uncommitted submodule, unexpected gitlink delta, or a pre-commit failure that cannot be fixed simply; the main agent decides the next step.
-9. If the user requested only a message, instruct `commit-specialist` to return the message without committing. If the user requested a commit, instruct it to execute `git commit`.
-10. After a successful commit, the main agent, not `commit-specialist`, runs the Post-Commit Review because only the main agent has the full session context.
+6. Select and state the delegation mode based on the main agent's confidence in the staged changes. Do not duplicate staged diff review: use **accept supplied message**, **review supplied message**, or **complete rough or missing message**.
+7. Delegate one review objective with explicit paths, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
+8. The specialist verifies staged scope and each handed-off gitlink, performs the requested detailed diff and security review, runs pre-commit against the approved paths, and prepares an approved English Conventional Commit message with the required trailer. It must not commit inside a submodule or broaden the approved scope.
+9. For a simple, directly actionable formatter or hook failure, the specialist applies Hook Recovery below. If the user requested only a message, it then returns the message without committing. If a commit is authorized, it executes `git commit` with the approved message and lets normal commit-time hooks run.
+10. If pre-commit, hook recovery, or commit execution fails because the sandbox cannot write `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, the specialist must immediately return the exact error to the main agent. It must not retry that sandbox-failed step, relocate or rebuild caches, change ACLs, alter cache-related environment variables, bypass hooks, or attempt another environment workaround.
+11. The main agent decides whether the reported error is a sandbox handoff case. If so, it resumes the same verification or commit step once in its authorized execution context without duplicating the specialist's completed detailed review.
+12. After a successful commit, the main agent runs the Post-Commit Review because only it has the full session context.
+
+## Why Commit Has A Main-Agent Fallback
+
+On Codex Desktop for Windows, delegated agents can edit workspace files but may be unable to create `.git/index.lock`; their user-level `uv` cache may also be read-only. These restrictions can change as Codex sandbox behavior evolves, so they are not grounds for permanently preventing delegated commit execution.
+
+The specialist therefore owns the token-heavy staged diff review, pre-commit run, ordinary bounded hook recovery, message drafting, and normal commit execution. A permission or sandbox failure is a handoff signal, not a debugging task: the specialist reports it without changing caches or permissions, and the main agent resumes the blocked step in the existing authorized context. This preserves delegation when it works while avoiding repeated environment churn when it does not. The fallback is an execution-boundary decision, not a reason to bypass hooks.
 
 ## Commit Message Standard
 
@@ -51,17 +59,17 @@ Co-authored-by: Codex gpt-5.6 <codex@openai.com>
 - Never stage or commit secrets.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.
-- The main agent must not perform full staged-content diff review during this workflow; content-level review, secret detection, hygiene checks, and pre-commit remediation belong to `commit-specialist`.
+- The main agent must not duplicate the specialist's full staged-content review or pre-commit run. The specialist owns detailed review, pre-commit, exact re-staging within approved paths, ordinary bounded hook recovery, message drafting, and commit execution; the main agent owns filename-level scope, authorization, and sandbox fallback.
 
 ## Delegation Modes
 
-- **Execute supplied message**: Do not inspect the staged diff or revise the complete supplied message; commit it directly with the required Codex trailer.
+- **Accept supplied message**: Do not inspect the staged diff or revise the complete supplied message; verify its required Codex trailer and return it to the main agent.
 - **Review supplied message**: Inspect the staged diff only when the main agent explicitly requests a review. Use the supplied message unless the main agent requests revisions.
-- **Complete rough or missing message**: Inspect the staged diff and draft a complete message before returning it or committing.
+- **Complete rough or missing message**: Inspect the staged diff and draft a complete message for the main agent.
 
 ## Hook Recovery
 
-For any execution mode, fix only a simple, directly actionable pre-commit failure, re-stage the affected files, and retry once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required.
+The specialist may fix one simple, directly actionable pre-commit or commit-hook failure, inspect the resulting diff, re-stage only the approved paths, and retry once. Sandbox or permission failures are excluded from recovery and must be handed off immediately under the workflow above. For any failure requiring non-trivial investigation, broader changes, or unclear ownership, stop and report the error, attempted fix, affected paths, and required user decision. Never bypass hooks without explicit authorization.
 
 ## Post-Commit Review
 

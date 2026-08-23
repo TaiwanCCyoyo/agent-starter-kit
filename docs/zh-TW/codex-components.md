@@ -26,7 +26,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `implementation_reviewer` | 唯讀     | 正確性、回歸、測試與非預期 diff                                                                                                               |
 | `security_reviewer`       | 唯讀     | Secrets、注入、依賴、權限、auth 與敏感資料                                                                                                    |
 | `doc_translator`          | 有界寫入 | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main agent 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `commit-specialist`       | 有界寫入 | 審查 staged changes，僅在明確要求時 commit                                                                                                    |
+| `commit-specialist`       | 有界寫入 | 審查 staged diff、執行 pre-commit、處理一次一般 hook 修正、草擬訊息並 commit；sandbox 失敗時交還 main agent                                   |
 
 ### 模型路由
 
@@ -45,7 +45,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | :--------------------- | :---------------------------------------------------------------------------------------------------- |
 | `python-development`   | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
 | `python-testing`       | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求                            |
-| `gen-commit`           | Commit 審查、Conventional Commits、commit 後 plan 更新與 durable-guidance checks                      |
+| `gen-commit`           | Specialist staged review、main-agent commit 執行與 hook recovery，以及 commit 後檢查                  |
 | `antigravity-subagent` | 透過 headless `agy -p` 將低成本、有界、唯讀工作委派給 Antigravity CLI                                 |
 
 ## Claude 能力取捨
@@ -100,6 +100,8 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `.vscode/settings.json`                 | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 
 Python verification 在開發期間使用目標式 `uv run python -m pytest`，並在完成前針對變更檔案執行 pre-commit。若 formatter 修改檔案，agent 會檢查 diff 並重跑相關 checks。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
+
+`gen-commit` 把耗 token 的 staged diff 審查、pre-commit、一次一般且有界的 hook 修正、訊息草擬及 commit 執行交給 `commit-specialist`；main agent 只做 filename-level scope 與授權檢查。因為 Codex sandbox 行為未來可能改變，specialist 仍先執行正常流程。若 Windows subagent sandbox 拒絕寫入 `.git/index.lock`、使用者層級的 `uv` cache、hook cache 或其他受權限限制的路徑，它會立即停止並回傳完整錯誤；不會重試該步驟、重建或搬移 cache、修改 ACL 或 cache 環境變數，也不會略過 hooks。接著由 main agent 在既有授權 context 只接手受阻的步驟。
 
 ## 延後能力
 
