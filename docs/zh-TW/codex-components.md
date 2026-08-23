@@ -1,6 +1,6 @@
 # Codex 元件參考
 
-Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。其 `.codex/AGENTS.md` 與 `CLAUDE.md` 加上 `.claude/rules/common/` 的共享政策保持語意對齊，同時保留 Codex 專屬 approval 與 tool constraints。
+Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。其 `.codex/AGENTS.md` 與 `CLAUDE.md` 的共享政策保持語意對齊，同時保留 Codex 專屬 approval 與 tool constraints。
 
 ## 原生與 Plugin 對應
 

@@ -5,7 +5,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 **ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC integration date**: 2026-06-02
-**Memory**: Claude uses Claude Code's built-in memory only; required repository guidance remains checked in — see `rules/common/memory.md`.
+**Memory**: Claude uses Claude Code's built-in memory only; required repository guidance remains checked in — see `CLAUDE.md` §Memory.
 
 The project settings intentionally disable the external Superpowers, Ponytail, and Karpathy plugins. This reference describes the repository-owned Claude components plus native Claude capabilities; GitHub, skill-creator, and Pyright LSP remain enabled in `.claude/settings.json`.
 
@@ -114,9 +114,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Removed (2026-08-19 cleanup — `/learn-eval` never triggered in practice)
 
-| Skill / Command                | Reason                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skill-curator`, `/learn-eval` | The manual port of ECC's holistic verdict gate and Hermes' curator lifecycle went untriggered — the only prompt was a weekly Stop-hook reminder. Replaced by the always-loaded `rules/common/skill-authoring.md` rule stating the durable intent (write a project skill when a task class will recur) plus the already-enabled `skill-creator` plugin for authoring. |
+| Skill / Command                | Reason                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skill-curator`, `/learn-eval` | The manual port of ECC's holistic verdict gate and Hermes' curator lifecycle went untriggered — the only prompt was a weekly Stop-hook reminder. Replaced by the always-loaded `CLAUDE.md` §Skill Authoring rule stating the durable intent (write a project skill when a task class will recur) plus the already-enabled `skill-creator` plugin for authoring. |
 
 ### Removed (2026-08-07 cleanup — dormant-by-design ECC demo skills, no downstream usage)
 
@@ -175,12 +175,19 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                                         | Notes                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | --------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | All files             | ECC v2.0.0-rc.1 (narrowed, 2026-08-07 cleanup) | Routing layer only: security triggers, review severity, reviewer routing, structural review heuristics, phase routing map, skill authoring, memory routing, and the risk-based testing baseline. `git-workflow`, `agents`, and `coding-style` rules removed; detail lives in `commit-helper`, `github-ops`, native Git operations, CLAUDE.md, and the applicable skill. |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified)                     | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review                                                                                                                                                                                                                                                                               |
+| Rule set        | Paths                 | Source                     | Notes                                                                                     |
+| --------------- | --------------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
 
-The common rules intentionally stay small and carry only decisions a model cannot derive on its own. Security triggers are centralized in `rules/common/security.md`, severity handling and review heuristics in `rules/common/code-review.md`, and phase ownership in `rules/common/development-workflow.md`; detailed procedures live in skills or agent definitions.
+Detailed procedures live in skills or agent definitions.
+
+### Removed (2026-08-23 cleanup — merged into CLAUDE.md)
+
+`rules/common/` matched `paths: "*"`, so it was injected on the first file access of any session regardless of content, making its only functional difference from CLAUDE.md a delivery-timing quirk rather than a real scoping benefit. Its routing content (review severity, security triggers, phase routing, skill authoring, memory routing, risk-based testing baseline) was folded directly into `CLAUDE.md`, and the directory was deleted.
+
+| Rule                   | Reason                                                                    |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `rules/common/*` (all) | No longer path-scoped in practice (`paths: "*"`); merged into `CLAUDE.md` |
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 

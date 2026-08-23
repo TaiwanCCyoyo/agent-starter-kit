@@ -5,7 +5,7 @@
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC 整合日期**：2026-06-02
-**記憶**：Claude 僅使用 Claude Code 的內建記憶；必要 repository guidance 仍納入版本控制——詳見 `rules/common/memory.md`。
+**記憶**：Claude 僅使用 Claude Code 的內建記憶；必要 repository guidance 仍納入版本控制——詳見 `CLAUDE.md` §Memory。
 
 本專案設定刻意停用外部的 Superpowers、Ponytail 與 Karpathy plugins。本參考文件描述 repository-owned 的 Claude 元件與 Claude 原生能力；GitHub、skill-creator 與 Pyright LSP 仍在 `.claude/settings.json` 中啟用。
 
@@ -175,12 +175,19 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                                       | 備註                                                                                                                                                                                                                                                                                            |
-| --------------- | --------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/` | 所有檔案              | ECC v2.0.0-rc.1（已收斂，2026-08-07 清理） | 僅路由層：security triggers、review severity、reviewer routing、結構性 review heuristics、階段路由地圖、skill 撰寫、記憶路由與風險導向測試基線。`git-workflow`、`agents` 與 `coding-style` rules 已移除；細節分別由 `commit-helper`、`github-ops`、原生 Git 操作、CLAUDE.md 與對應 skill 擁有。 |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改）                  | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review                                                                                                                                                                                                            |
+| 規則集          | 路徑                  | 來源                      | 備註                                                                                 |
+| --------------- | --------------------- | ------------------------- | ------------------------------------------------------------------------------------ |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
 
-Common rules 刻意維持精簡，只保留模型無法自行推導的決策。Security triggers 集中在 `rules/common/security.md`，severity handling 與 review heuristics 集中在 `rules/common/code-review.md`，phase ownership 集中在 `rules/common/development-workflow.md`；詳細流程則放在 skills 或 agent definitions。
+詳細流程放在 skills 或 agent definitions。
+
+### 已移除（2026-08-23 清理——併入 CLAUDE.md）
+
+`rules/common/` 每個檔案的 `paths` 都是 `"*"`，因此會在 session 第一次存取任何檔案時注入，與 CLAUDE.md 相比實際上沒有真正的路徑範圍效益，只是載入時機不同。其路由內容（review severity、security triggers、phase routing、skill authoring、memory routing、風險導向測試基線）已直接併入 `CLAUDE.md`，該目錄已刪除。
+
+| 規則                     | 原因                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| `rules/common/*`（全部） | 實務上並非路徑範圍限定（`paths: "*"`）；已併入 `CLAUDE.md` |
 
 ### 已移除（2026-06-13 清理——由 skills 與 CLAUDE.md 擁有）
 

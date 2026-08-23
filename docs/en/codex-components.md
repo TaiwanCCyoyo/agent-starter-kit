@@ -1,6 +1,6 @@
 # Codex Components Reference
 
-Codex uses Native Plan Mode, native local memories, repo-scoped skills, specialist subagents, project hooks, and installed plugins. Its `.codex/AGENTS.md` is semantically aligned with the shared policy in `CLAUDE.md` plus `.claude/rules/common/`, while retaining Codex-specific approval and tool constraints.
+Codex uses Native Plan Mode, native local memories, repo-scoped skills, specialist subagents, project hooks, and installed plugins. Its `.codex/AGENTS.md` is semantically aligned with the shared policy in `CLAUDE.md`, while retaining Codex-specific approval and tool constraints.
 
 ## Native And Plugin Equivalents
 
