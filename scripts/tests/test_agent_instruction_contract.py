@@ -354,16 +354,33 @@ def test_commit_specialists_use_explicit_delegation_modes() -> None:
 
     codex_skill = codex_files[0].read_text(encoding="utf-8")
     codex_agent = codex_files[1].read_text(encoding="utf-8")
-    assert "Do not duplicate staged diff review" in codex_skill
+    assert "Do not automatically escalate to diff review" in codex_skill
     assert "Run pre-commit against the explicitly approved paths" in codex_agent
     assert "execute `git commit` with the approved message" in codex_agent
     assert "Never retry a sandbox-failed step" in codex_agent
     assert "relocate or rebuild caches" in codex_agent
     assert "change ACLs" in codex_agent
+    assert "Never promote `accept supplied message`" in codex_agent
+    assert "do not inspect content" in codex_agent
+
+    assert "Unknown change intent" in codex_skill
+    assert "Approximate change intent" in codex_skill
+    assert "Exact intent in a clean, well-understood scope" in codex_skill
+    assert "Exact intent but explicit double-check requested" in codex_skill
+    assert "must not promote itself into this mode" in codex_skill
 
     claude_skill = claude_files[0].read_text(encoding="utf-8")
     assert "Do not duplicate diff review" in claude_skill
     assert "delegate it to `commit-specialist`" in claude_skill
+    assert "Unknown change intent" in claude_skill
+    assert "Approximate change intent" in claude_skill
+    assert "Exact intent in a clean, well-understood scope" in claude_skill
+    assert "Exact intent but explicit double-check requested" in claude_skill
+    assert "must not promote itself into this mode" in claude_skill
+
+    claude_agent = claude_files[2].read_text(encoding="utf-8")
+    assert "Never promote **execute supplied message**" in claude_agent
+    assert "Run pre-commit against the explicitly approved paths" in claude_agent
 
     for path in (codex_files[0], claude_files[0], claude_files[2]):
         content = path.read_text(encoding="utf-8")

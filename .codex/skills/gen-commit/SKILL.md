@@ -16,9 +16,9 @@ The main agent owns filename-level scope preflight, staging authorization, sandb
 3. If nothing is staged, inspect unstaged filenames/status only. Stage automatically when the operating contract authorizes a verified agent-owned commit or the user explicitly requested staging; otherwise ask first.
 4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, generated state, or unrelated files.
 5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
-6. Select and state the delegation mode based on the main agent's confidence in the staged changes. Do not duplicate staged diff review: use **accept supplied message**, **review supplied message**, or **complete rough or missing message**.
+6. Select and state the delegation mode using Mode Selection below. Do not automatically escalate to diff review merely because review could provide extra confidence: use **accept supplied message**, **review supplied message**, or **complete rough or missing message** according to what the main agent actually knows and requests.
 7. Delegate one review objective with explicit paths, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
-8. The specialist verifies staged scope and each handed-off gitlink, performs the requested detailed diff and security review, runs pre-commit against the approved paths, and prepares an approved English Conventional Commit message with the required trailer. It must not commit inside a submodule or broaden the approved scope.
+8. The specialist verifies staged filenames and each handed-off gitlink, then follows only the selected mode's diff policy. It runs pre-commit against the approved paths in every mode and prepares or accepts an English Conventional Commit message with the required trailer. It must not commit inside a submodule or broaden the approved scope.
 9. For a simple, directly actionable formatter or hook failure, the specialist applies Hook Recovery below. If the user requested only a message, it then returns the message without committing. If a commit is authorized, it executes `git commit` with the approved message and lets normal commit-time hooks run.
 10. If pre-commit, hook recovery, or commit execution fails because the sandbox cannot write `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, the specialist must immediately return the exact error to the main agent. It must not retry that sandbox-failed step, relocate or rebuild caches, change ACLs, alter cache-related environment variables, bypass hooks, or attempt another environment workaround.
 11. The main agent decides whether the reported error is a sandbox handoff case. If so, it resumes the same verification or commit step once in its authorized execution context without duplicating the specialist's completed detailed review.
@@ -61,11 +61,12 @@ Co-authored-by: Codex gpt-5.6 <codex@openai.com>
 - Do not bypass hooks unless the user explicitly authorizes it.
 - The main agent must not duplicate the specialist's full staged-content review or pre-commit run. The specialist owns detailed review, pre-commit, exact re-staging within approved paths, ordinary bounded hook recovery, message drafting, and commit execution; the main agent owns filename-level scope, authorization, and sandbox fallback.
 
-## Delegation Modes
+## Mode Selection
 
-- **Accept supplied message**: Do not inspect the staged diff or revise the complete supplied message; verify its required Codex trailer and return it to the main agent.
-- **Review supplied message**: Inspect the staged diff only when the main agent explicitly requests a review. Use the supplied message unless the main agent requests revisions.
-- **Complete rough or missing message**: Inspect the staged diff and draft a complete message for the main agent.
+1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
+2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
+3. **Exact intent in a clean, well-understood scope:** Use **accept supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and the required trailer, then focuses on pre-commit, bounded ordinary hook recovery, and commit execution.
+4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and still focuses on pre-commit, bounded ordinary hook recovery, and commit execution. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
 
 ## Hook Recovery
 

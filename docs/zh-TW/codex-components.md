@@ -103,6 +103,8 @@ Python verification 在開發期間使用目標式 `uv run python -m pytest`，�
 
 `gen-commit` 把耗 token 的 staged diff 審查、pre-commit、一次一般且有界的 hook 修正、訊息草擬及 commit 執行交給 `commit-specialist`；main agent 只做 filename-level scope 與授權檢查。因為 Codex sandbox 行為未來可能改變，specialist 仍先執行正常流程。若 Windows subagent sandbox 拒絕寫入 `.git/index.lock`、使用者層級的 `uv` cache、hook cache 或其他受權限限制的路徑，它會立即停止並回傳完整錯誤；不會重試該步驟、重建或搬移 cache、修改 ACL 或 cache 環境變數，也不會略過 hooks。接著由 main agent 在既有授權 context 只接手受阻的步驟。
 
+是否檢查 diff 由明確 mode 決定，不會自動發生。沒有訊息或只有粗略目標時，specialist 會讀 staged diff 並完成訊息；若 main agent 對乾淨且明確的 scope 已提供完整訊息，specialist 不讀 diff，重點是 pre-commit 與 commit。只有 main agent 因具體疑慮明確要求 double-check 時，完整訊息才會搭配額外 diff 檢查；specialist 不得自行升級到該 review mode。
+
 ## 延後能力
 
 - 超出原生 memory extraction 與明確 skill authoring 的背景 skill curation。

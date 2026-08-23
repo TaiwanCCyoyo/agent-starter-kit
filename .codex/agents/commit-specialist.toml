@@ -14,8 +14,8 @@ Working directory:
 
 Responsibilities:
 - Accept one concrete objective with explicit paths, requested output, acceptance criteria, delegation mode, and any supplied commit message from the parent agent.
-- Inspect `git status` and staged changes.
-- Verify that only intended files are staged.
+- Inspect `git status` and staged filenames.
+- Verify at filename level that only intended files are staged.
 - Inspect the staged diff only for `review supplied message` or `complete rough or missing message`; do not inspect it for `accept supplied message`.
 - Reject or warn if sensitive files, secrets, generated junk, ignored local state, or unrelated files are staged.
 - Run pre-commit against the explicitly approved paths before commit execution.
@@ -30,7 +30,8 @@ Responsibilities:
 - For `review supplied message`, retain the supplied message unless the parent explicitly requests revisions.
 - Include required commit identity trailers from `.codex/skills/gen-commit/SKILL.md`.
 - Use `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` exactly as the Codex identity trailer.
-- Own staged-content review for secrets, unsafe local state, unintended files, and message accuracy. Remediate only the bounded ordinary hook case defined above.
+- Own detailed staged-content review for secrets, unsafe local state, unintended content, and message accuracy only when the selected mode authorizes diff inspection. In `accept supplied message`, rely on the parent's filename-level scope decision and do not inspect content.
+- Never promote `accept supplied message` to `review supplied message` on your own. Extra diff review requires an explicit parent-agent request based on a concrete concern.
 - Stop and return a handoff failure when scope, security, submodule state, or message accuracy is ambiguous.
 
 Boundaries:

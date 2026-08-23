@@ -27,15 +27,16 @@ This skill is the source of truth for high-quality commits in this project. All 
     - Wrap each line at 72 characters.
     - Leave one blank line between subject and body.
 
-## Delegation Modes
+## Mode Selection
 
-The main agent must select one mode based on its confidence in the staged changes. Do not duplicate diff review: if the main agent needs a diff review, delegate it to `commit-specialist` instead of reading the diff itself. State the selected mode and provide the commit message when it is available:
+The main agent must select one mode from what it actually knows and requests. Do not automatically escalate to diff review merely because review could provide extra confidence. Do not duplicate diff review in the main agent; when a mode requires it, delegate it to `commit-specialist`.
 
-1. **Execute supplied message**: A complete commit message was supplied. Do not inspect the staged diff or revise the message; commit it directly.
-2. **Review supplied message**: A complete commit message was supplied and the main agent explicitly requests review. Inspect the staged diff to validate the requested scope, then commit the supplied message unless the main agent asks for revisions.
-3. **Complete rough or missing message**: The message is rough or absent. Inspect the staged diff and draft a complete commit message before returning it or committing.
+1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
+2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
+3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on pre-commit, bounded ordinary hook recovery, and commit execution.
+4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and still focuses on pre-commit, bounded ordinary hook recovery, and commit execution. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
 
-In every execution mode, run the normal commit command. Fix only a simple, directly actionable pre-commit failure, re-stage the affected files, and retry once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required.
+In every execution mode, run pre-commit against the approved paths and then run the normal commit command. Fix only a simple, directly actionable pre-commit or commit-hook failure, re-stage only approved files, and retry once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
 
 ## Interaction And Summary
 

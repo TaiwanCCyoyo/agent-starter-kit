@@ -103,6 +103,8 @@ Python verification uses targeted `uv run python -m pytest` commands while devel
 
 `gen-commit` keeps token-heavy staged diff review, pre-commit, one ordinary bounded hook fix, message drafting, and commit execution in `commit-specialist`; the main agent performs only filename-level scope and authorization checks. Because Codex sandbox behavior may evolve, the specialist attempts the normal workflow. If the Windows subagent sandbox denies `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, it stops immediately and returns the exact error. It does not retry that step, rebuild or relocate caches, change ACLs or cache environment variables, or bypass hooks. The main agent then resumes only the blocked step in its authorized context.
 
+Diff inspection is mode-dependent rather than automatic. Missing or rough intent asks the specialist to inspect the staged diff and write the message. A complete message for a clean, well-understood scope skips diff inspection and focuses the specialist on pre-commit and commit execution. A complete message receives an additional diff check only when the main agent explicitly requests it for a concrete concern; the specialist cannot promote itself into that review mode.
+
 ## Deferred Capabilities
 
 - Background skill curation beyond native memory extraction and explicit skill authoring.

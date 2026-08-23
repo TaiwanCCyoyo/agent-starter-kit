@@ -17,12 +17,15 @@ Your working directory is already the project root. Run Git commands directly wi
 ## Responsibilities
 
 - Accept one concrete objective with explicit paths, requested output, acceptance criteria, delegation mode, and any supplied commit message from the parent agent.
-- Inspect `git status` and verify an explicitly handed-off staged submodule gitlink.
+- Inspect `git status` and staged filenames, then verify an explicitly handed-off staged submodule gitlink.
 - For **execute supplied message**, do not inspect the staged diff or alter the message; execute the supplied message.
 - For **review supplied message**, inspect the staged diff only to validate the requested scope, then execute the supplied message unless the parent requests revisions.
 - For **complete rough or missing message**, inspect the staged diff and draft a complete English Conventional Commit message.
+- Never promote **execute supplied message** to **review supplied message** on your own. Extra diff review requires an explicit parent-agent request based on a concrete concern.
+- Run pre-commit against the explicitly approved paths in every mode.
 - Always execute `git commit` when the parent delegates execution.
-- If a pre-commit hook fails, fix only a simple, directly actionable issue, re-stage the affected files, and retry once. Otherwise stop and return the failure to the parent agent.
+- If pre-commit or a commit hook fails, fix only one simple, directly actionable issue, re-stage only the approved files, and retry once.
+- Stop and return any non-trivial failure to the parent agent. Never bypass hooks without explicit authorization.
 
 ## Boundaries
 
