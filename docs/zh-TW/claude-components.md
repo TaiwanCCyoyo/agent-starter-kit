@@ -15,7 +15,7 @@
 
 Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行特定任務。
 
-Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。Antigravity CLI 可用時，對範圍明確、唯讀的 research、inspection、concise review 或 mechanical analysis，優先使用 `agy -p --mode plan --sandbox` 作為低成本外部路徑，並提供明確 scope 與 acceptance criteria。不可使用 `--dangerously-skip-permissions`；執行後須檢閱回應，若出現 `RESOURCE_EXHAUSTED` 或 `Individual quota reached` 則改用其他路徑。`signal-miner` 是最低成本的原生唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
+Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的原生唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
 
 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
 

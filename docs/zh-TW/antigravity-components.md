@@ -70,7 +70,3 @@ Antigravity 的 Subagent 架構是由系統原生內建代理（`research`、`se
 
 - **委派方針**：在專案根目錄的 `GEMINI.md` 中規範委派原則（例如將 tests、benchmarks、broad searches、verbose diagnostics 等高輸出指令路由至低成本唯讀代理 `signal-miner`，將安全敏感路徑路由至 `security_reviewer`）。
 - **流程管理**：複雜的多步驟與領域任務主要透過 **Native Planning Mode** 與 **Skills (`.agent/skills/`)** 進行結構化管理與引導。
-
-## 外部呼叫
-
-Codex 與 Claude Code 可透過 headless `agy -p` 將 Antigravity CLI 當作低成本外部子代理。本 repository 只將此路徑用於範圍明確、唯讀的 research、inspection、concise review 或 mechanical analysis，並以明確 scope 與 acceptance criteria 執行 `agy -p --mode plan --sandbox`。呼叫端保留最終判斷，不得傳入 `--dangerously-skip-permissions`；若 Antigravity 回報 `RESOURCE_EXHAUSTED` 或 `Individual quota reached`，必須停止而非重試。

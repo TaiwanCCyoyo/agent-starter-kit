@@ -18,7 +18,6 @@
 - **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，repository-owned skills 與直接驗證負責實作工作，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
 - **分層驗證**：Claude Code 透過官方 Pyright LSP plugin 與唯讀的 Ruff `E722,F601,F602,F634` check 取得即時 diagnostics；Codex 因沒有 Python LSP，對 Python 編輯使用較廣的唯讀 Ruff `F` check。兩者都會在完成前執行 pre-commit，由其統一負責 formatting、linting、型別檢查與檔案驗證。
 - **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
-- **低成本外部委派**：安裝 Antigravity CLI 時，可用 `agy -p --mode plan --sandbox` 處理範圍明確、唯讀的 research、inspection、review 或 mechanical analysis。呼叫端保留最終判斷；若 Antigravity 回報 quota exhausted，改用其他合適路徑。
 - **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
 
 ## Agent 記憶與工作流程
@@ -29,7 +28,7 @@
 
 ### Agent 工作流程
 
-- **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。其 `antigravity-subagent` skill 會將符合條件的低成本外部委派路由至 headless `agy -p`。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
+- **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用根目錄 `GEMINI.md` 作為核心契約，並以 `.agent/workflows/` 提供自訂斜線指令（例如 `/gen-commit`、`/worktree`）、`.agent/skills/` 存放 repo-scoped skills，以及 `.agent/hooks.json` 定義生命週期勾子。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
 

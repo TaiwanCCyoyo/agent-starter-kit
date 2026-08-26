@@ -37,16 +37,15 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | 有界實作        | `gpt-5.6-terra` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
 | 高流量機械工作  | `gpt-5.6-luna` / medium  | Signal mining、commit 與文件同步            |
 
-`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。Antigravity CLI 可用時，`antigravity-subagent` 是範圍明確、唯讀的 research、inspection、concise review 或 mechanical analysis 的優先低成本外部路徑：以明確 scope 與 acceptance criteria 執行 `agy -p --mode plan --sandbox`，並檢閱回應。模糊、architecture、security-sensitive 或最終 integration judgment 不使用它；若回報 `RESOURCE_EXHAUSTED` 或 `Individual quota reached`，停止而非重試。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
+`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
 
 ## Skills
 
-| Skill                  | 用途                                                                                                  |
-| :--------------------- | :---------------------------------------------------------------------------------------------------- |
-| `python-development`   | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
-| `python-testing`       | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求                            |
-| `gen-commit`           | Specialist staged review、main-agent commit 執行與 hook recovery，以及 commit 後檢查                  |
-| `antigravity-subagent` | 透過 headless `agy -p` 將低成本、有界、唯讀工作委派給 Antigravity CLI                                 |
+| Skill                | 用途                                                                                                  |
+| :------------------- | :---------------------------------------------------------------------------------------------------- |
+| `python-development` | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
+| `python-testing`     | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求                            |
+| `gen-commit`         | Specialist staged review、main-agent commit 執行與 hook recovery，以及 commit 後檢查                  |
 
 ## Claude 能力取捨
 

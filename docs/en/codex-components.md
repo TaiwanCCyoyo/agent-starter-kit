@@ -37,16 +37,15 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | Bounded implementation      | `gpt-5.6-terra` / medium | Routine, explicitly scoped implementation through `task_worker` |
 | High-volume mechanical work | `gpt-5.6-luna` / medium  | Signal mining, commits, and documentation synchronization       |
 
-`plan_reviewer` critiques plans and never replaces Native Plan Mode. Use `explorer` for ordinary code location. When Antigravity CLI is available, `antigravity-subagent` is the preferred low-cost external route for bounded, read-only research, inspection, concise review, or mechanical analysis: invoke `agy -p --mode plan --sandbox` with explicit scope and acceptance criteria, then review its response. Do not use it for ambiguous, architectural, security-sensitive, or final integration judgment, and stop rather than retry if it reports `RESOURCE_EXHAUSTED` or `Individual quota reached`. When delegation is authorized and tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, use `signal_miner` before running them in the main context. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. Use `explorer` for ordinary code location. When delegation is authorized and tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, use `signal_miner` before running them in the main context. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
 
 ## Skills
 
-| Skill                  | Purpose                                                                                                   |
-| :--------------------- | :-------------------------------------------------------------------------------------------------------- |
-| `python-development`   | Python coding, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
-| `python-testing`       | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                  |
-| `gen-commit`           | Specialist staged review, main-agent commit execution and hook recovery, post-commit checks               |
-| `antigravity-subagent` | Low-cost, bounded read-only delegation to Antigravity CLI through headless `agy -p`                       |
+| Skill                | Purpose                                                                                                   |
+| :------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `python-development` | Python coding, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
+| `python-testing`     | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                  |
+| `gen-commit`         | Specialist staged review, main-agent commit execution and hook recovery, post-commit checks               |
 
 ## Claude Capability Decisions
 
