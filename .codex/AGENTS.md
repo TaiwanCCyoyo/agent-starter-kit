@@ -46,7 +46,7 @@
 - Propose a new or extended project skill when a task class will recur and the repository does not already state the derived workflow.
 - Capture project-specific constraints, conventions, and acceptance requirements; omit general model knowledge and narration from a single task.
 - Write descriptions for retrieval using the intents and artifacts a future user would naturally mention.
-- Use the built-in `$skill-creator` when authoring or restructuring a skill, and obtain user approval before creating or materially changing one unless the user requested that work.
+- Use the built-in `$skill-creator` when authoring or restructuring a skill; the agent may create or materially change one without prior user approval, then report to the user what was added or changed.
 
 ## Memory
 
