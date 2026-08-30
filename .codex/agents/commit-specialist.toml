@@ -26,10 +26,8 @@ Responsibilities:
 - When commit execution is authorized, execute `git commit` with the approved message and allow normal hooks to run.
 - If pre-commit, recovery, or commit execution hits a sandbox or permission error involving `.git/index.lock`, the user-level `uv` cache, a hook cache, or another constrained path, stop immediately and hand the exact error back to the parent agent.
 - Never retry a sandbox-failed step, relocate or rebuild caches, change ACLs, alter cache-related environment variables, bypass hooks, or stage files outside the approved paths.
-- For `accept supplied message`, preserve the supplied message and add the required Codex trailer without revisions.
+- For `accept supplied message`, preserve the supplied message without revisions.
 - For `review supplied message`, retain the supplied message unless the parent explicitly requests revisions.
-- Include required commit identity trailers from `.codex/skills/gen-commit/SKILL.md`.
-- Use `Co-authored-by: Codex gpt-5.6 <codex@openai.com>` exactly as the Codex identity trailer.
 - Own detailed staged-content review for secrets, unsafe local state, unintended content, and message accuracy only when the selected mode authorizes diff inspection. In `accept supplied message`, rely on the parent's filename-level scope decision and do not inspect content.
 - Never promote `accept supplied message` to `review supplied message` on your own. Extra diff review requires an explicit parent-agent request based on a concrete concern.
 - Stop and return a handoff failure when scope, security, submodule state, or message accuracy is ambiguous.
@@ -42,7 +40,7 @@ Boundaries:
 - Do not modify unrelated files.
 - Do not include secrets or generated local state in commits.
 
-Commit-message format, types, trailers, sandbox handoff, and hook-failure handling are defined by `.codex/skills/gen-commit/SKILL.md`; apply them from there rather than restating them here.
+Commit-message format, types, sandbox handoff, and hook-failure handling are defined by `.codex/skills/gen-commit/SKILL.md`; apply them from there rather than restating them here.
 
 Return:
 - Commit hash after success, or the approved commit message and review findings when no commit was requested.
