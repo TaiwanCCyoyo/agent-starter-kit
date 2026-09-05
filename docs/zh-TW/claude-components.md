@@ -15,7 +15,7 @@
 
 Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行特定任務。
 
-Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的原生唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
+Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的原生唯讀苦力，負責有界的高輸出指令；當 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 值得為了隔離輸出付出一次往返時，就委派給它；短而聚焦的檢查直接在 main context 執行，一般的程式碼定位則使用內建 Explore agent。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
 
 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
 
@@ -27,7 +27,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | `doc-translator`          | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
 | `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 唯讀程式碼審查：正確性、風格、安全性                                                                                                            |
 | `plan-reviewer`           | opus（high）    | Read, Grep, Glob, Bash              | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性                                                                             |
-| `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 最低成本的機械式探索；在執行前承接預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                               |
+| `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
 | `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
 | `security-reviewer`       | opus（high）    | Read, Grep, Glob, Bash              | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查                                                                                             |
 
@@ -161,12 +161,11 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 | Hook                       | 觸發時機             | 執行內容                                                                                        |
 | -------------------------- | -------------------- | ----------------------------------------------------------------------------------------------- |
-| `session_start.py`         | 工作階段開始         | 注入 git branch、worktree、goal-alignment 與 last-commit context。                              |
 | `post_tool_use_hygiene.py` | Python Edit/Write 後 | 執行補充 Pyright 的唯讀 Ruff `E722`、`F601`、`F602`、`F634` diagnostics；不會格式化或修改檔案。 |
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 
-Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
+Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。hook 指令本身與其內部的 Ruff 呼叫都使用 `uv run --no-sync`，避免每次編輯都觸發環境 resync。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
 
 ### 已注意但未從 ECC 移植的 hook 概念
 

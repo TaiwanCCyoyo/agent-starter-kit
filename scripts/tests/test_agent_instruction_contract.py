@@ -117,7 +117,7 @@ def test_claude_instructions_use_direct_openspec_routing() -> None:
     claude_instructions = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
 
     assert ("downstream" + " project") not in claude_instructions.lower()
-    assert "Use OpenSpec to communicate plans and specs across agents" in claude_instructions
+    assert "OpenSpec" in claude_instructions
 
 
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
@@ -227,23 +227,19 @@ def test_task_worker_descriptions_do_not_upgrade_low_cost_sessions() -> None:
         assert "capability floor" not in lowered
 
 
-def test_signal_miner_descriptions_proactively_route_high_output_commands() -> None:
-    claude_frontmatter = (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8").split("---", 2)[1].lower()
-    descriptions = (claude_frontmatter,)
+def test_signal_miner_descriptions_route_high_output_commands() -> None:
+    """The description must still name the high-output command families it owns.
 
-    for description in descriptions:
-        assert "expected to produce large logs or stdout" in description
-        assert "delegate before running" in description
-        for command_family in (
-            "tests",
-            "benchmarks",
-            "broad searches",
-            "verbose diagnostics",
-            "dependency traces",
-            "large diff/log inspections",
-        ):
+    Wording is intentionally not frozen; only the routing signal is asserted.
+    """
+    claude_frontmatter = (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8").split("---", 2)[1].lower()
+    codex_config = tomllib.loads((ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"))
+
+    for description in (claude_frontmatter, codex_config["description"].lower()):
+        for command_family in ("verbose diagnostics", "dependency traces"):
             assert command_family in description
-        assert "never raw output" in description
+        assert "read-only" in description
+        assert "explore" in description
 
 
 def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:

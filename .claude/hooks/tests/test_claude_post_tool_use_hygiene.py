@@ -46,6 +46,7 @@ def expected_command(root: Path, rel_path: str) -> list[str]:
     return [
         "uv",
         "run",
+        "--no-sync",
         "--project",
         str(root),
         "ruff",

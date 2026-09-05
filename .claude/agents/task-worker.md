@@ -20,6 +20,7 @@ Implement only a bounded task supplied by the parent agent.
 - Read the relevant implementation and tests before editing.
 - Make the smallest change that satisfies the acceptance criteria.
 - Preserve unrelated and pre-existing worktree changes.
+- You are not alone in the codebase; do not revert other agents' edits, and adapt your implementation to concurrent changes.
 - Run the requested verification and report exact results.
 
 ## Boundaries

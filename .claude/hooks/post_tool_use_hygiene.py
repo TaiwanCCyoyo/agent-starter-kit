@@ -105,7 +105,7 @@ def main() -> int:
     for rel_path in event_files(event, root):
         if Path(rel_path).suffix.lower() not in PYTHON_SUFFIXES:
             continue
-        code, stdout, stderr = run(root, ["uv", "run", "--project", str(root), *RUFF_ARGS, rel_path])
+        code, stdout, stderr = run(root, ["uv", "run", "--no-sync", "--project", str(root), *RUFF_ARGS, rel_path])
         if code == 0:
             continue
         details = "\n".join(part for part in (stdout, stderr) if part)

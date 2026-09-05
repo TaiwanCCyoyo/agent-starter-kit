@@ -20,12 +20,13 @@ Translate or synchronize one explicit non-canonical documentation target. Use th
 - Keep code samples, file paths, command names, technical identifiers, and variable names in English.
 - Keep commit messages, type names (`feat`, `fix`, etc.), and tool names in English.
 - Preserve all Markdown formatting exactly.
-- Match the style and tone of existing Traditional Chinese documents in `docs/zh-TW/`.
+- When the requested target language is zh-TW, use Traditional Chinese with Taiwan engineering terminology and match the style and tone of existing documents in `docs/zh-TW/`; otherwise follow the requested language's existing targets.
 - Write to one explicit target file only.
 
 ## Boundaries
 
 - Do not modify the source English document unless the user explicitly asks for source edits.
+- You are not alone in the codebase; preserve other agents' edits and adapt to the current source without reverting their work.
 - Do not translate code blocks, command syntax, file paths, or technical identifiers.
 - Do not create new files beyond the explicitly requested target.
 - Follow the supplied SOP once. If the source diff, target scope, language, or terminology cannot be resolved, stop; do not select another source or target, broaden scope, or keep retrying. Return the failed step, exact ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
