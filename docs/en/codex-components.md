@@ -20,24 +20,26 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 
 | Agent                     | Access        | Purpose                                                                                                                                                                                         |
 | :------------------------ | :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signal_miner`            | Read-only     | Lowest-cost high-output command utility; when delegation is authorized, returns concise signal instead of raw output                                                                            |
+| `signal_miner`            | Read-only     | Low-cost utility for substantial output isolation; returns concise evidence when delegation has a concrete benefit                                                                              |
 | `task_worker`             | Bounded write | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands                                                                          |
 | `plan_reviewer`           | Read-only     | Plan completeness, scope, sequencing, repository alignment, testability, and risk                                                                                                               |
 | `implementation_reviewer` | Read-only     | Correctness, regression, test coverage, and unintended-diff review                                                                                                                              |
 | `security_reviewer`       | Read-only     | Secrets, injection, dependencies, permissions, auth, and sensitive data                                                                                                                         |
 | `doc_translator`          | Bounded write | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main agent selects source and target, and its canonical document wins conflicts |
-| `commit-specialist`       | Bounded write | Reviews staged diffs, runs pre-commit, handles one ordinary hook fix, drafts the message, and commits; sandbox failures return to the main agent                                                |
+| `commit-specialist`       | Bounded write | Optional delegate for mode-dependent staged review, pre-commit and commits; sandbox failures return to the main agent                                                                           |
 
 ### Model routing
 
 | Tier                        | Model                    | Roles                                                           |
 | --------------------------- | ------------------------ | --------------------------------------------------------------- |
 | High-confidence review      | `gpt-5.6-sol` / high     | Plan and implementation review                                  |
-| Security review             | `gpt-5.6-luna` / xhigh   | Security review                                                 |
+| Security review             | `gpt-5.6-sol` / high     | Security review                                                 |
 | Bounded implementation      | `gpt-5.6-terra` / medium | Routine, explicitly scoped implementation through `task_worker` |
 | High-volume mechanical work | `gpt-5.6-luna` / medium  | Signal mining, commits, and documentation synchronization       |
 
-`plan_reviewer` critiques plans and never replaces Native Plan Mode. Use `explorer` for ordinary code location. When delegation is authorized and tests, benchmarks, broad searches, verbose diagnostics, dependency traces, or large diff/log inspections are expected to produce substantial output, use `signal_miner` before running them in the main context. `task_worker` is a mid-cost option only for a higher-tier main agent to downshift bounded edits with an explicit goal, scope, acceptance criteria, and verification. A lowest-cost main agent handles simple work directly or uses an appropriate native low-cost route; it does not escalate to `task_worker`. Ambiguous, cross-cutting, security-sensitive, architectural, and planning work stays with the main agent or a suitable built-in agent. Security review is expected for authentication, authorization, untrusted input, database, filesystem, external API, cryptography, payment, and sensitive-data changes.
+`plan_reviewer` critiques plans and never replaces Native Plan Mode. Use `explorer` for ordinary code location and `signal_miner` when substantial output isolation saves context. Run short checks locally; avoid same-tier handoffs without a concrete benefit. `task_worker` lets a higher-tier main agent downshift bounded implementation to Terra, while Luna handles mechanical work. Keep ambiguous, architectural, and security-sensitive judgment with the main agent or designated reviewer. Security review applies to changed trust boundaries, permissions, secrets, untrusted input handling, and sensitive data flows; routine file access alone does not require delegation.
+
+The seven roles plus the built-in explorer cover current recurring work. Add a role only for a demonstrated gap. The main model remains user-selected; role model defaults do not establish measured cost savings or quality. Keep the bounded concurrency and depth defaults unless actual workloads justify changing them.
 
 ## Skills
 
@@ -45,7 +47,7 @@ Codex keeps planning and implementation authority in the main agent. Read-only a
 | :------------------- | :-------------------------------------------------------------------------------------------------------- |
 | `python-development` | Python coding, logging, secrets, security routing, Codex hook ownership, and conditional FastAPI guidance |
 | `python-testing`     | Exact pytest, optional coverage, Ruff, mypy, hook fixture, and Windows-path requirements                  |
-| `gen-commit`         | Specialist staged review, main-agent commit execution and hook recovery, post-commit checks               |
+| `gen-commit`         | Scoped local commits, optional specialist review and execution, sandbox handoff, and reporting            |
 
 ## Claude Capability Decisions
 
@@ -87,7 +89,8 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 - `.references/` is read-only local reference storage for upstream clones and comparison material.
 - OpenSpec specs, changes, and tasks are regular project files when present; commit them when they are part of the project record.
 - Codex native local memories live under the user's Codex home outside the repository and provide optional recall; required repository rules remain in checked-in guidance.
-- After a commit, update a related OpenSpec change when one exists and apply the always-loaded Skill Authoring rules in `.codex/AGENTS.md`.
+- Include applicable OpenSpec status and workflow corrections in the verified commit when possible. Standing authorization permits project-local skills, hooks, rules, and agent configuration improvements without repeated approval: validate, commit locally, and report what changed and why. External actions, global settings, and platform permissions are outside that authorization.
+- Native memory writes require an explicit user request under the active storage rules.
 
 ## Hooks And Gates
 
@@ -100,12 +103,22 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 
 Python verification uses targeted `uv run python -m pytest` commands while developing and pre-commit against changed files before completion. If formatters modify files, the agent inspects the diff and reruns the relevant checks. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 
-`gen-commit` keeps token-heavy staged diff review, pre-commit, one ordinary bounded hook fix, message drafting, and commit execution in `commit-specialist`; the main agent performs only filename-level scope and authorization checks. Because Codex sandbox behavior may evolve, the specialist attempts the normal workflow. If the Windows subagent sandbox denies `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, it stops immediately and returns the exact error. It does not retry that step, rebuild or relocate caches, change ACLs or cache environment variables, or bypass hooks. The main agent then resumes only the blocked step in its authorized context.
+`gen-commit` uses `commit-specialist` for substantial review, rough or missing messages, and explicitly requested independent checks. The main agent may commit small verified agent-owned changes directly with a complete message and no unrelated staged files, using the same verification and normal hooks. If a delegated step fails on a sandbox or cache permission boundary, the specialist returns the exact error without retries or environment changes; the main agent resumes only the blocked step in its authorized context.
 
 Diff inspection is mode-dependent rather than automatic. Missing or rough intent asks the specialist to inspect the staged diff and write the message. A complete message for a clean, well-understood scope skips diff inspection and focuses the specialist on pre-commit and commit execution. A complete message receives an additional diff check only when the main agent explicitly requests it for a concrete concern; the specialist cannot promote itself into that review mode.
 
 ## Deferred Capabilities
 
-- Background skill curation beyond native memory extraction and explicit skill authoring.
+- Unattended background curation or changes outside the active project; project-local improvements during authorized work use the standing authorization above.
 - Eval-driven development infrastructure until a real runner, deterministic graders, baselines, repeated-run metrics, and CI integration exist.
 - Domain skills for LLM API cost routing or transaction-authorized agents until the repository adopts those application surfaces.
+
+## Runtime Verification
+
+The edit hook retains only Ruff `F` diagnostics excluding `F401,F841,F842`, limited to Python files named by that event. Full linting and formatting remain in pre-commit; this hook does not auto-fix or expand the lint rule set.
+
+SessionStart retains instruction injection because `.codex/AGENTS.md` is not a root instruction filename in the default discovery chain. It reports checkout metadata without inferring a task from branch names or commit messages. Hooks use the prepared environment with `uv run --no-sync`; set up dependencies before use. PostToolUse runs Ruff once per edit event with `--no-fix` and a timeout, and reports warnings without replacing the original tool result.
+
+Entrypoint tests verify protocol output and real Ruff execution, not dispatch from every desktop tool path. Live matcher coverage must be checked in the target runtime before treating hooks as enforcement. Pre-commit remains the completion gate.
+
+The [official model guidance](https://developers.openai.com/api/docs/guides/latest-model) recommends auditing conflicting skill instructions. The [hook reference](https://learn.chatgpt.com/docs/hooks) documents that `continue: false` replaces the normal PostToolUse result; diagnostic-only feedback here uses `systemMessage`.

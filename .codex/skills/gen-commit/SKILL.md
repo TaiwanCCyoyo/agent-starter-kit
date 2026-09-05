@@ -1,23 +1,25 @@
 ---
 name: gen-commit
-description: Use when the user says /gen-commit, gen-commit, generate commit, create commit message, commit staged changes, commit changes, or asks Codex to perform a Git commit; delegates detailed diff review, pre-commit, message drafting, and commit execution while retaining a sandbox-aware main-agent fallback.
+description: Prepare commit messages and create scoped local Git commits with pre-commit checks and optional specialist delegation. Use for /gen-commit, commit requests, and automatic agent-owned commits.
 ---
 
 # Gen Commit
 
 This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
 
-The main agent owns filename-level scope preflight, staging authorization, sandbox fallback, and post-commit review. It delegates detailed staged-content review, pre-commit verification, bounded ordinary hook recovery, commit-message drafting, and commit execution to `commit-specialist`.
+The main agent owns scope, staging authorization, sandbox fallback, and post-commit review. Use `commit-specialist` for substantial staged-content review, rough or missing messages, or an explicitly requested independent check. For a small, verified agent-owned change with a complete message and no unrelated staged files, the main agent may run the same checks and commit directly; do not delegate merely to repeat work already completed. If delegation is unavailable, follow the same workflow locally.
 
 ## Workflow
 
-1. Confirm whether the user wants only a commit message or wants Codex to execute a commit.
+1. Determine message-only versus commit execution from the request and standing authorization; ask only if that intent remains ambiguous.
 2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
 3. If nothing is staged, inspect unstaged filenames/status only. Stage automatically when the operating contract authorizes a verified agent-owned commit or the user explicitly requested staging; otherwise ask first.
-4. Stop and ask before delegating if filename-level preflight shows obvious forbidden or suspicious paths such as `.env`, credentials, generated state, or unrelated files.
+4. Exclude forbidden or unrelated unstaged paths. If the index already contains unrelated changes, preserve it and resolve the commit boundary before execution; ask only when ownership cannot be established from the session.
 5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
-6. Select and state the delegation mode using Mode Selection below. Do not automatically escalate to diff review merely because review could provide extra confidence: use **accept supplied message**, **review supplied message**, or **complete rough or missing message** according to what the main agent actually knows and requests.
-7. Delegate one review objective with explicit paths, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
+6. If delegating, select and state the delegation mode using Mode Selection below. Do not automatically escalate to diff review merely because review could provide extra confidence: use **accept supplied message**, **review supplied message**, or **complete rough or missing message** according to what the main agent actually knows and requests. For direct execution, the main agent owns the equivalent scope checks, pre-commit, bounded recovery, and commit.
+    - **Direct path:** Run pre-commit on approved paths, inspect any formatter changes, apply bounded Hook Recovery if needed, and execute the authorized commit with normal hooks. For message-only requests, return the message without committing. Skip steps 7-11 and proceed to step 12 after a commit; permission failures require the main agent's normal authorized escalation, not environment workarounds.
+    - **Delegated path:** Follow steps 7-11 below.
+7. When delegating, send one review objective with explicit paths, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
 8. The specialist verifies staged filenames and each handed-off gitlink, then follows only the selected mode's diff policy. It runs pre-commit against the approved paths in every mode and prepares or accepts an English Conventional Commit message. It must not commit inside a submodule or broaden the approved scope.
 9. For a simple, directly actionable formatter or hook failure, the specialist applies Hook Recovery below. If the user requested only a message, it then returns the message without committing. If a commit is authorized, it executes `git commit` with the approved message and lets normal commit-time hooks run.
 10. If pre-commit, hook recovery, or commit execution fails because the sandbox cannot write `.git/index.lock`, the user-level `uv` cache, a hook cache, or another permission-constrained path, the specialist must immediately return the exact error to the main agent. It must not retry that sandbox-failed step, relocate or rebuild caches, change ACLs, alter cache-related environment variables, bypass hooks, or attempt another environment workaround.
@@ -28,7 +30,7 @@ The main agent owns filename-level scope preflight, staging authorization, sandb
 
 On Codex Desktop for Windows, delegated agents can edit workspace files but may be unable to create `.git/index.lock`; their user-level `uv` cache may also be read-only. These restrictions can change as Codex sandbox behavior evolves, so they are not grounds for permanently preventing delegated commit execution.
 
-The specialist therefore owns the token-heavy staged diff review, pre-commit run, ordinary bounded hook recovery, message drafting, and normal commit execution. A permission or sandbox failure is a handoff signal, not a debugging task: the specialist reports it without changing caches or permissions, and the main agent resumes the blocked step in the existing authorized context. This preserves delegation when it works while avoiding repeated environment churn when it does not. The fallback is an execution-boundary decision, not a reason to bypass hooks.
+In the delegated path, the specialist owns the selected review and commit work. A permission or sandbox failure is a handoff signal: the specialist reports it without changing caches or permissions, and the main agent resumes the blocked step in its authorized context. Direct execution follows the same scope and verification requirements without this handoff. Neither path bypasses hooks.
 
 ## Commit Message Standard
 
@@ -45,7 +47,7 @@ The specialist therefore owns the token-heavy staged diff review, pre-commit run
 - Never stage or commit secrets.
 - Respect dirty worktrees; do not revert user changes.
 - Do not bypass hooks unless the user explicitly authorizes it.
-- The main agent must not duplicate the specialist's full staged-content review or pre-commit run. The specialist owns detailed review, pre-commit, exact re-staging within approved paths, ordinary bounded hook recovery, message drafting, and commit execution; the main agent owns filename-level scope, authorization, and sandbox fallback.
+- When delegating, do not duplicate the specialist's completed full staged-content review or pre-commit run unless files changed or unresolved evidence warrants it. Normal commit-time hooks still run; neither execution route bypasses them.
 
 ## Mode Selection
 
@@ -62,7 +64,7 @@ The specialist may fix one simple, directly actionable pre-commit or commit-hook
 
 After a successful commit:
 
-1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
-2. Let Codex native memory retain useful user preferences and project context; put required repository rules in checked-in guidance instead of relying on recall.
-3. Apply the Skill Authoring section in `.codex/AGENTS.md` to user corrections, non-obvious techniques, reusable workflows, or corrected skill guidance.
+1. Verify the committed scope and remaining worktree status, then report the commit hash and checks. Include related OpenSpec status and reusable workflow corrections in the verified commit before execution when possible; do not create an OpenSpec change merely to commit.
+2. Apply the standing workflow-improvement authorization in `.codex/AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
+3. Put required repository guidance in checked-in files. Write native memory only on an explicit user request, following the active memory storage rules.
 4. Do not preserve commit narration, duplicate plan content, or transient failures as durable knowledge.

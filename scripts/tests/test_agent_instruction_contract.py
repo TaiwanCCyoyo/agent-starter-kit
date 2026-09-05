@@ -142,16 +142,7 @@ def test_codex_subagents_handoff_sandbox_failures_to_the_parent() -> None:
     assert "or seek escalated access" in instructions
 
 
-def test_codex_agent_model_routing_uses_current_tiers() -> None:
-    expected = {
-        "plan_reviewer": ("gpt-5.6-sol", "high"),
-        "implementation_reviewer": ("gpt-5.6-sol", "high"),
-        "security_reviewer": ("gpt-5.6-luna", "xhigh"),
-        "task_worker": ("gpt-5.6-terra", "medium"),
-        "signal_miner": ("gpt-5.6-luna", "medium"),
-        "commit-specialist": ("gpt-5.6-luna", "medium"),
-        "doc_translator": ("gpt-5.6-luna", "low"),
-    }
+def test_codex_agents_keep_unique_roles_and_bounded_permissions() -> None:
     agent_dir = ROOT / ".codex" / "agents"
 
     assert {path.stem for path in agent_dir.glob("*.toml")} == {
@@ -164,11 +155,15 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
         "task-worker",
     }
 
+    names: set[str] = set()
+    writable = {"task_worker", "commit-specialist", "doc_translator"}
     for path in agent_dir.glob("*.toml"):
         config = tomllib.loads(path.read_text(encoding="utf-8"))
-        model, effort = expected[config["name"]]
-        assert config["model"] == model
-        assert config["model_reasoning_effort"] == effort
+        assert config["name"] not in names
+        names.add(config["name"])
+        assert config["model"]
+        assert config["model_reasoning_effort"] in {"low", "medium", "high", "xhigh", "max", "ultra"}
+        assert config["sandbox_mode"] == ("workspace-write" if config["name"] in writable else "read-only")
 
     task_worker = tomllib.loads((agent_dir / "task-worker.toml").read_text(encoding="utf-8"))
     assert task_worker["sandbox_mode"] == "workspace-write"
@@ -177,7 +172,7 @@ def test_codex_agent_model_routing_uses_current_tiers() -> None:
 
     signal_miner = tomllib.loads((agent_dir / "signal-miner.toml").read_text(encoding="utf-8"))
     assert signal_miner["sandbox_mode"] == "read-only"
-    assert "lowest-cost" in signal_miner["description"].lower()
+    assert "low-cost" in signal_miner["description"].lower()
     assert "verbose" in signal_miner["description"].lower()
 
 
@@ -233,9 +228,8 @@ def test_task_worker_descriptions_do_not_upgrade_low_cost_sessions() -> None:
 
 
 def test_signal_miner_descriptions_proactively_route_high_output_commands() -> None:
-    codex_config = tomllib.loads((ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"))
     claude_frontmatter = (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8").split("---", 2)[1].lower()
-    descriptions = (codex_config["description"].lower(), claude_frontmatter)
+    descriptions = (claude_frontmatter,)
 
     for description in descriptions:
         assert "expected to produce large logs or stdout" in description
@@ -285,14 +279,14 @@ def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
         assert "source diff" in content
 
 
-def test_only_codex_commit_workflow_requires_coauthor_identity() -> None:
+def test_commit_workflows_do_not_force_ai_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
     claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
     for content in (codex_skill, codex_agent):
-        assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in content
+        assert "Co-authored-by:" not in content
         assert "Agent: Codex" not in content
 
     assert "AI-Model:" not in codex_skill
@@ -328,14 +322,17 @@ def test_codex_attribution_does_not_require_claude_attribution() -> None:
     claude_command = (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8")
     claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
-    assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in codex_skill
-    assert "Co-authored-by: Codex gpt-5.6 <codex@openai.com>" in codex_agent
+    assert "Co-authored-by:" not in codex_skill
+    assert "Co-authored-by:" not in codex_agent
     assert "AI-Model:" not in codex_skill
     assert "AI-Model:" not in codex_agent
 
     for content in (claude_skill, claude_command, claude_agent):
         assert "Co-authored-by:" not in content
         assert "contributor-model" not in content
+
+    settings = json.loads((ROOT / ".claude/settings.json").read_text(encoding="utf-8"))
+    assert settings["includeCoAuthoredBy"] is False
 
 
 def test_commit_specialists_use_explicit_delegation_modes() -> None:

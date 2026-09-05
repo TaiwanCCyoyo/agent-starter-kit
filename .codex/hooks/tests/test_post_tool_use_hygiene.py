@@ -1,6 +1,8 @@
 import importlib.util
 import io
 import json
+import subprocess
+import sys
 from pathlib import Path
 from types import ModuleType
 from unittest.mock import patch
@@ -46,16 +48,19 @@ def expected_command(root: Path, rel_path: str) -> list[str]:
     return [
         "uv",
         "run",
+        "--no-sync",
         "--project",
         str(root),
         "ruff",
         "check",
+        "--no-fix",
         "--select",
         "F",
         "--ignore",
         "F401,F841,F842",
         "--output-format",
         "concise",
+        "--",
         rel_path,
     ]
 
@@ -80,7 +85,7 @@ def test_apply_patch_python_target_runs_read_only_ruff_check(tmp_path: Path) -> 
     assert commands == [expected_command(tmp_path, "src/sample.py")]
 
 
-def test_ruff_failure_returns_codex_blocking_json(tmp_path: Path) -> None:
+def test_ruff_failure_reports_diagnostics_without_replacing_tool_result(tmp_path: Path) -> None:
     target = tmp_path / "src" / "sample.py"
     target.parent.mkdir()
     target.write_text("value = missing_name\n", encoding="utf-8")
@@ -90,9 +95,7 @@ def test_ruff_failure_returns_codex_blocking_json(tmp_path: Path) -> None:
 
     assert exit_code == 0
     assert json.loads(output) == {
-        "systemMessage": "`ruff check` failed on `src/sample.py`.\nF821 undefined name",
-        "continue": False,
-        "stopReason": "Codex post-edit Ruff check failed.",
+        "systemMessage": "Post-edit Ruff diagnostics; fix relevant issues before completion.\nF821 undefined name",
     }
 
 
@@ -107,6 +110,80 @@ def test_non_python_edit_is_ignored(tmp_path: Path) -> None:
     assert exit_code == 0
     assert output == ""
     assert commands == []
+
+
+@pytest.mark.parametrize("input_kind", ["command", "raw"])
+def test_multi_file_patch_runs_one_check_on_only_existing_in_repo_python_files(tmp_path: Path, input_kind: str) -> None:
+    for name in ("one.py", "two.py", "notes.md"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+    outside = tmp_path.parent / "outside.py"
+    outside.write_text("", encoding="utf-8")
+    patch_text = "\n".join([
+        "*** Begin Patch",
+        "*** Update File: one.py",
+        "*** Update File: two.py",
+        "*** Update File: one.py",
+        "*** Update File: notes.md",
+        "*** Delete File: gone.py",
+        "*** Update File: ../outside.py",
+        "*** End Patch",
+    ])
+    tool_input = {"command": patch_text} if input_kind == "command" else patch_text
+
+    _code, output, commands = invoke_main({"tool_input": tool_input}, tmp_path, [(0, "", "")])
+
+    assert output == ""
+    assert commands == [expected_command(tmp_path, "one.py") + ["two.py"]]
+
+
+def test_entrypoint_reports_real_ruff_failure_without_applying_configured_fixes(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", str(tmp_path)], check=True, capture_output=True)
+    (tmp_path / "ruff.toml").write_text("fix = true\nunsafe-fixes = true\n", encoding="utf-8")
+    target = tmp_path / "sample.py"
+    source = 'value = missing_name\ndata = {"key": 1, "key": 2}\n'
+    target.write_text(source, encoding="utf-8")
+
+    result = subprocess.run(
+        [sys.executable, str(ROOT / ".codex/hooks/post_tool_use_hygiene.py")],
+        cwd=ROOT,
+        input=json.dumps({
+            "cwd": str(tmp_path),
+            "tool_name": "apply_patch",
+            "tool_input": {"command": "*** Begin Patch\n*** Update File: sample.py\n*** End Patch"},
+        }),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=True,
+    )
+
+    payload = json.loads(result.stdout)
+    assert "F821" in payload["systemMessage"]
+    assert "continue" not in payload
+    assert "stopReason" not in payload
+    assert target.read_text(encoding="utf-8") == source
+
+
+def test_linter_timeout_returns_actionable_diagnostic(tmp_path: Path) -> None:
+    with patch.object(HOOK.subprocess, "run", side_effect=subprocess.TimeoutExpired("ruff", 15)) as run:
+        code, stdout, stderr = HOOK.run(tmp_path, ["ruff", "check", "sample.py"])
+
+    assert code == 124
+    assert stdout == ""
+    assert "exceeded 15 seconds" in stderr
+    assert run.call_args.kwargs["timeout"] == 15
+
+
+def test_file_content_with_patch_headers_does_not_expand_check_scope(tmp_path: Path) -> None:
+    target = tmp_path / "sample.py"
+    target.write_text("", encoding="utf-8")
+    unrelated = tmp_path / "unrelated.py"
+    unrelated.write_text("", encoding="utf-8")
+    payload = {"tool_input": {"file_path": str(target), "content": "*** Begin Patch\n*** Update File: unrelated.py\n*** End Patch"}}
+
+    _code, _output, commands = invoke_main(payload, tmp_path, [(0, "", "")])
+
+    assert commands == [expected_command(tmp_path, "sample.py")]
 
 
 @pytest.mark.parametrize("raw_input", ["", "{not-json"])

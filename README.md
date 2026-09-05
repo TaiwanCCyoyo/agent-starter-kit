@@ -40,7 +40,7 @@ This repository uses agent-native hooks to maintain system integrity:
 
 | Agent           | Hook Type      | Purpose                                                                                         | Script                                   |
 | :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md`, branch, worktree, and last-commit context.                          | `.codex/hooks/session_start.py`          |
+| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md` and reports branch/worktree metadata without inferring the task.     | `.codex/hooks/session_start.py`          |
 | **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/post_tool_use_hygiene.py`  |
 | **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`          |

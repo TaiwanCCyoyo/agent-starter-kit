@@ -20,11 +20,11 @@ Use `python-development` separately for coding style, typing, logging, secrets, 
 
 - Keep Codex-specific hook contract and cross-agent hook regression tests under `.codex/hooks/tests/`; keep shared script tests under `scripts/tests/`.
 - For hook scripts, invoke the real entry point with representative JSON stdin and assert the resulting stdout JSON and CLI arguments.
-- Include positive input, blocking failures, warning-only responses, and malformed JSON.
+- Cover supported success, failure, warning, and malformed-input behavior for the changed hook; do not add output modes solely to satisfy a checklist.
 - For hygiene scripts, use small positive and negative fixtures.
 - Cover Windows path behavior when scripts are used by agent hooks.
 - Keep failure output readable and independent of a specific shell.
 
 ## Optional Coverage
 
-Run `uv run python -m pytest scripts/tests .codex/hooks/tests --cov --cov-report=term-missing` when the user requests coverage or the change is high risk. Use the report to find meaningful untested behavior; do not impose a universal percentage.
+Run `uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests --cov --cov-report=term-missing` when the user requests repository-wide coverage or the change is high risk. For focused coverage, select the affected test directories. Use the report to find meaningful untested behavior; do not impose a universal percentage.

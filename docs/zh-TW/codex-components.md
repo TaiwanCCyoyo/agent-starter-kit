@@ -20,24 +20,26 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | Agent                     | 權限     | 用途                                                                                                                                          |
 | :------------------------ | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signal_miner`            | 唯讀     | 最低成本的機械式探索；在執行前承接預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                             |
+| `signal_miner`            | 唯讀     | 低成本的大量輸出隔離工具；委派有具體收益時使用，只回傳精簡證據                                                                                |
 | `task_worker`             | 有界寫入 | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                            |
 | `plan_reviewer`           | 唯讀     | 計畫完整性、範圍、排序、repo 對齊、可測試性與風險                                                                                             |
 | `implementation_reviewer` | 唯讀     | 正確性、回歸、測試與非預期 diff                                                                                                               |
 | `security_reviewer`       | 唯讀     | Secrets、注入、依賴、權限、auth 與敏感資料                                                                                                    |
 | `doc_translator`          | 有界寫入 | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main agent 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `commit-specialist`       | 有界寫入 | 審查 staged diff、執行 pre-commit、處理一次一般 hook 修正、草擬訊息並 commit；sandbox 失敗時交還 main agent                                   |
+| `commit-specialist`       | 有界寫入 | 選用的 commit 代理；依 mode 審查 staged diff、執行 pre-commit 與 commit，sandbox 失敗時交還 main agent                                        |
 
 ### 模型路由
 
 | 層級            | 模型                     | 角色                                        |
 | --------------- | ------------------------ | ------------------------------------------- |
 | 高可信審查      | `gpt-5.6-sol` / high     | Plan 與 implementation review               |
-| Security review | `gpt-5.6-luna` / xhigh   | Security review                             |
+| Security review | `gpt-5.6-sol` / high     | Security review                             |
 | 有界實作        | `gpt-5.6-terra` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
 | 高流量機械工作  | `gpt-5.6-luna` / medium  | Signal mining、commit 與文件同步            |
 
-`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。`signal_miner` 是最低成本的唯讀苦力，負責機械式探索與有界的高輸出指令；若 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 預期會產生大量輸出，應在 main context 執行前就委派。`task_worker` 則是只供高階 main agent 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main agent 應自行處理簡單工作或使用適當的原生低成本路由，不升級到 `task_worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main agent 或適合的內建 agent。Authentication、authorization、不可信輸入、database、filesystem、external API、cryptography、payment 與敏感資料變更應觸發 security review。
+`plan_reviewer` 只審查計畫，不取代 Native Plan Mode。一般程式碼定位使用 `explorer`；需要隔離大量輸出、能節省 context 時使用 `signal_miner`。短檢查直接在本地執行；沒有具體收益時避免同層級 handoff。`task_worker` 讓高階 main agent 將有界實作降級給 Terra，而 Luna 處理機械式工作。模糊、架構與 security-sensitive 的判斷應留給 main agent 或指定 reviewer。Security review 適用於變更的 trust boundary、permissions、secrets、不可信輸入處理與敏感資料流；單純例行檔案存取不需要 delegation。
+
+目前七個角色加上內建 `explorer` 已涵蓋持續出現的工作。只有在證明存在缺口時才新增角色。主要模型仍由使用者選擇；角色的模型預設不代表已量測的成本節省或品質。除非實際 workload 證明需要，否則維持既有的並行數與深度預設。
 
 ## Skills
 
@@ -45,7 +47,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | :------------------- | :---------------------------------------------------------------------------------------------------- |
 | `python-development` | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
 | `python-testing`     | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求                            |
-| `gen-commit`         | Specialist staged review、main-agent commit 執行與 hook recovery，以及 commit 後檢查                  |
+| `gen-commit`         | 有界 local commit、選用 specialist review 與執行、sandbox handoff 及回報                              |
 
 ## Claude 能力取捨
 
@@ -87,7 +89,8 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 - OpenSpec specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。
 - OpenSpec planning artifacts 可以作為一般專案歷史，記錄 goals、decisions、tasks、verification、status 與 related commits；它們不屬於 durable memory，也不需要放進 `.references/`。
 - Codex 原生 local memories 位於 repository 外的使用者 Codex home，並提供選用 recall；必要 repository 規則仍放在 checked-in guidance。
-- Commit 後若有相關 OpenSpec change 就更新它，並套用 `.codex/AGENTS.md` 的常駐 Skill Authoring 規則。
+- 盡可能將適用的 OpenSpec status 與 workflow 修正納入已驗證的 commit。常駐授權允許在不重複請求核准的情況下，改善專案內的 skills、hooks、rules 與 agent configuration：先驗證、在本地 commit，並回報變更內容與原因。外部操作、全域設定與平台權限不在此授權內。
+- Native memory 寫入須依目前的儲存規則取得使用者明確請求。
 
 ## Hooks 與 Gates
 
@@ -100,12 +103,22 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 Python verification 在開發期間使用目標式 `uv run python -m pytest`，並在完成前針對變更檔案執行 pre-commit。若 formatter 修改檔案，agent 會檢查 diff 並重跑相關 checks。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 
-`gen-commit` 把耗 token 的 staged diff 審查、pre-commit、一次一般且有界的 hook 修正、訊息草擬及 commit 執行交給 `commit-specialist`；main agent 只做 filename-level scope 與授權檢查。因為 Codex sandbox 行為未來可能改變，specialist 仍先執行正常流程。若 Windows subagent sandbox 拒絕寫入 `.git/index.lock`、使用者層級的 `uv` cache、hook cache 或其他受權限限制的路徑，它會立即停止並回傳完整錯誤；不會重試該步驟、重建或搬移 cache、修改 ACL 或 cache 環境變數，也不會略過 hooks。接著由 main agent 在既有授權 context 只接手受阻的步驟。
+`gen-commit` 在需要實質審查、訊息粗略或缺漏，或明確要求獨立檢查時使用 `commit-specialist`。main agent 可在訊息完整、沒有無關 staged files 且變更已驗證時，直接 commit 小型 agent-owned 變更，並使用相同驗證與一般 hooks。若 delegated step 在 sandbox 或 cache 權限邊界失敗，specialist 會不重試、不改環境地回傳確切錯誤；main agent 只在既有授權 context 接手受阻步驟。
 
 是否檢查 diff 由明確 mode 決定，不會自動發生。沒有訊息或只有粗略目標時，specialist 會讀 staged diff 並完成訊息；若 main agent 對乾淨且明確的 scope 已提供完整訊息，specialist 不讀 diff，重點是 pre-commit 與 commit。只有 main agent 因具體疑慮明確要求 double-check 時，完整訊息才會搭配額外 diff 檢查；specialist 不得自行升級到該 review mode。
 
 ## 延後能力
 
-- 超出原生 memory extraction 與明確 skill authoring 的背景 skill curation。
+- 目前專案以外的無人值守背景 curation 或變更；在授權工作期間，專案內改善可使用上述常駐授權。
 - Eval-driven development infrastructure，直到有真實 runner、deterministic graders、baselines、重複執行 metrics 與 CI integration。
 - LLM API cost routing 或 transaction-authorized agent 的領域 skills，直到 repo 採用這些 application surfaces。
+
+## Runtime Verification
+
+編輯後 hook 保留 Ruff `F`，排除 `F401,F841,F842`，只檢查該次事件指明的 Python 檔案。完整 lint 與排版留給 pre-commit；此 hook 不會自動 fix，也沒有擴大 lint 規則範圍。
+
+SessionStart 保留 instruction injection，因為 `.codex/AGENTS.md` 不是預設 discovery chain 中的 root instruction filename。它回報 checkout metadata，不從 branch names 或 commit messages 推斷 task。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
+
+Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。Pre-commit 仍是完成 gate。
+
+[官方 model guidance](https://developers.openai.com/api/docs/guides/latest-model) 建議審查互相衝突的 skill instructions。[Hook reference](https://learn.chatgpt.com/docs/hooks) 說明 `continue: false` 會取代正常的 PostToolUse result；此處的 diagnostic-only feedback 使用 `systemMessage`。
