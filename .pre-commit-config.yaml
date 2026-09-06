@@ -38,6 +38,12 @@ repos:
             language: system
             types: [python]
             exclude: ^(?:\.claude|\.codex)/hooks/
+          - id: pyright
+            name: Pyright (Targeted Python Check)
+            entry: uv run pyright
+            language: system
+            types: [python]
+            exclude: ^(?:\.claude|\.codex)/hooks/
 
     # Ruff (Python Linter & Formatter)
     - repo: https://github.com/astral-sh/ruff-pre-commit
