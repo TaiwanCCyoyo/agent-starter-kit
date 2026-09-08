@@ -7,7 +7,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 SESSION_HOOKS = (
     ROOT / ".agent" / "hooks" / "session_start.py",
-    ROOT / ".codex" / "hooks" / "session_start.py",
+    ROOT / ".codex" / "hooks" / "codex_session_start.py",
 )
 
 
@@ -51,12 +51,12 @@ def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
     assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
     assert antigravity_config["hooks"]["PostToolUse"][0]["matcher"] == "*"
-    assert (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").exists()
-    assert (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").exists()
+    assert (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").exists()
+    assert (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").exists()
     assert (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").exists()
 
-    claude_hook = (ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
-    codex_hook = (ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
+    claude_hook = (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").read_text(encoding="utf-8")
+    codex_hook = (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").read_text(encoding="utf-8")
     antigravity_hook = (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
     assert '"E722,F601,F602,F634"' in claude_hook
     assert '"--no-fix"' in claude_hook

@@ -36,13 +36,13 @@
 
 本 repository 使用各 Agent 原生 hooks 維護系統一致性：
 
-| Agent           | Hook 類型      | 用途                                                               | Script                                   |
-| :-------------- | :------------- | :----------------------------------------------------------------- | :--------------------------------------- |
-| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`，回報 branch/worktree 資訊，不推測任務。   | `.codex/hooks/session_start.py`          |
-| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/post_tool_use_hygiene.py`  |
-| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/post_tool_use_hygiene.py` |
-| **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`          |
-| **Antigravity** | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `E722,F601,F602,F634` 診斷。 | `.agent/hooks/post_tool_use_hygiene.py`  |
+| Agent           | Hook 類型      | 用途                                                               | Script                                          |
+| :-------------- | :------------- | :----------------------------------------------------------------- | :---------------------------------------------- |
+| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`，回報 branch/worktree 資訊，不推測任務。   | `.codex/hooks/codex_session_start.py`           |
+| **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
+| **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/claude_post_tool_use_hygiene.py` |
+| **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`                 |
+| **Antigravity** | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `E722,F601,F602,F634` 診斷。 | `.agent/hooks/post_tool_use_hygiene.py`         |
 
 ### Hook 疑難排解
 

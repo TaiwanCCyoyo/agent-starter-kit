@@ -159,9 +159,9 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
-| Hook                       | 觸發時機             | 執行內容                                                                                        |
-| -------------------------- | -------------------- | ----------------------------------------------------------------------------------------------- |
-| `post_tool_use_hygiene.py` | Python Edit/Write 後 | 執行補充 Pyright 的唯讀 Ruff `E722`、`F601`、`F602`、`F634` diagnostics；不會格式化或修改檔案。 |
+| Hook                              | 觸發時機             | 執行內容                                                                                        |
+| --------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------- |
+| `claude_post_tool_use_hygiene.py` | Python Edit/Write 後 | 執行補充 Pyright 的唯讀 Ruff `E722`、`F601`、`F602`、`F634` diagnostics；不會格式化或修改檔案。 |
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 

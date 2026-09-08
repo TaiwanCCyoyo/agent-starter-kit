@@ -11,7 +11,7 @@ ROOT = Path(__file__).parents[3]
 
 
 def load_hook() -> ModuleType:
-    path = ROOT / ".codex" / "hooks" / "session_start.py"
+    path = ROOT / ".codex" / "hooks" / "codex_session_start.py"
     spec = importlib.util.spec_from_file_location("codex_session_start", path)
     module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     spec.loader.exec_module(module)  # type: ignore[union-attr]
@@ -78,7 +78,7 @@ def test_entrypoint_loads_instructions_in_repository_without_commits(tmp_path: P
     (instruction_dir / "AGENTS.md").write_text("- Preserve source artifacts.\n", encoding="utf-8")
 
     result = subprocess.run(
-        [sys.executable, str(ROOT / ".codex/hooks/session_start.py")],
+        [sys.executable, str(ROOT / ".codex/hooks/codex_session_start.py")],
         cwd=tmp_path,
         input='{"hook_event_name":"SessionStart","source":"startup"}',
         capture_output=True,

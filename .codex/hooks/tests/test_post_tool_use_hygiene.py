@@ -13,7 +13,7 @@ ROOT = Path(__file__).parents[3]
 
 
 def load_hook() -> ModuleType:
-    path = ROOT / ".codex" / "hooks" / "post_tool_use_hygiene.py"
+    path = ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py"
     spec = importlib.util.spec_from_file_location("codex_post_tool_use_hygiene", path)
     module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     spec.loader.exec_module(module)  # type: ignore[union-attr]
@@ -144,7 +144,7 @@ def test_entrypoint_reports_real_ruff_failure_without_applying_configured_fixes(
     target.write_text(source, encoding="utf-8")
 
     result = subprocess.run(
-        [sys.executable, str(ROOT / ".codex/hooks/post_tool_use_hygiene.py")],
+        [sys.executable, str(ROOT / ".codex/hooks/codex_post_tool_use_hygiene.py")],
         cwd=ROOT,
         input=json.dumps({
             "cwd": str(tmp_path),

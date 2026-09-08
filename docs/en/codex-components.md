@@ -94,12 +94,12 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 
 ## Hooks And Gates
 
-| Layer                                   | Responsibility                                                                        |
-| :-------------------------------------- | :------------------------------------------------------------------------------------ |
-| `.codex/hooks/session_start.py`         | Reports branch/worktree context and injects `.codex/AGENTS.md`                        |
-| `.codex/hooks/post_tool_use_hygiene.py` | Read-only targeted Ruff `F` diagnostics for edited Python files                       |
-| `.pre-commit-config.yaml`               | Formatting, file hygiene, detect-secrets, Ruff including T201, and targeted mypy      |
-| `.vscode/settings.json`                 | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
+| Layer                                         | Responsibility                                                                        |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------ |
+| `.codex/hooks/codex_session_start.py`         | Reports branch/worktree context and injects `.codex/AGENTS.md`                        |
+| `.codex/hooks/codex_post_tool_use_hygiene.py` | Read-only targeted Ruff `F` diagnostics for edited Python files                       |
+| `.pre-commit-config.yaml`                     | Formatting, file hygiene, detect-secrets, Ruff including T201, and targeted mypy      |
+| `.vscode/settings.json`                       | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
 
 Python verification uses targeted `uv run python -m pytest` commands while developing and pre-commit against changed files before completion. If formatters modify files, the agent inspects the diff and reruns the relevant checks. Coverage is optional through `uv run python -m pytest --cov --cov-report=term-missing`; there is no universal percentage gate.
 

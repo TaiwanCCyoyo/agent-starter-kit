@@ -159,9 +159,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 Hooks are Python scripts executed automatically by the Claude Code harness.
 
-| Hook                       | Trigger                 | What it does                                                                                                       |
-| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `post_tool_use_hygiene.py` | After Python Edit/Write | Runs read-only Ruff `E722,F601,F602,F634` diagnostics that complement Pyright; it does not format or modify files. |
+| Hook                              | Trigger                 | What it does                                                                                                       |
+| --------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `claude_post_tool_use_hygiene.py` | After Python Edit/Write | Runs read-only Ruff `E722,F601,F602,F634` diagnostics that complement Pyright; it does not format or modify files. |
 
 Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
 

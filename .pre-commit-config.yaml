@@ -37,20 +37,6 @@ repos:
             entry: uv run mypy --explicit-package-bases
             language: system
             types: [python]
-            exclude: ^(?:\.claude|\.codex)/hooks/
-          # Check hidden hook trees separately to avoid duplicate module names.
-          - id: mypy-codex-hooks
-            name: Mypy (Codex Hooks)
-            entry: uv run mypy --explicit-package-bases
-            language: system
-            types: [python]
-            files: ^\.codex/hooks/
-          - id: mypy-claude-hooks
-            name: Mypy (Claude Hooks)
-            entry: uv run mypy --explicit-package-bases
-            language: system
-            types: [python]
-            files: ^\.claude/hooks/
           - id: pyright
             name: Pyright (Targeted Python Check)
             entry: uv run pyright

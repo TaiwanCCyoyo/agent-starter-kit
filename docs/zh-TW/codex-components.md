@@ -94,12 +94,12 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 ## Hooks 與 Gates
 
-| 元件                                    | 用途                                                                            |
-| :-------------------------------------- | :------------------------------------------------------------------------------ |
-| `.codex/hooks/session_start.py`         | 回報 branch/worktree context 並注入 `.codex/AGENTS.md`                          |
-| `.codex/hooks/post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
-| `.pre-commit-config.yaml`               | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
-| `.vscode/settings.json`                 | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
+| 元件                                          | 用途                                                                            |
+| :-------------------------------------------- | :------------------------------------------------------------------------------ |
+| `.codex/hooks/codex_session_start.py`         | 回報 branch/worktree context 並注入 `.codex/AGENTS.md`                          |
+| `.codex/hooks/codex_post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
+| `.pre-commit-config.yaml`                     | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
+| `.vscode/settings.json`                       | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 
 Python verification 在開發期間使用目標式 `uv run python -m pytest`，並在完成前針對變更檔案執行 pre-commit。若 formatter 修改檔案，agent 會檢查 diff 並重跑相關 checks。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 

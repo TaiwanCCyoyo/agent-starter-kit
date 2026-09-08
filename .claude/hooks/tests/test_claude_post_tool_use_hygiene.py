@@ -11,7 +11,7 @@ ROOT = Path(__file__).parents[3]
 
 
 def load_hook() -> ModuleType:
-    path = ROOT / ".claude" / "hooks" / "post_tool_use_hygiene.py"
+    path = ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py"
     spec = importlib.util.spec_from_file_location("claude_post_tool_use_hygiene", path)
     module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
     spec.loader.exec_module(module)  # type: ignore[union-attr]
