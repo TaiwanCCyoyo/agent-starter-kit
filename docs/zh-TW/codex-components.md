@@ -14,7 +14,7 @@ Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專
 | 跨 session planning                          | Native planning 加上選用的 project-owned OpenSpec files   |
 | 跨 session recall                            | 由 project configuration 啟用的 Codex 原生 local memories |
 
-Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不會在沒有使用者明確授權時接管 commit、push、merge 或 pull request。
+Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不擁有發布與整合權限。主 agent 遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ## Agents
 
@@ -82,7 +82,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Repository Python verification                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
 
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或選用的 project-owned OpenSpec files；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；branch completion 則透過明確的原生 Git 操作，並遵守 Codex approval 規則。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或選用的 project-owned OpenSpec files；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ## Plans、原生 Memory 與 Commits
 

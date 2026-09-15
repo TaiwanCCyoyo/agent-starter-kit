@@ -5,6 +5,8 @@ description: Prepare commit messages and create scoped local Git commits with pr
 
 # Gen Commit
 
+This skill owns local commits. The main agent owns any subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
+
 This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
 
 The main agent owns scope, staging authorization, sandbox fallback, and post-commit review. Use `commit-specialist` for substantial staged-content review, rough or missing messages, or an explicitly requested independent check. For a small, verified agent-owned change with a complete message and no unrelated staged files, the main agent may run the same checks and commit directly; do not delegate merely to repeat work already completed. If delegation is unavailable, follow the same workflow locally.

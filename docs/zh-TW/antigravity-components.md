@@ -40,7 +40,7 @@
 - **`commit-helper`**：定義 Conventional Commits 格式、pre-commit 檢查清單、`Agent: Antigravity` commit trailer 與 submodule 提交防護。
 - **`python-testing`**：定義專案特定的 Python 測試指令、Windows 路徑處理、hook fixtures 與選配 coverage 規範。
 
-Repository、Issue、PR、CI 與 release 任務直接使用原生 GitHub 或 `gh` 操作，不另設包裝 skill。只有在使用者明確要求時才執行 PR 或其他遠端變更。
+Repository、Issue、PR、CI 與 release 任務直接使用原生 GitHub 或 `gh` 操作，不另設包裝 skill。交付與遠端變更權限遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ---
 
@@ -58,7 +58,7 @@ Antigravity 透過 `.agent/hooks.json` 支援 lifecycle hooks：
 `.agent/workflows/` 提供自訂斜線指令（Slash Commands），使用者可在 Antigravity UI / CLI 輸入檔名觸發：
 
 - **`/gen-commit`**（`gen-commit.md`）：分析暫存變更、遵循 `commit-helper` 規範，產生符合 Conventional Commits 格式的訊息並附帶 `Agent: Antigravity` trailer。
-- **`/worktree`**（`worktree.md`）：管理隔離的 Git worktree，進行 baseline 驗證與明確授權的合併/清理。
+- **`/worktree`**（`worktree.md`）：依共用 Git 工作契約管理隔離的任務 worktree。
 
 ---
 

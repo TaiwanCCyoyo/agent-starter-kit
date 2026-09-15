@@ -10,9 +10,9 @@ Use GitHub's repository Dependabot Alerts API as the alert source. Treat advisor
 ## Scope And Authorization
 
 - Resolve the repository from the current checkout; do not embed an owner or repository name.
-- Reading alerts authorizes only read-only GitHub requests. For requested remediation, follow any existing repository authorization for verified local commits; push, pull-request creation, merge, and other remote mutations require separate authorization.
+- Reading alerts authorizes only read-only GitHub requests. For requested remediation, follow repository authorization for local commits and `docs/en/git-workflow.md` for task-branch pushes and PR delivery. Merge and other remote mutations require separate authorization.
 - Never dismiss, reopen, or assign an alert as a remediation shortcut. Do not call the Dependabot alert `PATCH` endpoint from this workflow.
-- Prefer credentials with `Dependabot alerts: Read`. Do not require `Dependabot alerts: Write`; request other GitHub permissions only for a separately authorized remote action.
+- Prefer credentials with `Dependabot alerts: Read`. Do not require `Dependabot alerts: Write`; use other GitHub permissions only for a remote action authorized by the Git workflow contract or the user; do not expand credentials automatically.
 - Do not print tokens or authentication headers.
 
 ## Retrieve Alerts
@@ -65,7 +65,7 @@ Work only on alerts that the user authorized for remediation.
 
 ## Completion Evidence
 
-Local dependency changes do not prove that GitHub has closed an alert. GitHub normally marks it fixed only after the updated dependency graph is processed from an applicable pushed branch. Re-query only when remote publication was separately authorized and processing had a chance to occur.
+Local dependency changes do not prove that GitHub has closed an alert. GitHub normally marks it fixed only after the updated dependency graph is processed from an applicable pushed branch. Re-query only when remote publication was authorized and processing had a chance to occur.
 
 Report:
 
