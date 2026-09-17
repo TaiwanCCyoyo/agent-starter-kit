@@ -37,6 +37,7 @@ repos:
             entry: uv run mypy --explicit-package-bases
             language: system
             types: [python]
+            require_serial: true # Mypy batches share one SQLite cache.
           - id: pyright
             name: Pyright (Targeted Python Check)
             entry: uv run pyright
