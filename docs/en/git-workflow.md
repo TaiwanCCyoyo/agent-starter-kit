@@ -4,6 +4,7 @@ Shared by Codex, Claude Code, and Antigravity. Use native Git and GitHub capabil
 
 ## Task isolation
 
+- Place task worktrees under `<primary-checkout>/.worktrees/<task-name>/`, not `.tmp/`. Resolve this path from the primary checkout even when operating inside a linked worktree. Reserve `.tmp/` for temporary reports, probes, and disposable artifacts.
 - Use one task branch and isolated worktree per independent modification task. Reuse an existing worktree for the same unfinished task only after checking its ownership and changes; one primary writer at a time.
 - Keep the default branch free of task edits and commits. Start independent tasks from the latest available default-branch state; report when it cannot be refreshed. Read-only work needs no new branch. Explicit user checkout instructions take precedence.
 - Preserve unrelated work. Subagents operate within the parent-assigned scope; they do not independently publish or integrate changes.
