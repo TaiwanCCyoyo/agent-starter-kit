@@ -28,6 +28,8 @@
 
 ### Agent 工作流程
 
+先閱讀你使用的 agent 所對應的元件參考文件；不必設定所有支援的 agent。
+
 - **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
 - **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
 - **Antigravity**：使用根目錄 `GEMINI.md` 作為核心契約，並以 `.agent/workflows/` 提供自訂斜線指令（例如 `/gen-commit`、`/worktree`）、`.agent/skills/` 存放 repo-scoped skills，以及 `.agent/hooks.json` 定義生命週期勾子。完整元件與 hooks 請參考 [Antigravity 元件參考指南](antigravity-components.md)。
