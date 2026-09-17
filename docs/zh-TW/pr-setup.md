@@ -1,6 +1,6 @@
 # 下游專案啟用 PR 交付
 
-[共用 Git 工作契約](../en/git-workflow.md) 預設為 local-only。本文件供專案擁有者設定環境，不授予 agent 設定、發布或管理權限；英文版見 [PR setup](../en/pr-setup.md)。
+下游採用時，請將[共用 Git 工作契約](../en/git-workflow.md) 重設為 local-only。本文件供專案擁有者設定環境，不授予 agent 設定、發布或管理權限；英文版見 [PR setup](../en/pr-setup.md)。本來源專案另經擁有者授權的設定見[每日審核](daily-review.md)。
 
 ## 身分與權限隔離
 
@@ -10,6 +10,8 @@
 - 管理憑證不交給開發或審核 session。若只有擁有者能合併，啟用交付前必須建立獨立強制執行的合併界線；一般寫入權限不等於「只能推分支、永遠不能 merge」。平台角色無法拆分時，可使用受限工具服務；開發／審核 session 不應取得底層可合併的憑證。
 
 ## Repository 保護
+
+若擁有者授權自動審核及合併，可讓獨立審核 App 取得 Contents／Pull requests 讀寫及 Actions／Checks／Commit statuses 唯讀。僅在另一層 Restrict updates 規則加入 PR-only 例外，品質門檻那層維持沒有 bypass。擁有者接受限制時，同機可信 session 可採明確角色選擇，而非憑證硬隔離；仍不得改用個人憑證。
 
 - 確認 GitHub 方案支援該 repository 可見性所需的保護。啟用預設分支的 ruleset，要求 PR、有效的獨立核准、CI 通過、審查討論已處理，以及新增修改後重新核准；禁止 force push 與刪除分支，不設定 bypass 身分。
 - 先建立適合專案的 CI，再選擇必要 check 名稱。可從 README 範例開始，採用前將第三方 actions 固定至核實的完整 commit SHA，維持穩定 job 名稱，確認 PR 真的會執行檢查。本地 pre-commit 通過不代表遠端合併條件已成立。
@@ -23,4 +25,4 @@
 3. 用可丟棄的任務分支與小 PR 驗證建立、CI、審核與擁有者授權的合併。確認直接更新預設分支、未取得必要檢查／核准的合併會被拒絕，且新增 commit 後需重新核准。拒絕測試應使用測試 repository 或擁有者核准的探測；正式 repository 設定錯誤時，測試寫入可能真的成功。
 4. 若僅擁有者能合併，驗證開發與審核 session 即使面對所有檢查與核准皆通過的 PR，嘗試合併仍會被拒絕。使用測試 repository 或擁有者核准的探測，記錄實際強制執行機制；界線生效前不啟用常設交付。確認 PR job 不取得 write token 或高權限 secrets。驗證開發／審核憑證不能管理或繞過規則，並確認每個啟用客戶端的實際身分。保留驗收證據與未完成事項，再宣告保護已生效。
 
-本 starter kit 不會安裝 GitHub App、修改 `gh` 登入、啟用 ruleset、新增實際 CI workflow 或取消 push 提示。這些步驟由各下游專案完成；官方參考連結見[英文版](../en/pr-setup.md#references)。
+複製本 starter kit 不會替下游專案設定 GitHub App、憑證、ruleset 或排程，也不會取消 push 提示。這些設定由各下游專案的擁有者完成；官方參考連結見[英文版](../en/pr-setup.md#references)。

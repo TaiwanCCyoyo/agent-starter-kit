@@ -1,6 +1,6 @@
 # Enable PR Delivery in a Downstream Project
 
-The [Git workflow contract](git-workflow.md) starts in local-only mode. This guide is for repository owners; it does not grant agents setup, publishing, or administration authority.
+Reset the [Git workflow contract](git-workflow.md) to local-only when adopting this template. This guide is for repository owners; it does not grant agents setup, publishing, or administration authority. This source repository's separately approved configuration is documented in [daily review](daily-review.md).
 
 ## Identity and enforcement
 
@@ -10,6 +10,8 @@ The [Git workflow contract](git-workflow.md) starts in local-only mode. This gui
 - Keep administration credentials outside development and review sessions. For owner-only merge, require a separately enforced merge boundary before enabling delivery: ordinary write permissions are not a universal "push branches but never merge" role. Use a restricted tool service if platform roles cannot separate these capabilities; development/review sessions must not receive the underlying merge-capable credentials.
 
 ## Repository gates
+
+For owner-authorized automatic review and merge, an independent reviewer App can receive Contents/Pull requests write and Actions/Checks/Commit statuses read. Grant it a PR-only exception only in a separate Restrict updates ruleset; keep the quality-gate ruleset without bypass actors. Trusted sessions on one computer may use explicit role selection instead of hard credential isolation only when the owner accepts that limitation. This does not permit fallback to personal credentials.
 
 - Confirm the GitHub plan supports the required protection for the repository's visibility. Enable an active default-branch ruleset requiring PRs, valid independent approval, passing CI checks, resolved review conversations, and renewed approval after new changes. Block force pushes and branch deletion; leave the bypass list empty.
 - Add project-appropriate CI before selecting required check names. Use the README example as a starting point, pin third-party actions to verified full commit SHAs before adoption, keep job names stable, and verify checks actually run for PRs. Local pre-commit results do not establish a remote merge gate.
@@ -23,7 +25,7 @@ The [Git workflow contract](git-workflow.md) starts in local-only mode. This gui
 3. Use a disposable task branch and a small PR to verify creation, CI, review, and owner-authorized merge. Verify protection rejects direct default-branch updates and merging without required checks/approval, and that an additional commit requires renewed review. Use a test repository or an owner-approved probe for rejection tests; a misconfigured production rule could accept the attempted write.
 4. For owner-only merge, verify that development and reviewer sessions are rejected when attempting to merge even a PR that satisfies every check and approval. Use a test repository or owner-approved probe and record the enforcement mechanism; do not enable standing delivery until this boundary works. Verify PR jobs receive neither write tokens nor privileged secrets. Verify development/review credentials cannot administer or bypass rules. Confirm the effective identity through each enabled client. Record evidence and remaining gaps before claiming enforcement works.
 
-This starter kit does not install a GitHub App, change `gh` authentication, enable rulesets, add a live CI workflow, or remove runtime push prompts. Complete those steps in each adopting project.
+Copying this starter kit does not configure Apps, credentials, rulesets, or scheduling for a downstream repository, or remove runtime push prompts. Perform those owner setup steps in each adopting project.
 
 ## References
 
