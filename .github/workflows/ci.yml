@@ -1,0 +1,30 @@
+name: PR validation
+
+on:
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    repository-checks:
+        name: repository-checks
+        runs-on: windows-latest
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  persist-credentials: false
+            - uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb # v6.1.0
+              with:
+                  enable-cache: false
+                  python-version: "3.12"
+            - name: Install dependencies
+              run: uv sync --locked --group dev
+            - name: Repository checks
+              run: uv run --no-sync pre-commit run --all-files --show-diff-on-failure
+            - name: Tests
+              run: uv run --no-sync python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
