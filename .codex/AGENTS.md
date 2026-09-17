@@ -7,9 +7,9 @@
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - After completing and successfully verifying a task, automatically commit only the agent-owned changes for that task unless the user asks not to; leave unrelated work unstaged.
-- Standing authorization: improve this project's skills, hooks, rules, and agent configuration when there is a concrete reusable benefit; validate, commit locally, and report what changed and why without asking again. This does not authorize external actions, changes to other projects or global settings, or bypassing platform permissions.
+- Standing authorization: improve this project's skills, hooks, rules, and agent configuration when there is a concrete reusable benefit; validate, commit locally, and report what changed and why without asking again. This improvement authority does not enable or expand remote delivery, reviewer roles, or merge authority, and does not authorize other external actions, changes to other projects or global settings, or bypassing platform permissions.
 - Continue authorized work using reasonable assumptions for reversible choices. Ask only for missing decisions that materially affect scope, correctness, or authorization; explicit user instructions take precedence over skill guidelines within platform constraints.
-- Do not push, merge, create a pull request, rewrite history, or discard work unless the user explicitly requests that action.
+- Follow `docs/en/git-workflow.md` for task isolation, PR delivery authorization, and review/merge boundaries. Remote delivery remains disabled until the owner enables it for this repository.
 - `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit those clones.
 - Use existing OpenSpec files for durable plans and cross-agent handoffs when applicable; simple tasks do not require OpenSpec setup or a separate planning artifact.
 - `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.

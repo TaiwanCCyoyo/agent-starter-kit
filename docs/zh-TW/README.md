@@ -59,17 +59,21 @@
 4. Antigravity：檢查 `.agent/hooks.json` 是否正確定義事件。
 5. 確認 Agent 已信任 project-local configuration layer。
 
+## Git 與 PR 界線
+
+獨立修改任務使用隔離的 branch／worktree。[共用 Git 工作契約](../en/git-workflow.md) 定義交付、審核、合併與清理權限。目前交付停在驗證完成的本地 commit；專案擁有者完成[下游 PR 設定](pr-setup.md) 後，可啟用任務分支推送與 PR 的常設授權。操作交給原生 Git／GitHub 能力，不另增 PR skill。
+
 ## 權限與安全政策設定
 
-各 Agent 層皆附有自己的權限設定。共通原則：自動允許安全的讀取與非破壞性操作；需確認才可執行發布動作（`git push`）；封鎖破壞性或會直接修改 `.git` 的指令。
+執行環境權限與任務授權分開管理。目前遠端身分與保護設定尚未完成，因此保留 push 確認；工作契約不會繞過平台權限。
 
 ### Claude Code（`.claude/settings.json`）
 
 權限宣告在 `.claude/settings.json`，不需修改全域設定即可生效：
 
-- **自動允許 (allow)**：workspace 內所有讀寫、常用 CLI 工具（`ls`、`cat`、`grep`、`find`、`diff`、`uv`、`ruff`、`pytest`、`npm`、`jq` 等），以及安全的 git 操作（`status`、`diff`、`log`、`add`、`commit`、`fetch`、`branch`、`merge` 等）。
+- **允許 (allow)**：設定中列出的讀取與診斷操作；精確模式以 `.claude/settings.json` 為準。
 - **需要確認 (ask)**：`git push`，防止意外推送到遠端。
-- **封鎖 (deny)**：`git push --force`、`git push --force-with-lease`、任何刪除或修改 `.git` 目錄的指令（`rm -rf .git`、`rd /s`、`Remove-Item -Recurse … .git`），以及直接呼叫 `powershell`/`pwsh`（指令應直接執行，不透過殼層包裝）。
+- **封鎖 (deny)**：設定中列出的 force push 與 `.git` 刪除命令模式；這些模式不能取代 GitHub 分支保護。
 
 ### Codex
 
@@ -94,11 +98,16 @@ on:
     pull_request:
         branches: [main]
 
+permissions:
+    contents: read
+
 jobs:
     quality:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Set up Python
               uses: actions/setup-python@v5
@@ -148,6 +157,9 @@ CI 設定完成後，可直接使用 `gh` 執行日常操作。Dependabot 警示
 
 | Path                      | 用途                                                                                       |
 | :------------------------ | :----------------------------------------------------------------------------------------- |
+| `CLAUDE.md`               | Claude Code 根目錄核心契約。                                                               |
+| `docs/en/git-workflow.md` | 必須複製的共用 Git 授權契約；保留路徑，套用時將交付重設為 local-only。                     |
+| `docs/en/pr-setup.md`     | 契約引用的擁有者設定指南。                                                                 |
 | `GEMINI.md`               | Antigravity 根目錄核心契約。                                                               |
 | `.agent/`                 | Antigravity hooks、workflows（斜線指令）與 repo-scoped skills。                            |
 | `.codex/`                 | Codex instructions、hooks、private command-like skills、specialist agents。                |

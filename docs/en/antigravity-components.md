@@ -40,7 +40,7 @@ The root **`GEMINI.md`** acts as Antigravity's constant, active core contract ac
 - **`commit-helper`**: Defines Conventional Commits format, pre-commit checklists, `Agent: Antigravity` commit attribution trailers, and submodule protection.
 - **`python-testing`**: Specifies project-specific pytest commands, Windows path handling, hook fixtures, and optional coverage.
 
-Repository, issue, PR, CI, and release tasks use native GitHub or `gh` operations instead of a wrapper skill. PR and other remote mutations run only when explicitly requested.
+Repository, issue, PR, CI, and release tasks use native GitHub or `gh` operations instead of a wrapper skill. Delivery and remote mutation authority follow the [shared Git workflow contract](git-workflow.md).
 
 ---
 
@@ -58,7 +58,7 @@ Antigravity supports lifecycle hooks via `.agent/hooks.json`:
 `.agent/workflows/` provides project-level slash commands directly callable in the Antigravity UI / CLI:
 
 - **`/gen-commit`** (`gen-commit.md`): Analyzes staged changes, adheres to `commit-helper` standards, drafts Conventional Commits messages, and appends `Agent: Antigravity` commit trailers.
-- **`/worktree`** (`worktree.md`): Manages isolated Git worktrees with baseline verification and explicit merge/cleanup confirmation.
+- **`/worktree`** (`worktree.md`): Manages isolated task worktrees under the shared Git workflow contract.
 
 ---
 

@@ -61,17 +61,21 @@ If hooks are not firing:
 4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
 5. Confirm the agent trusts the project-local configuration layer.
 
+## Git and PR Boundaries
+
+Independent modification tasks use isolated branches/worktrees. The [shared Git workflow contract](docs/en/git-workflow.md) defines delivery, review, merge, and cleanup authority. Delivery currently stops at a verified local commit; owners can enable standing task-branch push and PR authorization after completing [downstream PR setup](docs/en/pr-setup.md). Native Git/GitHub capabilities handle the mechanics; no additional PR skill is needed.
+
 ## Permissions Configuration
 
-Each agent layer ships with its own permission configuration. Rules follow a common pattern: auto-allow safe read and non-destructive operations; require confirmation for publishing (`git push`); deny destructive or `.git`-mutating commands.
+Runtime permissions are separate from task authorization. The current configuration retains push confirmation while remote identity and protection setup are pending; the workflow contract does not bypass runtime controls.
 
 ### Claude Code (`.claude/settings.json`)
 
 Permissions are declared in `.claude/settings.json` and take effect immediately without modifying global config. Key rules:
 
-- **Auto-Allowed**: All workspace reads/writes, common CLI tools (`ls`, `cat`, `grep`, `find`, `diff`, `uv`, `ruff`, `pytest`, `npm`, `jq`, …), and safe git operations (`status`, `diff`, `log`, `add`, `commit`, `fetch`, `branch`, `merge`, …).
+- **Allow**: Listed read operations and diagnostic commands; inspect `.claude/settings.json` for the exact patterns.
 - **Requires Confirmation (ask)**: `git push` — prevents accidental remote publishing.
-- **Blocked (deny)**: `git push --force`, `git push --force-with-lease`, any command that deletes or mutates the `.git` directory (`rm -rf .git`, `rd /s`, `Remove-Item -Recurse … .git`), and direct `powershell`/`pwsh` invocations (commands should run directly, not wrapped).
+- **Deny**: Listed force-push and `.git` removal command patterns. These patterns are not a substitute for GitHub branch protection.
 
 ### Codex
 
@@ -96,11 +100,16 @@ on:
     pull_request:
         branches: [main]
 
+permissions:
+    contents: read
+
 jobs:
     quality:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Set up Python
               uses: actions/setup-python@v5
@@ -148,15 +157,18 @@ Requires `gh` CLI installed and authenticated (`gh auth login`).
 
 When applying this starter kit to a new project, copy the agent infrastructure that matches your supported tools:
 
-| Path                      | Purpose                                                                                       |
-| :------------------------ | :-------------------------------------------------------------------------------------------- |
-| `GEMINI.md`               | Antigravity root operating contract.                                                          |
-| `.agent/`                 | Antigravity hooks, workflows (slash commands), and repo-scoped skills.                        |
-| `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                |
-| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules. |
-| `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                  |
-| `scripts/`                | Repository-level hygiene and formatting scripts used by Git and agent adapters.               |
-| `.pre-commit-config.yaml` | Repository-level verification hooks.                                                          |
+| Path                      | Purpose                                                                                                     |
+| :------------------------ | :---------------------------------------------------------------------------------------------------------- |
+| `CLAUDE.md`               | Claude Code root operating contract.                                                                        |
+| `docs/en/git-workflow.md` | Required shared Git authorization contract; retain its path and reset delivery to local-only when adopting. |
+| `docs/en/pr-setup.md`     | Owner setup guide referenced by the contract.                                                               |
+| `GEMINI.md`               | Antigravity root operating contract.                                                                        |
+| `.agent/`                 | Antigravity hooks, workflows (slash commands), and repo-scoped skills.                                      |
+| `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                              |
+| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules.               |
+| `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                                |
+| `scripts/`                | Repository-level hygiene and formatting scripts used by Git and agent adapters.                             |
+| `.pre-commit-config.yaml` | Repository-level verification hooks.                                                                        |
 
 After copying, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
 

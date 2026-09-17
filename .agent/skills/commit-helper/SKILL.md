@@ -5,6 +5,8 @@ description: Quality standards and delegation rules for Git commits — pre-comm
 
 # Skill: Commit-Helper
 
+This skill owns local commits. The main agent owns any subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
+
 This skill is the source of truth for high-quality commits in this project. All Antigravity commit generation workflows must refer to this helper.
 
 ## Pre-commit Checklist

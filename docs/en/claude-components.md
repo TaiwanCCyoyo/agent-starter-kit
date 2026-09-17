@@ -64,9 +64,9 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | Command       | Purpose                                                        |
 | ------------- | -------------------------------------------------------------- |
 | `/gen-commit` | Generate a Conventional Commit message via `commit-specialist` |
-| `/worktree`   | Create, verify, manage, merge, and clean up Git worktrees      |
+| `/worktree`   | Create, resume, and finish isolated task worktrees             |
 
-When a PR is explicitly requested, Claude Code prepares it with native Git/GitHub operations: inspect full branch history, compare `base...HEAD`, write the PR summary, and include a fresh test plan. Publishing, pushing, and final branch completion require explicit user authorization.
+Native Git/GitHub operations follow the [shared Git workflow contract](git-workflow.md). Local-only delivery is the default; owner-enabled PR delivery authorizes task-branch pushes and PR updates, while merge requires separate authorization.
 
 ### Removed (2026-06-10 cleanup — agents and built-in `/code-review` now cover these)
 
@@ -114,9 +114,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
-| Skill        | Reason                                                                                                                                                                                                                      |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `github-ops` | Generic issue, PR, CI, and release commands duplicated Claude's native `gh` capability and imposed multi-contributor stale policies. Dependabot work moved to `dependabot-remediation`; PR operations remain explicit-only. |
+| Skill        | Reason                                                                                                                                                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `github-ops` | Generic issue, PR, CI, and release commands duplicated Claude's native `gh` capability and imposed multi-contributor stale policies. Dependabot work moved to `dependabot-remediation`; PR delivery follows the shared Git workflow contract. |
 
 ### Removed (2026-08-19 cleanup — `/learn-eval` never triggered in practice)
 
@@ -196,10 +196,10 @@ Detailed procedures live in skills or agent definitions.
 
 ### Removed (2026-06-13 cleanup — owned by skills and CLAUDE.md)
 
-| Rule                        | Reason                                                                                                                                                                                                                 |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rules/common/git-workflow` | Commit format owned by `commit-helper`; explicitly requested PR preparation uses native Git/GitHub operations (full history, `base...HEAD` diff, summary, test plan); push and creation require explicit authorization |
-| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                                                                                                                                 |
+| Rule                        | Reason                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `rules/common/git-workflow` | Shared authority lives in [git-workflow.md](git-workflow.md); `commit-helper` owns local commit checks. |
+| `rules/common/agents`       | Agent index owned by CLAUDE.md `Subagents`; parallel-execution guidance migrated there                  |
 
 ### Removed (2026-08-07 cleanup — model priors and CLAUDE.md already cover these)
 

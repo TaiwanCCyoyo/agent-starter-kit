@@ -1,7 +1,7 @@
 ---
-description: Create, manage, finish, merge, or clean up Git worktrees. Use when asked to create a branch worktree or finish a worktree.
+description: Create, resume, or finish an isolated task worktree under the repository Git workflow contract.
 ---
 
 # Worktree Manager
 
-Use native Git worktree operations for creation, branching, setup, verification, finish, and cleanup. Confirm the branch goal before creation, run baseline verification in the new worktree, and merge or remove worktrees only when explicitly requested.
+Follow `docs/en/git-workflow.md` for task ownership, reuse, delivery, and cleanup boundaries. Use native Git operations; finishing a task does not authorize merging it.

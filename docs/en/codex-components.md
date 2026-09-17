@@ -14,7 +14,7 @@ Codex uses Native Plan Mode, native local memories, repo-scoped skills, speciali
 | Cross-session planning                              | Native planning plus optional project-owned OpenSpec files     |
 | Cross-session recall                                | Native Codex local memories, enabled by project configuration  |
 
-Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or take over commits, pushes, merges, or pull requests without explicit user authorization.
+Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or own publication and integration. The main agent follows the [shared Git workflow contract](git-workflow.md).
 
 ## Agents
 
@@ -82,7 +82,7 @@ The seven roles plus the built-in explorer cover current recurring work. Add a r
 | Repository Python verification                                    | `python-testing`                                          |
 | Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
 
-Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or optional project-owned OpenSpec files; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and finish branches through explicit native Git operations within Codex approval rules.
+Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or optional project-owned OpenSpec files; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and follow the [shared Git workflow contract](git-workflow.md) for delivery and integration authority.
 
 ## Plans, Native Memory, And Commits
 
