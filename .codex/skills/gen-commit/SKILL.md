@@ -67,6 +67,6 @@ The specialist may fix one simple, directly actionable pre-commit or commit-hook
 After a successful commit:
 
 1. Verify the committed scope and remaining worktree status, then report the commit hash and checks. Include related OpenSpec status and reusable workflow corrections in the verified commit before execution when possible; do not create an OpenSpec change merely to commit.
-2. Apply the standing workflow-improvement authorization in `.codex/AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
+2. Apply the standing workflow-improvement authorization in `AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
 3. Put required repository guidance in checked-in files. Write native memory only on an explicit user request, following the active memory storage rules.
 4. Do not preserve commit narration, duplicate plan content, or transient failures as durable knowledge.

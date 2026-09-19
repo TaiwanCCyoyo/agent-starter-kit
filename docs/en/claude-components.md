@@ -5,7 +5,7 @@ Intended for Python and SystemVerilog/UVM developers.
 
 **ECC source**: [affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC integration date**: 2026-06-02
-**Memory**: Claude uses Claude Code's built-in memory only; required repository guidance remains checked in — see `CLAUDE.md` §Memory.
+**Memory**: Claude uses Claude Code's built-in memory only; required repository guidance remains checked in — see `AGENTS.md` §Memory.
 
 The project settings intentionally disable the external Superpowers, Ponytail, and Karpathy plugins. This reference describes the repository-owned Claude components plus native Claude capabilities; GitHub, skill-creator, and Pyright LSP remain enabled in `.claude/settings.json`.
 
@@ -122,7 +122,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 | Skill / Command                | Reason                                                                                                                                                                                                                                                                                                                                                          |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skill-curator`, `/learn-eval` | The manual port of ECC's holistic verdict gate and Hermes' curator lifecycle went untriggered — the only prompt was a weekly Stop-hook reminder. Replaced by the always-loaded `CLAUDE.md` §Skill Authoring rule stating the durable intent (write a project skill when a task class will recur) plus the already-enabled `skill-creator` plugin for authoring. |
+| `skill-curator`, `/learn-eval` | The manual port of ECC's holistic verdict gate and Hermes' curator lifecycle went untriggered — the only prompt was a weekly Stop-hook reminder. Replaced by the always-loaded `AGENTS.md` §Skill Authoring rule stating the durable intent (write a project skill when a task class will recur) plus the already-enabled `skill-creator` plugin for authoring. |
 
 ### Removed (2026-08-07 cleanup — dormant-by-design ECC demo skills, no downstream usage)
 

@@ -25,7 +25,7 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 ## Agent Memory And Workflows
 
 - **Codex memory**: Native local memories are enabled by `.codex/config.toml` and stored under the user's Codex home outside the repository; use `/memories` for chat-level controls. Required project rules remain in checked-in guidance.
-- **Claude Code memory**: Claude uses its built-in memory and routes repository conventions to `CLAUDE.md`, rules, documentation, or skills.
+- **Claude Code memory**: Claude uses its built-in memory and routes repository conventions to `AGENTS.md`, rules, documentation, or skills.
 - **Antigravity**: This repository does not provide a cross-session memory store; durable knowledge belongs in checked-in artifacts and Git history.
 
 ### Agent Workflows
@@ -42,7 +42,7 @@ This repository uses agent-native hooks to maintain system integrity:
 
 | Agent           | Hook Type      | Purpose                                                                                         | Script                                          |
 | :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :---------------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md` and reports branch/worktree metadata without inferring the task.     | `.codex/hooks/codex_session_start.py`           |
+| **Codex**       | `SessionStart` | Reports branch/worktree metadata without inferring the task.                                    | `.codex/hooks/codex_session_start.py`           |
 | **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
 | **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/claude_post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`                 |
@@ -159,7 +159,7 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 
 | Path                      | Purpose                                                                                                     |
 | :------------------------ | :---------------------------------------------------------------------------------------------------------- |
-| `CLAUDE.md`               | Claude Code root operating contract.                                                                        |
+| `AGENTS.md`               | Shared root operating contract, read natively by Claude Code and Codex.                                     |
 | `docs/en/git-workflow.md` | Required shared Git authorization contract; retain its path and reset delivery to local-only when adopting. |
 | `docs/en/pr-setup.md`     | Owner setup guide referenced by the contract.                                                               |
 | `GEMINI.md`               | Antigravity root operating contract.                                                                        |
@@ -184,7 +184,7 @@ This repository integrates native capabilities, project-owned skills, and select
 
 This starter kit is shaped by an open-source project:
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), and coding rules are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
 
 ## Initialization
 

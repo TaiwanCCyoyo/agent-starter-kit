@@ -69,9 +69,8 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
     config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
     hook_ids = {hook["id"] for repo in config["repos"] for hook in repo["hooks"]}
     instruction_files = [
-        ROOT / "CLAUDE.md",
+        ROOT / "AGENTS.md",
         ROOT / "GEMINI.md",
-        ROOT / ".codex" / "AGENTS.md",
         *sorted((ROOT / ".agent" / "workflows").rglob("*.md")),
         *sorted((ROOT / ".agent" / "skills").rglob("*.md")),
         *sorted((ROOT / ".claude" / "rules").rglob("*.md")),
@@ -113,18 +112,10 @@ def test_agent_hook_configs_have_no_stop_event() -> None:
     assert set(antigravity["hooks"]) == {"SessionStart", "PostToolUse"}
 
 
-def test_claude_instructions_use_direct_openspec_routing() -> None:
-    claude_instructions = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
-
-    assert ("downstream" + " project") not in claude_instructions.lower()
-    assert "OpenSpec" in claude_instructions
-
-
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
     instructions = {
-        ROOT / "CLAUDE.md": 80,
+        ROOT / "AGENTS.md": 60,
         ROOT / "GEMINI.md": 90,
-        ROOT / ".codex" / "AGENTS.md": 90,
     }
 
     for path, max_lines in instructions.items():
@@ -133,8 +124,8 @@ def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
         assert "## Karpathy Guidelines Condensed" not in content
 
 
-def test_codex_subagents_handoff_sandbox_failures_to_the_parent() -> None:
-    instructions = (ROOT / ".codex" / "AGENTS.md").read_text(encoding="utf-8")
+def test_subagents_handoff_sandbox_failures_to_the_parent() -> None:
+    instructions = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
     assert "sandbox or permission failures as execution-boundary handoffs" in instructions
     assert "subagents must stop and return the exact error" in instructions

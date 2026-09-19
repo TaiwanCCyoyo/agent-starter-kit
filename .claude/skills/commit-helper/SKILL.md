@@ -54,5 +54,5 @@ This check is the **main agent's** responsibility, run after `commit-specialist`
 
 1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
 2. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
-3. Route durable knowledge through Claude Code's built-in memory (`CLAUDE.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
-4. Apply `CLAUDE.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.
+3. Route durable knowledge through Claude Code's built-in memory (`AGENTS.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
+4. Apply `AGENTS.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.

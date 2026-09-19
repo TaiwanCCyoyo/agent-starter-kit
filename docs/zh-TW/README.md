@@ -23,7 +23,7 @@
 ## Agent 記憶與工作流程
 
 - **Codex memory**：`.codex/config.toml` 會啟用原生 local memories，資料存放於 repository 外的使用者 Codex home；使用 `/memories` 控制單一 chat。必要 project rules 仍放在 checked-in guidance。
-- **Claude Code memory**：Claude 使用內建記憶，repository conventions 則寫入 `CLAUDE.md`、rules、文件或 skills。
+- **Claude Code memory**：Claude 使用內建記憶，repository conventions 則寫入 `AGENTS.md`、rules、文件或 skills。
 - **Antigravity**：本 repository 不提供跨 session 記憶庫；耐久知識應放在 checked-in artifacts 與 Git history。
 
 ### Agent 工作流程
@@ -40,7 +40,7 @@
 
 | Agent           | Hook 類型      | 用途                                                               | Script                                          |
 | :-------------- | :------------- | :----------------------------------------------------------------- | :---------------------------------------------- |
-| **Codex**       | `SessionStart` | 注入 `.codex/AGENTS.md`，回報 branch/worktree 資訊，不推測任務。   | `.codex/hooks/codex_session_start.py`           |
+| **Codex**       | `SessionStart` | 回報 branch/worktree 資訊，不推測任務。                            | `.codex/hooks/codex_session_start.py`           |
 | **Codex**       | `PostToolUse`  | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。            | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
 | **Claude Code** | `PostToolUse`  | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。   | `.claude/hooks/claude_post_tool_use_hygiene.py` |
 | **Antigravity** | `SessionStart` | 回報目前 branch 與 workspace 是否為 worktree。                     | `.agent/hooks/session_start.py`                 |
@@ -157,7 +157,7 @@ CI 設定完成後，可直接使用 `gh` 執行日常操作。Dependabot 警示
 
 | Path                      | 用途                                                                                       |
 | :------------------------ | :----------------------------------------------------------------------------------------- |
-| `CLAUDE.md`               | Claude Code 根目錄核心契約。                                                               |
+| `AGENTS.md`               | 共用根目錄核心契約，Claude Code 與 Codex 都會原生讀取。                                    |
 | `docs/en/git-workflow.md` | 必須複製的共用 Git 授權契約；保留路徑，套用時將交付重設為 local-only。                     |
 | `docs/en/pr-setup.md`     | 契約引用的擁有者設定指南。                                                                 |
 | `GEMINI.md`               | Antigravity 根目錄核心契約。                                                               |
@@ -182,7 +182,7 @@ CI 設定完成後，可直接使用 `gh` 執行日常操作。Dependabot 警示
 
 本 starter kit 的架構設計受到一個開源專案的啟發：
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、程式碼規範，以及 `CLAUDE.md` 中的 Prompt Defense Baseline，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode 與 autoloaded project skills 取代。
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、與程式碼規範，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode 與 autoloaded project skills 取代。
 
 ## 初始化
 

@@ -1,6 +1,6 @@
 # Codex Components Reference
 
-Codex uses Native Plan Mode, native local memories, repo-scoped skills, specialist subagents, project hooks, and installed plugins. Its `.codex/AGENTS.md` is semantically aligned with the shared policy in `CLAUDE.md`, while retaining Codex-specific approval and tool constraints.
+Codex uses Native Plan Mode, native local memories, repo-scoped skills, specialist subagents, project hooks, and installed plugins. It reads the shared root `AGENTS.md`, which Codex discovers natively; repository-wide rules live there and nested `AGENTS.md` files scope rules to their own directory.
 
 ## Native And Plugin Equivalents
 
@@ -73,11 +73,11 @@ The seven roles plus the built-in explorer cover current recurring work. Add a r
 
 | Shared behavior                                                   | Codex owner                                               |
 | :---------------------------------------------------------------- | :-------------------------------------------------------- |
-| Operating contract, prompt defense, scoped changes                | `.codex/AGENTS.md`                                        |
-| Research and reuse before implementation                          | `.codex/AGENTS.md` engineering discipline                 |
-| Review severity and CRITICAL/HIGH completion policy               | `.codex/AGENTS.md` review and security section            |
-| Security triggers and secret handling                             | `.codex/AGENTS.md` plus `security_reviewer`               |
-| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                   |
+| Operating contract, scoped changes                                | `AGENTS.md`                                               |
+| Project conventions and tool preferences                          | `AGENTS.md` project conventions                           |
+| Review severity and CRITICAL/HIGH completion policy               | `AGENTS.md` review and security section                   |
+| Security triggers and secret handling                             | `security_reviewer` description plus `.claude/rules/`     |
+| Risk-based test scope                                             | `AGENTS.md` verification section                          |
 | Python development rules                                          | `python-development`                                      |
 | Repository Python verification                                    | `python-testing`                                          |
 | Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
@@ -96,7 +96,7 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 
 | Layer                                         | Responsibility                                                                        |
 | :-------------------------------------------- | :------------------------------------------------------------------------------------ |
-| `.codex/hooks/codex_session_start.py`         | Reports branch/worktree context and injects `.codex/AGENTS.md`                        |
+| `.codex/hooks/codex_session_start.py`         | Reports branch/worktree context                                                       |
 | `.codex/hooks/codex_post_tool_use_hygiene.py` | Read-only targeted Ruff `F` diagnostics for edited Python files                       |
 | `.pre-commit-config.yaml`                     | Formatting, file hygiene, detect-secrets, Ruff including T201, and targeted mypy      |
 | `.vscode/settings.json`                       | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
@@ -117,7 +117,7 @@ Diff inspection is mode-dependent rather than automatic. Missing or rough intent
 
 The edit hook retains only Ruff `F` diagnostics excluding `F401,F841,F842`, limited to Python files named by that event. Full linting and formatting remain in pre-commit; this hook does not auto-fix or expand the lint rule set.
 
-SessionStart retains instruction injection because `.codex/AGENTS.md` is not a root instruction filename in the default discovery chain. It reports checkout metadata without inferring a task from branch names or commit messages. Hooks use the prepared environment with `uv run --no-sync`; set up dependencies before use. PostToolUse runs Ruff once per edit event with `--no-fix` and a timeout, and reports warnings without replacing the original tool result.
+SessionStart no longer injects instructions: Codex discovers the root `AGENTS.md` natively. It reports checkout metadata without inferring a task from branch names or commit messages. Hooks use the prepared environment with `uv run --no-sync`; set up dependencies before use. PostToolUse runs Ruff once per edit event with `--no-fix` and a timeout, and reports warnings without replacing the original tool result.
 
 Entrypoint tests verify protocol output and real Ruff execution, not dispatch from every desktop tool path. Live matcher coverage must be checked in the target runtime before treating hooks as enforcement. Pre-commit remains the completion gate.
 

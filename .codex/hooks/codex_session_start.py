@@ -39,41 +39,17 @@ def get_git_info(root: Path) -> tuple[str, bool]:
         return f"unknown (error: {exc})", False
 
 
-def read_text(path: Path, missing: str = "", *, root: Path) -> str:
-    """Read bounded repository instructions without following an external target."""
-    try:
-        resolved = path.resolve()
-        if not resolved.is_relative_to(root.resolve()) or not resolved.is_file():
-            return missing
-        with resolved.open("r", encoding="utf-8") as stream:
-            content = stream.read(32769)
-        if len(content) > 32768:
-            return "Repository instructions exceed the 32768-character hook limit; read the file directly."
-        return content.strip()
-    except (OSError, UnicodeError, ValueError):
-        return f"Unable to read repository instructions at {path.name}."
-
-
 def main() -> int:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8")
 
     root = repo_root()
     branch, is_worktree = get_git_info(root)
-    codex_instructions = read_text(
-        root / ".codex" / "AGENTS.md",
-        "Codex instructions not found at `.codex/AGENTS.md`.",
-        root=root,
-    )
     sys.stdout.write(
         "## Codex Repository Context\n"
         f"- **Current Git Branch**: `{branch}`\n"
         f"- **Git Worktree Status**: {'Active Worktree' if is_worktree else 'Main Workspace'}\n\n"
-        "Branch metadata describes the checkout, not the user's task.\n\n"
-        "### [Codex Repository Instructions: .codex/AGENTS.md]\n"
-        f"{codex_instructions}\n\n"
-        "---\n"
-        "*This context was automatically injected by the Codex SessionStart hook.*\n"
+        "Branch metadata describes the checkout, not the user's task.\n"
     )
     return 0
 

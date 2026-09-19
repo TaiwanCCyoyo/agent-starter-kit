@@ -1,6 +1,6 @@
 # Codex 元件參考
 
-Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。其 `.codex/AGENTS.md` 與 `CLAUDE.md` 的共享政策保持語意對齊，同時保留 Codex 專屬 approval 與 tool constraints。
+Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。它讀取共用的根目錄 `AGENTS.md`，這是 Codex 原生會尋找的檔案；repository 層級的規則放在該檔，巢狀 `AGENTS.md` 只涵蓋自己所在的目錄。
 
 ## 原生與 Plugin 對應
 
@@ -73,11 +73,11 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | 共享行為                                                          | Codex owner                                             |
 | :---------------------------------------------------------------- | :------------------------------------------------------ |
-| Operating contract、prompt defense、scoped changes                | `.codex/AGENTS.md`                                      |
-| 實作前 research 與 reuse                                          | `.codex/AGENTS.md` engineering discipline               |
-| Review severity 與 CRITICAL/HIGH completion policy                | `.codex/AGENTS.md` review and security section          |
-| Security triggers 與 secret handling                              | `.codex/AGENTS.md` 加上 `security_reviewer`             |
-| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                 |
+| Operating contract、scoped changes                                | `AGENTS.md`                                             |
+| 專案慣例與工具偏好                                                | `AGENTS.md` project conventions                         |
+| Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                 |
+| Security triggers 與 secret handling                              | `security_reviewer` description 加上 `.claude/rules/`   |
+| Risk-based test scope                                             | `AGENTS.md` verification section                        |
 | Python development rules                                          | `python-development`                                    |
 | Repository Python verification                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
@@ -96,7 +96,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | 元件                                          | 用途                                                                            |
 | :-------------------------------------------- | :------------------------------------------------------------------------------ |
-| `.codex/hooks/codex_session_start.py`         | 回報 branch/worktree context 並注入 `.codex/AGENTS.md`                          |
+| `.codex/hooks/codex_session_start.py`         | 回報 branch/worktree context                                                    |
 | `.codex/hooks/codex_post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
 | `.pre-commit-config.yaml`                     | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
 | `.vscode/settings.json`                       | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
@@ -117,7 +117,7 @@ Python verification 在開發期間使用目標式 `uv run python -m pytest`，�
 
 編輯後 hook 保留 Ruff `F`，排除 `F401,F841,F842`，只檢查該次事件指明的 Python 檔案。完整 lint 與排版留給 pre-commit；此 hook 不會自動 fix，也沒有擴大 lint 規則範圍。
 
-SessionStart 保留 instruction injection，因為 `.codex/AGENTS.md` 不是預設 discovery chain 中的 root instruction filename。它回報 checkout metadata，不從 branch names 或 commit messages 推斷 task。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
+SessionStart 不再注入 instructions：Codex 原生就會讀取根目錄的 `AGENTS.md`。它回報 checkout metadata，不從 branch names 或 commit messages 推斷 task。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
 
 Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。Pre-commit 仍是完成 gate。
 
