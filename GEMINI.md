@@ -7,7 +7,7 @@
 - Respect dirty worktrees and never revert user changes unless explicitly requested.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - After completing and successfully verifying a task, automatically commit only the agent-owned changes for that task unless the user asks not to; leave unrelated work unstaged.
-- Follow `docs/en/git-workflow.md` for task isolation, PR delivery authorization, and review/merge boundaries. Remote delivery remains disabled until the owner enables it for this repository.
+- Follow `docs/en/git-workflow.md` for task isolation, PR delivery authorization, and review/merge boundaries. PR delivery is enabled for this repository using the owner's own GitHub credentials; merging stays with the owner.
 - `.references/` contains ignored local clones of upstream projects used for read-only comparison. Do not edit those clones.
 - Use OpenSpec to communicate plans and specs across agents; treat its specs, changes, and tasks as regular project files.
 - `.tmp/` contains ignored repo-local reports, probes, backups, and disposable task artifacts. Prefer it over OS `/tmp` for workspace-related temporary output, preserve files you did not create, and verify paths before cleanup.

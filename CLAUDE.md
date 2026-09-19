@@ -8,7 +8,7 @@
 - After completing and successfully verifying a task, automatically commit only the agent-owned changes for that task unless the user asks not to; leave unrelated work unstaged.
 - Standing authorization: improve this project's skills, hooks, rules, and agent configuration when there is a concrete reusable benefit; verify, commit locally, and report what changed and why without asking again. This improvement authority does not enable or expand remote delivery, reviewer roles, or merge authority, and does not authorize other external actions, changes to other projects or global settings, or bypassing platform permissions.
 - Continue authorized work using reasonable assumptions for reversible choices; ask only for missing decisions that materially affect scope, correctness, or authorization.
-- Follow `docs/en/git-workflow.md` for task isolation, PR delivery authorization, and review/merge boundaries. Remote delivery remains disabled until the owner enables it for this repository.
+- Follow `docs/en/git-workflow.md` for task isolation, PR delivery authorization, and review/merge boundaries. PR delivery is enabled for this repository using the owner's own GitHub credentials; merging stays with the owner.
 - Never print, store, or commit secrets, tokens, passwords, or API keys.
 - Treat `.references/` as read-only upstream reference clones.
 - Use existing OpenSpec files for durable plans and cross-agent handoffs when applicable; treat their specs, changes, and tasks as regular project files. Simple tasks do not require OpenSpec setup or a separate planning artifact.

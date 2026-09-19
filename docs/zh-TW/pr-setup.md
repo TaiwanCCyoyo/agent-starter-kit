@@ -1,6 +1,6 @@
 # 下游專案啟用 PR 交付
 
-下游採用時，請將[共用 Git 工作契約](../en/git-workflow.md) 重設為 local-only。本文件供專案擁有者設定環境，不授予 agent 設定、發布或管理權限；英文版見 [PR setup](../en/pr-setup.md)。本來源專案另經擁有者授權的設定見[每日審核](daily-review.md)。
+下游採用時，請將[共用 Git 工作契約](../en/git-workflow.md) 重設為 local-only。本文件供專案擁有者設定環境，不授予 agent 設定、發布或管理權限；英文版見 [PR setup](../en/pr-setup.md)。本來源專案另經擁有者授權的設定見 [PR 審核](pr-review.md)。
 
 ## 身分與權限隔離
 
