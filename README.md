@@ -38,11 +38,10 @@ Start with the component reference for the agent you use; you do not need to con
 
 This repository uses agent-native hooks to maintain system integrity:
 
-| Agent           | Hook Type      | Purpose                                                                                         | Script                                          |
-| :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :---------------------------------------------- |
-| **Codex**       | `SessionStart` | Reports branch/worktree metadata without inferring the task.                                    | `.codex/hooks/codex_session_start.py`           |
-| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
-| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/claude_post_tool_use_hygiene.py` |
+| Agent           | Hook Type     | Purpose                                                                                         | Script                                          |
+| :-------------- | :------------ | :---------------------------------------------------------------------------------------------- | :---------------------------------------------- |
+| **Codex**       | `PostToolUse` | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
+| **Claude Code** | `PostToolUse` | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/claude_post_tool_use_hygiene.py` |
 
 ### Troubleshooting Hooks
 

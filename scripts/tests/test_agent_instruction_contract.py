@@ -5,7 +5,6 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-SESSION_HOOKS = (ROOT / ".codex" / "hooks" / "codex_session_start.py",)
 
 
 def test_pre_commit_mypy_receives_targeted_python_files() -> None:
@@ -73,15 +72,11 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
         assert "uv run mypy" not in content, path
 
 
-def test_session_hooks_do_not_depend_on_shared_memory_bootstrap() -> None:
+def test_hooks_do_not_depend_on_shared_memory_bootstrap() -> None:
     ruff_config = (ROOT / "ruff.toml").read_text(encoding="utf-8")
 
     assert "[lint.per-file-ignores]" not in ruff_config
     assert "E402" not in ruff_config
-
-    for hook_path in SESSION_HOOKS:
-        hook_content = hook_path.read_text(encoding="utf-8")
-        assert "def main(" in hook_content
 
 
 def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
@@ -92,10 +87,11 @@ def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
     assert "mcp_servers" not in config
 
 
-def test_agent_hook_configs_have_no_stop_event() -> None:
+def test_agent_hook_configs_only_run_read_only_post_tool_diagnostics() -> None:
     codex = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
 
-    assert set(codex["hooks"]) == {"SessionStart", "PostToolUse"}
+    assert set(codex["hooks"]) == {"PostToolUse"}
+    assert not (ROOT / ".codex" / "hooks" / "codex_session_start.py").exists()
 
 
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:

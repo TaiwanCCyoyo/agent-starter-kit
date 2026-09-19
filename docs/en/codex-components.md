@@ -96,7 +96,6 @@ Shared development behavior now mirrors the Claude common-rule routing layer: pl
 
 | Layer                                         | Responsibility                                                                        |
 | :-------------------------------------------- | :------------------------------------------------------------------------------------ |
-| `.codex/hooks/codex_session_start.py`         | Reports branch/worktree context                                                       |
 | `.codex/hooks/codex_post_tool_use_hygiene.py` | Read-only targeted Ruff `F` diagnostics for edited Python files                       |
 | `.pre-commit-config.yaml`                     | Formatting, file hygiene, detect-secrets, Ruff including T201, and targeted mypy      |
 | `.vscode/settings.json`                       | Final-newline and trailing-whitespace hygiene plus Ruff formatter defaults for Python |
@@ -117,7 +116,7 @@ Diff inspection is mode-dependent rather than automatic. Missing or rough intent
 
 The edit hook retains only Ruff `F` diagnostics excluding `F401,F841,F842`, limited to Python files named by that event. Full linting and formatting remain in pre-commit; this hook does not auto-fix or expand the lint rule set.
 
-SessionStart no longer injects instructions: Codex discovers the root `AGENTS.md` natively. It reports checkout metadata without inferring a task from branch names or commit messages. Hooks use the prepared environment with `uv run --no-sync`; set up dependencies before use. PostToolUse runs Ruff once per edit event with `--no-fix` and a timeout, and reports warnings without replacing the original tool result.
+Codex runs no SessionStart hook. It discovers the root `AGENTS.md` natively, and branch or worktree context is a Git command away, so neither needs injecting. Hooks use the prepared environment with `uv run --no-sync`; set up dependencies before use. PostToolUse runs Ruff once per edit event with `--no-fix` and a timeout, and reports warnings without replacing the original tool result.
 
 Entrypoint tests verify protocol output and real Ruff execution, not dispatch from every desktop tool path. Live matcher coverage must be checked in the target runtime before treating hooks as enforcement. Pre-commit remains the completion gate.
 

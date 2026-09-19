@@ -96,7 +96,6 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | 元件                                          | 用途                                                                            |
 | :-------------------------------------------- | :------------------------------------------------------------------------------ |
-| `.codex/hooks/codex_session_start.py`         | 回報 branch/worktree context                                                    |
 | `.codex/hooks/codex_post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
 | `.pre-commit-config.yaml`                     | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
 | `.vscode/settings.json`                       | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
@@ -117,7 +116,7 @@ Python verification 在開發期間使用目標式 `uv run python -m pytest`，�
 
 編輯後 hook 保留 Ruff `F`，排除 `F401,F841,F842`，只檢查該次事件指明的 Python 檔案。完整 lint 與排版留給 pre-commit；此 hook 不會自動 fix，也沒有擴大 lint 規則範圍。
 
-SessionStart 不再注入 instructions：Codex 原生就會讀取根目錄的 `AGENTS.md`。它回報 checkout metadata，不從 branch names 或 commit messages 推斷 task。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
+Codex 不使用 SessionStart hook。根目錄的 `AGENTS.md` 由 Codex 原生讀取，branch 與 worktree 資訊跑一行 Git 指令即可取得，兩者都不需要注入。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
 
 Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。Pre-commit 仍是完成 gate。
 
