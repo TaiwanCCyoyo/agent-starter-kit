@@ -1,6 +1,6 @@
 # Git Workflow Contract
 
-Shared by Codex, Claude Code, and Antigravity. Use native Git and GitHub capabilities; commit skills own local verification and commits.
+Shared by Codex and Claude Code. Use native Git and GitHub capabilities; commit skills own local verification and commits.
 
 ## Task isolation
 

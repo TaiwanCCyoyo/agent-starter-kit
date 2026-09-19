@@ -5,10 +5,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-SESSION_HOOKS = (
-    ROOT / ".agent" / "hooks" / "session_start.py",
-    ROOT / ".codex" / "hooks" / "codex_session_start.py",
-)
+SESSION_HOOKS = (ROOT / ".codex" / "hooks" / "codex_session_start.py",)
 
 
 def test_pre_commit_mypy_receives_targeted_python_files() -> None:
@@ -45,24 +42,18 @@ def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     codex_config = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
-    antigravity_config = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
 
     assert set(claude_settings["hooks"]) == {"PostToolUse"}
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
     assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
-    assert antigravity_config["hooks"]["PostToolUse"][0]["matcher"] == "*"
     assert (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").exists()
     assert (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").exists()
-    assert (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").exists()
 
     claude_hook = (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").read_text(encoding="utf-8")
     codex_hook = (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").read_text(encoding="utf-8")
-    antigravity_hook = (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
     assert '"E722,F601,F602,F634"' in claude_hook
     assert '"--no-fix"' in claude_hook
     assert '"F401,F841,F842"' in codex_hook
-    assert '"E722,F601,F602,F634"' in antigravity_hook
-    assert '"--no-fix"' in antigravity_hook
 
 
 def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
@@ -70,9 +61,6 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
     hook_ids = {hook["id"] for repo in config["repos"] for hook in repo["hooks"]}
     instruction_files = [
         ROOT / "AGENTS.md",
-        ROOT / "GEMINI.md",
-        *sorted((ROOT / ".agent" / "workflows").rglob("*.md")),
-        *sorted((ROOT / ".agent" / "skills").rglob("*.md")),
         *sorted((ROOT / ".claude" / "rules").rglob("*.md")),
         *sorted((ROOT / ".claude" / "skills").rglob("*.md")),
         *sorted((ROOT / ".codex" / "skills").rglob("*.md")),
@@ -106,17 +94,12 @@ def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
 
 def test_agent_hook_configs_have_no_stop_event() -> None:
     codex = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
-    antigravity = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
 
     assert set(codex["hooks"]) == {"SessionStart", "PostToolUse"}
-    assert set(antigravity["hooks"]) == {"SessionStart", "PostToolUse"}
 
 
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
-    instructions = {
-        ROOT / "AGENTS.md": 60,
-        ROOT / "GEMINI.md": 90,
-    }
+    instructions = {ROOT / "AGENTS.md": 60}
 
     for path, max_lines in instructions.items():
         content = path.read_text(encoding="utf-8")
@@ -294,8 +277,6 @@ def test_commit_workflows_do_not_require_agent_status() -> None:
         ROOT / ".claude" / "commands" / "gen-commit.md",
         ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
         ROOT / ".claude" / "agents" / "commit-specialist.md",
-        ROOT / ".agent" / "workflows" / "gen-commit.md",
-        ROOT / ".agent" / "skills" / "commit-helper" / "SKILL.md",
     )
 
     for path in commit_files:

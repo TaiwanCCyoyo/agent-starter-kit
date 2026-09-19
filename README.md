@@ -2,7 +2,7 @@
 
 # AI Agent Starter Kit
 
-A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover project rules, skills, workflows, and verification expectations quickly.
+A standardized, frictionless engineering infrastructure for Codex and Claude Code. Use this repository as a project template when you want every supported agent to discover project rules, skills, workflows, and verification expectations quickly.
 
 ## Core Philosophy
 
@@ -26,7 +26,6 @@ A standardized, frictionless engineering infrastructure for Codex, Claude Code, 
 
 - **Codex memory**: Native local memories are enabled by `.codex/config.toml` and stored under the user's Codex home outside the repository; use `/memories` for chat-level controls. Required project rules remain in checked-in guidance.
 - **Claude Code memory**: Claude uses its built-in memory and routes repository conventions to `AGENTS.md`, rules, documentation, or skills.
-- **Antigravity**: This repository does not provide a cross-session memory store; durable knowledge belongs in checked-in artifacts and Git history.
 
 ### Agent Workflows
 
@@ -34,7 +33,6 @@ Start with the component reference for the agent you use; you do not need to con
 
 - **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
 - **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
-- **Antigravity**: Uses root `GEMINI.md` for core operating contract, `.agent/workflows/` for custom slash commands (e.g. `/gen-commit`, `/worktree`), `.agent/skills/` for repo-scoped skills, and `.agent/hooks.json` for lifecycle hooks. For details, see [Antigravity Components Reference](docs/en/antigravity-components.md).
 
 ## Automated Hooks & Lifecycle
 
@@ -45,8 +43,6 @@ This repository uses agent-native hooks to maintain system integrity:
 | **Codex**       | `SessionStart` | Reports branch/worktree metadata without inferring the task.                                    | `.codex/hooks/codex_session_start.py`           |
 | **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
 | **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/claude_post_tool_use_hygiene.py` |
-| **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`                 |
-| **Antigravity** | `PostToolUse`  | Reports targeted Ruff `E722,F601,F602,F634` diagnostics without modifying files.                | `.agent/hooks/post_tool_use_hygiene.py`         |
 
 ### Troubleshooting Hooks
 
@@ -58,8 +54,7 @@ If hooks are not firing:
     ```
 2. For Codex, verify `.codex/config.toml` enables `hooks` and `memories`, and `.codex/hooks.json` points to `.codex/hooks/`.
 3. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
-4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
-5. Confirm the agent trusts the project-local configuration layer.
+4. Confirm the agent trusts the project-local configuration layer.
 
 ## Git and PR Boundaries
 
@@ -162,8 +157,6 @@ When applying this starter kit to a new project, copy the agent infrastructure t
 | `AGENTS.md`               | Shared root operating contract, read natively by Claude Code and Codex.                                     |
 | `docs/en/git-workflow.md` | Required shared Git authorization contract; retain its path and reset delivery to local-only when adopting. |
 | `docs/en/pr-setup.md`     | Owner setup guide referenced by the contract.                                                               |
-| `GEMINI.md`               | Antigravity root operating contract.                                                                        |
-| `.agent/`                 | Antigravity hooks, workflows (slash commands), and repo-scoped skills.                                      |
 | `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                              |
 | `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules.               |
 | `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                                |
@@ -178,7 +171,6 @@ This repository integrates native capabilities, project-owned skills, and select
 
 - **Claude Code**: The project settings intentionally disable the Superpowers, Ponytail, and Karpathy plugins. Native Claude capabilities, project-owned `.claude/` agents, commands, skills, rules, and hooks provide the workflow; GitHub, skill-creator, and Pyright LSP remain enabled.
 - **Codex**: Does not depend on Superpowers, Ponytail, or external Karpathy skills. Native Codex capabilities, project-scoped agents and skills provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
-- **Antigravity**: Uses native Planning Mode, the dedicated root `GEMINI.md` operating contract, and repo-scoped skills in `.agent/skills/`. Its architecture is fully aligned with the Claude Code and Codex layers while maintaining strict namespace isolation.
 
 ## Design Influences
 
