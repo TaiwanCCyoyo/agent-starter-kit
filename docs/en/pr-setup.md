@@ -1,6 +1,6 @@
 # Enable PR Delivery in a Downstream Project
 
-Reset the [Git workflow contract](git-workflow.md) to local-only when adopting this template. This guide is for repository owners; it does not grant agents setup, publishing, or administration authority. This source repository's separately approved configuration is documented in [daily review](daily-review.md).
+Reset the [Git workflow contract](git-workflow.md) to local-only when adopting this template. This guide is for repository owners; it does not grant agents setup, publishing, or administration authority. This source repository's separately approved configuration is documented in [PR review](pr-review.md).
 
 ## Identity and enforcement
 
