@@ -52,17 +52,27 @@
             "Bash(git config --get *)",
             "Bash(mypy *)",
             "Bash(cat .git/COMMIT_EDITMSG)",
-            "Bash(cat .git/HEAD)"
+            "Bash(cat .git/HEAD)",
+            "Bash(git push)",
+            "Bash(git push *)"
         ],
         "deny": [
+            "Bash(git push -f *)",
+            "Bash(git push --force)",
             "Bash(git push --force *)",
+            "Bash(git push --force-with-lease)",
             "Bash(git push --force-with-lease *)",
+            "Bash(git push --mirror *)",
+            "Bash(git push --prune *)",
+            "Bash(git push --delete *)",
+            "Bash(git push * --delete *)",
+            "Bash(git push * -f *)",
+            "Bash(git push * --force *)",
             "Bash(rm -rf .git *)",
             "Bash(rm -rf .git)",
             "Bash(rm -r .git *)",
             "Bash(rm -r .git)"
         ],
-        "ask": ["Bash(git push *)", "Bash(git push)"],
         "defaultMode": "auto"
     },
     "model": "opusplan",
