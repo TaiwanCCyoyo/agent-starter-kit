@@ -11,7 +11,7 @@ Codex uses Native Plan Mode, native local memories, repo-scoped skills, speciali
 | TDD, debugging, worktrees, completion verification  | Native Codex capabilities, project skills, and explicit checks |
 | GitHub issues, PRs, CI, review comments, publishing | Installed GitHub plugin                                        |
 | Slash commands                                      | Natural-language skill triggers                                |
-| Cross-session planning                              | Native planning plus optional project-owned OpenSpec files     |
+| Cross-session planning                              | Native planning plus maintained plan artifacts                 |
 | Cross-session recall                                | Native Codex local memories, enabled by project configuration  |
 
 Codex keeps planning and implementation authority in the main agent. Read-only agents provide critique, security review, verification feedback, and context-isolated evidence summaries from broad searches, logs, test output, diffs, or commands whose stdout would overwhelm the main context; they do not replace Codex Native Plan Mode or own publication and integration. The main agent follows the [shared Git workflow contract](git-workflow.md).
@@ -53,7 +53,7 @@ The seven roles plus the built-in explorer cover current recurring work. Add a r
 
 | Claude capability                                            | Codex decision                       | Reason                                                                                                                                                                                                   |
 | :----------------------------------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/plan`                                                      | Native/optional artifact replacement | Conversational planning is provided by native Plan Mode. Durable PRD-based or cross-session planning handoff may use project-owned OpenSpec files when present.                                          |
+| `/plan`                                                      | Native/optional artifact replacement | Conversational planning is provided by native Plan Mode. Durable cross-session handoff uses a maintained plan artifact.                                                                                  |
 | `plan-reviewer`                                              | Ported                               | Independent plan critique is useful and does not duplicate plan creation.                                                                                                                                |
 | `/feature-dev`                                               | Native replacement                   | Brainstorming, Plan Mode, test-first development, verification, and review already form the workflow.                                                                                                    |
 | `/build-fix`                                                 | Native replacement                   | Evidence-driven debugging plus repository verification covers incremental diagnosis and repair.                                                                                                          |
@@ -82,15 +82,14 @@ The seven roles plus the built-in explorer cover current recurring work. Add a r
 | Repository Python verification                                    | `python-testing`                                          |
 | Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
 
-Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode or optional project-owned OpenSpec files; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and follow the [shared Git workflow contract](git-workflow.md) for delivery and integration authority.
+Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and follow the [shared Git workflow contract](git-workflow.md) for delivery and integration authority.
 
 ## Plans, Native Memory, And Commits
 
 - `.references/` is read-only local reference storage for upstream clones and comparison material.
-- OpenSpec specs, changes, and tasks are regular project files when present; commit them when they are part of the project record.
 - Codex native local memories live under the user's Codex home outside the repository and provide optional recall; required repository rules remain in checked-in guidance.
-- Include applicable OpenSpec status and workflow corrections in the verified commit when possible. Standing authorization permits project-local skills, hooks, rules, and agent configuration improvements without repeated approval: validate, commit locally, and report what changed and why. External actions, global settings, and platform permissions are outside that authorization.
-- Native memory writes require an explicit user request under the active storage rules.
+- Include applicable workflow corrections in the verified commit when possible. Standing authorization permits project-local skills, hooks, rules, and agent configuration improvements without repeated approval: validate, commit locally, and report what changed and why. External actions, global settings, and platform permissions are outside that authorization.
+- Memory writes need no prior approval; report afterwards when stored content changes future behavior.
 
 ## Hooks And Gates
 

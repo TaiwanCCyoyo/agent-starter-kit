@@ -1,197 +1,117 @@
-[English Version](../../README.md)
+[English](../../README.md)
 
 # AI Agent Starter Kit
 
-這是一套標準化、低摩擦的多 Agent 工程基礎設施，支援 Codex 與 Claude Code。當你希望新專案中的各種 Agent 能快速理解規則、工作流程與驗證要求時，可以把本 repository 當作模板使用。
+一套專案模板，讓 Codex 與 Claude Code 共享一份操作契約、配對式工具設置與相同的本地及 CI 驗證流程。
 
-## 核心理念
+當你希望新專案中的兩個 agent 都能無需特別指引而發現專案的規則、skills 與驗收標準時，可以把本套組當作範本複製使用。
 
-1. **Agent 原生 Context**：Codex 與 Claude Code 使用各自的原生 local memory；必要專案知識保留在版本控制 guidance。
-2. **Agent 專屬啟動層**：每個 Agent 擁有自己的原生 instruction 與 hook 層。
-3. **自動化維護**：格式化、lint 與檔案衛生檢查由 Agent hooks 與 repository 驗證腳本執行。
-4. **原生安全檢查**：透過 `detect-secrets` 整合 pre-commit secret scanning。
-5. **編碼與語言一致性**：驗證 repository 檔案使用 UTF-8 without BOM，並遵守語言邊界。
-6. **驗證優先**：Agent 在進行非瑣碎變更前須先說明驗證計畫，修改後執行驗證，並提供結果作為完成的證據。
+## The idea: one contract, enforced elsewhere
 
-## 目前預設值
+兩個 agent 都讀取單一根目錄的 `AGENTS.md`。Claude Code 與 Codex 原生會自動探索該檔名，所以不需要注入任何設定。
 
-- **共用開發規則**：Codex 與 Claude Code 採用同一套階段路由：原生規劃負責 plan，repository-owned skills 與直接驗證負責實作工作，品質與安全由專用 reviewers 處理，commit/PR 流程有明確 owner。
-- **分層驗證**：Claude Code 透過官方 Pyright LSP plugin 與唯讀的 Ruff `E722,F601,F602,F634` check 取得即時 diagnostics；Codex 因沒有 Python LSP，對 Python 編輯使用較廣的唯讀 Ruff `F` check。兩者都會在完成前執行 pre-commit，由其統一負責 formatting、linting、型別檢查與檔案驗證。
-- **安全審查契約**：涉及安全敏感面的變更會路由到 dedicated security reviewers；任何 `CRITICAL` security 或 data-loss 風險都必須先修正，不能直接宣告完成。
-- **編輯器衛生**：`.vscode/settings.json` 會移除行尾空白、保留單一 final newline、啟用 Python Ruff formatting，並將產生的 cache 與本機 agent state 排除於搜尋與 watcher 之外。
+`AGENTS.md` 刻意保持精簡。一項規則只有在無法由其他層級陳述或執行時，才值得列在其中。所有其他指引都存放在實際執行的地方：
 
-## Agent 記憶與工作流程
+| 層級                                | 負責範圍                                               |
+| :---------------------------------- | :----------------------------------------------------- |
+| `AGENTS.md`                         | 授權、專案慣例、審查嚴重性與記憶邊界                   |
+| `.pre-commit-config.yaml`           | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查 |
+| `.github/workflows/ci.yml`          | repository 層級的合併前檢查閘道                        |
+| `.claude/rules/`                    | 路徑限定的程式碼規範，觸發時才載入                     |
+| `.claude/skills/`, `.codex/skills/` | 任務類別工作流程，由各自的 `description` 觸發載入      |
+| `.claude/agents/`, `.codex/agents/` | Subagent 角色與路由，由各自的 `description` 選定       |
 
-- **Codex memory**：`.codex/config.toml` 會啟用原生 local memories，資料存放於 repository 外的使用者 Codex home；使用 `/memories` 控制單一 chat。必要 project rules 仍放在 checked-in guidance。
-- **Claude Code memory**：Claude 使用內建記憶，repository conventions 則寫入 `AGENTS.md`、rules、文件或 skills。
+有兩點值得直言：
 
-### Agent 工作流程
+- **`AGENTS.md` 不列舉個別 skill 或 subagent。** 路由應由各元件的 `description` 指定，檢索已在該處進行。在契約中列舉名稱會重複且容易過時。
+- **`AGENTS.md` 不陳述模型已知的事項。** 通用工程素養、讀程式碼後再改動、不 commit secrets 等原則被省略了，因為模型自帶前兩項，`detect-secrets` 強制執行第三項。
 
-先閱讀你使用的 agent 所對應的元件參考文件；不必設定所有支援的 agent。
+結果就是一份簡潔的契約，只在專案實際約束改變時才需要更新。
 
-- **Codex**：使用原生 Plan Mode、`.codex/skills/` 裡的 repo-scoped skills，以及 `.codex/agents/` 裡的專職 reviewer agents。Command-like skills 可以用 `/gen-commit` 這類純文字呼叫，但不會註冊成真正的 slash command。詳細內容請見 [Codex 元件參考](codex-components.md)。
-- **Claude Code**：使用 `.claude/commands/` 裡已註冊的 slash commands（例如 `/gen-commit`、`/worktree`）。子代理人定義在 `.claude/agents/`。Path-scoped 程式碼規範放在 `.claude/rules/`。完整元件清單請參考 [Claude Code 元件參考](claude-components.md)。
+## What to copy
 
-## 自動化 Hooks 與生命週期
+| 路徑                      | 用途                                                              |
+| :------------------------ | :---------------------------------------------------------------- |
+| `AGENTS.md`               | 所有 agent 的共用根目錄操作契約                                   |
+| `.pre-commit-config.yaml` | Repository 驗證 hooks                                             |
+| `scripts/`                | 所有 agent 共用的 shell 中立衛生與格式檢查                        |
+| `.claude/`                | Claude Code 設定、hooks、slash commands、subagents、skills 與規則 |
+| `.codex/`                 | Codex 組態、hooks、command-like skills 與專職 agents              |
+| `.github/workflows/`      | 執行與 agent 本地相同檢查的 CI                                    |
+| `docs/en/git-workflow.md` | Git 與交付授權契約；保留路徑，重置狀態                            |
+| `docs/en/pr-setup.md`     | 擁有者設定指南，用於啟用 PR 交付                                  |
+| `.vscode/`                | 檔案衛生與 Ruff 工作流程對齊的編輯器預設值                        |
 
-本 repository 使用各 Agent 原生 hooks 維護系統一致性：
+只複製你使用的 agent 目錄。兩個 agent 都不需要另一個的層級。
 
-| Agent           | Hook 類型     | 用途                                                             | Script                                          |
-| :-------------- | :------------ | :--------------------------------------------------------------- | :---------------------------------------------- |
-| **Codex**       | `PostToolUse` | 對修改後的 Python 檔案回報唯讀的 Ruff `F` diagnostics。          | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
-| **Claude Code** | `PostToolUse` | 回報補充 Pyright 的唯讀 Ruff `E722,F601,F602,F634` diagnostics。 | `.claude/hooks/claude_post_tool_use_hygiene.py` |
+## Setting up
 
-### Hook 疑難排解
-
-如果 hooks 沒有觸發：
-
-1. 確認 Git hooks 已安裝：
-    ```bash
-    uv run pre-commit install
-    ```
-2. Codex：檢查 `.codex/config.toml` 是否啟用 `hooks` 與 `memories`，以及 `.codex/hooks.json` 是否指向 `.codex/hooks/`。
-3. Claude Code：檢查 `.claude/settings.json` 是否有 `hooks` 區塊；若 hooks 是在 session 中途新增的，請在 Claude Code UI 中開啟 `/hooks` 重新載入設定。
-4. 確認 Agent 已信任 project-local configuration layer。
-
-## Git 與 PR 界線
-
-獨立修改任務使用隔離的 branch／worktree。[共用 Git 工作契約](../en/git-workflow.md) 定義交付、審核、合併與清理權限。目前交付停在驗證完成的本地 commit；專案擁有者完成[下游 PR 設定](pr-setup.md) 後，可啟用任務分支推送與 PR 的常設授權。操作交給原生 Git／GitHub 能力，不另增 PR skill。
-
-## 權限與安全政策設定
-
-執行環境權限與任務授權分開管理。目前遠端身分與保護設定尚未完成，因此保留 push 確認；工作契約不會繞過平台權限。
-
-### Claude Code（`.claude/settings.json`）
-
-權限宣告在 `.claude/settings.json`，不需修改全域設定即可生效：
-
-- **允許 (allow)**：設定中列出的讀取與診斷操作；精確模式以 `.claude/settings.json` 為準。
-- **需要確認 (ask)**：`git push`，防止意外推送到遠端。
-- **封鎖 (deny)**：設定中列出的 force push 與 `.git` 刪除命令模式；這些模式不能取代 GitHub 分支保護。
-
-### Codex
-
-Codex 在本 starter kit 不提供 repository-local permission rules。Permission review 交由已設定的 approvals reviewer 處理，例如「代我審核」/ auto-review workflow，而不是 `.codex/rules/`。
-
-Codex 的規劃由主 agent 透過 Plan Mode 承擔；本 starter kit 不新增獨立的 Codex planner agent。
-
-## CI/CD Setup
-
-Agent 透過 hooks 在本地端執行品質把關，但 CI pipeline 能在每次推送時捕捉問題，並讓整個團隊看到品質閘道的狀態。本節提供一個最精簡的起點。
-
-### 建議的 GitHub Actions Workflow
-
-在你的專案中建立 `.github/workflows/ci.yml`：
-
-```yaml
-name: CI
-
-on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-
-permissions:
-    contents: read
-
-jobs:
-    quality:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  persist-credentials: false
-
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
-
-            - name: Install dependencies
-              run: pip install uv && uv sync --group dev
-
-            - name: Lint
-              run: uv run ruff check --fix .
-
-            - name: Type check
-              run: uv run mypy .
-
-            - name: Test
-              run: uv run pytest
-
-            - name: Secret scan
-              run: uv run pre-commit run detect-secrets --all-files
+```bash
+uv sync --group dev
+uv run pre-commit install
 ```
 
-請調整 `pytest` 步驟以符合你的專案測試目錄，並將 Python 版本調整為與 `.python-version` 一致。
+然後驗證檢查執行：
 
-### GitHub CLI 操作
+```bash
+uv run pre-commit run --all-files
+uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+```
 
-CI 設定完成後，可直接使用 `gh` 執行日常操作。Dependabot 警示的讀取與修復由共用的 `dependabot-remediation` skill 負責。
+## Adapting it to your project
 
-| 任務               | 指令                                      |
-| :----------------- | :---------------------------------------- |
-| 查看失敗執行的日誌 | `gh run view <run-id> --log-failed`       |
-| 重新執行失敗步驟   | `gh run rerun <run-id> --failed`          |
-| 列出最近的失敗記錄 | `gh run list --status failure --limit 10` |
+### 1. Reset delivery authorization
 
-需先安裝 `gh` CLI 並完成驗證（`gh auth login`）。
+`docs/en/git-workflow.md` 記錄了此 repository 自己的交付狀態。**在用範本於他處前，先將其目前狀態項目重設為 local-only。** 複製檔案並不授予發佈權限；啟用它請見 [PR setup](pr-setup.md)。
 
-### CI 失敗疑難排解
+永遠不變的規則：agent 永不 commit 或 push 到預設分支。一切都必須經過 pull request 到達。
 
-1. **先在本地重現** — 在遠端調查之前，先執行 workflow 所使用的相同指令（`ruff check --fix .`、`mypy .`、`pytest`）。
-2. **閱讀完整日誌** — `gh run view <run-id> --log-failed` 只會顯示失敗步驟的輸出。
-3. **檢查環境差異** — Python 版本不符、缺少環境變數或未執行 `uv sync` 是最常見的原因。
-4. **區分偶發性失敗與真實錯誤** — 若同一個測試在本地通過但在遠端持續失敗，通常是環境問題，而非偶發性不穩定測試。
+### 2. Adjust the CI workflow
 
-## 模板使用方式
+`.github/workflows/ci.yml` 在 Windows 上執行完整的 pre-commit 加 agent hook 測試，因為 Windows 是此範本的主要開發平台。更改 runner、Python 版本與測試路徑以符合你的專案，然後把該 job 設為預設分支上的必需檢查。將任何第三方 action 鎖定到完整 commit SHA。
 
-套用到新專案時，依照支援的工具複製對應的 Agent 基礎設施：
+本地 pre-commit 結果不是合併閘道。CI 才是。
 
-| Path                      | 用途                                                                                       |
-| :------------------------ | :----------------------------------------------------------------------------------------- |
-| `AGENTS.md`               | 共用根目錄核心契約，Claude Code 與 Codex 都會原生讀取。                                    |
-| `docs/en/git-workflow.md` | 必須複製的共用 Git 授權契約；保留路徑，套用時將交付重設為 local-only。                     |
-| `docs/en/pr-setup.md`     | 契約引用的擁有者設定指南。                                                                 |
-| `.codex/`                 | Codex instructions、hooks、private command-like skills、specialist agents。                |
-| `.claude/`                | Claude Code settings、hooks、slash commands、subagents、skills 與 path-scoped 程式碼規範。 |
-| `.vscode/`                | 與 file hygiene 與 Python Ruff workflow 對齊的 workspace editor defaults。                 |
-| `scripts/`                | Repository 層級的檔案衛生與格式化腳本，供 Git 與 Agent adapters 呼叫。                     |
-| `.pre-commit-config.yaml` | Repository 層級驗證 hooks。                                                                |
+### 3. Rewrite the rules that are actually yours
 
-複製後，請檢查各 Agent 專屬規則，使用 `uv run pre-commit install` 安裝 hooks，並以 `uv run ruff check --fix .` 驗證。
+開啟 `AGENTS.md` 並刪除不適用於你專案的內容。繁體中文溝通、`scripts/` shell 中立需求與 Windows 路徑預期都是此範本的約束，不是通用的。保持形狀——授權、慣例、審查、skills、記憶、驗證、委派——並替換內容。
 
-### Agent workflow plugins 與 skills 整合
+對你加入的任何東西套用同一套測試：如果 pre-commit、CI、路徑限定的規則或 skill description 能承載它，就把它放在那裡，而不是這裡。
 
-本儲存庫依不同 Agent 採用不同方式整合原生能力、project-owned skills 與選用的 plugins：
+### 4. Consider OpenSpec for durable planning
 
-- **Claude Code**：專案設定刻意停用 Superpowers、Ponytail 與 Karpathy plugins。工作流程由 Claude 原生能力，以及 project-owned 的 `.claude/` agents、commands、skills、rules 與 hooks 提供；GitHub、skill-creator 與 Pyright LSP 仍維持啟用。
-- **Codex**：不依賴 Superpowers、Ponytail 或外部 Karpathy skills。工作流程由 Codex 原生能力、project-scoped agents 與 skills 提供；GitHub 整合則由可用的 GitHub plugin 提供。
+此範本不 commit `openspec/` 目錄，`AGENTS.md` 也不提及它，因為規劃狀態屬於各專案而非範本。從此 kit 建構的專案已發現它值得添加來應付長期工作：執行 `openspec init`，然後把生成的 specs、changes 與 tasks 當作一般專案檔案對待並 commit 為專案紀錄的一部分。它為跨 session 工作提供持久追蹤，超越任何單一 agent session。
 
-## 設計來源
+### 5. Set up permissions
 
-本 starter kit 的架構設計受到一個開源專案的啟發：
+Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。此範本允許普通 `git push` 並禁用 force-push、mirror、prune 與 delete 變體，加上 `.git` 刪除。這些是便利性設施，不是安全邊界——server 端分支保護才是。
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 提供生產就緒的 agents、skills、hooks、commands 與 rules。專職 agents（`code-reviewer`、`tdd-guide`、`security-reviewer` 等）、與程式碼規範，均移植或改編自 ECC v2.0.0-rc.1。大多數開發用 slash commands 已陸續退役，改以 Native Plan Mode 與 autoloaded project skills 取代。
+Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
 
-## 初始化
+## Per-agent references
 
-要初始化此儲存庫並設定驗證工具：
+從你使用的 agent 對應參考文件開始。不必設定兩個都。
 
-1. **安裝 Git Hooks**
-    ```bash
-    uv run pre-commit install
-    ```
-2. **安裝開發相依套件**（包含 mypy 型別檢查器）
-    ```bash
-    uv sync --group dev
-    ```
-3. **驗證環境設定**
-    ```bash
-    uv run ruff check --fix .
-    ```
+- **[Claude Code Components](claude-components.md)** — `.claude/` 中的 subagents、slash commands、skills、hooks 與路徑限定規則。
+- **[Codex Components](codex-components.md)** — `.codex/` 中的專職 agents、command-like skills、hooks 與模型路由。
+- **[Git Workflow Contract](../en/git-workflow.md)** — 任務隔離、交付授權與審查和合併邊界。
+- **[PR Review](pr-review.md)** — 此 repository 自己託管的審查與合併條件如何設定。
+
+## Hooks
+
+兩個 agent 都執行一個唯讀的 `PostToolUse` hook，在編輯後的 Python 檔案上回報 Ruff 診斷而不修改它們。兩者都不執行 `SessionStart` hook：根目錄 `AGENTS.md` 原生被探索，Git 脈絡是一個指令遠而已。
+
+| Agent           | Script                                          | 回報內容                                     |
+| :-------------- | :---------------------------------------------- | :------------------------------------------- |
+| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py` | Ruff `E722,F601,F602,F634`，補充 Pyright LSP |
+| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`   | Ruff `F` checks，因為 Codex 沒有 Python LSP  |
+
+若 hooks 未觸發，確認 `uv run pre-commit install` 已執行、`.codex/config.toml` 啟用 `hooks`、`.claude/settings.json` 宣告 `hooks` 區塊，以及 agent 信任了 project 本地設定。
+
+## Design influences
+
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 專職 agents 與程式碼規則改編自 ECC v2.0.0-rc.1。大多數開發 slash commands 已陸續退役，改採原生 Plan Mode 與 autoloaded project skills。
 
 ---
 
-本專案要求 source code、技術文件、workflows 與 configuration 使用 UTF-8 without BOM 並以英文撰寫。繁體中文內容應放在 `docs/zh-TW/`、`.references/` 與 `.tmp/`。
+本專案強制 UTF-8 without BOM 與英文用於源碼、技術文件、workflows 與設定。繁體中文內容屬於 `docs/zh-TW/`、`.references/` 與 `.tmp/`。

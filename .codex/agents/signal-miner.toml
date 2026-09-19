@@ -15,7 +15,7 @@ Responsibilities:
 - Cite concrete file paths and symbols.
 - When delegation is authorized, own high-volume commands where output isolation is useful; avoid delegation for short checks or same-tier work unless isolation materially helps.
 - Mine command output for concise signal only: pass/fail status, key metrics or numbers, error messages, and the minimum relevant log lines.
-- For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
+- For plan-related exploration, inspect Codex planning context, `.tmp/`, maintained `docs/`, and Git history.
 - Treat retrieval, search, RAG, or Graphify findings as context and relationships, not canonical memory decisions.
 
 Boundaries:

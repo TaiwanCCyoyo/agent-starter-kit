@@ -1,28 +1,53 @@
-# 下游專案啟用 PR 交付
+# 在下游專案啟用 PR 交付
 
-下游採用時，請將[共用 Git 工作契約](../en/git-workflow.md) 重設為 local-only。本文件供專案擁有者設定環境，不授予 agent 設定、發布或管理權限；英文版見 [PR setup](../en/pr-setup.md)。本來源專案另經擁有者授權的設定見 [PR 審核](pr-review.md)。
+重設[共用 Git 工作契約](../en/git-workflow.md)為 local-only 時採用本範本，然後按照本指南有意識地啟用交付。本指南供 repository 擁有者使用。它不授予 agent 設定、發布或管理權限，複製本範本也不會設定其中任何項目。
 
-## 身分與權限隔離
+本原始 repository 本身的已核准設定見[PR 審核](pr-review.md)。
 
-- 選定 repository 與預設分支。開發 GitHub App 只取得推送任務分支與建立 PR 所需的權限，不取得規則管理或繞過權限。私鑰保存在擁有者控制的秘密管理工具，由 repository 外部提供短效 installation token。
-- 逐一確認 Git HTTPS／SSH、`gh` 與 GitHub plugin 的實際身分；它們可能使用不同憑證。開發 session 不應能改用擁有者憑證。Worktree 不隔離憑證；若要強制角色分離，需隔離執行環境或提供憑證的服務。
-- 若指定 session 要正式 Approve，提供獨立審核身分，且只讓那些 session 使用。同帳號的兩張 token 不是兩個審核者；應實測核准是否計入 repository 規則，AI 留言或表情反應不算正式核准。
-- 管理憑證不交給開發或審核 session。若只有擁有者能合併，啟用交付前必須建立獨立強制執行的合併界線；一般寫入權限不等於「只能推分支、永遠不能 merge」。平台角色無法拆分時，可使用受限工具服務；開發／審核 session 不應取得底層可合併的憑證。
+## 1. 選擇身分模式
 
-## Repository 保護
+**共用身分（本 repository 採用的方式）。** Agent session 以擁有者的 GitHub 憑證推送任務分支並建立 pull request，因此 agent 編寫的 commit 會歸屬於擁有者。用 branch 前綴與 commit 訊息區分 agent 工作，不以身分區分。
 
-若擁有者授權自動審核及合併，可讓獨立審核 App 取得 Contents／Pull requests 讀寫及 Actions／Checks／Commit statuses 唯讀。僅在另一層 Restrict updates 規則加入 PR-only 例外，品質門檻那層維持沒有 bypass。擁有者接受限制時，同機可信 session 可採明確角色選擇，而非憑證硬隔離；仍不得改用個人憑證。
+這是最簡單的選項，不需要 App、不需要私鑰、也不需要 token helper。代價是明確的：**agent 與擁有者共用同一身分，所以沒有強制的角色分離。** 有意識地接納這個限制，或不要使用此模式。
 
-- 確認 GitHub 方案支援該 repository 可見性所需的保護。啟用預設分支的 ruleset，要求 PR、有效的獨立核准、CI 通過、審查討論已處理，以及新增修改後重新核准；禁止 force push 與刪除分支，不設定 bypass 身分。
-- 先建立適合專案的 CI，再選擇必要 check 名稱。可從 README 範例開始，採用前將第三方 actions 固定至核實的完整 commit SHA，維持穩定 job 名稱，確認 PR 真的會執行檢查。本地 pre-commit 通過不代表遠端合併條件已成立。
-- CI 與 ownership 政策的修改需特別審查。執行 PR 程式時不提供高權限發布或管理憑證；高權限審核／合併自動化應置於待審程式之外。
-- 優先使用現有 GitHub／Codex PR 介面與審核整合，再考慮自製收件匣。通知與 reviewer 指派需依實際帳號設定；自動審查意見與 GitHub 必要核准是不同結果。
+**分離身分。** 如果您的專案需要強制分離 — 例如審核者的核准必須計入 required-review rule — 則需要開發 session 無法取得的獨立身分。同帳號的兩張 token 不是兩個審核者。稽核每條 authentication route，因為 Git HTTPS/SSH、`gh` 和 agent plugin 可能各自解析為不同身分，且分開的 worktree 不會隔離憑證。
 
-## 啟用與驗收
+## 2. 保護預設分支
 
-1. 在 `git-workflow.md` 的 current-state 項目記錄核准的 repository／remote、base branch、發布身分與啟用狀態；如有常設 reviewer 授權，也在該處記錄。不要記錄憑證。
-2. 配合該範圍調整實際 agent 的工具權限。本模板仍保留 Claude push 確認與 Codex 平台核准；改文字不會取消提示。等身分與伺服器保護完成，再調整執行環境設定。
-3. 用可丟棄的任務分支與小 PR 驗證建立、CI、審核與擁有者授權的合併。確認直接更新預設分支、未取得必要檢查／核准的合併會被拒絕，且新增 commit 後需重新核准。拒絕測試應使用測試 repository 或擁有者核准的探測；正式 repository 設定錯誤時，測試寫入可能真的成功。
-4. 若僅擁有者能合併，驗證開發與審核 session 即使面對所有檢查與核准皆通過的 PR，嘗試合併仍會被拒絕。使用測試 repository 或擁有者核准的探測，記錄實際強制執行機制；界線生效前不啟用常設交付。確認 PR job 不取得 write token 或高權限 secrets。驗證開發／審核憑證不能管理或繞過規則，並確認每個啟用客戶端的實際身分。保留驗收證據與未完成事項，再宣告保護已生效。
+在預設分支上建立 ruleset，要求 pull request、解決所有 review conversation、以及當前 revision 的通過 status check。禁止 force push 與 branch 刪除，並且**保持 bypass 清單為空** — bypass actor 會無聲地使下面所有規則失效。
 
-複製本 starter kit 不會替下游專案設定 GitHub App、憑證、ruleset 或排程，也不會取消 push 提示。這些設定由各下游專案的擁有者完成；官方參考連結見[英文版](../en/pr-setup.md#references)。
+在共用身分模式下，不要要求核准的 review：單一身分無法核准自己的 pull request，因此該規則會造成僵局。Conversation resolution 加上 required check 是可行的等效方案。
+
+在選擇必要的 check 名稱之前先加入您的 CI，保持 job 名稱穩定，並確認 check 確實在 pull request 上執行。
+
+## 3. 連線 review
+
+為 repository 啟用託管 review 整合 — 本範本使用 Codex GitHub 整合，針對根目錄 `AGENTS.md` review 規則檢視每個 pull request。
+
+連線時有兩個屬性很重要：
+
+- Review 輸出是**建議性留言，不是 GitHub approval**，且它不會合併任何東西。
+- Review 發現會建立 review conversation，所以未解決的發現會透過 conversation-resolution rule 而不是 approval rule 阻擋合併。
+
+巢狀 `AGENTS.md` 檔案以自己的目錄為範圍。Repository 層級的 review 規則應放在根檔案。
+
+## 4. 記錄並驗證
+
+1. 在 `git-workflow.md` 的 current-state 項目記錄已核准的 repository、base branch 和發布身分，然後在該處啟用常設 PR 交付。不要記錄憑證。
+2. 調整 agent 的執行時期權限以符合該範圍。修改文字不會移除執行時期確認提示。
+3. 推送一個可丟棄的 branch 並建立小 pull request。驗證 CI 執行、review 發布，以及當 conversation 未解決或 check 失敗時拒絕合併。
+4. 驗證對預設分支的直接 push 被拒絕。使用 test repository 或擁有者核准的探測；設定不當的正式 rule 可能會接受嘗試的寫入。
+
+記錄證據和任何剩餘的缺口後再依賴此邊界。
+
+## 5. 保持合併權限明確
+
+合併是擁有者的決定，除非您有意委派。如果您自動化合併，使自動化重新檢查當前 head 而不是信任較早的結果：對 commit `ABC` 的 review 對 commit `DEF` 沒有說明作用。將缺少 review 發現視為「尚未審核」直到 review 被確認已完成當前 head。
+
+絕不使用 admin 權限、force push 或削弱的 ruleset 進行合併。
+
+## References
+
+- [GitHub rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
+- [Automatically merging a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request)
+- [Codex GitHub review integration](https://learn.chatgpt.com/docs/third-party/github)

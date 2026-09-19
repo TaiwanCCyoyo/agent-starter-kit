@@ -50,7 +50,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 ## Interactive, Automated, and Company Use
 
 - Interactive work: enter Native Plan Mode, optionally use `plan-reviewer` for complex or high-risk plans, approve the plan, then return to execution mode.
-- Unattended work: use separate planning and execution sessions. The planning session writes an OpenSpec or maintained plan artifact; the execution session reads the approved artifact. Do not use a planner subagent as the main-session handoff.
+- Unattended work: use separate planning and execution sessions. The planning session writes a maintained plan artifact; the execution session reads the approved artifact. Do not use a planner subagent as the main-session handoff.
 - Claude-only company copy: retain instructions, rules, agents, skills, and hygiene hooks as-is. Use organization-approved model IDs or alias mappings rather than this repository's personal-Pro defaults.
 
 `REVIEW.md` is not part of the local baseline. Add it only when the repository is enrolled in Claude's managed Team or Enterprise Code Review service.
@@ -231,7 +231,3 @@ Because every `rules/common/` file matches `paths: "*"`, the set is injected on 
 | `uvm-patterns` skill            | Custom build            | UVM project starts                                                                                             |
 | `rules/systemverilog/`          | Custom build            | UVM project starts                                                                                             |
 | Eval-driven development harness | Workflow infrastructure | Add a real runner, deterministic graders, baselines, repeated-run metrics, Python commands, and CI integration |
-
-### OpenSpec Planning Handoff
-
-OpenSpec is optional project state, not starter-kit committed content. Its specs, changes, and tasks are regular project files when present; commit them when they are part of the project record. Plans remain outside durable memory.

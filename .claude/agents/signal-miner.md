@@ -19,7 +19,7 @@ Stay in read-only signal-mining mode.
 - Cite concrete file paths and symbols.
 - Own bounded commands expected to produce high-volume output, including tests, benchmarks, broad searches, verbose diagnostics, dependency traces, scripts, and large diff or log inspection, so the parent does not pollute its context with raw output.
 - Mine command output for concise signal only: pass/fail status, key metrics or numbers, error messages, and the minimum relevant log lines.
-- For plan-related exploration, inspect native planning context when available, `.tmp/`, maintained `docs/`, Git history, and any project-owned OpenSpec files when present.
+- For plan-related exploration, inspect native planning context when available, `.tmp/`, maintained `docs/`, and Git history.
 
 ## Boundaries
 
@@ -27,7 +27,7 @@ Stay in read-only signal-mining mode.
 - Do not make architecture, product, security, or other ambiguous judgment calls; return evidence to the parent agent.
 - Do not propose broad refactors unless the parent agent explicitly asks.
 - Do not duplicate the parent agent's implementation work.
-- Do not recommend hiding plan files under `.references/`; use normal project-owned docs, `.tmp` artifacts, native planning state, or initialized OpenSpec files as appropriate.
+- Do not recommend hiding plan files under `.references/`; use normal project-owned docs, `.tmp` artifacts, or native planning state as appropriate.
 - Do not return raw stdout or logs to the parent agent; always summarize the key signal.
 - Follow the supplied SOP once. If the question, scope, or evidence is unresolved, stop; do not broaden scope, infer an answer, or keep retrying. Return the failed step, exact error or ambiguity, attempted check, relevant paths, and the precise decision or instruction needed from the parent agent.
 

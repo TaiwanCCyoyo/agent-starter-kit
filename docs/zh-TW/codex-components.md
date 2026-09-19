@@ -11,7 +11,7 @@ Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專
 | TDD、除錯、worktree、完成前驗證              | Codex 原生能力、project skills 與明確檢查                 |
 | GitHub issues、PR、CI、review comments、發布 | 已安裝的 GitHub plugin                                    |
 | Slash commands                               | 自然語言 skill triggers                                   |
-| 跨 session planning                          | Native planning 加上選用的 project-owned OpenSpec files   |
+| 跨 session planning                          | Native planning 加上受維護的 plan artifacts               |
 | 跨 session recall                            | 由 project configuration 啟用的 Codex 原生 local memories |
 
 Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不擁有發布與整合權限。主 agent 遵守[共用 Git 工作契約](../en/git-workflow.md)。
@@ -53,7 +53,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | Claude 能力                                                  | Codex 決策               | 原因                                                                                                                                                           |
 | :----------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/plan`                                                      | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化 PRD-based 或跨 session planning handoff 可在 OpenSpec files 存在時使用。                                               |
+| `/plan`                                                      | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化的跨 session handoff 使用受維護的 plan artifact。                                                                       |
 | `plan-reviewer`                                              | 已移植                   | 獨立 plan critique 有價值，且不重複 plan creation。                                                                                                            |
 | `/feature-dev`                                               | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
 | `/build-fix`                                                 | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
@@ -82,15 +82,13 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Repository Python verification                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
 
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或選用的 project-owned OpenSpec files；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ## Plans、原生 Memory 與 Commits
 
-- OpenSpec specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。
-- OpenSpec planning artifacts 可以作為一般專案歷史，記錄 goals、decisions、tasks、verification、status 與 related commits；它們不屬於 durable memory，也不需要放進 `.references/`。
 - Codex 原生 local memories 位於 repository 外的使用者 Codex home，並提供選用 recall；必要 repository 規則仍放在 checked-in guidance。
-- 盡可能將適用的 OpenSpec status 與 workflow 修正納入已驗證的 commit。常駐授權允許在不重複請求核准的情況下，改善專案內的 skills、hooks、rules 與 agent configuration：先驗證、在本地 commit，並回報變更內容與原因。外部操作、全域設定與平台權限不在此授權內。
-- Native memory 寫入須依目前的儲存規則取得使用者明確請求。
+- 盡可能將適用的 workflow 修正納入已驗證的 commit。常駐授權允許在不重複請求核准的情況下，改善專案內的 skills、hooks、rules 與 agent configuration：先驗證、在本地 commit，並回報變更內容與原因。外部操作、全域設定與平台權限不在此授權內。
+- 寫入 memory 不需事前核准；若儲存內容會改變日後行為，事後回報。
 
 ## Hooks 與 Gates
 
