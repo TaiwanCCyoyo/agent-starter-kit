@@ -268,6 +268,25 @@ def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
         assert "source diff" in content
 
 
+def test_commit_workflows_establish_the_branch_before_committing() -> None:
+    """Auto-commit is authorized, so the branch must be checked, not assumed.
+
+    No SessionStart hook reports the branch and `git status --short` omits it, so
+    every commit workflow has to establish it explicitly and refuse the default
+    branch, which `docs/en/git-workflow.md` puts off limits.
+    """
+    workflows = (
+        ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
+        ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
+        ROOT / ".claude" / "commands" / "gen-commit.md",
+    )
+
+    for path in workflows:
+        content = path.read_text(encoding="utf-8")
+        assert "git branch --show-current" in content, path
+        assert "default branch" in content, path
+
+
 def test_commit_workflows_do_not_force_ai_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")

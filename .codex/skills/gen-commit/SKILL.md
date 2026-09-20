@@ -11,6 +11,10 @@ This is a command-like Codex skill that can be invoked with plain text such as `
 
 The main agent owns scope, staging authorization, sandbox fallback, and post-commit review. Use `commit-specialist` for substantial staged-content review, rough or missing messages, or an explicitly requested independent check. For a small, verified agent-owned change with a complete message and no unrelated staged files, the main agent may run the same checks and commit directly; do not delegate merely to repeat work already completed. If delegation is unavailable, follow the same workflow locally.
 
+## Branch Precondition
+
+Run `git branch --show-current` before staging or committing anything. `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. If the checkout is on the default branch, stop and report: `docs/en/git-workflow.md` forbids committing there, and standing commit authorization does not override it.
+
 ## Workflow
 
 1. Determine message-only versus commit execution from the request and standing authorization; ask only if that intent remains ambiguous.
