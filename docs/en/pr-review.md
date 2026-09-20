@@ -2,7 +2,7 @@
 
 Owner-approved scope: `TaiwanCCyoyo/agent-starter-kit`, base `main`. Pull request review runs on the hosted Codex GitHub integration, enabled by the owner in Codex settings for this repository. Reviews are triggered per pull request, not on a schedule.
 
-The implementing agent owns [PR follow-through](git-workflow.md#pr-follow-through): wait for CI and review, address valid findings within scope, and resolve verified fixes before reporting completion. The owner retains merge authority.
+The implementing agent owns [PR follow-through](git-workflow.md#pr-follow-through): assess findings, fix and verify valid issues within scope, push the fixes, and promptly resolve addressed threads before waiting for current-head CI and renewed review. Resolution does not guarantee that a new review will start; verify its actual status before reporting completion. The owner retains merge authority.
 
 ## How review runs
 
