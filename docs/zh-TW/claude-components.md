@@ -25,7 +25,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | ------------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `commit-specialist`       | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
 | `doc-translator`          | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `implementation-reviewer` | opus            | Read, Grep, Glob                    | 可選、僅在明確要求時進行的程式碼檢查：行為錯誤與回歸                                                                                            |
+| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 可選、僅在明確要求時進行的程式碼檢查：行為錯誤與回歸；Bash 依指引限於唯讀 Git 檢視                                                              |
 | `plan-reviewer`           | opus（high）    | Read, Grep, Glob, Bash              | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性                                                                             |
 | `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
 | `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
