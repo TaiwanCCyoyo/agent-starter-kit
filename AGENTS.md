@@ -5,6 +5,7 @@
 - Standing authorization: improve this project's skills, hooks, rules, and agent configuration when there is a concrete reusable benefit; verify, commit locally, and report afterwards. This does not extend to remote delivery, reviewer roles, merge authority, other projects, or global settings.
 - Continue authorized work under reasonable assumptions for reversible choices; ask only for decisions that materially affect scope, correctness, or authorization.
 - Follow `docs/en/git-workflow.md` for worktree isolation, delivery authorization, and review and merge boundaries. PR delivery is enabled for this repository using the owner's own GitHub credentials; merging stays with the owner.
+- Own authorized PR delivery through CI, review fixes, and resolution of addressed threads under `docs/en/git-workflow.md#pr-follow-through`; opening the PR is not completion.
 - Treat `.references/` as ignored read-only clones of upstream projects.
 - Use `.tmp/` for scratch files, diagnostics, and disposable reports instead of the OS temporary directory; preserve files you did not create.
 
