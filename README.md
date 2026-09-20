@@ -88,7 +88,7 @@ Claude Code permissions live in `.claude/settings.json` and take effect without 
 
 That asymmetry is deliberate. Patterns match command text, and Git accepts flags in any position, bundled (`-fu`), and abbreviated (`--forc`), so an allow-list with a wildcard cannot be made safe — successive review rounds on this template each found another spelling.
 
-Even the bare command is only conditionally safe: `remote.<name>.mirror` turns `git push` into a mirror push that deletes refs missing locally, and `remote.<name>.push` can carry a force or delete refspec. A permission pattern cannot see configuration, so writes to remote config and `git remote set-url` are denied instead, which is also what the Git workflow contract requires about destination and identity.
+Even the bare command is only conditionally safe: `remote.<name>.mirror` turns `git push` into a mirror push that deletes refs missing locally, and `remote.<name>.push` can carry a force or delete refspec. A permission pattern cannot see configuration, so the common write spellings are denied — but that list is no more completable than the push list. `git config --replace-all`, `--file`, and `--worktree` all reach the same key, and editing `.git/config` directly reaches it without `git config` at all. The denials raise the cost of arriving there; they do not close it.
 
 Treat all of it as defence in depth. A default-branch ruleset protects only the default branch, so server-side rules are what actually stop an unauthorized remote update.
 

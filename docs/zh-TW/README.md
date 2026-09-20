@@ -88,7 +88,7 @@ Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即�
 
 這個不對稱是刻意的。Pattern 比對的是指令文字，而 Git 允許旗標出現在任何位置、可合併（`-fu`）、也可縮寫（`--forc`），因此帶萬用字元的 allow 清單無法做到安全——本範本歷經數輪 review，每一輪都找出另一種寫法。
 
-即使是裸指令也只是有條件地安全：`remote.<name>.mirror` 會讓 `git push` 變成 mirror push 並刪除本地不存在的 refs，`remote.<name>.push` 也可能帶有 force 或 delete refspec。權限 pattern 看不到設定內容，因此改為禁止寫入 remote 設定與 `git remote set-url`——這也正是 Git 工作契約對 destination 與 identity 的要求。
+即使是裸指令也只是有條件地安全：`remote.<name>.mirror` 會讓 `git push` 變成 mirror push 並刪除本地不存在的 refs，`remote.<name>.push` 也可能帶有 force 或 delete refspec。權限 pattern 看不到設定內容，因此禁止了常見的寫入寫法——但這份清單和 push 清單一樣無法窮舉：`git config --replace-all`、`--file`、`--worktree` 都能寫到同一個 key，直接編輯 `.git/config` 更是完全不經過 `git config`。這些 deny 提高了抵達該狀態的成本，並沒有封閉它。
 
 請把上述全部視為縱深防禦：default branch ruleset 只保護 default branch，真正能阻止未授權遠端更新的是 server 端規則。
 

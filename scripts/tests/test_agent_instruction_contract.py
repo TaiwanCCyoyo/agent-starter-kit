@@ -275,9 +275,11 @@ def test_remote_configuration_writes_are_denied() -> None:
 
     `remote.<name>.mirror` makes it delete refs missing locally and
     `remote.<name>.push` can carry a force or delete refspec, so the allowed bare
-    command is only safe while that config stays benign. Permission patterns
-    cannot inspect config, so the write path is denied instead -- which is also
-    what `docs/en/git-workflow.md` requires about destination and identity.
+    command is only safe while that config stays benign. These entries deny the
+    common write spellings, which `docs/en/git-workflow.md` requires anyway about
+    destination and identity. They are not a closure: `--replace-all`, `--file`,
+    and `--worktree` reach the same key, and editing `.git/config` skips
+    `git config` entirely. Only a server-side ruleset bounds the outcome.
     """
     deny = set(json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]["deny"])
 
