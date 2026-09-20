@@ -84,7 +84,9 @@ This template commits no `openspec/` directory and `AGENTS.md` says nothing abou
 
 ### 5. Set up permissions
 
-Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The template allows ordinary `git push` and denies force-push, mirror, prune, and delete variants, plus `.git` removal. These patterns are a convenience, not a security boundary — server-side branch protection is.
+Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The template allows ordinary `git push` and denies the destructive forms: every force, delete, mirror, and prune flag in its bare, trailing-argument, and mid-command spelling, the refspec equivalents (`origin :branch` and a leading `+`), and `.git` removal.
+
+Treat that list as defence in depth, not as the boundary. It matches command text, so a spelling nobody enumerated slips through, and a default-branch ruleset protects only the default branch — task branches stay writable by anything holding the credential. Server-side rules are what actually stop an unauthorized remote update.
 
 Codex ships no repository-local permission rules here; it uses its own approval controls.
 

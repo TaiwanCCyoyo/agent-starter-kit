@@ -4,7 +4,7 @@
 
 - PR 建立或更新時自動審核；在 PR 留言 `@codex review` 可隨時手動觸發。
 - 審核在服務商端執行，消耗擁有者的 Codex 程式碼審核額度，不佔用本專案的 GitHub Actions 分鐘數。
-- 審核結果是建議性留言，不等於 GitHub Approve，也不會執行合併。審核者只讀取 PR，不得從待審程式碼載入具權限的指令或認證助手。
+- 審核結果是建議性留言，不等於 GitHub Approve，也不會執行合併。審核者的權限來自擁有者在 Codex 設定中的配置，位於本 repository 之外；PR 內容無法授予它憑證或擴大其權限，因此修改本檔案也不會改變該邊界。
 - 本機不存放任何 GitHub App 私鑰。原本的 `taiwanccyoyo-dev-agent`、`taiwanccyoyo-review-agent` 兩個 App 與本機 PowerShell 取權杖助手已停用。
 - Agent session 以擁有者本人的 GitHub 憑證推送任務分支並建立 PR，因此 agent 產出的 commit 會歸屬於擁有者。以分支前綴與 commit 訊息區分 agent 工作，不以身分區分。
 - 由於 agent 與擁有者共用同一身分，這個安排沒有強制的角色隔離；擁有者接受此限制。

@@ -84,7 +84,9 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 ### 5. Set up permissions
 
-Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。此範本允許普通 `git push` 並禁用 force-push、mirror、prune 與 delete 變體，加上 `.git` 刪除。這些是便利性設施，不是安全邊界——server 端分支保護才是。
+Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。此範本允許普通 `git push`，並禁用所有破壞性形式：force、delete、mirror、prune 各旗標的裸形式、帶參數形式與中段形式，以及等效的 refspec 寫法（`origin :branch` 與開頭的 `+`），加上 `.git` 刪除。
+
+請把這份清單視為縱深防禦，而不是邊界。它比對的是指令文字，因此沒有被列舉到的寫法仍會通過；而 default branch ruleset 只保護 default branch，task branches 對任何持有憑證者都仍可寫入。真正能阻止未授權遠端更新的是 server 端規則。
 
 Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
 

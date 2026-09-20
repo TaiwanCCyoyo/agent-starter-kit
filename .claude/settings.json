@@ -81,6 +81,8 @@
             "Bash(git push --prune)",
             "Bash(git push --prune *)",
             "Bash(git push * --prune *)",
+            "Bash(git push * :*)",
+            "Bash(git push * +*)",
             "Bash(rm -rf .git *)",
             "Bash(rm -rf .git)",
             "Bash(rm -r .git *)",

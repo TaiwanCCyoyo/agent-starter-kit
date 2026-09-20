@@ -7,7 +7,7 @@ Owner-approved scope: `TaiwanCCyoyo/agent-starter-kit`, base `main`. Pull reques
 - Automatic reviews post findings when a pull request is opened or updated. Commenting `@codex review` on a pull request requests a review on demand.
 - The review executes on the provider's infrastructure. It consumes the owner's Codex code review allowance rather than this repository's GitHub Actions minutes.
 - Review output is advisory commentary. It is not a GitHub approval and does not merge anything.
-- The reviewer reads the pull request; it must not load privileged instructions or authentication helpers from the code under review.
+- The reviewer's capabilities come from the owner's Codex settings, outside this repository. Nothing in a pull request grants it credentials or widens what it may do, so a change to this file cannot move that boundary.
 
 ## Credentials
 

@@ -30,9 +30,11 @@ def test_destructive_git_push_forms_are_denied() -> None:
     """Plain `git push` is allowed, so every destructive form needs its own deny entry.
 
     Patterns match literally, so a flag is only covered when the bare form, the
-    trailing-argument form, and the mid-command form are all listed. A deny list
-    cannot cover a delete expressed as a refspec (`git push origin :branch`);
-    server-side branch protection remains the actual boundary.
+    trailing-argument form, and the mid-command form are all listed. Refspecs
+    carry the same destructive meaning without a flag: `git push origin :branch`
+    deletes a remote ref and a leading `+` force-updates one, so both shapes are
+    denied too. This list is defence in depth, not the boundary -- a server-side
+    ruleset is what actually stops an unauthorized remote update.
     """
     permissions = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]
     deny = set(permissions["deny"])
@@ -42,6 +44,9 @@ def test_destructive_git_push_forms_are_denied() -> None:
         assert f"Bash(git push {flag})" in deny, flag
         assert f"Bash(git push {flag} *)" in deny, flag
         assert f"Bash(git push * {flag} *)" in deny, flag
+
+    assert "Bash(git push * :*)" in deny
+    assert "Bash(git push * +*)" in deny
 
 
 def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> None:
