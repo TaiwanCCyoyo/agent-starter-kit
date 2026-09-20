@@ -8,12 +8,6 @@ REVIEWERS = (
     ROOT / ".codex" / "agents" / "security-reviewer.toml",
 )
 
-AGENT_INSTRUCTIONS = (
-    ROOT / "CLAUDE.md",
-    ROOT / "GEMINI.md",
-    ROOT / ".codex" / "AGENTS.md",
-)
-
 REQUIRED_CHECKS = (
     "secrets",
     "input validation",
@@ -38,16 +32,3 @@ def test_security_reviewer_has_conditional_checklist(reviewer_path: Path) -> Non
     assert "only require controls that apply" in content
     for check in REQUIRED_CHECKS:
         assert check in content
-
-
-@pytest.mark.parametrize(
-    "instructions_path",
-    AGENT_INSTRUCTIONS,
-    ids=lambda path: path.name,
-)
-def test_agent_instructions_preserve_external_research_fallback(
-    instructions_path: Path,
-) -> None:
-    content = instructions_path.read_text(encoding="utf-8")
-
-    assert ("Search GitHub or package registries only when local patterns and primary documentation are insufficient.") in content

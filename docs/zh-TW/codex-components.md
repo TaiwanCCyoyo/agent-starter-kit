@@ -1,6 +1,6 @@
 # Codex 元件參考
 
-Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。其 `.codex/AGENTS.md` 與 `CLAUDE.md` 的共享政策保持語意對齊，同時保留 Codex 專屬 approval 與 tool constraints。
+Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。它讀取共用的根目錄 `AGENTS.md`，這是 Codex 原生會尋找的檔案；repository 層級的規則放在該檔，巢狀 `AGENTS.md` 只涵蓋自己所在的目錄。
 
 ## 原生與 Plugin 對應
 
@@ -11,7 +11,7 @@ Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專
 | TDD、除錯、worktree、完成前驗證              | Codex 原生能力、project skills 與明確檢查                 |
 | GitHub issues、PR、CI、review comments、發布 | 已安裝的 GitHub plugin                                    |
 | Slash commands                               | 自然語言 skill triggers                                   |
-| 跨 session planning                          | Native planning 加上選用的 project-owned OpenSpec files   |
+| 跨 session planning                          | Native planning 加上受維護的 plan artifacts               |
 | 跨 session recall                            | 由 project configuration 啟用的 Codex 原生 local memories |
 
 Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責 critique、security review、verification feedback，以及從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不擁有發布與整合權限。主 agent 遵守[共用 Git 工作契約](../en/git-workflow.md)。
@@ -53,7 +53,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 | Claude 能力                                                  | Codex 決策               | 原因                                                                                                                                                           |
 | :----------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/plan`                                                      | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化 PRD-based 或跨 session planning handoff 可在 OpenSpec files 存在時使用。                                               |
+| `/plan`                                                      | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化的跨 session handoff 使用受維護的 plan artifact。                                                                       |
 | `plan-reviewer`                                              | 已移植                   | 獨立 plan critique 有價值，且不重複 plan creation。                                                                                                            |
 | `/feature-dev`                                               | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
 | `/build-fix`                                                 | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
@@ -71,32 +71,29 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 ## 共享政策對齊
 
-| 共享行為                                                          | Codex owner                                             |
-| :---------------------------------------------------------------- | :------------------------------------------------------ |
-| Operating contract、prompt defense、scoped changes                | `.codex/AGENTS.md`                                      |
-| 實作前 research 與 reuse                                          | `.codex/AGENTS.md` engineering discipline               |
-| Review severity 與 CRITICAL/HIGH completion policy                | `.codex/AGENTS.md` review and security section          |
-| Security triggers 與 secret handling                              | `.codex/AGENTS.md` 加上 `security_reviewer`             |
-| Risk-based test scope                                             | `.codex/AGENTS.md` verification section                 |
-| Python development rules                                          | `python-development`                                    |
-| Repository Python verification                                    | `python-testing`                                        |
-| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
+| 共享行為                                                          | Codex owner                                                 |
+| :---------------------------------------------------------------- | :---------------------------------------------------------- |
+| Operating contract、scoped changes                                | `AGENTS.md`                                                 |
+| 專案慣例與工具偏好                                                | `AGENTS.md` project conventions                             |
+| Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                     |
+| Security triggers 與 secret handling                              | `.codex/skills/python-development` 加上 `security_reviewer` |
+| Risk-based test scope                                             | `AGENTS.md` verification section                            |
+| Python development rules                                          | `python-development`                                        |
+| Repository Python verification                                    | `python-testing`                                            |
+| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification     |
 
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode 或選用的 project-owned OpenSpec files；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ## Plans、原生 Memory 與 Commits
 
-- OpenSpec specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。
-- OpenSpec planning artifacts 可以作為一般專案歷史，記錄 goals、decisions、tasks、verification、status 與 related commits；它們不屬於 durable memory，也不需要放進 `.references/`。
 - Codex 原生 local memories 位於 repository 外的使用者 Codex home，並提供選用 recall；必要 repository 規則仍放在 checked-in guidance。
-- 盡可能將適用的 OpenSpec status 與 workflow 修正納入已驗證的 commit。常駐授權允許在不重複請求核准的情況下，改善專案內的 skills、hooks、rules 與 agent configuration：先驗證、在本地 commit，並回報變更內容與原因。外部操作、全域設定與平台權限不在此授權內。
-- Native memory 寫入須依目前的儲存規則取得使用者明確請求。
+- 盡可能將適用的 workflow 修正納入已驗證的 commit。常駐授權允許在不重複請求核准的情況下，改善專案內的 skills、hooks、rules 與 agent configuration：先驗證、在本地 commit，並回報變更內容與原因。外部操作、全域設定與平台權限不在此授權內。
+- 寫入 memory 不需事前核准；若儲存內容會改變日後行為，事後回報。
 
 ## Hooks 與 Gates
 
 | 元件                                          | 用途                                                                            |
 | :-------------------------------------------- | :------------------------------------------------------------------------------ |
-| `.codex/hooks/codex_session_start.py`         | 回報 branch/worktree context 並注入 `.codex/AGENTS.md`                          |
 | `.codex/hooks/codex_post_tool_use_hygiene.py` | 修改 Python 檔案後執行唯讀的精簡 Ruff `F` diagnostics                           |
 | `.pre-commit-config.yaml`                     | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
 | `.vscode/settings.json`                       | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
@@ -117,7 +114,7 @@ Python verification 在開發期間使用目標式 `uv run python -m pytest`，�
 
 編輯後 hook 保留 Ruff `F`，排除 `F401,F841,F842`，只檢查該次事件指明的 Python 檔案。完整 lint 與排版留給 pre-commit；此 hook 不會自動 fix，也沒有擴大 lint 規則範圍。
 
-SessionStart 保留 instruction injection，因為 `.codex/AGENTS.md` 不是預設 discovery chain 中的 root instruction filename。它回報 checkout metadata，不從 branch names 或 commit messages 推斷 task。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
+Codex 不使用 SessionStart hook。根目錄的 `AGENTS.md` 由 Codex 原生讀取，branch 與 worktree 資訊跑一行 Git 指令即可取得，兩者都不需要注入。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
 
 Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。Pre-commit 仍是完成 gate。
 

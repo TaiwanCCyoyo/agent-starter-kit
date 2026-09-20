@@ -11,8 +11,9 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 ## Pre-commit Checklist
 
-1. **Scope Verification**: The main agent performs filename-level staged-scope preflight only.
-2. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit-specialist`. The specialist verifies it and must not commit inside a submodule.
+1. **Branch Verification**: Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
+2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only.
+3. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit-specialist`. The specialist verifies it and must not commit inside a submodule.
 
 ## Commit Message Standard
 
@@ -52,7 +53,6 @@ In every execution mode, run pre-commit against the approved paths and then run 
 
 This check is the **main agent's** responsibility, run after `commit-specialist` reports a successful commit. The subagent only sees the delegated staged scope, not the full session, so it cannot judge these criteria itself:
 
-1. If a related OpenSpec change exists, update its tasks, verification notes, or specs when the commit changes implementation status. Do not create a change retroactively for a simple commit.
-2. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
-3. Route durable knowledge through Claude Code's built-in memory (`CLAUDE.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
-4. Apply `CLAUDE.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.
+1. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
+2. Route durable knowledge through Claude Code's built-in memory (`AGENTS.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
+3. Apply `AGENTS.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.

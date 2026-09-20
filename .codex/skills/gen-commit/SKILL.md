@@ -11,6 +11,10 @@ This is a command-like Codex skill that can be invoked with plain text such as `
 
 The main agent owns scope, staging authorization, sandbox fallback, and post-commit review. Use `commit-specialist` for substantial staged-content review, rough or missing messages, or an explicitly requested independent check. For a small, verified agent-owned change with a complete message and no unrelated staged files, the main agent may run the same checks and commit directly; do not delegate merely to repeat work already completed. If delegation is unavailable, follow the same workflow locally.
 
+## Branch Precondition
+
+Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
+
 ## Workflow
 
 1. Determine message-only versus commit execution from the request and standing authorization; ask only if that intent remains ambiguous.
@@ -66,7 +70,7 @@ The specialist may fix one simple, directly actionable pre-commit or commit-hook
 
 After a successful commit:
 
-1. Verify the committed scope and remaining worktree status, then report the commit hash and checks. Include related OpenSpec status and reusable workflow corrections in the verified commit before execution when possible; do not create an OpenSpec change merely to commit.
-2. Apply the standing workflow-improvement authorization in `.codex/AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
-3. Put required repository guidance in checked-in files. Write native memory only on an explicit user request, following the active memory storage rules.
+1. Verify the committed scope and remaining worktree status, then report the commit hash and checks. Include reusable workflow corrections in the verified commit before execution when possible.
+2. Apply the standing workflow-improvement authorization in `AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
+3. Put required repository guidance in checked-in files. Writing native memory needs no prior approval; report afterwards when stored content changes future behavior.
 4. Do not preserve commit narration, duplicate plan content, or transient failures as durable knowledge.

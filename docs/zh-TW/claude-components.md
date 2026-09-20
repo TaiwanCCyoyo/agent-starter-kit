@@ -5,7 +5,7 @@
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
 **ECC 整合日期**：2026-06-02
-**記憶**：Claude 僅使用 Claude Code 的內建記憶；必要 repository guidance 仍納入版本控制——詳見 `CLAUDE.md` §Memory。
+**記憶**：Claude 僅使用 Claude Code 的內建記憶；必要 repository guidance 仍納入版本控制——詳見 `AGENTS.md` §Memory。
 
 本專案設定刻意停用外部的 Superpowers、Ponytail 與 Karpathy plugins。本參考文件描述 repository-owned 的 Claude 元件與 Claude 原生能力；GitHub、skill-creator 與 Pyright LSP 仍在 `.claude/settings.json` 中啟用。
 
@@ -50,7 +50,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 ## 互動、自動化與公司使用
 
 - 互動工作：進入 Native Plan Mode；複雜或高風險計畫可選用 `plan-reviewer`；核准計畫後再回到執行模式。
-- 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入 OpenSpec 或受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
+- 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
 - Claude-only 公司移植：保留 instructions、rules、agents、skills 與 hygiene hooks。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
 
 `REVIEW.md` 不屬於本機 baseline；只有 repository 加入 Claude 託管的 Team 或 Enterprise Code Review 時才加入。
@@ -231,7 +231,3 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `uvm-patterns` skill            | 自訂建置                | UVM 專案啟動                                                                                           |
 | `rules/systemverilog/`          | 自訂建置                | UVM 專案啟動                                                                                           |
 | Eval-driven development harness | Workflow infrastructure | 加入真實 runner、deterministic graders、baselines、重複執行 metrics、Python commands 與 CI integration |
-
-### OpenSpec Planning Handoff
-
-OpenSpec 是選用的專案狀態，不是 starter kit 需要提交的內容。Specs、changes 與 tasks 存在時就是一般 project-owned files；當它們屬於專案紀錄時就提交。Plans 不屬於 durable memory。

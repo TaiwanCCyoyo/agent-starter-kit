@@ -5,10 +5,6 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-SESSION_HOOKS = (
-    ROOT / ".agent" / "hooks" / "session_start.py",
-    ROOT / ".codex" / "hooks" / "codex_session_start.py",
-)
 
 
 def test_pre_commit_mypy_receives_targeted_python_files() -> None:
@@ -45,35 +41,25 @@ def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> 
 def test_claude_and_codex_use_read_only_ruff_diagnostics() -> None:
     claude_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     codex_config = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
-    antigravity_config = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
 
     assert set(claude_settings["hooks"]) == {"PostToolUse"}
     assert claude_settings["hooks"]["PostToolUse"][0]["matcher"] == "Edit|Write"
     assert codex_config["hooks"]["PostToolUse"][0]["matcher"] == "apply_patch|Edit|Write"
-    assert antigravity_config["hooks"]["PostToolUse"][0]["matcher"] == "*"
     assert (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").exists()
     assert (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").exists()
-    assert (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").exists()
 
     claude_hook = (ROOT / ".claude" / "hooks" / "claude_post_tool_use_hygiene.py").read_text(encoding="utf-8")
     codex_hook = (ROOT / ".codex" / "hooks" / "codex_post_tool_use_hygiene.py").read_text(encoding="utf-8")
-    antigravity_hook = (ROOT / ".agent" / "hooks" / "post_tool_use_hygiene.py").read_text(encoding="utf-8")
     assert '"E722,F601,F602,F634"' in claude_hook
     assert '"--no-fix"' in claude_hook
     assert '"F401,F841,F842"' in codex_hook
-    assert '"E722,F601,F602,F634"' in antigravity_hook
-    assert '"--no-fix"' in antigravity_hook
 
 
 def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
     config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
     hook_ids = {hook["id"] for repo in config["repos"] for hook in repo["hooks"]}
     instruction_files = [
-        ROOT / "CLAUDE.md",
-        ROOT / "GEMINI.md",
-        ROOT / ".codex" / "AGENTS.md",
-        *sorted((ROOT / ".agent" / "workflows").rglob("*.md")),
-        *sorted((ROOT / ".agent" / "skills").rglob("*.md")),
+        ROOT / "AGENTS.md",
         *sorted((ROOT / ".claude" / "rules").rglob("*.md")),
         *sorted((ROOT / ".claude" / "skills").rglob("*.md")),
         *sorted((ROOT / ".codex" / "skills").rglob("*.md")),
@@ -86,15 +72,11 @@ def test_agent_instructions_delegate_pre_commit_owned_checks() -> None:
         assert "uv run mypy" not in content, path
 
 
-def test_session_hooks_do_not_depend_on_shared_memory_bootstrap() -> None:
+def test_hooks_do_not_depend_on_shared_memory_bootstrap() -> None:
     ruff_config = (ROOT / "ruff.toml").read_text(encoding="utf-8")
 
     assert "[lint.per-file-ignores]" not in ruff_config
     assert "E402" not in ruff_config
-
-    for hook_path in SESSION_HOOKS:
-        hook_content = hook_path.read_text(encoding="utf-8")
-        assert "def main(" in hook_content
 
 
 def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
@@ -105,27 +87,15 @@ def test_codex_uses_native_memories_without_project_mcp_servers() -> None:
     assert "mcp_servers" not in config
 
 
-def test_agent_hook_configs_have_no_stop_event() -> None:
+def test_agent_hook_configs_only_run_read_only_post_tool_diagnostics() -> None:
     codex = json.loads((ROOT / ".codex" / "hooks.json").read_text(encoding="utf-8"))
-    antigravity = json.loads((ROOT / ".agent" / "hooks.json").read_text(encoding="utf-8"))
 
-    assert set(codex["hooks"]) == {"SessionStart", "PostToolUse"}
-    assert set(antigravity["hooks"]) == {"SessionStart", "PostToolUse"}
-
-
-def test_claude_instructions_use_direct_openspec_routing() -> None:
-    claude_instructions = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
-
-    assert ("downstream" + " project") not in claude_instructions.lower()
-    assert "OpenSpec" in claude_instructions
+    assert set(codex["hooks"]) == {"PostToolUse"}
+    assert not (ROOT / ".codex" / "hooks" / "codex_session_start.py").exists()
 
 
 def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
-    instructions = {
-        ROOT / "CLAUDE.md": 80,
-        ROOT / "GEMINI.md": 90,
-        ROOT / ".codex" / "AGENTS.md": 90,
-    }
+    instructions = {ROOT / "AGENTS.md": 60}
 
     for path, max_lines in instructions.items():
         content = path.read_text(encoding="utf-8")
@@ -133,8 +103,8 @@ def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
         assert "## Karpathy Guidelines Condensed" not in content
 
 
-def test_codex_subagents_handoff_sandbox_failures_to_the_parent() -> None:
-    instructions = (ROOT / ".codex" / "AGENTS.md").read_text(encoding="utf-8")
+def test_subagents_handoff_sandbox_failures_to_the_parent() -> None:
+    instructions = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
     assert "sandbox or permission failures as execution-boundary handoffs" in instructions
     assert "subagents must stop and return the exact error" in instructions
@@ -303,8 +273,6 @@ def test_commit_workflows_do_not_require_agent_status() -> None:
         ROOT / ".claude" / "commands" / "gen-commit.md",
         ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
         ROOT / ".claude" / "agents" / "commit-specialist.md",
-        ROOT / ".agent" / "workflows" / "gen-commit.md",
-        ROOT / ".agent" / "skills" / "commit-helper" / "SKILL.md",
     )
 
     for path in commit_files:

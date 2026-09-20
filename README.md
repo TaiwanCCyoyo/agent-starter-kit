@@ -2,215 +2,121 @@
 
 # AI Agent Starter Kit
 
-A standardized, frictionless engineering infrastructure for Codex, Claude Code, and Antigravity. Use this repository as a project template when you want every supported agent to discover project rules, skills, workflows, and verification expectations quickly.
+A project template that gives Codex and Claude Code a shared operating contract, matching per-agent tooling, and verification that runs the same way locally and in CI.
 
-## Core Philosophy
+Copy it into a new project when you want both agents to find the project's rules, skills, and quality gates without being told where to look.
 
-1. **Agent-Native Context**: Codex and Claude Code use their native local memory systems; required project knowledge stays in version-controlled guidance.
-2. **Optional OpenSpec Planning Handoff**: Downstream projects may initialize OpenSpec and treat its specs, changes, and tasks as regular project files.
-3. **Agent-Specific Bootstrap**: Each agent owns its native instruction and hook layer.
-4. **Automated Maintenance**: Formatting, linting, and file hygiene are enforced through agent hooks and repository verification scripts.
-5. **Native Security**: Secret scanning is integrated into the pre-commit workflow through `detect-secrets`.
-6. **Encoding & Language Integrity**: UTF-8 without BOM and language boundaries are validated for repository files.
-7. **Verification-First Execution**: Agents state a verification plan before making non-trivial changes, run those checks after editing, and provide evidence before marking tasks complete.
+## The idea: one contract, enforced elsewhere
 
-## Current Defaults
+Both agents read a single root `AGENTS.md`. Claude Code and Codex discover that filename natively, so nothing has to inject it.
 
-- **Shared development rules**: Codex and Claude Code use the same phase routing model: native planning for in-session plans, optional downstream OpenSpec files for durable planning handoff, repository-owned skills and direct verification for implementation work, dedicated reviewers for quality and security, and explicit commit/PR workflow owners.
-- **OpenSpec CLI dependency**: Spec-driven planning expects the OpenSpec CLI to be installed by the user. Run `openspec init` in each downstream project or workspace that wants OpenSpec planning, then treat the generated specs, changes, and tasks as normal project files and commit them when they are part of the project record.
-- **Layered verification**: Claude Code uses the official Pyright LSP plugin plus a read-only Ruff check for `E722,F601,F602,F634`; Codex uses a broader read-only `F` check because it has no Python LSP. Both use pre-commit before completion for authoritative formatting, linting, type checking, and file validation.
-- **Security review contract**: Security-sensitive changes route to dedicated security reviewers, and any `CRITICAL` security or data-loss risk blocks completion until fixed.
-- **Editor hygiene**: `.vscode/settings.json` trims trailing whitespace, keeps exactly one final newline, enables Ruff formatting for Python, and hides generated caches and local agent state from search/watchers.
+`AGENTS.md` is deliberately short. A rule earns a place in it only when no other layer can state or enforce that rule. Everything else lives where it actually takes effect:
 
-## Agent Memory And Workflows
+| Layer                               | Owns                                                                             |
+| :---------------------------------- | :------------------------------------------------------------------------------- |
+| `AGENTS.md`                         | Authorization, project conventions, review severity, and memory boundaries       |
+| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks |
+| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                 |
+| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                 |
+| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                          |
+| `.claude/agents/`, `.codex/agents/` | Subagent roles and routing, selected by their own `description`                  |
 
-- **Codex memory**: Native local memories are enabled by `.codex/config.toml` and stored under the user's Codex home outside the repository; use `/memories` for chat-level controls. Required project rules remain in checked-in guidance.
-- **Claude Code memory**: Claude uses its built-in memory and routes repository conventions to `CLAUDE.md`, rules, documentation, or skills.
-- **Antigravity**: This repository does not provide a cross-session memory store; durable knowledge belongs in checked-in artifacts and Git history.
+Two consequences are worth stating outright:
 
-### Agent Workflows
+- **`AGENTS.md` names no individual skill or subagent.** Routing belongs in each component's `description`, where retrieval already happens. Listing names in the contract duplicates that and goes stale.
+- **`AGENTS.md` states nothing the model already knows.** General engineering craft, reading code before changing it, and not committing secrets are left out, because the model brings the first two and `detect-secrets` enforces the third.
 
-Start with the component reference for the agent you use; you do not need to configure every supported agent.
+The result is a contract that fits on one screen and changes only when the project's actual constraints change.
 
-- **Codex**: Uses native Plan Mode, repo-scoped skills in `.codex/skills/`, and specialist reviewer agents in `.codex/agents/`. Command-like skills can be invoked with plain text such as `/gen-commit`, but they are not registered slash commands. For details, see [Codex Components Reference](docs/en/codex-components.md).
-- **Claude Code**: Uses registered slash commands in `.claude/commands/` (e.g. `/gen-commit`, `/worktree`). Subagents live in `.claude/agents/`. Path-scoped coding rules live in `.claude/rules/`. For a full list of available agents, commands, skills, hooks, and rules, see [Claude Code Components Reference](docs/en/claude-components.md).
-- **Antigravity**: Uses root `GEMINI.md` for core operating contract, `.agent/workflows/` for custom slash commands (e.g. `/gen-commit`, `/worktree`), `.agent/skills/` for repo-scoped skills, and `.agent/hooks.json` for lifecycle hooks. For details, see [Antigravity Components Reference](docs/en/antigravity-components.md).
+## What to copy
 
-## Automated Hooks & Lifecycle
+| Path                      | Purpose                                                                   |
+| :------------------------ | :------------------------------------------------------------------------ |
+| `AGENTS.md`               | Shared root operating contract for every agent                            |
+| `.pre-commit-config.yaml` | Repository verification hooks                                             |
+| `scripts/`                | Shell-neutral hygiene and formatting checks shared by every agent         |
+| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and rules |
+| `.codex/`                 | Codex configuration, hooks, command-like skills, and specialist agents    |
+| `.github/workflows/`      | CI that runs the same checks the agents run locally                       |
+| `docs/en/git-workflow.md` | Git and delivery authorization contract; keep the path, reset the status  |
+| `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project              |
+| `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows            |
 
-This repository uses agent-native hooks to maintain system integrity:
+Take only the agent directories you use. Neither agent needs the other's layer, but the verification below and the contract tests in `scripts/tests/` read both: drop the assertions and test paths for the layer you did not copy, or they will fail on a directory that is not there.
 
-| Agent           | Hook Type      | Purpose                                                                                         | Script                                          |
-| :-------------- | :------------- | :---------------------------------------------------------------------------------------------- | :---------------------------------------------- |
-| **Codex**       | `SessionStart` | Injects `.codex/AGENTS.md` and reports branch/worktree metadata without inferring the task.     | `.codex/hooks/codex_session_start.py`           |
-| **Codex**       | `PostToolUse`  | Reports targeted Ruff `F` diagnostics for edited Python files without modifying them.           | `.codex/hooks/codex_post_tool_use_hygiene.py`   |
-| **Claude Code** | `PostToolUse`  | Reports Ruff `E722,F601,F602,F634` diagnostics that complement Pyright without modifying files. | `.claude/hooks/claude_post_tool_use_hygiene.py` |
-| **Antigravity** | `SessionStart` | Reports the active branch and whether the workspace is a worktree.                              | `.agent/hooks/session_start.py`                 |
-| **Antigravity** | `PostToolUse`  | Reports targeted Ruff `E722,F601,F602,F634` diagnostics without modifying files.                | `.agent/hooks/post_tool_use_hygiene.py`         |
+## Setting up
 
-### Troubleshooting Hooks
-
-If hooks are not firing:
-
-1. Ensure Git hooks are installed:
-    ```bash
-    uv run pre-commit install
-    ```
-2. For Codex, verify `.codex/config.toml` enables `hooks` and `memories`, and `.codex/hooks.json` points to `.codex/hooks/`.
-3. For Claude Code, verify `.claude/settings.json` has the `hooks` section with correct paths; open `/hooks` in the Claude Code UI to reload config if hooks were added mid-session.
-4. For Antigravity, verify `.agent/hooks.json` is correctly defining the events.
-5. Confirm the agent trusts the project-local configuration layer.
-
-## Git and PR Boundaries
-
-Independent modification tasks use isolated branches/worktrees. The [shared Git workflow contract](docs/en/git-workflow.md) defines delivery, review, merge, and cleanup authority. Delivery currently stops at a verified local commit; owners can enable standing task-branch push and PR authorization after completing [downstream PR setup](docs/en/pr-setup.md). Native Git/GitHub capabilities handle the mechanics; no additional PR skill is needed.
-
-## Permissions Configuration
-
-Runtime permissions are separate from task authorization. The current configuration retains push confirmation while remote identity and protection setup are pending; the workflow contract does not bypass runtime controls.
-
-### Claude Code (`.claude/settings.json`)
-
-Permissions are declared in `.claude/settings.json` and take effect immediately without modifying global config. Key rules:
-
-- **Allow**: Listed read operations and diagnostic commands; inspect `.claude/settings.json` for the exact patterns.
-- **Requires Confirmation (ask)**: `git push` — prevents accidental remote publishing.
-- **Deny**: Listed force-push and `.git` removal command patterns. These patterns are not a substitute for GitHub branch protection.
-
-### Codex
-
-Codex does not ship repository-local permission rules in this starter kit. Permission review is delegated to the configured approvals reviewer (for example, an auto-review / "review on my behalf" workflow) instead of `.codex/rules/`.
-
-Codex planning is handled by the main agent through Plan Mode; this starter kit intentionally does not define a separate Codex planner agent.
-
-## CI/CD Setup
-
-Agents enforce quality locally via hooks, but a CI pipeline catches issues on every push and makes quality gates visible to the whole team. This section provides a minimal starting point.
-
-### Recommended GitHub Actions Workflow
-
-Create `.github/workflows/ci.yml` in your project:
-
-```yaml
-name: CI
-
-on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-
-permissions:
-    contents: read
-
-jobs:
-    quality:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  persist-credentials: false
-
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
-
-            - name: Install dependencies
-              run: pip install uv && uv sync --group dev
-
-            - name: Lint
-              run: uv run ruff check --fix .
-
-            - name: Type check
-              run: uv run mypy .
-
-            - name: Test
-              run: uv run pytest
-
-            - name: Secret scan
-              run: uv run pre-commit run detect-secrets --all-files
+```bash
+uv sync --group dev
+uv run pre-commit install
 ```
 
-Adjust the `pytest` step to match your project's test directory and the Python version to match `.python-version`.
+Then verify the checks run:
 
-### GitHub CLI Operations
+```bash
+uv run pre-commit run --all-files
+uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+```
 
-Once CI is configured, use `gh` directly for operational tasks. Dependabot alert retrieval and remediation are owned by the shared `dependabot-remediation` skill.
+List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert both agent layers; prune them to the layers your project actually has.
 
-| Task                 | Command                                   |
-| :------------------- | :---------------------------------------- |
-| View failed run logs | `gh run view <run-id> --log-failed`       |
-| Re-run failed steps  | `gh run rerun <run-id> --failed`          |
-| List recent failures | `gh run list --status failure --limit 10` |
+## Adapting it to your project
 
-Requires `gh` CLI installed and authenticated (`gh auth login`).
+### 1. Reset delivery authorization
 
-### Troubleshooting CI Failures
+`docs/en/git-workflow.md` records this repository's own delivery status. **Reset its current-state bullet to local-only before using the template elsewhere.** Copying the file grants no publishing authority; see [PR setup](docs/en/pr-setup.md) for enabling it deliberately.
 
-1. **Reproduce locally first** — run the same commands the workflow runs (`ruff check --fix .`, `mypy .`, `pytest`) before investigating remotely.
-2. **Read the full log** — `gh run view <run-id> --log-failed` shows only the failing step output.
-3. **Check for environment differences** — Python version, missing env vars, or missing `uv sync` are the most common causes.
-4. **Distinguish flaky from real** — if the same test passes locally and fails remotely consistently, it is usually an environment issue, not a flaky test.
+The one rule that never relaxes: agents never commit or push to the default branch. Everything reaches it through a pull request.
 
-## Template Usage
+### 2. Adjust the CI workflow
 
-When applying this starter kit to a new project, copy the agent infrastructure that matches your supported tools:
+`.github/workflows/ci.yml` runs full pre-commit plus the agent hook tests on Windows, because Windows is this template's primary development platform. Change the runner, the Python version, and the test paths to match your project, then make the job a required check on your default branch. Pin any third-party action to a full commit SHA.
 
-| Path                      | Purpose                                                                                                     |
-| :------------------------ | :---------------------------------------------------------------------------------------------------------- |
-| `CLAUDE.md`               | Claude Code root operating contract.                                                                        |
-| `docs/en/git-workflow.md` | Required shared Git authorization contract; retain its path and reset delivery to local-only when adopting. |
-| `docs/en/pr-setup.md`     | Owner setup guide referenced by the contract.                                                               |
-| `GEMINI.md`               | Antigravity root operating contract.                                                                        |
-| `.agent/`                 | Antigravity hooks, workflows (slash commands), and repo-scoped skills.                                      |
-| `.codex/`                 | Codex instructions, hooks, private command-like skills, and specialist agents.                              |
-| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and path-scoped coding rules.               |
-| `.vscode/`                | Workspace editor defaults that match file hygiene and Python Ruff workflows.                                |
-| `scripts/`                | Repository-level hygiene and formatting scripts used by Git and agent adapters.                             |
-| `.pre-commit-config.yaml` | Repository-level verification hooks.                                                                        |
+Local pre-commit results are not a merge gate. CI is.
 
-After copying, review agent-specific rules, install hooks with `uv run pre-commit install`, initialize OpenSpec with `openspec init` when spec-driven planning is desired, treat that project's OpenSpec artifacts as regular project files, and verify with `uv run ruff check --fix .`.
+### 3. Rewrite the rules that are actually yours
 
-### Agent Workflow Plugin And Skill Integration
+Open `AGENTS.md` and delete what does not apply to your project. Traditional Chinese communication, the `scripts/` shell-neutral requirement, and the Windows path expectation are this template's constraints, not universal ones. Keep the shape — authorization, conventions, review, skills, memory, verification, delegation — and replace the content.
 
-This repository integrates native capabilities, project-owned skills, and selected plugins differently per agent:
+Apply the same test to anything you add: if pre-commit, CI, a path-scoped rule, or a skill description can carry it, put it there instead.
 
-- **Claude Code**: The project settings intentionally disable the Superpowers, Ponytail, and Karpathy plugins. Native Claude capabilities, project-owned `.claude/` agents, commands, skills, rules, and hooks provide the workflow; GitHub, skill-creator, and Pyright LSP remain enabled.
-- **Codex**: Does not depend on Superpowers, Ponytail, or external Karpathy skills. Native Codex capabilities, project-scoped agents and skills provide the workflow; GitHub integration is supplied by the available GitHub plugin when installed.
-- **Antigravity**: Uses native Planning Mode, the dedicated root `GEMINI.md` operating contract, and repo-scoped skills in `.agent/skills/`. Its architecture is fully aligned with the Claude Code and Codex layers while maintaining strict namespace isolation.
+### 4. Consider OpenSpec for durable planning
 
-## Design Influences
+This template commits no `openspec/` directory and `AGENTS.md` says nothing about it, because planning state belongs to each project rather than to the template. Projects built from this kit have found it worth adding for long-running work: run `openspec init`, then treat the generated specs, changes, and tasks as ordinary project files and commit them as part of the project record. It gives multi-session work a durable trail that outlives any single agent session.
 
-This starter kit is shaped by an open-source project:
+### 5. Set up permissions
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — Production-ready agents, skills, hooks, commands, and rules for Claude Code. The specialist agents (`code-reviewer`, `tdd-guide`, `security-reviewer`, etc.), coding rules, and the Prompt Defense Baseline in `CLAUDE.md` are ported or adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
+Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The allow list covers read-only inspection, and the deny list covers only `.git` removal. Everything else, `git push` included, is left to the session's permission mode to judge per call.
 
-## Initialization
+That is a deliberate retreat from pattern matching. Permission patterns compare command text, while `git push` takes its meaning from flags in any position, bundled (`-fu`) or abbreviated (`--forc`), from refspecs, and from configuration the text never mentions — `remote.<name>.mirror`, `branch.<name>.pushRemote`, `url.<base>.pushInsteadOf`. Successive review rounds on this template each found another spelling, which is what an unenumerable set looks like. A list that cannot be completed invites more trust than it earns.
 
-To initialize this repository and set up verification tools:
+The boundary is server-side: a ruleset on the default branch, which no local configuration can weaken.
 
-1. **Install Git Hooks**
-    ```bash
-    uv run pre-commit install
-    ```
-2. **Install Dev Dependencies** (includes mypy for type checking)
-    ```bash
-    uv sync --group dev
-    ```
-3. **Verify Environment**
-    ```bash
-    uv run ruff check --fix .
-    ```
-4. **Initialize OpenSpec When Needed**
+Codex ships no repository-local permission rules here; it uses its own approval controls.
 
-    Install the OpenSpec CLI in your user environment, then initialize planning state per project or workspace:
+## Per-agent references
 
-    ```bash
-    openspec init
-    ```
+Start with the reference for the agent you use. You do not need to configure both.
 
-    This starter kit does not commit the `openspec/` directory created by initializing the template repository itself. Downstream projects should treat their own OpenSpec specs, changes, and tasks as regular project files and commit them when those artifacts define project planning or requirements.
+- **[Claude Code Components](docs/en/claude-components.md)** — subagents, slash commands, skills, hooks, and path-scoped rules in `.claude/`.
+- **[Codex Components](docs/en/codex-components.md)** — specialist agents, command-like skills, hooks, and model routing in `.codex/`.
+- **[Git Workflow Contract](docs/en/git-workflow.md)** — task isolation, delivery authorization, and review and merge boundaries.
+- **[PR Review](docs/en/pr-review.md)** — how this repository's own hosted review and merge conditions are configured.
+
+## Hooks
+
+Both agents run one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. Neither runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and the commit workflows establish branch context themselves rather than relying on injected state.
+
+| Agent           | Script                                          | Reports                                                   |
+| :-------------- | :---------------------------------------------- | :-------------------------------------------------------- |
+| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py` | Ruff `E722,F601,F602,F634`, complementing the Pyright LSP |
+| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`   | Ruff `F` checks, since Codex has no Python LSP            |
+
+If hooks do not fire, confirm `uv run pre-commit install` has run, that `.codex/config.toml` enables `hooks`, that `.claude/settings.json` declares the `hooks` section, and that the agent trusts the project-local configuration.
+
+## Design influences
+
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — the specialist agents and coding rules are adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
 
 ---
 
