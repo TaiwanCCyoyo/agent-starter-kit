@@ -26,6 +26,24 @@ def test_claude_uses_pyright_lsp_without_project_ruff_lsp() -> None:
     assert not (ROOT / ".claude" / "marketplace").exists()
 
 
+def test_destructive_git_push_forms_are_denied() -> None:
+    """Plain `git push` is allowed, so every destructive form needs its own deny entry.
+
+    Patterns match literally, so a flag is only covered when the bare form, the
+    trailing-argument form, and the mid-command form are all listed. A deny list
+    cannot cover a delete expressed as a refspec (`git push origin :branch`);
+    server-side branch protection remains the actual boundary.
+    """
+    permissions = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]
+    deny = set(permissions["deny"])
+
+    assert "Bash(git push)" in permissions["allow"]
+    for flag in ("-f", "--force", "--force-with-lease", "--force-if-includes", "-d", "--delete", "--mirror", "--prune"):
+        assert f"Bash(git push {flag})" in deny, flag
+        assert f"Bash(git push {flag} *)" in deny, flag
+        assert f"Bash(git push * {flag} *)" in deny, flag
+
+
 def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> None:
     settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     plugins = settings["enabledPlugins"]

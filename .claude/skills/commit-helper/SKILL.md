@@ -52,6 +52,6 @@ In every execution mode, run pre-commit against the approved paths and then run 
 
 This check is the **main agent's** responsibility, run after `commit-specialist` reports a successful commit. The subagent only sees the delegated staged scope, not the full session, so it cannot judge these criteria itself:
 
-2. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
-3. Route durable knowledge through Claude Code's built-in memory (`AGENTS.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
-4. Apply `AGENTS.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.
+1. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
+2. Route durable knowledge through Claude Code's built-in memory (`AGENTS.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
+3. Apply `AGENTS.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.

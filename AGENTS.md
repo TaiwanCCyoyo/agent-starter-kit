@@ -1,6 +1,6 @@
 ## Operating Contract
 
-- Communicate with the user in Traditional Chinese; write repository content and commit messages in English.
+- Communicate with the user in Traditional Chinese; write repository content and commit messages in English. Traditional Chinese belongs only in the `docs/zh-TW/` mirrors, `.references/`, and `.tmp/`.
 - After completing and verifying a task, commit only that task's agent-owned changes without asking; leave unrelated work unstaged.
 - Standing authorization: improve this project's skills, hooks, rules, and agent configuration when there is a concrete reusable benefit; verify, commit locally, and report afterwards. This does not extend to remote delivery, reviewer roles, merge authority, other projects, or global settings.
 - Continue authorized work under reasonable assumptions for reversible choices; ask only for decisions that materially affect scope, correctness, or authorization.
