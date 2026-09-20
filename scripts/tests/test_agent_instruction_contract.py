@@ -27,23 +27,25 @@ def test_claude_uses_pyright_lsp_without_project_ruff_lsp() -> None:
 
 
 def test_destructive_git_push_forms_are_denied() -> None:
-    """Plain `git push` is allowed, so every destructive form needs its own deny entry.
+    """Only the bare `git push` runs unattended; any argument falls through to a prompt.
 
-    Patterns match literally, so a flag is only covered when the bare form, the
-    trailing-argument form, and the mid-command form are all listed. Refspecs
-    carry the same destructive meaning without a flag: `git push origin :branch`
-    deletes a remote ref and a leading `+` force-updates one, so both shapes are
-    denied too. This list is defence in depth, not the boundary -- a server-side
-    ruleset is what actually stops an unauthorized remote update.
+    Three review rounds each found another spelling the deny list missed -- bare
+    flags, refspecs, then flags in terminal position -- and Git also accepts
+    unambiguous abbreviations such as `--forc`, so a text pattern list cannot be
+    completed. The wildcard allow is therefore gone: `Bash(git push)` cannot
+    express a force or a delete, and everything else asks. The deny entries stay
+    as defence in depth, and the real boundary is a server-side ruleset.
     """
     permissions = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]
     deny = set(permissions["deny"])
 
     assert "Bash(git push)" in permissions["allow"]
+    assert "Bash(git push *)" not in permissions["allow"]
     for flag in ("-f", "--force", "--force-with-lease", "--force-if-includes", "-d", "--delete", "--mirror", "--prune"):
         assert f"Bash(git push {flag})" in deny, flag
         assert f"Bash(git push {flag} *)" in deny, flag
         assert f"Bash(git push * {flag} *)" in deny, flag
+        assert f"Bash(git push * {flag})" in deny, flag
 
     assert "Bash(git push * :*)" in deny
     assert "Bash(git push * +*)" in deny
@@ -272,8 +274,9 @@ def test_commit_workflows_establish_the_branch_before_committing() -> None:
     """Auto-commit is authorized, so the branch must be checked, not assumed.
 
     No SessionStart hook reports the branch and `git status --short` omits it, so
-    every commit workflow has to establish it explicitly and refuse the default
-    branch, which `docs/en/git-workflow.md` puts off limits.
+    every commit workflow has to establish it explicitly and refuse both states
+    `docs/en/git-workflow.md` puts off limits: the default branch, and a detached
+    HEAD, which `git branch --show-current` reports as empty rather than as a name.
     """
     workflows = (
         ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
@@ -285,6 +288,10 @@ def test_commit_workflows_establish_the_branch_before_committing() -> None:
         content = path.read_text(encoding="utf-8")
         assert "git branch --show-current" in content, path
         assert "default branch" in content, path
+        # An empty result means detached HEAD, which is not the default branch
+        # and would otherwise pass the check.
+        assert "empty" in content, path
+        assert "detached HEAD" in content, path
 
 
 def test_commit_workflows_do_not_force_ai_attribution() -> None:

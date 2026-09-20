@@ -84,9 +84,9 @@ This template commits no `openspec/` directory and `AGENTS.md` says nothing abou
 
 ### 5. Set up permissions
 
-Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The template allows ordinary `git push` and denies the destructive forms: every force, delete, mirror, and prune flag in its bare, trailing-argument, and mid-command spelling, the refspec equivalents (`origin :branch` and a leading `+`), and `.git` removal.
+Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. Only the bare `git push` runs unattended, because it cannot express a force or a delete. Any `git push` with arguments prompts, and the destructive flags and refspecs are denied outright alongside `.git` removal.
 
-Treat that list as defence in depth, not as the boundary. It matches command text, so a spelling nobody enumerated slips through, and a default-branch ruleset protects only the default branch — task branches stay writable by anything holding the credential. Server-side rules are what actually stop an unauthorized remote update.
+That asymmetry is deliberate. Patterns match command text, and Git accepts flags in any position, bundled (`-fu`), and abbreviated (`--forc`), so an allow-list with a wildcard cannot be made safe — three review rounds on this template each found another spelling. Treat the deny entries as defence in depth: a default-branch ruleset protects only the default branch, so server-side rules are what actually stop an unauthorized remote update.
 
 Codex ships no repository-local permission rules here; it uses its own approval controls.
 
@@ -101,7 +101,7 @@ Start with the reference for the agent you use. You do not need to configure bot
 
 ## Hooks
 
-Both agents run one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. Neither runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and Git context is a command away.
+Both agents run one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. Neither runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and the commit workflows establish branch context themselves rather than relying on injected state.
 
 | Agent           | Script                                          | Reports                                                   |
 | :-------------- | :---------------------------------------------- | :-------------------------------------------------------- |

@@ -84,9 +84,9 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 ### 5. Set up permissions
 
-Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。此範本允許普通 `git push`，並禁用所有破壞性形式：force、delete、mirror、prune 各旗標的裸形式、帶參數形式與中段形式，以及等效的 refspec 寫法（`origin :branch` 與開頭的 `+`），加上 `.git` 刪除。
+Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。只有裸指令 `git push` 會自動執行，因為它無法表達 force 或 delete；任何帶參數的 `git push` 都會先詢問，破壞性旗標與 refspec 寫法則直接禁用，`.git` 刪除亦然。
 
-請把這份清單視為縱深防禦，而不是邊界。它比對的是指令文字，因此沒有被列舉到的寫法仍會通過；而 default branch ruleset 只保護 default branch，task branches 對任何持有憑證者都仍可寫入。真正能阻止未授權遠端更新的是 server 端規則。
+這個不對稱是刻意的。Pattern 比對的是指令文字，而 Git 允許旗標出現在任何位置、可合併（`-fu`）、也可縮寫（`--forc`），因此帶萬用字元的 allow 清單無法做到安全——本範本歷經三輪 review，每一輪都找出另一種寫法。請把 deny 條目視為縱深防禦：default branch ruleset 只保護 default branch，真正能阻止未授權遠端更新的是 server 端規則。
 
 Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
 
@@ -101,7 +101,7 @@ Codex 此處不提供 repository 本地權限規則；它使用自己的核准�
 
 ## Hooks
 
-兩個 agent 都執行一個唯讀的 `PostToolUse` hook，在編輯後的 Python 檔案上回報 Ruff 診斷而不修改它們。兩者都不執行 `SessionStart` hook：根目錄 `AGENTS.md` 原生被探索，Git 脈絡是一個指令遠而已。
+兩個 agent 都執行一個唯讀的 `PostToolUse` hook，在編輯後的 Python 檔案上回報 Ruff 診斷而不修改它們。兩者都不執行 `SessionStart` hook：根目錄 `AGENTS.md` 原生被探索，commit 流程也自行建立 branch context，不依賴被注入的狀態。
 
 | Agent           | Script                                          | 回報內容                                     |
 | :-------------- | :---------------------------------------------- | :------------------------------------------- |

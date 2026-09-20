@@ -8,7 +8,7 @@ Delegate this task to the `commit-specialist` subagent, which MUST follow `.clau
 
 ## Workflow
 
-1. Run `git branch --show-current` before staging or committing anything. `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. If the checkout is on the default branch, stop and report: `docs/en/git-workflow.md` forbids committing there, and standing commit authorization does not override it.
+1. Run `git branch --show-current` before staging or committing anything. `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids both, and standing commit authorization does not override it.
 2. Confirm whether the user wants only a commit message or wants Claude to execute a commit.
 3. Do a filename/status-level-only preflight of the staged (or, if nothing is staged, unstaged) scope. Do not inspect staged file contents in the main agent.
 4. Stop and ask before delegating if that preflight shows obvious forbidden or suspicious paths. If nothing is staged, ask before staging unless the user explicitly requested autonomous staging.
