@@ -13,7 +13,7 @@ The main agent owns scope, staging authorization, sandbox fallback, and post-com
 
 ## Branch Precondition
 
-Run `git branch --show-current` before staging or committing anything. `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids both, and standing commit authorization does not override it.
+Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
 
 ## Workflow
 

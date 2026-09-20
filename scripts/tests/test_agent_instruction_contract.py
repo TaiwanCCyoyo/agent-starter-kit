@@ -316,6 +316,10 @@ def test_commit_workflows_establish_the_branch_before_committing() -> None:
         # and would otherwise pass the check.
         assert "empty" in content, path
         assert "detached HEAD" in content, path
+        # The guard covers staging and committing. Returning a message writes
+        # nothing, so the exemption is asserted by its rule rather than by the
+        # words "message-only", which appear elsewhere in these files anyway.
+        assert "may proceed on any branch" in content, path
 
 
 def test_commit_workflows_do_not_force_ai_attribution() -> None:

@@ -11,7 +11,7 @@ This skill is the source of truth for high-quality commits in this project. All 
 
 ## Pre-commit Checklist
 
-1. **Branch Verification**: Run `git branch --show-current` before staging or committing anything. `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids both, and standing commit authorization does not override it.
+1. **Branch Verification**: Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
 2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only.
 3. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit-specialist`. The specialist verifies it and must not commit inside a submodule.
 
