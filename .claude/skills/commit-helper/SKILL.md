@@ -1,6 +1,6 @@
 ---
 name: commit-helper
-description: Quality standards and delegation rules for Git commits — pre-commit handoff, Conventional Commits format, and post-commit memory checks. Load this BEFORE staging, drafting a commit message, running `git commit`, or delegating to commit-specialist, for ANY commit request (not only when the user types /gen-commit) — triggers on "commit", "commit this", "commit changes", "write a commit message", or any request to record staged work as a commit.
+description: Prepare scoped Git commits and Conventional Commit messages with specialist delegation. Load before staging, drafting a commit message, running git commit, or delegating to commit-specialist; applies to commit requests and automatic agent-owned commits.
 ---
 
 # Skill: Commit-Helper
@@ -9,7 +9,7 @@ This skill owns local commits. The main agent owns any subsequent PR delivery un
 
 This skill is the source of truth for high-quality commits in this project. All Claude commit generation workflows must refer to this helper.
 
-## Pre-commit Checklist
+## Commit Preflight
 
 1. **Branch Verification**: Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
 2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only.
@@ -36,10 +36,10 @@ The main agent must select one mode from what it actually knows and requests. Do
 
 1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
 2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
-3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on pre-commit, bounded ordinary hook recovery, and commit execution.
-4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and still focuses on pre-commit, bounded ordinary hook recovery, and commit execution. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
+3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on commit execution and bounded hook recovery.
+4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and then executes the commit with bounded hook recovery. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
 
-In every execution mode, run pre-commit against the approved paths and then run the normal commit command. Fix only a simple, directly actionable pre-commit or commit-hook failure, re-stage only approved files, and retry once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
+For message-only requests, return the message without committing. For authorized execution, run the normal commit command with its installed hooks. Fix only a simple, directly actionable commit-hook failure, inspect the resulting diff, re-stage only approved files, and retry the commit once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
 
 ## Interaction And Summary
 

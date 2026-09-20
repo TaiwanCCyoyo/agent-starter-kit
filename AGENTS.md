@@ -16,7 +16,7 @@
 
 ## Review And Security
 
-These rules govern local review before commit and hosted pull request review alike. See [PR review](docs/en/pr-review.md) for how PR review is triggered and what it may do.
+These rules govern requested local reviews and hosted pull request reviews. See [PR review](docs/en/pr-review.md) for how PR review is triggered and what it may do.
 
 - Classify every finding as `CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`: block `CRITICAL` security or data-loss risks and `HIGH` likely bugs or significant regressions unless the user accepts the risk; report `MEDIUM` and `LOW` as informational.
 - Flag any secret, token, password, or API key in a diff as `CRITICAL`.
@@ -28,6 +28,7 @@ These rules govern local review before commit and hosted pull request review ali
 
 - Create or extend a skill in the active agent's skills directory when a recurring task class needs guidance the repository does not already state; the main session owns the file, writes it under the standing authorization above, and reports afterwards. Keep command entry points thin and put the workflow logic in the skill.
 - Capture project-specific constraints, conventions, and what the finished deliverable must satisfy; omit general model knowledge and narration of a single task instance.
+- Keep automated-check inventories and duplicate check instructions out of skills, rules, and agent prompts; installed hooks and CI own those checks.
 - Write `description` for retrieval: name the triggering intents, artifacts, and phrasings a future unrelated session would actually use.
 
 ## Memory
@@ -39,6 +40,7 @@ These rules govern local review before commit and hosted pull request review ali
 ## Verification
 
 - Verify what you changed and show the output as evidence; state plainly when verification was skipped or insufficient and what risk remains.
+- Focus local verification on changed behavior. Use normal commit hooks and hosted PR checks without a separate manual pass; investigate their failures when reported.
 - Match coverage to the risk of the change rather than a fixed repository-wide target; do not add tests that only freeze prose, model names, or configuration values.
 - A changed hook or script needs one functional regression test, because these fail silently.
 

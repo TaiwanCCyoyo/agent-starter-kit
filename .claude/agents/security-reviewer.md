@@ -34,8 +34,7 @@ Only require controls that apply to the changed system and its trust boundaries.
 ## Repository Checks
 
 - Inspect the relevant diff and surrounding code.
-- Use existing repository gates such as `detect-secrets`; do not assume Bandit, npm audit, AgentShield, or another scanner is installed.
-- Run additional tools only when they are present in project configuration or explicitly approved.
+- Base findings on the changed trust boundaries and concrete exploit paths.
 - Do not print or reproduce suspected secret values.
 
 ## Output

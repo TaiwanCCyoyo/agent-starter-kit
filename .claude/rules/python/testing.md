@@ -6,8 +6,6 @@ paths:
 
 # Python Testing
 
-> This file extends [common/testing.md](../common/testing.md) with Python specific content.
-
 ## Framework
 
 Use **pytest** as the testing framework.

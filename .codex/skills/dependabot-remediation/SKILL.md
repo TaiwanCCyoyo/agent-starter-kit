@@ -60,7 +60,7 @@ Work only on alerts that the user authorized for remediation.
 - Prefer the smallest compatible upgrade that exits every affected vulnerable range. Preserve unrelated dependency versions where the package manager permits it.
 - Update manifest and lock files through the repository's package manager. Review lifecycle scripts and generated changes before accepting them.
 - If the minimum fix causes compatibility failures, fix the compatibility issue when it remains in scope. Do not broaden to an unrelated major upgrade merely to make resolution succeed.
-- Run the smallest relevant tests, lint, type checks, build, and repository-required pre-commit checks. Use the environment's security review workflow when available.
+- Run targeted behavioral tests or a build when needed to verify compatibility of the dependency change. Use the environment's security review workflow when available.
 - Preserve unrelated working-tree changes and never discard user work.
 
 ## Completion Evidence
