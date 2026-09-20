@@ -25,3 +25,14 @@ Shared by Codex and Claude Code. Use native Git and GitHub capabilities; commit 
 - Review the PR's current head commit and identify it in the result. New commits require renewed review; an internal reviewer report is not a GitHub approval.
 - Agent sessions must not directly push the default branch, bypass quality gates, or change repository rules. Merging is the owner's decision and must go through a PR whose required checks pass.
 - Force pushes, history rewrites, discarding work, and deleting branches/worktrees require explicit authorization. Before authorized cleanup, verify the task result is preserved and no other session owns the worktree.
+
+## PR follow-through
+
+For an authorized implementation PR, the main agent owns the following work without waiting for another user reminder. A review-only or status-only request remains read-only unless the user also authorizes implementation.
+
+1. After opening or updating the PR, wait for required CI and the configured review on the current head. Check at bounded intervals; report meaningful changes rather than unchanged polls. If review does not start or an external blocker prevents progress, report the exact pending state instead of claiming completion.
+2. Assess findings against the current diff. Fix valid issues within the authorized scope, verify the changed behavior, and push the fix. New commits require current-head CI and renewed review. Bring disputed findings, scope expansion, or authorization decisions to the owner; do not blindly apply suggestions or dismiss them to clear a gate.
+3. Once a finding is addressed and the relevant verification and renewed review are complete, resolve its review thread. An outdated thread or successful CI alone does not prove that the finding is fixed. Re-read the thread list to confirm resolution and catch remaining discussions.
+4. Report completion only after current-head required checks pass, review is complete, and no review threads remain unresolved. Otherwise report the remaining blocker or owner decision. Include the PR link and verified head; merging remains the owner's responsibility.
+
+This follow-through authorizes resolving addressed threads on the implementation PR. It does not authorize formal approvals, resolving disputed or unfixed findings, merging, or changing repository rules.
