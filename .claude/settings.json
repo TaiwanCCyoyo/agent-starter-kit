@@ -93,7 +93,14 @@
             "Bash(rm -rf .git *)",
             "Bash(rm -rf .git)",
             "Bash(rm -r .git *)",
-            "Bash(rm -r .git)"
+            "Bash(rm -r .git)",
+            "Bash(git config remote.*)",
+            "Bash(git config --add remote.*)",
+            "Bash(git config --local remote.*)",
+            "Bash(git config --global *)",
+            "Bash(git config --system *)",
+            "Bash(git remote set-url *)",
+            "Bash(git remote add *)"
         ],
         "defaultMode": "auto"
     },

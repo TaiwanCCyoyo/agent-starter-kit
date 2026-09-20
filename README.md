@@ -86,7 +86,11 @@ This template commits no `openspec/` directory and `AGENTS.md` says nothing abou
 
 Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. Only the bare `git push` runs unattended, because it cannot express a force or a delete. Any `git push` with arguments prompts, and the destructive flags and refspecs are denied outright alongside `.git` removal.
 
-That asymmetry is deliberate. Patterns match command text, and Git accepts flags in any position, bundled (`-fu`), and abbreviated (`--forc`), so an allow-list with a wildcard cannot be made safe — three review rounds on this template each found another spelling. Treat the deny entries as defence in depth: a default-branch ruleset protects only the default branch, so server-side rules are what actually stop an unauthorized remote update.
+That asymmetry is deliberate. Patterns match command text, and Git accepts flags in any position, bundled (`-fu`), and abbreviated (`--forc`), so an allow-list with a wildcard cannot be made safe — successive review rounds on this template each found another spelling.
+
+Even the bare command is only conditionally safe: `remote.<name>.mirror` turns `git push` into a mirror push that deletes refs missing locally, and `remote.<name>.push` can carry a force or delete refspec. A permission pattern cannot see configuration, so writes to remote config and `git remote set-url` are denied instead, which is also what the Git workflow contract requires about destination and identity.
+
+Treat all of it as defence in depth. A default-branch ruleset protects only the default branch, so server-side rules are what actually stop an unauthorized remote update.
 
 Codex ships no repository-local permission rules here; it uses its own approval controls.
 

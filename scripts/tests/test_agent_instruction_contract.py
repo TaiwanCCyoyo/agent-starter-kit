@@ -270,6 +270,28 @@ def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
         assert "source diff" in content
 
 
+def test_remote_configuration_writes_are_denied() -> None:
+    """Bare `git push` reads its behaviour from remote config, not from its own text.
+
+    `remote.<name>.mirror` makes it delete refs missing locally and
+    `remote.<name>.push` can carry a force or delete refspec, so the allowed bare
+    command is only safe while that config stays benign. Permission patterns
+    cannot inspect config, so the write path is denied instead -- which is also
+    what `docs/en/git-workflow.md` requires about destination and identity.
+    """
+    deny = set(json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]["deny"])
+
+    for entry in (
+        "Bash(git config remote.*)",
+        "Bash(git config --add remote.*)",
+        "Bash(git config --local remote.*)",
+        "Bash(git config --global *)",
+        "Bash(git remote set-url *)",
+        "Bash(git remote add *)",
+    ):
+        assert entry in deny, entry
+
+
 def test_commit_workflows_establish_the_branch_before_committing() -> None:
     """Auto-commit is authorized, so the branch must be checked, not assumed.
 

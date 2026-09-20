@@ -86,7 +86,11 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。只有裸指令 `git push` 會自動執行，因為它無法表達 force 或 delete；任何帶參數的 `git push` 都會先詢問，破壞性旗標與 refspec 寫法則直接禁用，`.git` 刪除亦然。
 
-這個不對稱是刻意的。Pattern 比對的是指令文字，而 Git 允許旗標出現在任何位置、可合併（`-fu`）、也可縮寫（`--forc`），因此帶萬用字元的 allow 清單無法做到安全——本範本歷經三輪 review，每一輪都找出另一種寫法。請把 deny 條目視為縱深防禦：default branch ruleset 只保護 default branch，真正能阻止未授權遠端更新的是 server 端規則。
+這個不對稱是刻意的。Pattern 比對的是指令文字，而 Git 允許旗標出現在任何位置、可合併（`-fu`）、也可縮寫（`--forc`），因此帶萬用字元的 allow 清單無法做到安全——本範本歷經數輪 review，每一輪都找出另一種寫法。
+
+即使是裸指令也只是有條件地安全：`remote.<name>.mirror` 會讓 `git push` 變成 mirror push 並刪除本地不存在的 refs，`remote.<name>.push` 也可能帶有 force 或 delete refspec。權限 pattern 看不到設定內容，因此改為禁止寫入 remote 設定與 `git remote set-url`——這也正是 Git 工作契約對 destination 與 identity 的要求。
+
+請把上述全部視為縱深防禦：default branch ruleset 只保護 default branch，真正能阻止未授權遠端更新的是 server 端規則。
 
 Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
 
