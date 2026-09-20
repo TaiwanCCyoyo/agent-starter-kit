@@ -2,7 +2,7 @@
 
 擁有者授權範圍為 `TaiwanCCyoyo/agent-starter-kit` 的 `main`。PR 審核由擁有者在 Codex 設定中啟用的 GitHub 整合服務執行，以每個 PR 為單位觸發，不是排程；完整契約見[英文版](../en/pr-review.md)。
 
-實作 agent 負責[PR 後續處理](../en/git-workflow.md#pr-follow-through)：等待 CI 與審核結果、處理範圍內成立的意見，並在確認修正後解決對應的審核討論，才算完成。合併權仍由擁有者保留。
+實作 agent 負責[PR 後續處理](../en/git-workflow.md#pr-follow-through)：評估審核意見，修正並驗證範圍內成立的問題，推送修正後立即解決已處理的審核討論，再等待當前 head 的 CI 與重新審核。解決討論不保證會啟動新的審核；回報完成前須確認實際狀態。合併權仍由擁有者保留。
 
 - PR 建立或更新時自動審核；在 PR 留言 `@codex review` 可隨時手動觸發。
 - 審核在服務商端執行，消耗擁有者的 Codex 程式碼審核額度，不佔用本專案的 GitHub Actions 分鐘數。
