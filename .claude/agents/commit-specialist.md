@@ -22,9 +22,8 @@ Your working directory is already the project root. Run Git commands directly wi
 - For **review supplied message**, inspect the staged diff only to validate the requested scope, then execute the supplied message unless the parent requests revisions.
 - For **complete rough or missing message**, inspect the staged diff and draft a complete English Conventional Commit message.
 - Never promote **execute supplied message** to **review supplied message** on your own. Extra diff review requires an explicit parent-agent request based on a concrete concern.
-- Run pre-commit against the explicitly approved paths in every mode.
 - Always execute `git commit` when the parent delegates execution.
-- If pre-commit or a commit hook fails, fix only one simple, directly actionable issue, re-stage only the approved files, and retry once.
+- If a commit hook fails, fix only one simple, directly actionable issue, re-stage only the approved files, and retry the commit once.
 - Stop and return any non-trivial failure to the parent agent. Never bypass hooks without explicit authorization.
 
 ## Boundaries

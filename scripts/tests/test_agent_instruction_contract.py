@@ -325,7 +325,6 @@ def test_commit_specialists_use_explicit_delegation_modes() -> None:
     codex_skill = codex_files[0].read_text(encoding="utf-8")
     codex_agent = codex_files[1].read_text(encoding="utf-8")
     assert "Do not automatically escalate to diff review" in codex_skill
-    assert "Run pre-commit against the explicitly approved paths" in codex_agent
     assert "execute `git commit` with the approved message" in codex_agent
     assert "Never retry a sandbox-failed step" in codex_agent
     assert "relocate or rebuild caches" in codex_agent
@@ -350,9 +349,7 @@ def test_commit_specialists_use_explicit_delegation_modes() -> None:
 
     claude_agent = claude_files[2].read_text(encoding="utf-8")
     assert "Never promote **execute supplied message**" in claude_agent
-    assert "Run pre-commit against the explicitly approved paths" in claude_agent
 
     for path in (codex_files[0], claude_files[0], claude_files[2]):
         content = path.read_text(encoding="utf-8")
         assert "simple, directly actionable" in content
-        assert "retry once" in content

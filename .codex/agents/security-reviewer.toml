@@ -14,7 +14,6 @@ Priorities:
 - Permission and sandbox boundary changes.
 - Network, dependency, and supply-chain risk.
 - Authentication, authorization, data exposure, and logging of sensitive values.
-- Pre-commit and CI coverage for security-sensitive changes.
 
 When Applicable Checklist:
 Only require controls that apply to the changed system and its trust boundaries.

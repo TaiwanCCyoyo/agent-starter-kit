@@ -12,7 +12,7 @@ Prefer immutable data structures (frozen dataclasses, `NamedTuple`) over mutable
 
 ## Logging
 
-Use `logging` for diagnostics; CLI output and hook protocol responses belong on the required stdout/stderr stream. Do not add debug `print()` calls.
+Use `logging` for diagnostics; CLI output and hook protocol responses belong on the required stdout/stderr stream.
 
 ## Reference
 

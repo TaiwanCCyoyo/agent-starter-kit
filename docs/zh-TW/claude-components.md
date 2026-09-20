@@ -25,7 +25,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | ------------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `commit-specialist`       | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
 | `doc-translator`          | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 唯讀程式碼審查：正確性、風格、安全性                                                                                                            |
+| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 可選、僅在明確要求時進行的程式碼檢查：行為錯誤與回歸；Bash 依指引限於唯讀 Git 檢視                                                              |
 | `plan-reviewer`           | opus（high）    | Read, Grep, Glob, Bash              | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性                                                                             |
 | `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
 | `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
@@ -70,14 +70,14 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ### 已移除（2026-06-10 清理——agents 與內建 `/code-review` 已涵蓋）
 
-| Command          | 替代方案                                                                       |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill                        |
-| `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ `implementation-reviewer` agent |
-| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent             |
-| `/python-review` | `python-testing` skill 與 `implementation-reviewer`                            |
-| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                              |
-| `/test-coverage` | `python-testing` skill（`pytest --cov`）                                       |
+| Command          | 替代方案                                                                 |
+| ---------------- | ------------------------------------------------------------------------ |
+| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill                  |
+| `/code-review`   | 託管 PR review；`implementation-reviewer` 僅用於明確要求的本機程式碼檢查 |
+| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent       |
+| `/python-review` | `python-testing` 用於行為測試；可選的明確要求程式碼檢查                  |
+| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                        |
+| `/test-coverage` | `python-testing` skill（`pytest --cov`）                                 |
 
 ### 未從 ECC 移植（含原因）
 
@@ -101,16 +101,16 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 工作流程（原創——非來自 ECC）
 
-| Skill                    | 用途                                           |
-| ------------------------ | ---------------------------------------------- |
-| `commit-helper`          | Conventional Commits 格式、pre-commit 檢查清單 |
-| `dependabot-remediation` | 唯讀警示擷取、最小安全升級與完成證據           |
+| Skill                    | 用途                                              |
+| ------------------------ | ------------------------------------------------- |
+| `commit-helper`          | Conventional Commits 格式、限定範圍的 commit 執行 |
+| `dependabot-remediation` | 唯讀警示擷取、最小安全升級與完成證據              |
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
-| Skill            | 用途                                                                                                                                     |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-testing` | 僅含專案特定驗證需求：`uv run python -m pytest`、ruff、mypy、hook JSON fixtures、Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+| Skill            | 用途                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `python-testing` | 僅含專案特定的行為測試、hook JSON fixtures 與 Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
 
 ### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
 
@@ -144,7 +144,7 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 | Skill                                      | 原因                                                                                                                                               |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-patterns`                          | PEP 8 格式化由 ruff 處理；慣例由 `python-reviewer` agent 涵蓋                                                                                      |
+| `python-patterns`                          | 自動格式化由 repository gates 負責；語意指引位於 Python rules                                                                                      |
 | `deep-research`                            | 需要 firecrawl + exa MCP——延後至 MCP 設定完成                                                                                                      |
 | `api-design`、`backend-patterns`           | 本股票專案非 web backend                                                                                                                           |
 | `security-review`                          | 已由 `security-reviewer` agent 涵蓋；交易相關模式（消費上限、斷路器）因 `llm-trading-agent-security` 於 2026-08-07 移除而不再涵蓋                  |
@@ -165,7 +165,7 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 
-Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。hook 指令本身與其內部的 Ruff 呼叫都使用 `uv run --no-sync`，避免每次編輯都觸發環境 resync。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Agent 會在完成前針對變更檔案執行 pre-commit，由 pre-commit 負責 formatting 與 validation。
+Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。hook 指令本身與其內部的 Ruff 呼叫都使用 `uv run --no-sync`，避免每次編輯都觸發環境 resync。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。已安裝的 commit hooks 與 PR CI 負責自動化檢查；skills 與 reviewers 不會要求額外的手動檢查。
 
 ### 已注意但未從 ECC 移植的 hook 概念
 
@@ -180,9 +180,9 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                      | 備註                                                                                 |
-| --------------- | --------------------- | ------------------------- | ------------------------------------------------------------------------------------ |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Type annotations、Ruff、logging、repository hooks、pytest 與風險導向 security review |
+| 規則集          | 路徑                  | 來源                      | 備註                                          |
+| --------------- | --------------------- | ------------------------- | --------------------------------------------- |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging、設定存取、FastAPI 設計與行為測試路由 |
 
 詳細流程放在 skills 或 agent definitions。
 

@@ -25,7 +25,7 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 | ------------------------- | --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `commit-specialist`       | haiku           | Bash, Read                          | Review staged changes and draft commit messages                                                                                                                                                   |
 | `doc-translator`          | haiku           | Read, Write, Edit                   | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main session selects source and target, and its canonical document wins conflicts |
-| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | Read-only code review: correctness, style, security                                                                                                                                               |
+| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | Optional, explicitly requested code inspection for behavior bugs and regressions; Bash is limited by instructions to read-only Git inspection                                                     |
 | `plan-reviewer`           | opus (high)     | Read, Grep, Glob, Bash              | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability                                                                                         |
 | `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | Lowest-cost isolation for commands expected to produce large logs or stdout; returns concise signal instead of raw output                                                                         |
 | `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands                                                                            |
@@ -70,14 +70,14 @@ Native Git/GitHub operations follow the [shared Git workflow contract](git-workf
 
 ### Removed (2026-06-10 cleanup — agents and built-in `/code-review` now cover these)
 
-| Command          | Replacement                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                              |
-| `/code-review`   | Built-in `/code-review` (incl. `ultra` cloud review) + `implementation-reviewer` agent |
-| `/feature-dev`   | Native Plan Mode + native test-first workflow + `signal-miner` agent                   |
-| `/python-review` | `python-testing` skill and `implementation-reviewer`                                   |
-| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                                      |
-| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                                |
+| Command          | Replacement                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                                         |
+| `/code-review`   | Hosted PR review; `implementation-reviewer` only for specifically requested local code inspection |
+| `/feature-dev`   | Native Plan Mode + native test-first workflow + `signal-miner` agent                              |
+| `/python-review` | `python-testing` for behavioral tests; optional requested code inspection                         |
+| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                                                 |
+| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                                           |
 
 ### Not ported from ECC (with reasons)
 
@@ -103,14 +103,14 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 | Skill                    | Purpose                                                                   |
 | ------------------------ | ------------------------------------------------------------------------- |
-| `commit-helper`          | Conventional Commits format, pre-commit checklist                         |
+| `commit-helper`          | Conventional Commits format, scoped commit execution                      |
 | `dependabot-remediation` | Read-only alert retrieval, minimum-safe upgrades, and completion evidence |
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
-| Skill            | Purpose                                                                                                                                                                            |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-testing` | Repository-specific test requirements only: `uv run python -m pytest`, ruff, mypy, hook JSON fixtures, Windows path behavior. Test-first decisions use native Claude capabilities. |
+| Skill            | Purpose                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `python-testing` | Repository-specific behavioral tests, hook JSON fixtures, and Windows path behavior. Test-first decisions use native Claude capabilities. |
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
@@ -144,7 +144,7 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 | Skill                                      | Reason                                                                                                                                                                                    |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-patterns`                          | PEP 8 formatting handled by ruff; idioms covered by `python-reviewer` agent                                                                                                               |
+| `python-patterns`                          | Automated formatting belongs to repository gates; semantic guidance lives in Python rules                                                                                                 |
 | `deep-research`                            | Requires firecrawl + exa MCP — deferred until MCP configured                                                                                                                              |
 | `api-design`, `backend-patterns`           | Stock project is not a web backend                                                                                                                                                        |
 | `security-review`                          | Covered by `security-reviewer` agent; trading-specific patterns (spend limits, circuit breakers) no longer covered since `llm-trading-agent-security` was removed 2026-08-07              |
@@ -165,7 +165,7 @@ Hooks are Python scripts executed automatically by the Claude Code harness.
 
 Workspace editor defaults live in `.vscode/settings.json`: trim trailing whitespace, keep one final newline, use Ruff for Python formatting and explicit code actions, and exclude generated caches plus local agent state from search, watchers, and local history.
 
-Claude Code uses the official Pyright plugin for immediate type-aware navigation and diagnostics. Its PostToolUse hook adds a read-only targeted Ruff check for `E722,F601,F602,F634`, which complements Pyright without repeating its common undefined-name and unused-symbol diagnostics. Both the hook command and its internal Ruff invocation use `uv run --no-sync` so an edit never triggers an environment resync. Complete Ruff linting and formatting are deferred to pre-commit, so normal edits do not trigger repository-wide formatting. Before completion, the agent runs pre-commit against changed files, and pre-commit owns formatting and validation.
+Claude Code uses the official Pyright plugin for immediate type-aware navigation and diagnostics. Its PostToolUse hook adds a read-only targeted Ruff check for `E722,F601,F602,F634`, which complements Pyright without repeating its common undefined-name and unused-symbol diagnostics. Both the hook command and its internal Ruff invocation use `uv run --no-sync` so an edit never triggers an environment resync. Complete Ruff linting and formatting are deferred to pre-commit, so normal edits do not trigger repository-wide formatting. Installed commit hooks and PR CI own automated checks; skills and reviewers do not request a separate manual pass.
 
 ### ECC hook concepts noted but not ported
 
@@ -180,9 +180,9 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                     | Notes                                                                                     |
-| --------------- | --------------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Type annotations, Ruff, logging, repository hooks, pytest, and risk-based security review |
+| Rule set        | Paths                 | Source                     | Notes                                                                      |
+| --------------- | --------------------- | -------------------------- | -------------------------------------------------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Logging, configuration access, FastAPI design, and behavioral test routing |
 
 Detailed procedures live in skills or agent definitions.
 

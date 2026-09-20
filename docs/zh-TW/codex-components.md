@@ -23,10 +23,10 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `signal_miner`            | 唯讀     | 低成本的大量輸出隔離工具；委派有具體收益時使用，只回傳精簡證據                                                                                |
 | `task_worker`             | 有界寫入 | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                            |
 | `plan_reviewer`           | 唯讀     | 計畫完整性、範圍、排序、repo 對齊、可測試性與風險                                                                                             |
-| `implementation_reviewer` | 唯讀     | 正確性、回歸、測試與非預期 diff                                                                                                               |
+| `implementation_reviewer` | 唯讀     | 選用，僅在明確要求時檢查程式碼行為錯誤、回歸與缺少的行為覆蓋                                                                                  |
 | `security_reviewer`       | 唯讀     | Secrets、注入、依賴、權限、auth 與敏感資料                                                                                                    |
 | `doc_translator`          | 有界寫入 | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main agent 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `commit-specialist`       | 有界寫入 | 選用的 commit 代理；依 mode 審查 staged diff、執行 pre-commit 與 commit，sandbox 失敗時交還 main agent                                        |
+| `commit-specialist`       | 有界寫入 | 選用的 commit 代理；依 mode 審查 staged diff 與執行 commit，sandbox 失敗時交還 main agent                                                     |
 
 ### 模型路由
 
@@ -46,7 +46,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Skill                | 用途                                                                                                  |
 | :------------------- | :---------------------------------------------------------------------------------------------------- |
 | `python-development` | Python coding、typing、logging、secrets、security routing、Codex hook ownership 與條件式 FastAPI 指引 |
-| `python-testing`     | 精確 pytest、選配 coverage、Ruff、mypy、hook fixtures 與 Windows path 要求                            |
+| `python-testing`     | 目標式行為測試、選配 coverage、hook fixtures 與 Windows path 要求                                     |
 | `gen-commit`         | 有界 local commit、選用 specialist review 與執行、sandbox handoff 及回報                              |
 
 ## Claude 能力取捨
@@ -58,7 +58,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `/feature-dev`                                               | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
 | `/build-fix`                                                 | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
 | `/code-review`                                               | 原生／plugin 取代        | Local review 使用 Codex review stance 與 agents；PR review 使用 GitHub plugin。                                                                                |
-| `/python-review`                                             | Skill 取代               | `python-testing` 提供 repo 支援的 Ruff、mypy、pytest 與選配 coverage。                                                                                         |
+| `/python-review`                                             | Skill 取代               | `python-testing` 提供 repository-specific 行為測試與選配 coverage 指引。                                                                                       |
 | `/security-scan`                                             | Agent 與 gates 取代      | 已有 `security_reviewer`、detect-secrets、hooks、pre-commit；未安裝 AgentShield。                                                                              |
 | `/test-coverage`                                             | Skill 取代               | 選配 coverage 已在 `python-testing`；Codex 不需要 command wrapper。                                                                                            |
 | `github-ops`                                                 | Plugin 取代              | GitHub plugin 提供 repo、issue、PR、CI、comment 與發布流程，且 connector semantics 可維持更新。                                                                |
@@ -82,7 +82,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Repository Python verification                                    | `python-testing`                                            |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification     |
 
-共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
+共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；交付 review 透過 hosted PR integration，只有明確要求時才進行 local code inspection；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
 ## Plans、原生 Memory 與 Commits
 
@@ -98,11 +98,11 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `.pre-commit-config.yaml`                     | Formatting、file hygiene、detect-secrets、Ruff T201 與目標檔案 mypy             |
 | `.vscode/settings.json`                       | Final newline、trailing whitespace hygiene，以及 Python Ruff formatter defaults |
 
-Python verification 在開發期間使用目標式 `uv run python -m pytest`，並在完成前針對變更檔案執行 pre-commit。若 formatter 修改檔案，agent 會檢查 diff 並重跑相關 checks。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
+Local Python verification 以變更行為為目標。已安裝的 commit hooks 與 PR CI 負責自動檢查；skills 與 reviewers 不會要求額外的手動 pass。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 
 `gen-commit` 在需要實質審查、訊息粗略或缺漏，或明確要求獨立檢查時使用 `commit-specialist`。main agent 可在訊息完整、沒有無關 staged files 且變更已驗證時，直接 commit 小型 agent-owned 變更，並使用相同驗證與一般 hooks。若 delegated step 在 sandbox 或 cache 權限邊界失敗，specialist 會不重試、不改環境地回傳確切錯誤；main agent 只在既有授權 context 接手受阻步驟。
 
-是否檢查 diff 由明確 mode 決定，不會自動發生。沒有訊息或只有粗略目標時，specialist 會讀 staged diff 並完成訊息；若 main agent 對乾淨且明確的 scope 已提供完整訊息，specialist 不讀 diff，重點是 pre-commit 與 commit。只有 main agent 因具體疑慮明確要求 double-check 時，完整訊息才會搭配額外 diff 檢查；specialist 不得自行升級到該 review mode。
+是否檢查 diff 由明確 mode 決定，不會自動發生。沒有訊息或只有粗略目標時，specialist 會讀 staged diff 並完成訊息；若 main agent 對乾淨且明確的 scope 已提供完整訊息，specialist 不讀 diff，重點是執行 commit 與有界的 hook recovery。只有 main agent 因具體疑慮明確要求 double-check 時，完整訊息才會搭配額外 diff 檢查；specialist 不得自行升級到該 review mode。
 
 ## 延後能力
 
@@ -116,6 +116,6 @@ Python verification 在開發期間使用目標式 `uv run python -m pytest`，�
 
 Codex 不使用 SessionStart hook。根目錄的 `AGENTS.md` 由 Codex 原生讀取，branch 與 worktree 資訊跑一行 Git 指令即可取得，兩者都不需要注入。Hooks 使用已準備好的環境與 `uv run --no-sync`；使用前需先建立 dependencies。PostToolUse 每次 edit event 執行一次帶有 `--no-fix` 與 timeout 的 Ruff，回報 warnings 而不取代原始 tool result。
 
-Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。Pre-commit 仍是完成 gate。
+Entrypoint tests 驗證 protocol output 與真實 Ruff 執行，不驗證每個 desktop tool path 的 dispatch。將 hooks 視為 enforcement 前，必須在目標 runtime 檢查 live matcher coverage。一般 commit hooks 與 PR CI 提供自動化檢查。
 
 [官方 model guidance](https://developers.openai.com/api/docs/guides/latest-model) 建議審查互相衝突的 skill instructions。[Hook reference](https://learn.chatgpt.com/docs/hooks) 說明 `continue: false` 會取代正常的 PostToolUse result；此處的 diagnostic-only feedback 使用 `systemMessage`。
