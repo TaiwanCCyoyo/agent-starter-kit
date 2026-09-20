@@ -86,13 +86,11 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 ### 5. Set up permissions
 
-Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。只有裸指令 `git push` 會自動執行，因為它無法表達 force 或 delete；任何帶參數的 `git push` 都會先詢問，破壞性旗標與 refspec 寫法則直接禁用，`.git` 刪除亦然。
+Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即可生效。allow 清單只涵蓋唯讀檢視，deny 清單只保留 `.git` 刪除。其餘一切——包含 `git push`——都交給 session 的 permission mode 逐次判斷。
 
-這個不對稱是刻意的。Pattern 比對的是指令文字，而 Git 允許旗標出現在任何位置、可合併（`-fu`）、也可縮寫（`--forc`），因此帶萬用字元的 allow 清單無法做到安全——本範本歷經數輪 review，每一輪都找出另一種寫法。
+這是刻意從 pattern 比對撤退。權限 pattern 比對的是指令文字，而 `git push` 的語意來自任何位置的旗標、合併寫法（`-fu`）、縮寫（`--forc`）、refspec，以及指令文字完全看不到的設定：`remote.<name>.mirror`、`branch.<name>.pushRemote`、`url.<base>.pushInsteadOf`。本範本歷經數輪 review，每一輪都找出另一種寫法——那正是一個無法窮舉的集合該有的樣子。一份補不完的清單，會換來超過它應得的信任。
 
-即使是裸指令也只是有條件地安全：`remote.<name>.mirror` 會讓 `git push` 變成 mirror push 並刪除本地不存在的 refs，`remote.<name>.push` 也可能帶有 force 或 delete refspec。權限 pattern 看不到設定內容，因此禁止了常見的寫入寫法——但這份清單和 push 清單一樣無法窮舉：`git config --replace-all`、`--file`、`--worktree` 都能寫到同一個 key，直接編輯 `.git/config` 更是完全不經過 `git config`。這些 deny 提高了抵達該狀態的成本，並沒有封閉它。
-
-請把上述全部視為縱深防禦：default branch ruleset 只保護 default branch，真正能阻止未授權遠端更新的是 server 端規則。
+邊界在 server 端：default branch 上的 ruleset，那是任何本機設定都削弱不了的。
 
 Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
 

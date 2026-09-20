@@ -26,31 +26,6 @@ def test_claude_uses_pyright_lsp_without_project_ruff_lsp() -> None:
     assert not (ROOT / ".claude" / "marketplace").exists()
 
 
-def test_destructive_git_push_forms_are_denied() -> None:
-    """Only the bare `git push` runs unattended; any argument falls through to a prompt.
-
-    Three review rounds each found another spelling the deny list missed -- bare
-    flags, refspecs, then flags in terminal position -- and Git also accepts
-    unambiguous abbreviations such as `--forc`, so a text pattern list cannot be
-    completed. The wildcard allow is therefore gone: `Bash(git push)` cannot
-    express a force or a delete, and everything else asks. The deny entries stay
-    as defence in depth, and the real boundary is a server-side ruleset.
-    """
-    permissions = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]
-    deny = set(permissions["deny"])
-
-    assert "Bash(git push)" in permissions["allow"]
-    assert "Bash(git push *)" not in permissions["allow"]
-    for flag in ("-f", "--force", "--force-with-lease", "--force-if-includes", "-d", "--delete", "--mirror", "--prune"):
-        assert f"Bash(git push {flag})" in deny, flag
-        assert f"Bash(git push {flag} *)" in deny, flag
-        assert f"Bash(git push * {flag} *)" in deny, flag
-        assert f"Bash(git push * {flag})" in deny, flag
-
-    assert "Bash(git push * :*)" in deny
-    assert "Bash(git push * +*)" in deny
-
-
 def test_claude_native_workflow_does_not_require_external_workflow_plugins() -> None:
     settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     plugins = settings["enabledPlugins"]
@@ -268,30 +243,6 @@ def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
     for content in (codex_agents[2], claude_agents[2]):
         assert "explicit target" in content
         assert "source diff" in content
-
-
-def test_remote_configuration_writes_are_denied() -> None:
-    """Bare `git push` reads its behaviour from remote config, not from its own text.
-
-    `remote.<name>.mirror` makes it delete refs missing locally and
-    `remote.<name>.push` can carry a force or delete refspec, so the allowed bare
-    command is only safe while that config stays benign. These entries deny the
-    common write spellings, which `docs/en/git-workflow.md` requires anyway about
-    destination and identity. They are not a closure: `--replace-all`, `--file`,
-    and `--worktree` reach the same key, and editing `.git/config` skips
-    `git config` entirely. Only a server-side ruleset bounds the outcome.
-    """
-    deny = set(json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))["permissions"]["deny"])
-
-    for entry in (
-        "Bash(git config remote.*)",
-        "Bash(git config --add remote.*)",
-        "Bash(git config --local remote.*)",
-        "Bash(git config --global *)",
-        "Bash(git remote set-url *)",
-        "Bash(git remote add *)",
-    ):
-        assert entry in deny, entry
 
 
 def test_commit_workflows_do_not_force_ai_attribution() -> None:

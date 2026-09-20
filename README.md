@@ -86,13 +86,11 @@ This template commits no `openspec/` directory and `AGENTS.md` says nothing abou
 
 ### 5. Set up permissions
 
-Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. Only the bare `git push` runs unattended, because it cannot express a force or a delete. Any `git push` with arguments prompts, and the destructive flags and refspecs are denied outright alongside `.git` removal.
+Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The allow list covers read-only inspection, and the deny list covers only `.git` removal. Everything else, `git push` included, is left to the session's permission mode to judge per call.
 
-That asymmetry is deliberate. Patterns match command text, and Git accepts flags in any position, bundled (`-fu`), and abbreviated (`--forc`), so an allow-list with a wildcard cannot be made safe — successive review rounds on this template each found another spelling.
+That is a deliberate retreat from pattern matching. Permission patterns compare command text, while `git push` takes its meaning from flags in any position, bundled (`-fu`) or abbreviated (`--forc`), from refspecs, and from configuration the text never mentions — `remote.<name>.mirror`, `branch.<name>.pushRemote`, `url.<base>.pushInsteadOf`. Successive review rounds on this template each found another spelling, which is what an unenumerable set looks like. A list that cannot be completed invites more trust than it earns.
 
-Even the bare command is only conditionally safe: `remote.<name>.mirror` turns `git push` into a mirror push that deletes refs missing locally, and `remote.<name>.push` can carry a force or delete refspec. A permission pattern cannot see configuration, so the common write spellings are denied — but that list is no more completable than the push list. `git config --replace-all`, `--file`, and `--worktree` all reach the same key, and editing `.git/config` directly reaches it without `git config` at all. The denials raise the cost of arriving there; they do not close it.
-
-Treat all of it as defence in depth. A default-branch ruleset protects only the default branch, so server-side rules are what actually stop an unauthorized remote update.
+The boundary is server-side: a ruleset on the default branch, which no local configuration can weaken.
 
 Codex ships no repository-local permission rules here; it uses its own approval controls.
 
