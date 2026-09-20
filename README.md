@@ -42,7 +42,7 @@ The result is a contract that fits on one screen and changes only when the proje
 | `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project              |
 | `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows            |
 
-Take only the agent directories you use. Neither agent needs the other's layer.
+Take only the agent directories you use. Neither agent needs the other's layer, but the verification below and the contract tests in `scripts/tests/` read both: drop the assertions and test paths for the layer you did not copy, or they will fail on a directory that is not there.
 
 ## Setting up
 
@@ -57,6 +57,8 @@ Then verify the checks run:
 uv run pre-commit run --all-files
 uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 ```
+
+List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert both agent layers; prune them to the layers your project actually has.
 
 ## Adapting it to your project
 

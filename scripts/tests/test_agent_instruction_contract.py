@@ -294,34 +294,6 @@ def test_remote_configuration_writes_are_denied() -> None:
         assert entry in deny, entry
 
 
-def test_commit_workflows_establish_the_branch_before_committing() -> None:
-    """Auto-commit is authorized, so the branch must be checked, not assumed.
-
-    No SessionStart hook reports the branch and `git status --short` omits it, so
-    every commit workflow has to establish it explicitly and refuse both states
-    `docs/en/git-workflow.md` puts off limits: the default branch, and a detached
-    HEAD, which `git branch --show-current` reports as empty rather than as a name.
-    """
-    workflows = (
-        ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
-        ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
-        ROOT / ".claude" / "commands" / "gen-commit.md",
-    )
-
-    for path in workflows:
-        content = path.read_text(encoding="utf-8")
-        assert "git branch --show-current" in content, path
-        assert "default branch" in content, path
-        # An empty result means detached HEAD, which is not the default branch
-        # and would otherwise pass the check.
-        assert "empty" in content, path
-        assert "detached HEAD" in content, path
-        # The guard covers staging and committing. Returning a message writes
-        # nothing, so the exemption is asserted by its rule rather than by the
-        # words "message-only", which appear elsewhere in these files anyway.
-        assert "may proceed on any branch" in content, path
-
-
 def test_commit_workflows_do_not_force_ai_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
     codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")

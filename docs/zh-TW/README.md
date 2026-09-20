@@ -42,7 +42,7 @@
 | `docs/en/pr-setup.md`     | 擁有者設定指南，用於啟用 PR 交付                                  |
 | `.vscode/`                | 檔案衛生與 Ruff 工作流程對齊的編輯器預設值                        |
 
-只複製你使用的 agent 目錄。兩個 agent 都不需要另一個的層級。
+只複製你使用的 agent 目錄。兩個 agent 都不需要另一個的層級，但下方的驗證指令與 `scripts/tests/` 裡的契約測試會同時讀取兩邊：請把未複製那一層的斷言與測試路徑一併移除，否則會因為目錄不存在而失敗。
 
 ## Setting up
 
@@ -57,6 +57,8 @@ uv run pre-commit install
 uv run pre-commit run --all-files
 uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 ```
+
+只列出你保留的 hook 目錄。`scripts/tests/` 是本範本自己的契約測試，會斷言兩個 agent 層級；請依你的專案實際擁有的層級修剪。
 
 ## Adapting it to your project
 
