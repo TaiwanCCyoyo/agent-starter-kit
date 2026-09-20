@@ -71,16 +71,16 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 ## 共享政策對齊
 
-| 共享行為                                                          | Codex owner                                             |
-| :---------------------------------------------------------------- | :------------------------------------------------------ |
-| Operating contract、scoped changes                                | `AGENTS.md`                                             |
-| 專案慣例與工具偏好                                                | `AGENTS.md` project conventions                         |
-| Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                 |
-| Security triggers 與 secret handling                              | `security_reviewer` description 加上 `.claude/rules/`   |
-| Risk-based test scope                                             | `AGENTS.md` verification section                        |
-| Python development rules                                          | `python-development`                                    |
-| Repository Python verification                                    | `python-testing`                                        |
-| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
+| 共享行為                                                          | Codex owner                                                 |
+| :---------------------------------------------------------------- | :---------------------------------------------------------- |
+| Operating contract、scoped changes                                | `AGENTS.md`                                                 |
+| 專案慣例與工具偏好                                                | `AGENTS.md` project conventions                             |
+| Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                     |
+| Security triggers 與 secret handling                              | `.codex/skills/python-development` 加上 `security_reviewer` |
+| Risk-based test scope                                             | `AGENTS.md` verification section                            |
+| Python development rules                                          | `python-development`                                        |
+| Repository Python verification                                    | `python-testing`                                            |
+| Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification     |
 
 共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；review 透過 `implementation_reviewer` 與專職 reviewers；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
 

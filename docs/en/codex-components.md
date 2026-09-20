@@ -71,16 +71,16 @@ The seven roles plus the built-in explorer cover current recurring work. Add a r
 
 ## Shared Policy Alignment
 
-| Shared behavior                                                   | Codex owner                                               |
-| :---------------------------------------------------------------- | :-------------------------------------------------------- |
-| Operating contract, scoped changes                                | `AGENTS.md`                                               |
-| Project conventions and tool preferences                          | `AGENTS.md` project conventions                           |
-| Review severity and CRITICAL/HIGH completion policy               | `AGENTS.md` review and security section                   |
-| Security triggers and secret handling                             | `security_reviewer` description plus `.claude/rules/`     |
-| Risk-based test scope                                             | `AGENTS.md` verification section                          |
-| Python development rules                                          | `python-development`                                      |
-| Repository Python verification                                    | `python-testing`                                          |
-| Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
+| Shared behavior                                                   | Codex owner                                                 |
+| :---------------------------------------------------------------- | :---------------------------------------------------------- |
+| Operating contract, scoped changes                                | `AGENTS.md`                                                 |
+| Project conventions and tool preferences                          | `AGENTS.md` project conventions                             |
+| Review severity and CRITICAL/HIGH completion policy               | `AGENTS.md` review and security section                     |
+| Security triggers and secret handling                             | `.codex/skills/python-development` plus `security_reviewer` |
+| Risk-based test scope                                             | `AGENTS.md` verification section                            |
+| Python development rules                                          | `python-development`                                        |
+| Repository Python verification                                    | `python-testing`                                            |
+| Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification   |
 
 Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode; test and debug through native workflows, task-specific tests, and project skills; review through `implementation_reviewer` plus targeted specialists; prepare PRs through the GitHub plugin when available; and follow the [shared Git workflow contract](git-workflow.md) for delivery and integration authority.
 
