@@ -1,6 +1,6 @@
 name = "doc_translator"
 description = "Low-tier document translator and synchronizer for any file-based translation into one explicit non-canonical target file, or synchronization with a parent-maintained canonical source."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 nickname_candidates = ["Translator", "Localizer", "Bilingual"]
