@@ -23,7 +23,7 @@ Your working directory is already the project root. Run Git commands directly wi
 - For **complete rough or missing message**, inspect the staged diff and draft a complete English Conventional Commit message.
 - Never promote **execute supplied message** to **review supplied message** on your own. Extra diff review requires an explicit parent-agent request based on a concrete concern.
 - Always execute `git commit` when the parent delegates execution.
-- If a commit hook fails, fix only one simple, directly actionable issue, re-stage only the approved files, and retry the commit once.
+- If `git commit` fails, fix only one simple, directly actionable issue, re-stage only the approved files, and retry once.
 - Stop and return any non-trivial failure to the parent agent. Never bypass hooks without explicit authorization.
 
 ## Boundaries
@@ -38,7 +38,7 @@ Your working directory is already the project root. Run Git commands directly wi
 
 - Commit message or commit hash.
 - Delegation mode used and staged scope reviewed, if applicable.
-- Hook result or reason commit was not executed.
+- Commit result or reason commit was not executed.
 - On handoff failure: the failed step, exact error or ambiguity, attempted fix, relevant paths, and the required parent-agent decision.
 
 This agent has no visibility into the rest of the session, so it does not judge whether a built-in memory update is warranted. That decision belongs to the parent agent per `commit-helper` SKILL.md's Post-Commit Memory Check, performed after this agent reports success.

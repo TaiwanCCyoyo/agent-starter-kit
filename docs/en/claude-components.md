@@ -21,35 +21,33 @@ Claude keeps `model: "opusplan"` in `.claude/settings.json`: native Plan Mode us
 
 ### Workflow (original — not from ECC)
 
-| Agent                     | Model           | Tools                               | Purpose                                                                                                                                                                                           |
-| ------------------------- | --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commit-specialist`       | haiku           | Bash, Read                          | Review staged changes and draft commit messages                                                                                                                                                   |
-| `doc-translator`          | haiku           | Read, Write, Edit                   | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main session selects source and target, and its canonical document wins conflicts |
-| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | Optional, explicitly requested code inspection for behavior bugs and regressions; Bash is limited by instructions to read-only Git inspection                                                     |
-| `plan-reviewer`           | opus (high)     | Read, Grep, Glob, Bash              | Pre-implementation plan critique: completeness, scope creep, step sequencing, repo alignment, testability                                                                                         |
-| `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | Lowest-cost isolation for commands expected to produce large logs or stdout; returns concise signal instead of raw output                                                                         |
-| `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands                                                                            |
-| `security-reviewer`       | opus (high)     | Read, Grep, Glob, Bash              | Read-only secrets, injection, dependency, permission, auth, and sensitive-data review                                                                                                             |
+| Agent               | Model           | Tools                               | Purpose                                                                                                                                                                                           |
+| ------------------- | --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commit-specialist` | haiku           | Bash, Read                          | Review staged changes and draft commit messages                                                                                                                                                   |
+| `doc-translator`    | haiku           | Read, Write, Edit                   | Low-tier translator and synchronizer for any file-based translation into one explicit non-canonical target; the main session selects source and target, and its canonical document wins conflicts |
+| `signal-miner`      | haiku           | Read, Grep, Glob, Bash              | Lowest-cost isolation for commands expected to produce large logs or stdout; returns concise signal instead of raw output                                                                         |
+| `task-worker`       | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | Implement explicit low-to-medium-risk tasks with acceptance criteria and verification; stop when scope or risk expands                                                                            |
 
 ### Not ported from ECC (with reasons)
 
-| Agent                                                                                                                                              | Reason                                                                                                                             |
-| -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `planner`                                                                                                                                          | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`)                                               |
-| `architect`, `code-reviewer`, `code-simplifier`, `loop-operator`, `performance-optimizer`, `python-reviewer`, `silent-failure-hunter`, `tdd-guide` | Removed 2026-07-13 — native Claude capabilities and focused reviewers cover their responsibilities without overlapping delegation. |
-| `refactor-cleaner`                                                                                                                                 | Depends on Node.js tools (knip, depcheck, ts-prune); Python project                                                                |
-| `harness-optimizer`                                                                                                                                | Requires ECC-internal `/harness-audit`; not portable                                                                               |
-| All `*-build-resolver` (11 agents)                                                                                                                 | Non-Python languages not in use                                                                                                    |
-| Language reviewers (non-Python)                                                                                                                    | Unused languages                                                                                                                   |
-| `gan-*`, `seo-specialist`                                                                                                                          | Out of scope                                                                                                                       |
-| `homelab-*`, `network-*`, `healthcare-reviewer`                                                                                                    | Domain mismatch                                                                                                                    |
-| `marketing-agent`                                                                                                                                  | Deferred — add when short-form video planning starts                                                                               |
+| Agent                                                                                                                                              | Reason                                                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `planner`                                                                                                                                          | Removed 2026-06-08 — superseded by Native Plan Mode (`EnterPlanMode`/`ExitPlanMode`)                                                                                              |
+| `architect`, `code-reviewer`, `code-simplifier`, `loop-operator`, `performance-optimizer`, `python-reviewer`, `silent-failure-hunter`, `tdd-guide` | Removed 2026-07-13 — native Claude capabilities and focused reviewers cover their responsibilities without overlapping delegation.                                                |
+| `implementation-reviewer`, `plan-reviewer`, `security-reviewer`                                                                                    | Removed 2026-10-02 — current models, native Plan Mode, built-in `/code-review`, hosted Codex PR review, and pre-commit gates cover them; the remaining agents exist to save cost. |
+| `refactor-cleaner`                                                                                                                                 | Depends on Node.js tools (knip, depcheck, ts-prune); Python project                                                                                                               |
+| `harness-optimizer`                                                                                                                                | Requires ECC-internal `/harness-audit`; not portable                                                                                                                              |
+| All `*-build-resolver` (11 agents)                                                                                                                 | Non-Python languages not in use                                                                                                                                                   |
+| Language reviewers (non-Python)                                                                                                                    | Unused languages                                                                                                                                                                  |
+| `gan-*`, `seo-specialist`                                                                                                                          | Out of scope                                                                                                                                                                      |
+| `homelab-*`, `network-*`, `healthcare-reviewer`                                                                                                    | Domain mismatch                                                                                                                                                                   |
+| `marketing-agent`                                                                                                                                  | Deferred — add when short-form video planning starts                                                                                                                              |
 
 ---
 
 ## Interactive, Automated, and Company Use
 
-- Interactive work: enter Native Plan Mode, optionally use `plan-reviewer` for complex or high-risk plans, approve the plan, then return to execution mode.
+- Interactive work: enter Native Plan Mode, approve the plan, then return to execution mode.
 - Unattended work: use separate planning and execution sessions. The planning session writes a maintained plan artifact; the execution session reads the approved artifact. Do not use a planner subagent as the main-session handoff.
 - Claude-only company copy: retain instructions, rules, agents, skills, and hygiene hooks as-is. Use organization-approved model IDs or alias mappings rather than this repository's personal-Pro defaults.
 
@@ -70,14 +68,14 @@ Native Git/GitHub operations follow the [shared Git workflow contract](git-workf
 
 ### Removed (2026-06-10 cleanup — agents and built-in `/code-review` now cover these)
 
-| Command          | Replacement                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                                         |
-| `/code-review`   | Hosted PR review; `implementation-reviewer` only for specifically requested local code inspection |
-| `/feature-dev`   | Native Plan Mode + native test-first workflow + `signal-miner` agent                              |
-| `/python-review` | `python-testing` for behavioral tests; optional requested code inspection                         |
-| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                                                 |
-| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                                           |
+| Command          | Replacement                                                                   |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                     |
+| `/code-review`   | Built-in `/code-review` (incl. `ultra` cloud review) + hosted Codex PR review |
+| `/feature-dev`   | Native Plan Mode + native test-first workflow + `signal-miner` agent          |
+| `/python-review` | `python-testing` skill and built-in `/code-review`                            |
+| `/security-scan` | Built-in `/security-review` + `detect-secrets` gate                           |
+| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                       |
 
 ### Not ported from ECC (with reasons)
 
@@ -142,16 +140,16 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Not ported from ECC (with reasons)
 
-| Skill                                      | Reason                                                                                                                                                                                    |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-patterns`                          | Automated formatting belongs to repository gates; semantic guidance lives in Python rules                                                                                                 |
-| `deep-research`                            | Requires firecrawl + exa MCP — deferred until MCP configured                                                                                                                              |
-| `api-design`, `backend-patterns`           | Stock project is not a web backend                                                                                                                                                        |
-| `security-review`                          | Covered by `security-reviewer` agent; trading-specific patterns (spend limits, circuit breakers) no longer covered since `llm-trading-agent-security` was removed 2026-08-07              |
-| Non-Python language patterns               | Unused languages                                                                                                                                                                          |
-| `homelab-*`, `network-*`, `healthcare-*`   | Domain mismatch                                                                                                                                                                           |
-| `angular-developer`, `react-*`, `nextjs-*` | No frontend planned                                                                                                                                                                       |
-| `eval-harness`                             | Removed 2026-06-09: referenced nonexistent `/eval` commands and had no runner, graders, baseline format, Python commands, or CI integration. Restore only after those capabilities exist. |
+| Skill                                      | Reason                                                                                                                                                                                                    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `python-patterns`                          | Automated formatting belongs to repository gates; semantic guidance lives in Python rules                                                                                                                 |
+| `deep-research`                            | Requires firecrawl + exa MCP — deferred until MCP configured                                                                                                                                              |
+| `api-design`, `backend-patterns`           | Stock project is not a web backend                                                                                                                                                                        |
+| `security-review`                          | Covered by built-in `/security-review` and hosted Codex PR review; trading-specific patterns (spend limits, circuit breakers) no longer covered since `llm-trading-agent-security` was removed 2026-08-07 |
+| Non-Python language patterns               | Unused languages                                                                                                                                                                                          |
+| `homelab-*`, `network-*`, `healthcare-*`   | Domain mismatch                                                                                                                                                                                           |
+| `angular-developer`, `react-*`, `nextjs-*` | No frontend planned                                                                                                                                                                                       |
+| `eval-harness`                             | Removed 2026-06-09: referenced nonexistent `/eval` commands and had no runner, graders, baseline format, Python commands, or CI integration. Restore only after those capabilities exist.                 |
 
 ---
 
@@ -180,9 +178,9 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                     | Notes                                                                      |
-| --------------- | --------------------- | -------------------------- | -------------------------------------------------------------------------- |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Logging, configuration access, FastAPI design, and behavioral test routing |
+| Rule set        | Paths                 | Source                     | Notes                                                 |
+| --------------- | --------------------- | -------------------------- | ----------------------------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Logging and log-driven debugging, and pytest pointers |
 
 Detailed procedures live in skills or agent definitions.
 

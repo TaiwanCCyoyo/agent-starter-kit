@@ -1,6 +1,6 @@
 name = "task_worker"
 description = "Mid-cost, write-capable agent for a higher-tier parent to downshift bounded, low-to-medium-risk implementation with explicit scope, acceptance criteria, and verification. Do not use when the parent already uses the lowest-cost model, or for planning, ambiguity, security-sensitive work, broad refactors, commits, durable memory writes, or external state changes."
-model = "gpt-5.6-terra"
+model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 nickname_candidates = ["Builder", "Implementer", "Craft"]

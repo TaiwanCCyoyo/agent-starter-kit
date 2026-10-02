@@ -54,14 +54,7 @@ For `403` or `404`, distinguish invalid authentication, missing `Dependabot aler
 
 Work only on alerts that the user authorized for remediation.
 
-- Inspect the affected manifest, lock file, dependency constraints, and repository verification commands before editing.
-- Group alerts that share a package or lock-file resolution so one coherent upgrade can address them without conflicting edits.
 - Treat `first_patched_version` as the minimum known safe boundary, not proof that it is compatible or the only acceptable target. If it is null, inspect the advisory and resolver output; do not invent a fixed version.
-- Prefer the smallest compatible upgrade that exits every affected vulnerable range. Preserve unrelated dependency versions where the package manager permits it.
-- Update manifest and lock files through the repository's package manager. Review lifecycle scripts and generated changes before accepting them.
-- If the minimum fix causes compatibility failures, fix the compatibility issue when it remains in scope. Do not broaden to an unrelated major upgrade merely to make resolution succeed.
-- Run targeted behavioral tests or a build when needed to verify compatibility of the dependency change. Use the environment's security review workflow when available.
-- Preserve unrelated working-tree changes and never discard user work.
 
 ## Completion Evidence
 

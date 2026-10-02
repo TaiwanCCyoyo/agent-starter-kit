@@ -1,29 +1,20 @@
 ---
 name: python-development
-description: Use when creating, modifying, or reviewing non-test Python production code, including APIs, services, configuration access, logging, typing, or FastAPI applications.
+description: Use when creating, modifying, debugging, or reviewing non-test Python production code, including services, scripts, hooks, logging, and typing.
 ---
 
 # Python Development
 
 Apply the repository's Python development baseline.
 
-## Core Rules
+## Logging
 
 - Use `logging` for diagnostics; CLI output and hook protocol responses belong on the required stdout/stderr stream.
-- Prefer immutable values when they reduce hidden state, while allowing clear local mutation.
-- Read existing implementation and tests before introducing a new Python pattern or dependency.
-
-## Secrets And Security
-
-- Read required secrets with `os.environ["NAME"]` or the application's existing configuration layer.
-- Do not add dotenv or a security scanner unless the repository explicitly adopts and configures it.
-- Use `security_reviewer` when the change affects a trust boundary, permissions, secrets, untrusted input handling, or sensitive data flow; ordinary file access alone is not a trigger.
+- While writing code, add `logging` at key points (inputs, branch decisions, external call results, caught exceptions) so that history logs from a later failure locate the cause without a rerun.
+- When a failure's cause is not obvious from the code and error, add targeted `logging` at the relevant boundaries (inputs, branch decisions, external call results) and reproduce it before changing behavior.
+- Keep log statements that would help diagnose future failures, at an appropriate level, instead of removing them after the fix.
 
 ## Verification
 
 - Run targeted behavioral tests appropriate to the change's risk.
 - Use `python-testing` for pytest, coverage, hook fixtures, and Windows-path verification.
-
-## FastAPI
-
-When the code imports FastAPI or changes API routes, dependencies, schemas, or app construction, read [references/fastapi.md](references/fastapi.md) before editing.
