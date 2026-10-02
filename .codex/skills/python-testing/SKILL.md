@@ -6,7 +6,7 @@ description: Apply repository-specific verification requirements to Python scrip
 # Python Testing
 
 Use this skill when Python scripts, hooks, or reusable tooling change.
-Use `python-development` separately for coding style, typing, logging, secrets, and FastAPI design.
+Use `python-development` separately for logging and log-driven debugging.
 
 ## Repository Tests
 
