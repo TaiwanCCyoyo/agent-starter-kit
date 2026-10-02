@@ -21,35 +21,33 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ### 工作流程（原創——非來自 ECC）
 
-| Agent                     | 模型            | 工具                                | 用途                                                                                                                                            |
-| ------------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commit-specialist`       | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
-| `doc-translator`          | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `implementation-reviewer` | opus            | Read, Grep, Glob, Bash              | 可選、僅在明確要求時進行的程式碼檢查：行為錯誤與回歸；Bash 依指引限於唯讀 Git 檢視                                                              |
-| `plan-reviewer`           | opus（high）    | Read, Grep, Glob, Bash              | 實作前計畫品質審查：完整性、範疇蔓延、步驟排序、Repo 對齊、可測試性                                                                             |
-| `signal-miner`            | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
-| `task-worker`             | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
-| `security-reviewer`       | opus（high）    | Read, Grep, Glob, Bash              | 唯讀 secrets、注入、依賴、權限、auth 與敏感資料審查                                                                                             |
+| Agent               | 模型            | 工具                                | 用途                                                                                                                                            |
+| ------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `commit-specialist` | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
+| `doc-translator`    | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
+| `signal-miner`      | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
+| `task-worker`       | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
 
 ### 未從 ECC 移植（含原因）
 
-| Agent                                                                                                                                              | 原因                                                                          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代  |
-| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能與聚焦 reviewer 已涵蓋其責任，無須重複委派。 |
-| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python              |
-| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                    |
-| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                          |
-| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                  |
-| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                      |
-| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                      |
-| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                |
+| Agent                                                                                                                                              | 原因                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代                                                                                  |
+| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能與聚焦 reviewer 已涵蓋其責任，無須重複委派。                                                                                 |
+| `implementation-reviewer`、`plan-reviewer`、`security-reviewer`                                                                                    | 2026-10-02 移除——目前模型、Native Plan Mode、內建 `/code-review`、hosted Codex PR review 與 pre-commit gates 已涵蓋其責任；其餘 agents 的存在是為了節省成本。 |
+| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python                                                                                              |
+| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                                                                                                    |
+| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                                                                                                          |
+| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                                                                                                  |
+| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                                                                                                      |
+| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                                                                                                      |
+| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                                                                                                |
 
 ---
 
 ## 互動、自動化與公司使用
 
-- 互動工作：進入 Native Plan Mode；複雜或高風險計畫可選用 `plan-reviewer`；核准計畫後再回到執行模式。
+- 互動工作：進入 Native Plan Mode，核准計畫後再回到執行模式。
 - 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
 - Claude-only 公司移植：保留 instructions、rules、agents、skills 與 hygiene hooks。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
 
@@ -70,14 +68,14 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ### 已移除（2026-06-10 清理——agents 與內建 `/code-review` 已涵蓋）
 
-| Command          | 替代方案                                                                 |
-| ---------------- | ------------------------------------------------------------------------ |
-| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill                  |
-| `/code-review`   | 託管 PR review；`implementation-reviewer` 僅用於明確要求的本機程式碼檢查 |
-| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent       |
-| `/python-review` | `python-testing` 用於行為測試；可選的明確要求程式碼檢查                  |
-| `/security-scan` | `security-reviewer` agent + `detect-secrets` gate                        |
-| `/test-coverage` | `python-testing` skill（`pytest --cov`）                                 |
+| Command          | 替代方案                                                              |
+| ---------------- | --------------------------------------------------------------------- |
+| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill               |
+| `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ hosted Codex PR review |
+| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent    |
+| `/python-review` | `python-testing` skill 與內建 `/code-review`                          |
+| `/security-scan` | 內建 `/security-review` + `detect-secrets` gate                       |
+| `/test-coverage` | `python-testing` skill（`pytest --cov`）                              |
 
 ### 未從 ECC 移植（含原因）
 
@@ -108,9 +106,9 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
-| Skill            | 用途                                                                                                  |
-| ---------------- | ----------------------------------------------------------------------------------------------------- |
-| `python-testing` | 僅含專案特定的行為測試、hook JSON fixtures 與 Windows 路徑行為。Test-first 決策使用 Claude 原生能力。 |
+| Skill            | 用途                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `python-testing` | Repository-specific 行為測試、hook JSON fixtures 與 Windows path 行為。Test-first 決策使用 Claude 原生能力。 |
 
 ### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
 
@@ -120,9 +118,9 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 已移除（2026-08-19 清理——`/learn-eval` 未曾在實務中觸發）
 
-| Skill / Command                | 原因                                                                                                                                                                                                                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `skill-curator`、`/learn-eval` | ECC 整體品質門與 Hermes curator 生命週期的手動移植未曾被觸發——唯一提示是每週的 Stop hook 提醒。已由常駐載入的 `rules/common/skill-authoring.md` 規則取代，該規則陳述耐用的意圖（當任務類別會重複出現時，撰寫 project skill），加上已啟用的 `skill-creator` 外掛用於撰寫。 |
+| Skill / Command                | 原因                                                                                                                                                                                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `skill-curator`、`/learn-eval` | ECC 整體品質門與 Hermes curator 生命週期的手動移植未曾被觸發——唯一提示是每週的 Stop hook 提醒。已由常駐載入的 `AGENTS.md` §Skill Authoring 規則取代，該規則陳述耐用的意圖（當任務類別會重複出現時，撰寫 project skill），加上已啟用的 `skill-creator` 外掛用於撰寫。 |
 
 ### 已移除（2026-08-07 清理——待機設計 ECC demo skills，無下游使用方）
 
@@ -142,16 +140,16 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 未從 ECC 移植（含原因）
 
-| Skill                                      | 原因                                                                                                                                               |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-patterns`                          | 自動格式化由 repository gates 負責；語意指引位於 Python rules                                                                                      |
-| `deep-research`                            | 需要 firecrawl + exa MCP——延後至 MCP 設定完成                                                                                                      |
-| `api-design`、`backend-patterns`           | 本股票專案非 web backend                                                                                                                           |
-| `security-review`                          | 已由 `security-reviewer` agent 涵蓋；交易相關模式（消費上限、斷路器）因 `llm-trading-agent-security` 於 2026-08-07 移除而不再涵蓋                  |
-| 非 Python 語言模式                         | 未使用的語言                                                                                                                                       |
-| `homelab-*`、`network-*`、`healthcare-*`   | 領域不符                                                                                                                                           |
-| `angular-developer`、`react-*`、`nextjs-*` | 未規劃前端                                                                                                                                         |
-| `eval-harness`                             | 2026-06-09 移除：引用不存在的 `/eval` commands，且沒有 runner、graders、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。 |
+| Skill                                      | 原因                                                                                                                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `python-patterns`                          | Automated formatting 屬於 repository gates；semantic guidance 位於 Python rules                                                                          |
+| `deep-research`                            | 需要 firecrawl + exa MCP——延後至 MCP 設定完成                                                                                                            |
+| `api-design`、`backend-patterns`           | 本股票專案非 web backend                                                                                                                                 |
+| `security-review`                          | 已由內建 `/security-review` 與 hosted Codex PR review 涵蓋；交易相關模式（消費上限、斷路器）因 `llm-trading-agent-security` 於 2026-08-07 移除而不再涵蓋 |
+| 非 Python 語言模式                         | 未使用的語言                                                                                                                                             |
+| `homelab-*`、`network-*`、`healthcare-*`   | 領域不符                                                                                                                                                 |
+| `angular-developer`、`react-*`、`nextjs-*` | 未規劃前端                                                                                                                                               |
+| `eval-harness`                             | 2026-06-09 移除：引用不存在的 `/eval` commands，且沒有 runner、graders、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。       |
 
 ---
 
@@ -165,7 +163,7 @@ Hooks 是由 Claude Code harness 自動執行的 Python 腳本。
 
 Workspace editor defaults 放在 `.vscode/settings.json`：移除行尾空白、保留單一 final newline、使用 Ruff 進行 Python formatting 與 explicit code actions，並將產生的 cache 與本機 agent state 排除於 search、watchers 與 local history 之外。
 
-Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。hook 指令本身與其內部的 Ruff 呼叫都使用 `uv run --no-sync`，避免每次編輯都觸發環境 resync。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。已安裝的 commit hooks 與 PR CI 負責自動化檢查；skills 與 reviewers 不會要求額外的手動檢查。
+Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics；其 PostToolUse hook 額外對修改後的 Python 檔案執行唯讀的 Ruff `E722`、`F601`、`F602`、`F634` check，補足 Pyright 不負責的問題並避免重複回報 undefined-name 與 unused-symbol diagnostics。hook 指令本身與其內部的 Ruff 呼叫都使用 `uv run --no-sync`，避免每次編輯都觸發環境 resync。完整 Ruff linting 與 formatting 延後由 pre-commit 負責，因此正常編輯期間不會觸發 repository-wide formatting。Installed commit hooks 與 PR CI 負責自動化檢查；skills 與 reviewers 不要求另外執行一次手動。
 
 ### 已注意但未從 ECC 移植的 hook 概念
 
@@ -180,9 +178,9 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                      | 備註                                          |
-| --------------- | --------------------- | ------------------------- | --------------------------------------------- |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging、設定存取、FastAPI 設計與行為測試路由 |
+| 規則集          | 路徑                  | 來源                      | 備註                                   |
+| --------------- | --------------------- | ------------------------- | -------------------------------------- |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging 與以 log 輔助除錯、pytest 指引 |
 
 詳細流程放在 skills 或 agent definitions。
 

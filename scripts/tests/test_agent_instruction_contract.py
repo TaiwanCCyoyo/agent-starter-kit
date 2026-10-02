@@ -119,9 +119,6 @@ def test_codex_agents_keep_unique_roles_and_bounded_permissions() -> None:
         "commit-specialist",
         "doc-translator",
         "signal-miner",
-        "implementation-reviewer",
-        "plan-reviewer",
-        "security-reviewer",
         "task-worker",
     }
 
@@ -151,9 +148,6 @@ def test_claude_agent_model_routing_uses_current_aliases() -> None:
         "commit-specialist": ("haiku", None),
         "doc-translator": ("haiku", None),
         "signal-miner": ("haiku", None),
-        "implementation-reviewer": ("opus", "high"),
-        "plan-reviewer": ("opus", "high"),
-        "security-reviewer": ("opus", "high"),
         "task-worker": ("sonnet", "medium"),
     }
     agent_dir = ROOT / ".claude" / "agents"

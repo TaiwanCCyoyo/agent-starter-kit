@@ -36,10 +36,10 @@ The main agent must select one mode from what it actually knows and requests. Do
 
 1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
 2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
-3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on commit execution and bounded hook recovery.
-4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and then executes the commit with bounded hook recovery. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
+3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on commit execution and bounded failure recovery.
+4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and then executes the commit with bounded failure recovery. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
 
-For message-only requests, return the message without committing. For authorized execution, run the normal commit command with its installed hooks. Fix only a simple, directly actionable commit-hook failure, inspect the resulting diff, re-stage only approved files, and retry the commit once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
+For message-only requests, return the message without committing. For authorized execution, run the normal commit command. If it fails, fix only a simple, directly actionable issue, inspect the resulting diff, re-stage only approved files, and retry the commit once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
 
 ## Interaction And Summary
 
@@ -47,7 +47,7 @@ For message-only requests, return the message without committing. For authorized
 - The summary provided to the user must be in Traditional Chinese (zh-TW).
 - The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates one concrete objective with explicit paths, requested output, acceptance criteria, the delegation mode, any supplied commit message, and staged submodule gitlink state to `commit-specialist`.
 - `commit-specialist` never stages a file on its own initiative. When any target file is not yet staged, the delegation must explicitly list every file to stage by name; omitting this instruction leaves those files uncommitted.
-- For an uncommitted submodule, unexpected gitlink delta, or unresolved hook failure, `commit-specialist` stops and returns the failed step, evidence, and the precise parent-agent decision required.
+- For an uncommitted submodule, unexpected gitlink delta, or unresolved commit failure, `commit-specialist` stops and returns the failed step, evidence, and the precise parent-agent decision required.
 
 ## Post-Commit Memory Check
 
