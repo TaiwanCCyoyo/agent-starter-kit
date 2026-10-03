@@ -12,14 +12,14 @@ Both agents read a single root `AGENTS.md`. Claude Code and Codex discover that 
 
 `AGENTS.md` is deliberately short. A rule earns a place in it only when no other layer can state or enforce that rule. Everything else lives where it actually takes effect:
 
-| Layer                               | Owns                                                                             |
-| :---------------------------------- | :------------------------------------------------------------------------------- |
-| `AGENTS.md`                         | Authorization, project conventions, review severity, and memory boundaries       |
-| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks |
-| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                 |
-| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                 |
-| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                          |
-| `.claude/agents/`, `.codex/agents/` | Subagent roles and routing, selected by their own `description`                  |
+| Layer                               | Owns                                                                                                  |
+| :---------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                         | Authorization, communication preferences, project conventions, review severity, and memory boundaries |
+| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks                      |
+| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                                      |
+| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                                      |
+| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                                               |
+| `.claude/agents/`, `.codex/agents/` | Subagent roles and routing, selected by their own `description`                                       |
 
 Two consequences are worth stating outright:
 
@@ -76,7 +76,7 @@ Local pre-commit results are not a merge gate. CI is.
 
 ### 3. Rewrite the rules that are actually yours
 
-Open `AGENTS.md` and delete what does not apply to your project. Traditional Chinese communication, the `scripts/` shell-neutral requirement, and the Windows path expectation are this template's constraints, not universal ones. Keep the shape — authorization, conventions, review, skills, memory, verification, delegation — and replace the content.
+Open `AGENTS.md` and delete what does not apply to your project. Traditional Chinese communication, visual communication preferences, the `scripts/` shell-neutral requirement, and the Windows path expectation are this template's constraints, not universal ones. Keep the shape — authorization, communication, conventions, review, skills, memory, verification, delegation — and replace the content.
 
 Apply the same test to anything you add: if pre-commit, CI, a path-scoped rule, or a skill description can carry it, put it there instead.
 
