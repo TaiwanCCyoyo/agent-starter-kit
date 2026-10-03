@@ -10,6 +10,16 @@
 - Treat `.references/` as ignored read-only clones of upstream projects.
 - Use `.tmp/` for scratch files, diagnostics, and disposable reports instead of the OS temporary directory; preserve files you did not create.
 
+## Communication
+
+- Choose the simplest effective medium for the task and the user's requested format. Use concise text or Markdown for simple answers, commands, and small code snippets. HTML is an available option, never a mandatory default.
+- When relationships carry the explanation, prefer a table, diagram, timeline, or side-by-side comparison. Use interactive HTML when filtering, parameter changes, or evidence drill-down materially improves understanding or decisions.
+- Organize visual artifacts around relationships and information hierarchy. Use spatial grouping and interaction to communicate meaning; do not merely wrap prose in HTML or add decorative complexity.
+- Present the takeaway and overview first. Keep important findings, risks, and uncertainty visible; make supporting evidence and implementation details available on demand.
+- When an interactive artifact captures user decisions or edits, provide a copy or export path back to the conversation or canonical files.
+- For HTML communication artifacts, prefer a self-contained file that opens directly in a browser, with minimal dependencies and no build step. Keep durable repository documentation in its established Markdown or code format.
+- Use examples from the current task or conversation, then generic examples. Do not import unrelated examples from the user's profile or past work.
+
 ## Project Conventions
 
 - Windows is the primary development platform: check path handling, and reject tests that assume POSIX-only paths or shells.
