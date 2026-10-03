@@ -14,7 +14,7 @@
 
 | 層級                                | 負責範圍                                               |
 | :---------------------------------- | :----------------------------------------------------- |
-| `AGENTS.md`                         | 授權、專案慣例、審查嚴重性與記憶邊界                   |
+| `AGENTS.md`                         | 授權、溝通偏好、專案慣例、審查嚴重性與記憶邊界         |
 | `.pre-commit-config.yaml`           | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查 |
 | `.github/workflows/ci.yml`          | repository 層級的合併前檢查閘道                        |
 | `.claude/rules/`                    | 路徑限定的程式碼規範，觸發時才載入                     |
@@ -76,7 +76,7 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 ### 3. Rewrite the rules that are actually yours
 
-開啟 `AGENTS.md` 並刪除不適用於你專案的內容。繁體中文溝通、`scripts/` shell 中立需求與 Windows 路徑預期都是此範本的約束，不是通用的。保持形狀——授權、慣例、審查、skills、記憶、驗證、委派——並替換內容。
+開啟 `AGENTS.md` 並刪除不適用於你專案的內容。繁體中文溝通、視覺溝通偏好、`scripts/` shell 中立需求與 Windows 路徑預期都是此範本的約束，不是通用的。保持形狀——授權、溝通、慣例、審查、skills、記憶、驗證、委派——並替換內容。
 
 對你加入的任何東西套用同一套測試：如果 pre-commit、CI、路徑限定的規則或 skill description 能承載它，就把它放在那裡，而不是這裡。
 
