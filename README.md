@@ -1,0 +1,125 @@
+[繁體中文](docs/zh-TW/README.md)
+
+# AI Agent Starter Kit
+
+A project template that gives Codex and Claude Code a shared operating contract, matching per-agent tooling, and verification that runs the same way locally and in CI.
+
+Copy it into a new project when you want both agents to find the project's rules, skills, and quality gates without being told where to look.
+
+## The idea: one contract, enforced elsewhere
+
+Both agents read a single root `AGENTS.md`. Claude Code and Codex discover that filename natively, so nothing has to inject it.
+
+`AGENTS.md` is deliberately short. A rule earns a place in it only when no other layer can state or enforce that rule. Everything else lives where it actually takes effect:
+
+| Layer                               | Owns                                                                                                  |
+| :---------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                         | Authorization, communication preferences, project conventions, review severity, and memory boundaries |
+| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks                      |
+| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                                      |
+| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                                      |
+| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                                               |
+| `.claude/agents/`, `.codex/agents/` | Subagent roles and routing, selected by their own `description`                                       |
+
+Two consequences are worth stating outright:
+
+- **`AGENTS.md` names no individual skill or subagent.** Routing belongs in each component's `description`, where retrieval already happens. Listing names in the contract duplicates that and goes stale.
+- **`AGENTS.md` states nothing the model already knows.** General engineering craft, reading code before changing it, and not committing secrets are left out, because the model brings the first two and `detect-secrets` enforces the third.
+
+The result is a contract that fits on one screen and changes only when the project's actual constraints change.
+
+## What to copy
+
+| Path                      | Purpose                                                                   |
+| :------------------------ | :------------------------------------------------------------------------ |
+| `AGENTS.md`               | Shared root operating contract for every agent                            |
+| `.pre-commit-config.yaml` | Repository verification hooks                                             |
+| `scripts/`                | Shell-neutral hygiene and formatting checks shared by every agent         |
+| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and rules |
+| `.codex/`                 | Codex configuration, hooks, command-like skills, and specialist agents    |
+| `.github/workflows/`      | CI that runs the same checks the agents run locally                       |
+| `docs/en/git-workflow.md` | Git and delivery authorization contract; keep the path, reset the status  |
+| `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project              |
+| `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows            |
+
+Take only the agent directories you use. Neither agent needs the other's layer, but the verification below and the contract tests in `scripts/tests/` read both: drop the assertions and test paths for the layer you did not copy, or they will fail on a directory that is not there.
+
+## Setting up
+
+```bash
+uv sync --group dev
+uv run pre-commit install
+```
+
+Then verify the checks run:
+
+```bash
+uv run pre-commit run --all-files
+uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+```
+
+List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert both agent layers; prune them to the layers your project actually has.
+
+## Adapting it to your project
+
+### 1. Reset delivery authorization
+
+`docs/en/git-workflow.md` records this repository's own delivery status. **Reset its current-state bullet to local-only before using the template elsewhere.** Copying the file grants no publishing authority; see [PR setup](docs/en/pr-setup.md) for enabling it deliberately.
+
+The one rule that never relaxes: agents never commit or push to the default branch. Everything reaches it through a pull request.
+
+This repository also authorizes [post-merge cleanup](docs/en/git-workflow.md#post-merge-cleanup): after confirming a task PR merged into `main`, agents update local `main` and remove their task branches and worktrees, preserving other work. Reset this standing authorization and the corresponding `AGENTS.md` rule when adopting the template elsewhere.
+
+### 2. Adjust the CI workflow
+
+`.github/workflows/ci.yml` runs full pre-commit plus the agent hook tests on Windows, because Windows is this template's primary development platform. Change the runner, the Python version, and the test paths to match your project, then make the job a required check on your default branch. Pin any third-party action to a full commit SHA.
+
+Local pre-commit results are not a merge gate. CI is.
+
+### 3. Rewrite the rules that are actually yours
+
+Open `AGENTS.md` and delete what does not apply to your project. Traditional Chinese communication, visual communication preferences, the `scripts/` shell-neutral requirement, and the Windows path expectation are this template's constraints, not universal ones. Keep the shape — authorization, communication, conventions, review, skills, memory, verification, delegation — and replace the content.
+
+Apply the same test to anything you add: if pre-commit, CI, a path-scoped rule, or a skill description can carry it, put it there instead.
+
+### 4. Keep planning proportional to the work
+
+Keep durable plans in the project's existing documentation when work spans sessions or carries significant risk. Record the intended outcome, acceptance criteria, material decisions, and verification evidence where future maintainers can find them. Small changes can use the task or PR description; extend the project's existing records for larger work rather than introducing a separate planning framework.
+
+### 5. Set up permissions
+
+Claude Code permissions live in `.claude/settings.json` and take effect without touching global config. The allow list covers read-only inspection, and the deny list covers only `.git` removal. Everything else, `git push` included, is left to the session's permission mode to judge per call.
+
+That is a deliberate retreat from pattern matching. Permission patterns compare command text, while `git push` takes its meaning from flags in any position, bundled (`-fu`) or abbreviated (`--forc`), from refspecs, and from configuration the text never mentions — `remote.<name>.mirror`, `branch.<name>.pushRemote`, `url.<base>.pushInsteadOf`. Successive review rounds on this template each found another spelling, which is what an unenumerable set looks like. A list that cannot be completed invites more trust than it earns.
+
+The boundary is server-side: a ruleset on the default branch, which no local configuration can weaken.
+
+Codex ships no repository-local permission rules here; it uses its own approval controls.
+
+## Per-agent references
+
+Start with the reference for the agent you use. You do not need to configure both.
+
+- **[Claude Code Components](docs/en/claude-components.md)** — subagents, slash commands, skills, hooks, and path-scoped rules in `.claude/`.
+- **[Codex Components](docs/en/codex-components.md)** — specialist agents, command-like skills, hooks, and model routing in `.codex/`.
+- **[Git Workflow Contract](docs/en/git-workflow.md)** — task isolation, delivery authorization, and review and merge boundaries.
+- **[PR Review](docs/en/pr-review.md)** — how this repository's own hosted review and merge conditions are configured.
+
+## Hooks
+
+Both agents run one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. Neither runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and the commit workflows establish branch context themselves rather than relying on injected state.
+
+| Agent           | Script                                          | Reports                                                   |
+| :-------------- | :---------------------------------------------- | :-------------------------------------------------------- |
+| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py` | Ruff `E722,F601,F602,F634`, complementing the Pyright LSP |
+| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`   | Ruff `F` checks, since Codex has no Python LSP            |
+
+If hooks do not fire, confirm `uv run pre-commit install` has run, that `.codex/config.toml` enables `hooks`, that `.claude/settings.json` declares the `hooks` section, and that the agent trusts the project-local configuration.
+
+## Design influences
+
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — the specialist agents and coding rules are adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
+
+---
+
+This project enforces UTF-8 without BOM and English for source code, technical documentation, workflows, and configuration. Traditional Chinese content belongs in `docs/zh-TW/`, `.references/`, and `.tmp/`.

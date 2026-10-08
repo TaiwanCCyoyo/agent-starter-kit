@@ -1,0 +1,7 @@
+line-length = 160
+
+[format]
+preview = true
+
+[lint]
+select = ["E", "F", "I", "ANN001", "T201"]
