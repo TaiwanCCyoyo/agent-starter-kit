@@ -1,0 +1,2 @@
+# Normalize detected text files and check them out with LF.
+* text=auto eol=lf
