@@ -30,7 +30,7 @@ For document translation or synchronization, the main agent selects the authorit
 | Skill                | Purpose                                                                                                 |
 | :------------------- | :------------------------------------------------------------------------------------------------------ |
 | `python-development` | Python logging and log-driven debugging                                                                 |
-| `python-testing`     | Repository test invocation, hook fixtures, and Windows paths when tests are warranted          |
+| `python-testing`     | Repository test invocation, hook fixtures, and Windows paths when tests are warranted                   |
 | `gen-commit`         | Scoped local commits, built-in delegation for substantial diff reading and hook recovery, and reporting |
 
 ## Claude Capability Decisions
@@ -60,7 +60,7 @@ For document translation or synchronization, the main agent selects the authorit
 | Operating contract, scoped changes                                | `AGENTS.md`                                               |
 | Project conventions and tool preferences                          | `AGENTS.md` project conventions                           |
 | Review severity and CRITICAL/HIGH completion policy               | `AGENTS.md` review and security section                   |
-| Risk-based test scope                                             | `AGENTS.md` verification section                          |
+| Verification scope                                                | `AGENTS.md` verification section                          |
 | Python development rules                                          | `python-development`                                      |
 | Repository Python test details                                    | `python-testing`                                          |
 | Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |

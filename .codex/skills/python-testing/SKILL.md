@@ -5,7 +5,7 @@ description: Write or run Python tests in this repository with Windows imports, 
 
 # Python Testing
 
-Follow `AGENTS.md` for whether tests are needed. This skill supplies repository-specific details after that decision.
+Use this reference when writing or running Python tests. It supplies repository-specific execution and fixture details.
 
 ## Running Tests
 

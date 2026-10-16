@@ -49,9 +49,8 @@ These rules govern requested local reviews and hosted pull request reviews. See 
 ## Verification
 
 - Verify what you changed and show the output as evidence; state plainly when verification was skipped or insufficient and what risk remains.
-- Choose the smallest check that addresses the concrete failure risk. For mechanical moves, inspect affected references and smoke-test entry points when runtime paths can change; documentation-only edits need no Python tests.
-- Reuse existing tests for changed behavior. Add or extend regression tests when a bug or meaningful behavior change lacks coverage, including hooks and scripts; changing a Python file alone does not require a new test.
-- Use normal commit hooks and hosted PR checks without a duplicate manual pass; investigate reported failures. Request coverage reports only when they help assess risk, and avoid tests that merely freeze prose, model names, configuration values, or file layout.
+- Choose verification proportional to the change and its concrete risks; use available evidence and avoid redundant checks.
+- Use normal commit hooks and hosted PR checks without a duplicate manual pass; investigate reported failures.
 
 ## Delegation
 

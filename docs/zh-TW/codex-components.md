@@ -27,11 +27,11 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 ## Skills
 
-| Skill                | 用途                                                                         |
-| :------------------- | :--------------------------------------------------------------------------- |
-| `python-development` | Python logging 與以 log 輔助除錯                                             |
-| `python-testing`     | 需要測試時的執行方式、hook fixtures 與 Windows 路徑細節                  |
-| `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報        |
+| Skill                | 用途                                                                  |
+| :------------------- | :-------------------------------------------------------------------- |
+| `python-development` | Python logging 與以 log 輔助除錯                                      |
+| `python-testing`     | 需要測試時的執行方式、hook fixtures 與 Windows 路徑細節               |
+| `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報 |
 
 ## Claude 能力取捨
 
@@ -60,7 +60,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Operating contract、scoped changes                                | `AGENTS.md`                                             |
 | 專案慣例與工具偏好                                                | `AGENTS.md` project conventions                         |
 | Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                 |
-| Risk-based test scope                                             | `AGENTS.md` verification section                        |
+| Verification scope                                                | `AGENTS.md` verification section                        |
 | Python development rules                                          | `python-development`                                    |
 | Repository Python test details                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
