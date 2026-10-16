@@ -1,6 +1,6 @@
 # Codex 元件參考
 
-Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專用 subagents、project hooks 與已安裝 plugins。它讀取共用的根目錄 `AGENTS.md`，這是 Codex 原生會尋找的檔案；repository 層級的規則放在該檔，巢狀 `AGENTS.md` 只涵蓋自己所在的目錄。
+Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、內建 subagents、project hooks 與已安裝 plugins。它讀取共用的根目錄 `AGENTS.md`，這是 Codex 原生會尋找的檔案；repository 層級的規則放在該檔，巢狀 `AGENTS.md` 只涵蓋自己所在的目錄。
 
 ## 原生與 Plugin 對應
 
@@ -15,25 +15,15 @@ Codex 使用 Native Plan Mode、原生 local memories、repo-scoped skills、專
 
 Codex 將 planning 與 implementation 權責保留在 main agent。Read-only agents 負責從大範圍搜尋、logs、test output、diffs，或任何 stdout 會淹沒 main context 的指令中整理 context-isolated evidence summaries；它們不取代 Codex Native Plan Mode，也不擁有發布與整合權限。主 agent 遵守[共用 Git 工作契約](../en/git-workflow.md)。
 
-## Agents
+## 委派
 
-| Agent               | 權限     | 用途                                                                                                                                          |
-| :------------------ | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signal_miner`      | 唯讀     | 低成本的大量輸出隔離工具；委派有具體收益時使用，只回傳精簡證據                                                                                |
-| `task_worker`       | 有界寫入 | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                            |
-| `doc_translator`    | 有界寫入 | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main agent 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `commit-specialist` | 有界寫入 | 選用的 commit 代理；依 mode 審查 staged diff、執行 commit，sandbox 失敗時交還 main agent                                                      |
+有界工作使用內建 general-purpose subagent；聚焦程式碼探索使用原生 `explorer`。本專案不定義自訂 agent 角色。共用委派原則由 `AGENTS.md` 管理；skills 保留各任務專屬的工作流程細節。
 
-### 模型路由
+當大量輸入、輸出、雜訊或重複作業使隔離脈絡有具體效益時，優先使用 `gpt-6-luna` 處理簡單工作，包括長篇翻譯、文件同步、大型 diff/log 檢視與機械式 hook 修復。若 handoff 沒有實際助益，短檢查直接執行。需要較多判斷的實作則選用合適模型，並保留使用者選擇主要模型的權限。
 
-| 層級           | 模型                   | 角色                                        |
-| -------------- | ---------------------- | ------------------------------------------- |
-| 有界實作       | `gpt-6.1-sol` / medium | 由 `task_worker` 執行明確限定範圍的一般實作 |
-| 高流量機械工作 | `gpt-6-luna` / medium  | Signal mining、commit 與文件同步            |
+在平台支援時，建立內建 agent 時指定模型。若需使用新 context，明確提供任務、相關指示、範圍與證據。回傳精簡結果，不複製原始輸出。需要時要求實際的平台限制；只描述唯讀任務並不能強制 sandbox。除非實際 workload 證明需要，否則維持已設定的並行數與深度限制。
 
-一般程式碼定位使用 `explorer`；需要隔離大量輸出、能節省 context 時使用 `signal_miner`。短檢查直接在本地執行；沒有具體收益時避免同層級 handoff。`task_worker` 讓高階 main agent 將有界實作降級給 Sol，而 Luna 處理機械式工作。模糊、架構與 security-sensitive 的判斷應留給 main agent；pull request 也會經過 hosted Codex review。
-
-四個角色加上內建 `explorer` 已涵蓋目前的持續工作。只有在證明存在缺口時才新增角色。主要模型仍由使用者選擇；角色的模型預設不代表已量測的成本節省或品質。除非實際 workload 證明需要，否則維持既有的並行數與深度預設。
+文件翻譯或同步由 main agent 選定權威來源與明確目標。保留結構、連結、程式碼與識別字；遇到來源衝突或術語不明時回報。這是共用衍生輸出原則的應用。
 
 ## Skills
 
@@ -41,14 +31,14 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | :------------------- | :--------------------------------------------------------------------------- |
 | `python-development` | Python logging 與以 log 輔助除錯                                             |
 | `python-testing`     | Targeted behavioral tests、選配 coverage、hook fixtures 與 Windows path 要求 |
-| `gen-commit`         | 有界 local commit、選用 specialist review 與執行、sandbox handoff 及回報     |
+| `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報        |
 
 ## Claude 能力取捨
 
 | Claude 能力                                                     | Codex 決策               | 原因                                                                                                                                                           |
 | :-------------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/plan`                                                         | 原生／選用 artifact 取代 | 對話式規劃由原生 Plan Mode 提供。持久化的跨 session handoff 使用受維護的 plan artifact。                                                                       |
-| `plan-reviewer`、`implementation-reviewer`、`security-reviewer` | 2026-10-02 移除          | Native Plan Mode、目前模型能力、hosted Codex PR review 與 pre-commit gates 已涵蓋其責任；其餘 agents 的存在是為了節省成本。                                    |
+| `plan-reviewer`、`implementation-reviewer`、`security-reviewer` | 2026-10-02 移除          | Native Plan Mode、目前模型能力、hosted Codex PR review 與 pre-commit gates 已涵蓋其責任；成本導向的委派改用內建 agents。                                       |
 | `/feature-dev`                                                  | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
 | `/build-fix`                                                    | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
 | `/code-review`                                                  | 原生／plugin 取代        | Local review 使用原生 Codex review stance；PR review 使用 GitHub plugin。                                                                                      |
@@ -94,9 +84,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 Local Python verification 目標行為已改變。Installed commit hooks 與 PR CI 負責自動化檢查；skills 與 reviewers 不要求另外執行一次手動。Coverage 透過 `uv run python -m pytest --cov --cov-report=term-missing` 選配執行，不設全域百分比 gate。
 
-`gen-commit` 在需要實質審查、訊息粗略或缺漏，或明確要求獨立檢查時使用 `commit-specialist`。main agent 可在訊息完整、沒有無關 staged files 且變更已驗證時，直接 commit 小型 agent-owned 變更，並使用相同驗證與一般 hooks。若 delegated step 在 sandbox 或 cache 權限邊界失敗，specialist 會不重試、不改環境地回傳確切錯誤；main agent 只在既有授權 context 接手受阻步驟。
-
-是否檢查 diff 由明確 mode 決定，不會自動發生。沒有訊息或只有粗略目標時，specialist 會讀 staged diff 並完成訊息；若 main agent 對乾淨且明確的 scope 已提供完整訊息，specialist 不讀 diff，重點是 commit 執行與有界 hook recovery。只有 main agent 因具體疑慮明確要求 double-check 時，完整訊息才會搭配額外 diff 檢查；specialist 不得自行升級到該 review mode。
+`gen-commit` 沿用共用委派原則：內建 Luna agent 可協助檢視大量 diff，並處理範圍明確的簡單 hook 修復；main agent 負責範圍與最終結果。若提供的 commit 訊息完整，除非有具體疑慮要求檢視，否則不重複讀取 diff；若只有粗略意圖，則檢視核准範圍內的 diff。代理回報精簡驗證證據，遇到 sandbox 或權限失敗立即停止。可編輯路徑範圍與復原限制詳見 skill。
 
 ## 延後能力
 

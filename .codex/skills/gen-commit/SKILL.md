@@ -1,76 +1,35 @@
 ---
 name: gen-commit
-description: Prepare commit messages and create scoped local Git commits with optional specialist delegation. Use for /gen-commit, commit requests, and automatic agent-owned commits.
+description: Prepare scoped local Git commits and Conventional Commit messages. Use for /gen-commit, commit requests, and automatic agent-owned commits; delegate substantial diff reading and simple hook recovery under the shared delegation principles.
 ---
 
 # Gen Commit
 
-This skill owns local commits. The main agent owns any subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
+This skill owns local commits. The main agent owns subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
 
-This is a command-like Codex skill that can be invoked with plain text such as `/gen-commit`.
+## Scope And Execution
 
-The main agent owns scope, staging authorization, sandbox fallback, and post-commit review. Use `commit-specialist` for substantial staged-content review, rough or missing messages, or an explicitly requested independent check. For a small, verified agent-owned change with a complete message and no unrelated staged files, the main agent may run the same checks and commit directly; do not delegate merely to repeat work already completed. If delegation is unavailable, follow the same workflow locally.
+1. Determine message-only versus commit execution from the request and standing authorization. A message-only request writes nothing and may proceed on any branch.
+2. Before staging or committing, run `git branch --show-current`. Stop on the default branch or an empty result (detached HEAD), as required by the Git workflow contract.
+3. The main agent checks filenames/status and establishes the approved scope. Stage only verified agent-owned changes under standing authorization or paths the user authorized. Preserve unrelated staged and unstaged work; stop if the commit boundary cannot be established safely.
+4. For an authorized submodule change, confirm its `HEAD` is committed, stage it in the superproject with `git add -- <submodule-path>`, and record the staged gitlink. A delegate verifies that gitlink and must not commit inside a submodule. An uncommitted submodule or unexpected gitlink delta returns to the main agent.
+5. Apply `AGENTS.md`'s delegation principles. Use a built-in general-purpose subagent with Luna for substantial diff reading or repetitive, straightforward hook recovery; small, already-understood commits can run directly. Give the delegate this skill, the task intent, repository path, exact staged/staging and editable paths, acceptance criteria, verification, supplied message or drafting request, gitlink evidence, and explicit message-only or commit authorization. Keep one writer on those paths and the Git index.
+6. If intent is rough or unknown, the executor inspects only the approved diff and drafts the message. With a complete supplied message and understood scope, preserve the message and skip repeated diff reading unless the main agent explicitly requests review for a concrete concern. A delegate does not add review on its own; changed content still needs inspection during recovery.
+7. Return a message-only result without committing. Otherwise execute the authorized commit with normal hooks and the recovery limits below.
 
-## Branch Precondition
+## Commit Message
 
-Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
+- Write English Conventional Commits: `<type>[optional scope]: <description>`.
+- Use an imperative, lowercase description without a final period; keep the subject under 50 characters when practical.
+- Add a body explaining why and how only when useful; separate it from the subject with a blank line.
 
-## Workflow
+## Hook Recovery And Handoff
 
-1. Determine message-only versus commit execution from the request and standing authorization; ask only if that intent remains ambiguous.
-2. Inspect staged scope at filename/status level only, such as with `git status --short` or `git diff --cached --name-status`.
-3. If nothing is staged, inspect unstaged filenames/status only. Stage automatically when the operating contract authorizes a verified agent-owned commit or the user explicitly requested staging; otherwise ask first.
-4. Exclude forbidden or unrelated unstaged paths. If the index already contains unrelated changes, preserve it and resolve the commit boundary before execution; ask only when ownership cannot be established from the session.
-5. When the user explicitly authorizes commit execution or autonomous staging, identify intended submodule paths. Confirm each submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and record its staged gitlink state. Do not stage a submodule without that authorization.
-6. If delegating, select and state the delegation mode using Mode Selection below. Do not automatically escalate to diff review merely because review could provide extra confidence: use **accept supplied message**, **review supplied message**, or **complete rough or missing message** according to what the main agent actually knows and requests. For direct execution, the main agent owns the equivalent scope checks, bounded recovery, and commit.
-    - **Direct path:** Execute the authorized commit and apply bounded Commit Failure Recovery if it fails. For message-only requests, return the message without committing. Skip steps 7-11 and proceed to step 12 after a commit; permission failures require the main agent's normal authorized escalation, not environment workarounds.
-    - **Delegated path:** Follow steps 7-11 below.
-7. When delegating, send one review objective with explicit paths, acceptance criteria, the user's intent, filename-level staged scope, delegation mode, any supplied commit message, and every staged submodule gitlink state to `commit-specialist`.
-8. The specialist verifies staged filenames and each handed-off gitlink, then follows only the selected mode's diff policy and prepares or accepts an English Conventional Commit message. It must not commit inside a submodule or broaden the approved scope.
-9. If the user requested only a message, return it without committing. If a commit is authorized, execute `git commit` with the approved message. Apply Commit Failure Recovery below only on failure.
-10. If failure recovery or commit execution fails because the sandbox cannot write `.git/index.lock`, the user-level `uv` cache, a tool cache, or another permission-constrained path, the specialist must immediately return the exact error to the main agent. It must not retry that sandbox-failed step, relocate or rebuild caches, change ACLs, alter cache-related environment variables, bypass hooks, or attempt another environment workaround.
-11. The main agent decides whether the reported error is a sandbox handoff case. If so, it resumes the same verification or commit step once in its authorized execution context without duplicating the specialist's completed detailed review.
-12. After a successful commit, the main agent runs the Post-Commit Review because only it has the full session context.
+- Permit up to three simple fix-and-retry cycles for actionable hook failures within explicitly editable paths. Inspect each resulting diff, re-stage only approved paths, and rerun the normal commit. Stop when a failure repeats without progress or the budget is exhausted.
+- Fix formatting, imports, and clear local typing mistakes while preserving behavior. Do not weaken checks, add blanket `Any` or suppression directives, change dependencies, or expand scope to make a commit pass. Ambiguous typing, design changes, secrets, or broader failures return to the main agent with evidence.
+- A sandbox or permission failure is an immediate handoff, not a recovery cycle. Return the exact error, attempted step, affected paths, and current state; do not retry, relocate caches, change environment variables or ACLs, seek escalation, or bypass hooks. The main agent may resume the blocked step through its normal authorized execution mechanism without repeating completed diff review.
+- Never amend without explicit authorization, include secrets, or stage unrelated work. Never bypass hooks without explicit user authorization.
 
-## Why Commit Has A Main-Agent Fallback
+## Result
 
-On Codex Desktop for Windows, delegated agents can edit workspace files but may be unable to create `.git/index.lock`; their user-level `uv` cache may also be read-only. These restrictions can change as Codex sandbox behavior evolves, so they are not grounds for permanently preventing delegated commit execution.
-
-In the delegated path, the specialist owns the selected review and commit work. A permission or sandbox failure is a handoff signal: the specialist reports it without changing caches or permissions, and the main agent resumes the blocked step in its authorized context. Direct execution follows the same scope and verification requirements without this handoff.
-
-## Commit Message Standard
-
-- Use English only.
-- Use Conventional Commits: `<type>[optional scope]: <description>`.
-- Use imperative mood.
-- Start the description with lowercase.
-- Do not end the subject with a period.
-- Keep the subject under 50 characters when practical.
-- Use the body to explain why and how for complex changes.
-
-## Safety
-
-- Never stage or commit secrets.
-- Respect dirty worktrees; do not revert user changes.
-- Do not bypass hooks unless the user explicitly authorizes it.
-- When delegating, do not duplicate the specialist's completed staged-content review unless files changed or unresolved evidence warrants it.
-
-## Mode Selection
-
-1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
-2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
-3. **Exact intent in a clean, well-understood scope:** Use **accept supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames, then focuses on commit execution and bounded failure recovery.
-4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and then executes the commit with bounded failure recovery. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
-
-## Commit Failure Recovery
-
-The specialist may fix one simple, directly actionable commit failure, inspect the resulting diff, re-stage only the approved paths, and retry the commit once. Sandbox or permission failures are excluded from recovery and must be handed off immediately under the workflow above. For any failure requiring non-trivial investigation, broader changes, or unclear ownership, stop and report the error, attempted fix, affected paths, and required user decision. Never bypass hooks without explicit authorization.
-
-## Post-Commit Review
-
-After a successful commit:
-
-1. Verify the committed scope and remaining worktree status, then report the commit hash and checks. Include reusable workflow corrections in the verified commit before execution when possible.
-2. Apply the standing workflow-improvement authorization in `AGENTS.md` to concrete reusable findings; verify and commit any necessary follow-up, then report it.
-3. Put required repository guidance in checked-in files. Writing native memory needs no prior approval; report afterwards when stored content changes future behavior.
-4. Do not preserve commit narration, duplicate plan content, or transient failures as durable knowledge.
+The executor returns the commit hash or drafted message, committed/changed paths, hook results, retry count, and any blocker; keep full logs and diffs out of the main context unless needed to resolve a problem. The main agent verifies the committed filenames and remaining status, reports the result, and owns any follow-up workflow improvements under `AGENTS.md`. Re-read detailed content only when changes or unresolved evidence warrants it. Store required guidance in checked-in files rather than commit narration in memory.

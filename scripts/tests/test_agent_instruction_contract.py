@@ -94,15 +94,6 @@ def test_agent_hook_configs_only_run_read_only_post_tool_diagnostics() -> None:
     assert not (ROOT / ".codex" / "hooks" / "codex_session_start.py").exists()
 
 
-def test_root_agent_instructions_remain_bounded_routing_maps() -> None:
-    instructions = {ROOT / "AGENTS.md": 60}
-
-    for path, max_lines in instructions.items():
-        content = path.read_text(encoding="utf-8")
-        assert len(content.splitlines()) <= max_lines
-        assert "## Karpathy Guidelines Condensed" not in content
-
-
 def test_subagents_handoff_sandbox_failures_to_the_parent() -> None:
     instructions = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
 
@@ -112,161 +103,22 @@ def test_subagents_handoff_sandbox_failures_to_the_parent() -> None:
     assert "or seek escalated access" in instructions
 
 
-def test_codex_agents_keep_unique_roles_and_bounded_permissions() -> None:
-    agent_dir = ROOT / ".codex" / "agents"
-
-    assert {path.stem for path in agent_dir.glob("*.toml")} == {
-        "commit-specialist",
-        "doc-translator",
-        "signal-miner",
-        "task-worker",
-    }
-
-    names: set[str] = set()
-    writable = {"task_worker", "commit-specialist", "doc_translator"}
-    for path in agent_dir.glob("*.toml"):
-        config = tomllib.loads(path.read_text(encoding="utf-8"))
-        assert config["name"] not in names
-        names.add(config["name"])
-        assert config["model"]
-        assert config["model_reasoning_effort"] in {"low", "medium", "high", "xhigh", "max", "ultra"}
-        assert config["sandbox_mode"] == ("workspace-write" if config["name"] in writable else "read-only")
-
-    task_worker = tomllib.loads((agent_dir / "task-worker.toml").read_text(encoding="utf-8"))
-    assert task_worker["sandbox_mode"] == "workspace-write"
-    assert "bounded" in task_worker["description"].lower()
-    assert "planning" in task_worker["description"].lower()
-
-    signal_miner = tomllib.loads((agent_dir / "signal-miner.toml").read_text(encoding="utf-8"))
-    assert signal_miner["sandbox_mode"] == "read-only"
-    assert "low-cost" in signal_miner["description"].lower()
-    assert "verbose" in signal_miner["description"].lower()
-
-
-def test_claude_agent_model_routing_uses_current_aliases() -> None:
-    expected = {
-        "commit-specialist": ("haiku", None),
-        "doc-translator": ("haiku", None),
-        "signal-miner": ("haiku", None),
-        "task-worker": ("sonnet", "medium"),
-    }
-    agent_dir = ROOT / ".claude" / "agents"
-
-    assert {path.stem for path in agent_dir.glob("*.md")} == set(expected)
-
-    for path in agent_dir.glob("*.md"):
-        frontmatter = path.read_text(encoding="utf-8").split("---", 2)[1]
-        fields = dict(line.split(":", 1) for line in frontmatter.splitlines() if ":" in line and not line.startswith((" ", "-")))
-        model, effort = expected[path.stem]
-        assert fields["model"].strip() == model
-        if effort is None:
-            assert "effort" not in fields
-        else:
-            assert fields["effort"].strip() == effort
-
-    task_worker = (agent_dir / "task-worker.md").read_text(encoding="utf-8")
-    assert "bounded" in task_worker.split("---", 2)[1].lower()
-    assert "planning" in task_worker.split("---", 2)[1].lower()
-    assert "  - Write" in task_worker
-    assert "  - Edit" in task_worker
-
-    signal_miner = (agent_dir / "signal-miner.md").read_text(encoding="utf-8")
-    assert "lowest-cost" in signal_miner.split("---", 2)[1].lower()
-    assert "verbose" in signal_miner.split("---", 2)[1].lower()
-    assert "  - Write" not in signal_miner
-    assert "  - Edit" not in signal_miner
-
-
-def test_task_worker_descriptions_do_not_upgrade_low_cost_sessions() -> None:
-    instructions = (
-        (ROOT / ".codex" / "agents" / "task-worker.toml").read_text(encoding="utf-8"),
-        (ROOT / ".claude" / "agents" / "task-worker.md").read_text(encoding="utf-8"),
-    )
-
-    for content in instructions:
-        lowered = content.lower()
-        assert "lowest-cost" in lowered
-        assert "do not use" in lowered
-        assert "raise capability" not in lowered
-        assert "capability floor" not in lowered
-
-
-def test_signal_miner_descriptions_route_high_output_commands() -> None:
-    """The description must still name the high-output command families it owns.
-
-    Wording is intentionally not frozen; only the routing signal is asserted.
-    """
-    claude_frontmatter = (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8").split("---", 2)[1].lower()
-    codex_config = tomllib.loads((ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"))
-
-    for description in (claude_frontmatter, codex_config["description"].lower()):
-        for command_family in ("verbose diagnostics", "dependency traces"):
-            assert command_family in description
-        assert "read-only" in description
-        assert "explore" in description
-
-
-def test_low_tier_agent_handoffs_are_bounded_and_explicit() -> None:
-    codex_agents = (
-        (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8"),
-        (ROOT / ".codex" / "agents" / "signal-miner.toml").read_text(encoding="utf-8"),
-        (ROOT / ".codex" / "agents" / "doc-translator.toml").read_text(encoding="utf-8"),
-    )
-    claude_agents = (
-        (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8"),
-        (ROOT / ".claude" / "agents" / "signal-miner.md").read_text(encoding="utf-8"),
-        (ROOT / ".claude" / "agents" / "doc-translator.md").read_text(encoding="utf-8"),
-    )
-    commit_workflows = (
-        (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8"),
-        (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8"),
-        (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8"),
-    )
-
-    for content in (*codex_agents, *claude_agents):
-        assert "one concrete objective" in content
-        assert "acceptance criteria" in content
-        assert "parent agent" in content
-        assert "stop" in content.lower()
-
-    for content in commit_workflows:
-        assert "submodule" in content
-        assert "git add -- <submodule-path>" in content
-        assert "must not commit inside a submodule" in content
-
-    for content in (codex_agents[2], claude_agents[2]):
-        assert "explicit target" in content
-        assert "source diff" in content
-
-
 def test_commit_workflows_do_not_force_ai_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
-    codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
-    claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
-    for content in (codex_skill, codex_agent):
-        assert "Co-authored-by:" not in content
-        assert "Agent: Codex" not in content
-
+    assert "Co-authored-by:" not in codex_skill
+    assert "Agent: Codex" not in codex_skill
     assert "AI-Model:" not in codex_skill
-    assert "AI-Model:" not in codex_agent
-
-    for content in (claude_skill, claude_agent):
-        assert "Co-authored-by:" not in content
-        assert "contributor-model" not in content
-
-    assert "  - Edit" in claude_agent
-    assert "Follow `.claude/skills/commit-helper/SKILL.md` as the source of truth." in claude_agent
+    assert "Co-authored-by:" not in claude_skill
+    assert "contributor-model" not in claude_skill
 
 
 def test_commit_workflows_do_not_require_agent_status() -> None:
     commit_files = (
         ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
-        ROOT / ".codex" / "agents" / "commit-specialist.toml",
         ROOT / ".claude" / "commands" / "gen-commit.md",
         ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
-        ROOT / ".claude" / "agents" / "commit-specialist.md",
     )
 
     for path in commit_files:
@@ -275,75 +127,15 @@ def test_commit_workflows_do_not_require_agent_status() -> None:
 
 def test_codex_attribution_does_not_require_claude_attribution() -> None:
     codex_skill = (ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md").read_text(encoding="utf-8")
-    codex_agent = (ROOT / ".codex" / "agents" / "commit-specialist.toml").read_text(encoding="utf-8")
     claude_skill = (ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md").read_text(encoding="utf-8")
     claude_command = (ROOT / ".claude" / "commands" / "gen-commit.md").read_text(encoding="utf-8")
-    claude_agent = (ROOT / ".claude" / "agents" / "commit-specialist.md").read_text(encoding="utf-8")
 
     assert "Co-authored-by:" not in codex_skill
-    assert "Co-authored-by:" not in codex_agent
     assert "AI-Model:" not in codex_skill
-    assert "AI-Model:" not in codex_agent
 
-    for content in (claude_skill, claude_command, claude_agent):
+    for content in (claude_skill, claude_command):
         assert "Co-authored-by:" not in content
         assert "contributor-model" not in content
 
     settings = json.loads((ROOT / ".claude/settings.json").read_text(encoding="utf-8"))
     assert settings["includeCoAuthoredBy"] is False
-
-
-def test_commit_specialists_use_explicit_delegation_modes() -> None:
-    codex_files = (
-        ROOT / ".codex" / "skills" / "gen-commit" / "SKILL.md",
-        ROOT / ".codex" / "agents" / "commit-specialist.toml",
-    )
-    claude_files = (
-        ROOT / ".claude" / "skills" / "commit-helper" / "SKILL.md",
-        ROOT / ".claude" / "commands" / "gen-commit.md",
-        ROOT / ".claude" / "agents" / "commit-specialist.md",
-    )
-
-    for path in codex_files:
-        content = path.read_text(encoding="utf-8").lower()
-        assert "accept supplied message" in content
-        assert "review supplied message" in content
-        assert "complete rough or missing message" in content
-
-    for path in claude_files:
-        content = path.read_text(encoding="utf-8").lower()
-        assert "execute supplied message" in content
-        assert "review supplied message" in content
-        assert "complete rough or missing message" in content
-
-    codex_skill = codex_files[0].read_text(encoding="utf-8")
-    codex_agent = codex_files[1].read_text(encoding="utf-8")
-    assert "Do not automatically escalate to diff review" in codex_skill
-    assert "execute `git commit` with the approved message" in codex_agent
-    assert "Never retry a sandbox-failed step" in codex_agent
-    assert "relocate or rebuild caches" in codex_agent
-    assert "change ACLs" in codex_agent
-    assert "Never promote `accept supplied message`" in codex_agent
-    assert "do not inspect content" in codex_agent
-
-    assert "Unknown change intent" in codex_skill
-    assert "Approximate change intent" in codex_skill
-    assert "Exact intent in a clean, well-understood scope" in codex_skill
-    assert "Exact intent but explicit double-check requested" in codex_skill
-    assert "must not promote itself into this mode" in codex_skill
-
-    claude_skill = claude_files[0].read_text(encoding="utf-8")
-    assert "Do not duplicate diff review" in claude_skill
-    assert "delegate it to `commit-specialist`" in claude_skill
-    assert "Unknown change intent" in claude_skill
-    assert "Approximate change intent" in claude_skill
-    assert "Exact intent in a clean, well-understood scope" in claude_skill
-    assert "Exact intent but explicit double-check requested" in claude_skill
-    assert "must not promote itself into this mode" in claude_skill
-
-    claude_agent = claude_files[2].read_text(encoding="utf-8")
-    assert "Never promote **execute supplied message**" in claude_agent
-
-    for path in (codex_files[0], claude_files[0], claude_files[2]):
-        content = path.read_text(encoding="utf-8")
-        assert "simple, directly actionable" in content

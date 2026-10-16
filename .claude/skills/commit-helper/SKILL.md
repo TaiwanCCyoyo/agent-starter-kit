@@ -1,58 +1,35 @@
 ---
 name: commit-helper
-description: Prepare scoped Git commits and Conventional Commit messages with specialist delegation. Load before staging, drafting a commit message, running git commit, or delegating to commit-specialist; applies to commit requests and automatic agent-owned commits.
+description: Prepare scoped local Git commits and Conventional Commit messages. Load before staging, drafting a commit message, or running git commit; delegate substantial diff reading and simple hook recovery under the shared delegation principles.
 ---
 
-# Skill: Commit-Helper
+# Commit Helper
 
-This skill owns local commits. The main agent owns any subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
+This skill owns local commits. The main agent owns subsequent PR delivery under `docs/en/git-workflow.md`; a commit request alone does not authorize publication or merge.
 
-This skill is the source of truth for high-quality commits in this project. All Claude commit generation workflows must refer to this helper.
+## Scope And Execution
 
-## Commit Preflight
+1. Determine message-only versus commit execution from the request and standing authorization. A message-only request writes nothing and may proceed on any branch.
+2. Before staging or committing, run `git branch --show-current`. Stop on the default branch or an empty result (detached HEAD), as required by the Git workflow contract.
+3. The main agent checks filenames/status and establishes the approved scope. Stage only verified agent-owned changes under standing authorization or paths the user authorized. Preserve unrelated staged and unstaged work; stop if the commit boundary cannot be established safely.
+4. For an authorized submodule change, confirm its `HEAD` is committed, stage it in the superproject with `git add -- <submodule-path>`, and record the staged gitlink. A delegate verifies that gitlink and must not commit inside a submodule. An uncommitted submodule or unexpected gitlink delta returns to the main agent.
+5. Apply `AGENTS.md`'s delegation principles. Use a built-in general-purpose subagent with the lowest-cost suitable available model for substantial diff reading or repetitive, straightforward hook recovery; small, already-understood commits can run directly. Give the delegate this skill, the task intent, repository path, exact staged/staging and editable paths, acceptance criteria, verification, supplied message or drafting request, gitlink evidence, and explicit message-only or commit authorization. Keep one writer on those paths and the Git index.
+6. If intent is rough or unknown, the executor inspects only the approved diff and drafts the message. With a complete supplied message and understood scope, preserve the message and skip repeated diff reading unless the main agent explicitly requests review for a concrete concern. A delegate does not add review on its own; changed content still needs inspection during recovery.
+7. Return a message-only result without committing. Otherwise execute the authorized commit with normal hooks and the recovery limits below.
 
-1. **Branch Verification**: Establish the request's intent first. A message-only request writes nothing and may proceed on any branch. Before staging or committing, run `git branch --show-current`: `git status --short` does not report the branch and no session hook supplies it, so this is the only step that establishes it. Stop and report if the output names the default branch, and stop and report if the output is empty, which means a detached HEAD and a commit that would belong to no branch. `docs/en/git-workflow.md` forbids committing on either, and standing commit authorization does not override it.
-2. **Scope Verification**: The main agent performs filename-level staged-scope preflight only.
-3. **Submodule Handoff**: When commit execution or autonomous staging is explicitly authorized, confirm each intended submodule has a committed `HEAD`, run `git add -- <submodule-path>` in the superproject, and give its staged gitlink state to `commit-specialist`. The specialist verifies it and must not commit inside a submodule.
+## Commit Message
 
-## Commit Message Standard
+- Write English Conventional Commits: `<type>[optional scope]: <description>`.
+- Use an imperative, lowercase description without a final period; keep the subject under 50 characters when practical.
+- Add a body explaining why and how only when useful; separate it from the subject with a blank line.
 
-1. **Language**: English only for the subject and body.
-2. **Format**: `<type>[optional scope]: <description>`
-3. **Subject Line**:
-    - Use imperative mood, such as `add` instead of `added`.
-    - Start with lowercase.
-    - Do not end with a period.
-    - Keep under 50 characters when practical.
-4. **Body**:
-    - Use for complex changes to explain why and how.
-    - Use a simple bullet list when helpful.
-    - Wrap each line at 72 characters.
-    - Leave one blank line between subject and body.
+## Hook Recovery And Handoff
 
-## Mode Selection
+- Permit up to three simple fix-and-retry cycles for actionable hook failures within explicitly editable paths. Inspect each resulting diff, re-stage only approved paths, and rerun the normal commit. Stop when a failure repeats without progress or the budget is exhausted.
+- Fix formatting, imports, and clear local typing mistakes while preserving behavior. Do not weaken checks, add blanket `Any` or suppression directives, change dependencies, or expand scope to make a commit pass. Ambiguous typing, design changes, secrets, or broader failures return to the main agent with evidence.
+- A sandbox or permission failure is an immediate handoff, not a recovery cycle. Return the exact error, attempted step, affected paths, and current state; do not retry, relocate caches, change environment variables or ACLs, seek escalation, or bypass hooks. The main agent may resume the blocked step through its normal authorized execution mechanism without repeating completed diff review.
+- Never amend without explicit authorization, include secrets, or stage unrelated work. Never bypass hooks without explicit user authorization.
 
-The main agent must select one mode from what it actually knows and requests. Do not automatically escalate to diff review merely because review could provide extra confidence. Do not duplicate diff review in the main agent; when a mode requires it, delegate it to `commit-specialist`.
+## Result
 
-1. **Unknown change intent:** Use **complete rough or missing message**. The specialist inspects the staged diff and derives the message.
-2. **Approximate change intent:** Use **complete rough or missing message** with the rough intent. The specialist inspects the staged diff, checks the rough intent, and writes the complete message.
-3. **Exact intent in a clean, well-understood scope:** Use **execute supplied message**. The specialist must not inspect the staged diff or revise the complete supplied message; it verifies filenames and focuses on commit execution and bounded failure recovery.
-4. **Exact intent but explicit double-check requested:** Use **review supplied message**. The specialist inspects only the approved staged diff, checks it against the supplied message, and then executes the commit with bounded failure recovery. Use this mode only when the main agent explicitly requests the extra review because of a dirty or shared worktree, unexplained state, or another concrete concern. The specialist must not promote itself into this mode merely because additional review might be useful.
-
-For message-only requests, return the message without committing. For authorized execution, run the normal commit command. If it fails, fix only a simple, directly actionable issue, inspect the resulting diff, re-stage only approved files, and retry the commit once. For any failure requiring non-trivial investigation, a broader change, or an unclear fix, stop and return the error, attempted fix, affected paths, and the parent-agent decision required. Never bypass hooks without explicit authorization.
-
-## Interaction And Summary
-
-- The commit message itself is always in English.
-- The summary provided to the user must be in Traditional Chinese (zh-TW).
-- The main agent should not inspect staged file contents in this workflow. It confirms intent, checks staged filenames/status for obvious forbidden paths, and delegates one concrete objective with explicit paths, requested output, acceptance criteria, the delegation mode, any supplied commit message, and staged submodule gitlink state to `commit-specialist`.
-- `commit-specialist` never stages a file on its own initiative. When any target file is not yet staged, the delegation must explicitly list every file to stage by name; omitting this instruction leaves those files uncommitted.
-- For an uncommitted submodule, unexpected gitlink delta, or unresolved commit failure, `commit-specialist` stops and returns the failed step, evidence, and the precise parent-agent decision required.
-
-## Post-Commit Memory Check
-
-This check is the **main agent's** responsibility, run after `commit-specialist` reports a successful commit. The subagent only sees the delegated staged scope, not the full session, so it cannot judge these criteria itself:
-
-1. Review whether the session produced durable project facts, user preferences, decisions, lessons, environment constraints, recurring problems, or verified resolutions.
-2. Route durable knowledge through Claude Code's built-in memory (`AGENTS.md` §Memory) only when it will help future sessions; do not save commit narration or duplicate the plan.
-3. Apply `AGENTS.md` §Skill Authoring to reusable findings: create or improve the skill under its existing authorization, verify and commit the change, then report it to the user.
+The executor returns the commit hash or drafted message, committed/changed paths, hook results, retry count, and any blocker; keep full logs and diffs out of the main context unless needed to resolve a problem. The main agent verifies the committed filenames and remaining status, reports the result, and owns any follow-up workflow improvements under `AGENTS.md`. Re-read detailed content only when changes or unresolved evidence warrants it. Store required guidance in checked-in files rather than commit narration in memory.

@@ -12,35 +12,34 @@
 
 `AGENTS.md` 刻意保持精簡。一項規則只有在無法由其他層級陳述或執行時，才值得列在其中。所有其他指引都存放在實際執行的地方：
 
-| 層級                                | 負責範圍                                               |
-| :---------------------------------- | :----------------------------------------------------- |
-| `AGENTS.md`                         | 授權、溝通偏好、專案慣例、審查嚴重性與記憶邊界         |
-| `.pre-commit-config.yaml`           | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查 |
-| `.github/workflows/ci.yml`          | repository 層級的合併前檢查閘道                        |
-| `.claude/rules/`                    | 路徑限定的程式碼規範，觸發時才載入                     |
-| `.claude/skills/`, `.codex/skills/` | 任務類別工作流程，由各自的 `description` 觸發載入      |
-| `.claude/agents/`, `.codex/agents/` | Subagent 角色與路由，由各自的 `description` 選定       |
+| 層級                                | 負責範圍                                                 |
+| :---------------------------------- | :------------------------------------------------------- |
+| `AGENTS.md`                         | 授權、溝通偏好、專案慣例、審查嚴重性、委派原則與記憶邊界 |
+| `.pre-commit-config.yaml`           | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查   |
+| `.github/workflows/ci.yml`          | repository 層級的合併前檢查閘道                          |
+| `.claude/rules/`                    | 路徑限定的程式碼規範，觸發時才載入                       |
+| `.claude/skills/`, `.codex/skills/` | 任務類別工作流程，由各自的 `description` 觸發載入        |
 
 有兩點值得直言：
 
-- **`AGENTS.md` 不列舉個別 skill 或 subagent。** 路由應由各元件的 `description` 指定，檢索已在該處進行。在契約中列舉名稱會重複且容易過時。
+- **`AGENTS.md` 不列舉個別 skill 或 subagent。** Skills 以自己的 `description` 提供檢索資訊；內建 subagents 則遵循共用委派原則。在契約中列舉個別元件名稱會重複且容易過時。
 - **`AGENTS.md` 不陳述模型已知的事項。** 通用工程素養、讀程式碼後再改動、不 commit secrets 等原則被省略了，因為模型自帶前兩項，`detect-secrets` 強制執行第三項。
 
 結果就是一份簡潔的契約，只在專案實際約束改變時才需要更新。
 
 ## What to copy
 
-| 路徑                      | 用途                                                              |
-| :------------------------ | :---------------------------------------------------------------- |
-| `AGENTS.md`               | 所有 agent 的共用根目錄操作契約                                   |
-| `.pre-commit-config.yaml` | Repository 驗證 hooks                                             |
-| `scripts/`                | 所有 agent 共用的 shell 中立衛生與格式檢查                        |
-| `.claude/`                | Claude Code 設定、hooks、slash commands、subagents、skills 與規則 |
-| `.codex/`                 | Codex 組態、hooks、command-like skills 與專職 agents              |
-| `.github/workflows/`      | 執行與 agent 本地相同檢查的 CI                                    |
-| `docs/en/git-workflow.md` | Git 與交付授權契約；保留路徑，重置狀態                            |
-| `docs/en/pr-setup.md`     | 擁有者設定指南，用於啟用 PR 交付                                  |
-| `.vscode/`                | 檔案衛生與 Ruff 工作流程對齊的編輯器預設值                        |
+| 路徑                      | 用途                                                   |
+| :------------------------ | :----------------------------------------------------- |
+| `AGENTS.md`               | 所有 agent 的共用根目錄操作契約                        |
+| `.pre-commit-config.yaml` | Repository 驗證 hooks                                  |
+| `scripts/`                | 所有 agent 共用的 shell 中立衛生與格式檢查             |
+| `.claude/`                | Claude Code 設定、hooks、slash commands、skills 與規則 |
+| `.codex/`                 | Codex 組態、hooks、command-like skills                 |
+| `.github/workflows/`      | 執行與 agent 本地相同檢查的 CI                         |
+| `docs/en/git-workflow.md` | Git 與交付授權契約；保留路徑，重置狀態                 |
+| `docs/en/pr-setup.md`     | 擁有者設定指南，用於啟用 PR 交付                       |
+| `.vscode/`                | 檔案衛生與 Ruff 工作流程對齊的編輯器預設值             |
 
 只複製你使用的 agent 目錄。兩個 agent 都不需要另一個的層級，但下方的驗證指令與 `scripts/tests/` 裡的契約測試會同時讀取兩邊：請把未複製那一層的斷言與測試路徑一併移除，否則會因為目錄不存在而失敗。
 
@@ -100,8 +99,8 @@ Codex 此處不提供 repository 本地權限規則；它使用自己的核准�
 
 從你使用的 agent 對應參考文件開始。不必設定兩個都。
 
-- **[Claude Code Components](claude-components.md)** — `.claude/` 中的 subagents、slash commands、skills、hooks 與路徑限定規則。
-- **[Codex Components](codex-components.md)** — `.codex/` 中的專職 agents、command-like skills、hooks 與模型路由。
+- **[Claude Code Components](claude-components.md)** — 內建委派、slash commands、skills、hooks 與路徑限定規則。
+- **[Codex Components](codex-components.md)** — 內建委派、command-like skills、hooks 與模型路由。
 - **[Git Workflow Contract](../en/git-workflow.md)** — 任務隔離、交付授權與審查和合併邊界。
 - **[PR Review](pr-review.md)** — 此 repository 自己託管的審查與合併條件如何設定。
 
@@ -118,7 +117,7 @@ Codex 此處不提供 repository 本地權限規則；它使用自己的核准�
 
 ## Design influences
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 專職 agents 與程式碼規則改編自 ECC v2.0.0-rc.1。大多數開發 slash commands 已陸續退役，改採原生 Plan Mode 與 autoloaded project skills。
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — 工作流程指引與程式碼規則改編自 ECC v2.0.0-rc.1。自訂 agent 角色與多數開發 slash commands 已由內建委派、原生 Plan Mode 與專案 skills 取代。
 
 ---
 
