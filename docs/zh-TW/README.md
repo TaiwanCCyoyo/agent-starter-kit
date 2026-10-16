@@ -59,6 +59,8 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 只列出你保留的 hook 目錄。`scripts/tests/` 是本範本自己的契約測試，會斷言兩個 agent 層級；請依你的專案實際擁有的層級修剪。
 
+一起收集測試的 hook 目錄之間，測試模組檔名須保持唯一；例如使用 `test_codex_...py`、`test_claude_...py` 等 agent 前綴，可避免 pytest 的 import-file-mismatch 錯誤。
+
 ## Adapting it to your project
 
 ### 1. Reset delivery authorization
