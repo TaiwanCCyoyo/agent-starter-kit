@@ -63,12 +63,12 @@ Claude 在 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode
 
 | Command          | 替代方案                                                              |
 | ---------------- | --------------------------------------------------------------------- |
-| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill               |
+| `/build-fix`     | 原生 evidence-driven debugging                                        |
 | `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ hosted Codex PR review |
 | `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + 內建 delegation         |
-| `/python-review` | `python-testing` skill 與內建 `/code-review`                          |
+| `/python-review` | 內建 `/code-review` 與 repository checks                              |
 | `/security-scan` | 內建 `/security-review` + `detect-secrets` gate                       |
-| `/test-coverage` | `python-testing` skill（`pytest --cov`）                              |
+| `/test-coverage` | 標準 pytest-cov 用法                                                  |
 
 ### 未從 ECC 移植（含原因）
 
@@ -96,12 +96,6 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | ------------------------ | ------------------------------------------------- |
 | `commit-helper`          | Conventional Commits 格式、限定範圍的 commit 執行 |
 | `dependabot-remediation` | 唯讀警示擷取、最小安全升級與完成證據              |
-
-### 開發（從 ECC v2.0.0-rc.1 移植）
-
-| Skill            | 用途                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `python-testing` | Repository-specific 行為測試、hook JSON fixtures 與 Windows path 行為。Test-first 決策使用 Claude 原生能力。 |
 
 ### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
 
@@ -171,9 +165,9 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                      | 備註                                   |
-| --------------- | --------------------- | ------------------------- | -------------------------------------- |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging 與以 log 輔助除錯、pytest 指引 |
+| 規則集          | 路徑                  | 來源                      | 備註                           |
+| --------------- | --------------------- | ------------------------- | ------------------------------ |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Script logging，方便未來 debug |
 
 詳細流程放在 skills；共用委派原則放在 `AGENTS.md`。
 
@@ -201,7 +195,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `rules/common/coding-style`               | 通用工程常識，與 CLAUDE.md `Engineering Discipline` 重複；結構性 review heuristic 已移至 `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | 與 CLAUDE.md `Engineering Discipline` 逐字重複                                                                         |
 | `development-workflow` §Pre-Review Checks | 通用 pre-merge 常識，由 CI 與原生 GitHub 操作負責                                                                      |
-| `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例，由 `skill: python-testing` 擁有                                                            |
+| `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例已移除，由原生能力處理                                                                       |
 | `code-review` §Security Review Triggers   | 純指標區塊；reviewer routing 清單已連結 `security.md`                                                                  |
 
 ### 未從 ECC 移植（含原因）

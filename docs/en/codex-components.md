@@ -30,7 +30,6 @@ For document translation or synchronization, the main agent selects the authorit
 | Skill                | Purpose                                                                                                 |
 | :------------------- | :------------------------------------------------------------------------------------------------------ |
 | `python-development` | Python logging and log-driven debugging                                                                 |
-| `python-testing`     | Targeted behavioral tests, optional coverage, hook fixtures, and Windows-path requirements              |
 | `gen-commit`         | Scoped local commits, built-in delegation for substantial diff reading and hook recovery, and reporting |
 
 ## Claude Capability Decisions
@@ -42,9 +41,9 @@ For document translation or synchronization, the main agent selects the authorit
 | `/feature-dev`                                                  | Native replacement                   | Brainstorming, Plan Mode, test-first development, verification, and review already form the workflow.                                                                                                    |
 | `/build-fix`                                                    | Native replacement                   | Evidence-driven debugging plus repository verification covers incremental diagnosis and repair.                                                                                                          |
 | `/code-review`                                                  | Native/plugin replacement            | Local review uses the native Codex review stance; PR review uses the GitHub plugin.                                                                                                                      |
-| `/python-review`                                                | Skill replacement                    | `python-testing` provides repository-specific behavioral tests and optional coverage guidance.                                                                                                           |
+| `/python-review`                                                | Native replacement                   | Native Python review and existing repository checks cover this workflow.                                                                                                                                 |
 | `/security-scan`                                                | Agent and gate replacement           | detect-secrets, hooks, pre-commit, and hosted PR review are installed; AgentShield is not.                                                                                                               |
-| `/test-coverage`                                                | Skill replacement                    | Optional coverage is part of `python-testing`; Codex does not need a command wrapper.                                                                                                                    |
+| `/test-coverage`                                                | Native replacement                   | Standard pytest-cov usage needs no dedicated skill or command wrapper.                                                                                                                                   |
 | `github-ops`                                                    | Plugin replacement                   | The GitHub plugin supplies repository, issue, PR, CI, comment, and publishing workflows with current connector semantics.                                                                                |
 | `cost-aware-llm-pipeline`                                       | Not ported                           | It is application-domain guidance with provider-specific model names and volatile pricing, not a Codex workflow. Create a shared, vendor-verified skill when this repository builds an LLM API pipeline. |
 | `eval-harness`                                                  | Removed/deferred                     | It referenced nonexistent `/eval` commands and lacked a runner, grader implementation, baseline format, Python commands, and CI integration. Restore only after those capabilities exist.                |
@@ -60,9 +59,8 @@ For document translation or synchronization, the main agent selects the authorit
 | Operating contract, scoped changes                                | `AGENTS.md`                                               |
 | Project conventions and tool preferences                          | `AGENTS.md` project conventions                           |
 | Review severity and CRITICAL/HIGH completion policy               | `AGENTS.md` review and security section                   |
-| Risk-based test scope                                             | `AGENTS.md` verification section                          |
+| Verification scope                                                | `AGENTS.md` verification section                          |
 | Python development rules                                          | `python-development`                                      |
-| Repository Python verification                                    | `python-testing`                                          |
 | Planning, TDD, debugging, review, verification, branch completion | Native Codex, project agents, and repository verification |
 
 Shared development behavior now mirrors the Claude common-rule routing layer: plan through Native Plan Mode; test and debug through native workflows, task-specific tests, and project skills; delivery review through the hosted PR integration; prepare PRs through the GitHub plugin when available; and follow the [shared Git workflow contract](git-workflow.md) for delivery and integration authority.

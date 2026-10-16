@@ -63,12 +63,12 @@ Native Git/GitHub operations follow the [shared Git workflow contract](git-workf
 
 | Command          | Replacement                                                                   |
 | ---------------- | ----------------------------------------------------------------------------- |
-| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                     |
+| `/build-fix`     | Native evidence-driven debugging                                              |
 | `/code-review`   | Built-in `/code-review` (incl. `ultra` cloud review) + hosted Codex PR review |
 | `/feature-dev`   | Native Plan Mode + native test-first workflow + built-in delegation           |
-| `/python-review` | `python-testing` skill and built-in `/code-review`                            |
+| `/python-review` | Built-in `/code-review` and repository checks                                 |
 | `/security-scan` | Built-in `/security-review` + `detect-secrets` gate                           |
-| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                       |
+| `/test-coverage` | Standard pytest-cov usage                                                     |
 
 ### Not ported from ECC (with reasons)
 
@@ -96,12 +96,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | ------------------------ | ------------------------------------------------------------------------- |
 | `commit-helper`          | Conventional Commits format, scoped commit execution                      |
 | `dependabot-remediation` | Read-only alert retrieval, minimum-safe upgrades, and completion evidence |
-
-### Development (ported from ECC v2.0.0-rc.1)
-
-| Skill            | Purpose                                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-testing` | Repository-specific behavioral tests, hook JSON fixtures, and Windows path behavior. Test-first decisions use native Claude capabilities. |
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
@@ -171,9 +165,9 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                     | Notes                                                 |
-| --------------- | --------------------- | -------------------------- | ----------------------------------------------------- |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Logging and log-driven debugging, and pytest pointers |
+| Rule set        | Paths                 | Source                     | Notes                               |
+| --------------- | --------------------- | -------------------------- | ----------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Script logging for future debugging |
 
 Detailed procedures live in skills; shared delegation principles live in `AGENTS.md`.
 
@@ -201,7 +195,7 @@ Because every `rules/common/` file matches `paths: "*"`, the set is injected on 
 | `rules/common/coding-style`               | Generic craft guidance duplicated CLAUDE.md `Engineering Discipline`; the structural review heuristic moved to `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | Verbatim duplicate of CLAUDE.md `Engineering Discipline`                                                                                     |
 | `development-workflow` §Pre-Review Checks | Generic pre-merge hygiene; CI and native GitHub operations own it                                                                            |
-| `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples; owned by `skill: python-testing`                                                               |
+| `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples removed; native capabilities cover them                                                         |
 | `code-review` §Security Review Triggers   | Pointer-only section; the reviewer routing list already links `security.md`                                                                  |
 
 ### Not ported from ECC (with reasons)

@@ -49,9 +49,8 @@ These rules govern requested local reviews and hosted pull request reviews. See 
 ## Verification
 
 - Verify what you changed and show the output as evidence; state plainly when verification was skipped or insufficient and what risk remains.
-- Focus local verification on changed behavior. Use normal commit hooks and hosted PR checks without a separate manual pass; investigate their failures when reported.
-- Match coverage to the risk of the change rather than a fixed repository-wide target; do not add tests that only freeze prose, model names, or configuration values.
-- A changed hook or script needs one functional regression test, because these fail silently.
+- Choose verification proportional to the change and its concrete risks; use available evidence and avoid redundant checks.
+- Use normal commit hooks and hosted PR checks without a duplicate manual pass; investigate reported failures.
 
 ## Delegation
 
