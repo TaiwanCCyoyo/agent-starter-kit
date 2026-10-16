@@ -30,7 +30,7 @@ For document translation or synchronization, the main agent selects the authorit
 | Skill                | Purpose                                                                                                 |
 | :------------------- | :------------------------------------------------------------------------------------------------------ |
 | `python-development` | Python logging and log-driven debugging                                                                 |
-| `python-testing`     | Repository test invocation, hook fixtures, and Windows paths when tests are warranted                   |
+| `python-testing`     | Repository test invocation, hook fixtures, and Windows paths                                            |
 | `gen-commit`         | Scoped local commits, built-in delegation for substantial diff reading and hook recovery, and reporting |
 
 ## Claude Capability Decisions

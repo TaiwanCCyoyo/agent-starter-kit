@@ -30,7 +30,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Skill                | 用途                                                                  |
 | :------------------- | :-------------------------------------------------------------------- |
 | `python-development` | Python logging 與以 log 輔助除錯                                      |
-| `python-testing`     | 需要測試時的執行方式、hook fixtures 與 Windows 路徑細節               |
+| `python-testing`     | 測試執行方式、hook fixtures 與 Windows 路徑細節                       |
 | `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報 |
 
 ## Claude 能力取捨

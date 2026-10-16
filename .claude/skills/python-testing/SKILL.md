@@ -1,11 +1,11 @@
 ---
 name: python-testing
-description: Write or run Python tests in this repository with Windows imports, hidden hook test directories, and hook JSON fixtures. Use when tests are warranted or requested, not for every Python file edit or move.
+description: Write or run Python tests in this repository with Windows imports, hidden hook test directories, and hook JSON fixtures.
 ---
 
 # Python Testing
 
-Use this reference when writing or running Python tests. It supplies repository-specific execution and fixture details.
+Repository-specific test execution and fixture reference.
 
 ## Running Tests
 
@@ -15,10 +15,9 @@ Use this reference when writing or running Python tests. It supplies repository-
 
 ## Hook Fixtures
 
-- When entry-point or protocol behavior changes, exercise the real hook with representative JSON stdin and check its response and CLI arguments.
-- Select cases for affected, supported behavior; success, failure, warnings, and malformed input are possibilities, not a mandatory checklist.
-- Exercise Windows paths when path handling is affected. Keep subprocess fixtures independent of a particular shell.
+- Hook fixtures invoke the real entry point with representative JSON stdin and inspect its response and CLI arguments.
+- Windows path fixtures cover both separators; subprocess fixtures remain independent of a particular shell.
 
 ## Coverage
 
-When a coverage report helps assess an identified risk or the user requests it, add `--cov --cov-report=term-missing` to the affected test run. Use it to find meaningful gaps; do not impose a universal percentage or expand to the full suite solely because coverage is enabled.
+The coverage-report options are `--cov --cov-report=term-missing`; append them to the selected pytest command.

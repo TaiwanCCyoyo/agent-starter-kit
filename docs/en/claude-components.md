@@ -99,9 +99,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
-| Skill            | Purpose                                                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `python-testing` | Repository test invocation, hook JSON fixtures, and Windows paths when tests are warranted. `AGENTS.md` owns verification decisions. |
+| Skill            | Purpose                                                            |
+| ---------------- | ------------------------------------------------------------------ |
+| `python-testing` | Repository test invocation, hook JSON fixtures, and Windows paths. |
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
@@ -171,13 +171,13 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                     | Notes                                                    |
-| --------------- | --------------------- | -------------------------- | -------------------------------------------------------- |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Diagnostic logging; test decisions belong to `AGENTS.md` |
+| Rule set        | Paths                 | Source                     | Notes                               |
+| --------------- | --------------------- | -------------------------- | ----------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Script logging for future debugging |
 
 Detailed procedures live in skills; shared delegation principles live in `AGENTS.md`.
 
-The generic `rules/python/testing.md` was removed; `python-testing` retains repository-specific invocation and fixture details for tasks that need tests.
+The generic `rules/python/testing.md` was removed; `python-testing` retains repository-specific invocation and fixture details as a technical reference.
 
 ### Removed (2026-08-23 cleanup — merged into CLAUDE.md)
 
