@@ -1,47 +1,24 @@
 ---
 name: python-testing
-description: Repository-specific Python behavioral test, hook fixture, Windows path, and optional coverage requirements.
-origin: ECC (narrowed — repository-specific verification requirements)
+description: Write or run Python tests in this repository with Windows imports, hidden hook test directories, and hook JSON fixtures. Use when tests are warranted or requested, not for every Python file edit or move.
 ---
 
-# Python Testing — Repository-Specific Requirements
+# Python Testing
 
-This skill contains the verification requirements specific to this repository. Use the native test-first workflow when appropriate.
+Follow `AGENTS.md` for whether tests are needed. This skill supplies repository-specific details after that decision.
 
 ## Running Tests
 
-```bash
-# Complete repository suite — includes shared scripts and all agent hook tests
-uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+- Use `uv run python -m pytest <affected-test-paths>` so the repository root remains importable on Windows.
+- Pass hidden hook test directories explicitly; pytest discovery excludes them. Shared script tests live in `scripts/tests/`, Codex hook tests in `.codex/hooks/tests/`, and Claude hook tests in `.claude/hooks/tests/`.
+- Give hook test files agent-prefixed basenames to avoid module-name collisions when running both agents' suites together.
 
-# Claude hook tests only
-uv run python -m pytest .claude/hooks/tests
+## Hook Fixtures
 
-```
+- When entry-point or protocol behavior changes, exercise the real hook with representative JSON stdin and check its response and CLI arguments.
+- Select cases for affected, supported behavior; success, failure, warnings, and malformed input are possibilities, not a mandatory checklist.
+- Exercise Windows paths when path handling is affected. Keep subprocess fixtures independent of a particular shell.
 
-Invoke pytest through `uv run python -m pytest` so the repository root remains importable on Windows. Pass hidden hook test directories (`.claude/`, `.codex/`) explicitly because pytest discovery excludes them.
+## Coverage
 
-## Hook Test Location
-
-- Keep Claude-specific hook contract tests under `.claude/hooks/tests/`.
-- Keep Codex-specific hook contract tests under `.codex/hooks/tests/`.
-- Keep cross-agent script tests (e.g. `scripts/file_hygiene.py`) under `scripts/tests/`.
-- Use each agent's own hook tests as evidence for that agent's contracts.
-- Give test files agent-prefixed basenames (e.g. `test_claude_session_start.py`) to avoid pytest module name collisions when the same logical test exists in both `.claude/` and `.codex/` directories.
-
-## Hook and Script Tests
-
-- Invoke the real entry point with representative JSON stdin payloads and assert the resulting stdout JSON and CLI arguments.
-- Include positive fixtures (clean input → no output), blocking failures, warning-only responses, and malformed JSON.
-- Cover Windows path behavior: hooks receive Windows-style paths on this machine; scripts must handle both separators.
-- Keep failure output independent of a specific shell — use Python's `subprocess` or `sys.stderr`, not `bash`-specific constructs.
-
-## Coverage Target
-
-Coverage is optional unless the user requests it or the change is high risk. Run:
-
-```bash
-uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests --cov --cov-report=term-missing
-```
-
-Use coverage to find meaningful untested behavior, not to satisfy a universal percentage. If a task defines a threshold, report the measured result against that threshold.
+When a coverage report helps assess an identified risk or the user requests it, add `--cov --cov-report=term-missing` to the affected test run. Use it to find meaningful gaps; do not impose a universal percentage or expand to the full suite solely because coverage is enabled.

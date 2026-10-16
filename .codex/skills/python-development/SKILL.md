@@ -10,11 +10,9 @@ Apply the repository's Python development baseline.
 ## Logging
 
 - Use `logging` for diagnostics; CLI output and hook protocol responses belong on the required stdout/stderr stream.
-- While writing code, add `logging` at key points (inputs, branch decisions, external call results, caught exceptions) so that history logs from a later failure locate the cause without a rerun. Log identifiers and summaries rather than credentials, tokens, or personal data.
-- When a failure's cause is not obvious from the code and error, add targeted `logging` at the relevant boundaries (inputs, branch decisions, external call results) and reproduce it before changing behavior.
-- Keep log statements that would help diagnose future failures, at an appropriate level, instead of removing them after the fix.
+- Add diagnostic logs where they help explain otherwise hard-to-observe failures. Log identifiers and summaries rather than credentials, tokens, or personal data.
+- When existing evidence does not explain a failure, use targeted logging to gather the missing evidence. Retain logs that help diagnose future failures at an appropriate level.
 
 ## Verification
 
-- Run targeted behavioral tests appropriate to the change's risk.
-- Use `python-testing` for pytest, coverage, hook fixtures, and Windows-path verification.
+Follow `AGENTS.md` for verification decisions. Use `python-testing` when the task calls for writing or running Python tests.

@@ -99,9 +99,9 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 
 ### 開發（從 ECC v2.0.0-rc.1 移植）
 
-| Skill            | 用途                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `python-testing` | Repository-specific 行為測試、hook JSON fixtures 與 Windows path 行為。Test-first 決策使用 Claude 原生能力。 |
+| Skill            | 用途                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `python-testing` | 需要測試時的執行方式、hook JSON fixtures 與 Windows 路徑細節；驗證決策由 `AGENTS.md` 統一規範。 |
 
 ### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
 
@@ -171,11 +171,13 @@ Claude Code 使用官方 Pyright plugin 提供即時型別導覽與 diagnostics�
 
 Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的檔案類型時生效。
 
-| 規則集          | 路徑                  | 來源                      | 備註                                   |
-| --------------- | --------------------- | ------------------------- | -------------------------------------- |
-| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging 與以 log 輔助除錯、pytest 指引 |
+| 規則集          | 路徑                  | 來源                      | 備註                                          |
+| --------------- | --------------------- | ------------------------- | --------------------------------------------- |
+| `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | 診斷 logging；測試決策由 `AGENTS.md` 統一規範 |
 
 詳細流程放在 skills；共用委派原則放在 `AGENTS.md`。
+
+已移除通用的 `rules/python/testing.md`；需要測試的任務仍可透過 `python-testing` 取得專案專屬的執行方式與 fixture 細節。
 
 ### 已移除（2026-08-23 清理——併入 CLAUDE.md）
 
@@ -201,7 +203,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `rules/common/coding-style`               | 通用工程常識，與 CLAUDE.md `Engineering Discipline` 重複；結構性 review heuristic 已移至 `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | 與 CLAUDE.md `Engineering Discipline` 逐字重複                                                                         |
 | `development-workflow` §Pre-Review Checks | 通用 pre-merge 常識，由 CI 與原生 GitHub 操作負責                                                                      |
-| `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例，由 `skill: python-testing` 擁有                                                            |
+| `testing` §AAA 與 §Test Naming            | 通用 pytest 結構與命名範例已移除，由原生能力處理                                                                       |
 | `code-review` §Security Review Triggers   | 純指標區塊；reviewer routing 清單已連結 `security.md`                                                                  |
 
 ### 未從 ECC 移植（含原因）

@@ -1,30 +1,24 @@
 ---
 name: python-testing
-description: Apply repository-specific verification requirements to Python scripts, hooks, and tooling.
+description: Write or run Python tests in this repository with Windows imports, hidden hook test directories, and hook JSON fixtures. Use when tests are warranted or requested, not for every Python file edit or move.
 ---
 
 # Python Testing
 
-Use this skill when Python scripts, hooks, or reusable tooling change.
-Use `python-development` separately for logging and log-driven debugging.
+Follow `AGENTS.md` for whether tests are needed. This skill supplies repository-specific details after that decision.
 
-## Repository Tests
+## Running Tests
 
-- Run Python commands through the project-managed environment with `uv run`.
-- Use `uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests` for the complete repository test suite so the repository root is importable on Windows and hidden hook tests are included.
-- Use `uv run python -m pytest .codex/hooks/tests` for focused Codex hook verification.
-- Invoke pytest through `uv run python -m pytest` so the repository root remains importable on Windows.
-- Pass hidden hook test directories explicitly because pytest discovery excludes them.
+- Use `uv run python -m pytest <affected-test-paths>` so the repository root remains importable on Windows.
+- Pass hidden hook test directories explicitly; pytest discovery excludes them. Shared script tests live in `scripts/tests/`, Codex hook tests in `.codex/hooks/tests/`, and Claude hook tests in `.claude/hooks/tests/`.
+- Give hook test files agent-prefixed basenames to avoid module-name collisions when running both agents' suites together.
 
-## Hook And Script Coverage
+## Hook Fixtures
 
-- Keep Codex-specific hook contract and cross-agent hook regression tests under `.codex/hooks/tests/`; keep shared script tests under `scripts/tests/`.
-- For hook scripts, invoke the real entry point with representative JSON stdin and assert the resulting stdout JSON and CLI arguments.
-- Cover supported success, failure, warning, and malformed-input behavior for the changed hook; do not add output modes solely to satisfy a checklist.
-- For hygiene scripts, use small positive and negative fixtures.
-- Cover Windows path behavior when scripts are used by agent hooks.
-- Keep failure output readable and independent of a specific shell.
+- When entry-point or protocol behavior changes, exercise the real hook with representative JSON stdin and check its response and CLI arguments.
+- Select cases for affected, supported behavior; success, failure, warnings, and malformed input are possibilities, not a mandatory checklist.
+- Exercise Windows paths when path handling is affected. Keep subprocess fixtures independent of a particular shell.
 
-## Optional Coverage
+## Coverage
 
-Run `uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests --cov --cov-report=term-missing` when the user requests repository-wide coverage or the change is high risk. For focused coverage, select the affected test directories. Use the report to find meaningful untested behavior; do not impose a universal percentage.
+When a coverage report helps assess an identified risk or the user requests it, add `--cov --cov-report=term-missing` to the affected test run. Use it to find meaningful gaps; do not impose a universal percentage or expand to the full suite solely because coverage is enabled.

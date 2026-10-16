@@ -99,9 +99,9 @@ Skills are internal workflow documents loaded when a matching command or agent n
 
 ### Development (ported from ECC v2.0.0-rc.1)
 
-| Skill            | Purpose                                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `python-testing` | Repository-specific behavioral tests, hook JSON fixtures, and Windows path behavior. Test-first decisions use native Claude capabilities. |
+| Skill            | Purpose                                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `python-testing` | Repository test invocation, hook JSON fixtures, and Windows paths when tests are warranted. `AGENTS.md` owns verification decisions. |
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
@@ -171,11 +171,13 @@ Claude Code uses the official Pyright plugin for immediate type-aware navigation
 
 Rules are path-scoped markdown files loaded when Claude works with matching file types.
 
-| Rule set        | Paths                 | Source                     | Notes                                                 |
-| --------------- | --------------------- | -------------------------- | ----------------------------------------------------- |
-| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Logging and log-driven debugging, and pytest pointers |
+| Rule set        | Paths                 | Source                     | Notes                                                    |
+| --------------- | --------------------- | -------------------------- | -------------------------------------------------------- |
+| `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Diagnostic logging; test decisions belong to `AGENTS.md` |
 
 Detailed procedures live in skills; shared delegation principles live in `AGENTS.md`.
+
+The generic `rules/python/testing.md` was removed; `python-testing` retains repository-specific invocation and fixture details for tasks that need tests.
 
 ### Removed (2026-08-23 cleanup — merged into CLAUDE.md)
 
@@ -201,7 +203,7 @@ Because every `rules/common/` file matches `paths: "*"`, the set is injected on 
 | `rules/common/coding-style`               | Generic craft guidance duplicated CLAUDE.md `Engineering Discipline`; the structural review heuristic moved to `rules/common/code-review.md` |
 | `development-workflow` §Research & Reuse  | Verbatim duplicate of CLAUDE.md `Engineering Discipline`                                                                                     |
 | `development-workflow` §Pre-Review Checks | Generic pre-merge hygiene; CI and native GitHub operations own it                                                                            |
-| `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples; owned by `skill: python-testing`                                                               |
+| `testing` §AAA and §Test Naming           | Generic pytest structure and naming examples removed; native capabilities cover them                                                         |
 | `code-review` §Security Review Triggers   | Pointer-only section; the reviewer routing list already links `security.md`                                                                  |
 
 ### Not ported from ECC (with reasons)

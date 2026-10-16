@@ -30,7 +30,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Skill                | 用途                                                                         |
 | :------------------- | :--------------------------------------------------------------------------- |
 | `python-development` | Python logging 與以 log 輔助除錯                                             |
-| `python-testing`     | Targeted behavioral tests、選配 coverage、hook fixtures 與 Windows path 要求 |
+| `python-testing`     | 需要測試時的執行方式、hook fixtures 與 Windows 路徑細節                  |
 | `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報        |
 
 ## Claude 能力取捨
@@ -62,7 +62,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                 |
 | Risk-based test scope                                             | `AGENTS.md` verification section                        |
 | Python development rules                                          | `python-development`                                    |
-| Repository Python verification                                    | `python-testing`                                        |
+| Repository Python test details                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
 
 共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；delivery review 透過 hosted PR integration；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。
