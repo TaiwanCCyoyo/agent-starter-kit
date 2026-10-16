@@ -1,6 +1,6 @@
 # Claude Code 元件參考
 
-本文件列出 `.claude/` 目錄中所有啟用的 agents、commands、skills、hooks 與 rules。
+本文件列出 `.claude/` 目錄中所有啟用的 commands、skills、hooks 與 rules。
 適用對象：Python 及 SystemVerilog/UVM 開發者。
 
 **ECC 來源**：[affaan-m/ECC](https://github.com/affaan-m/ECC) v2.0.0-rc.1
@@ -11,37 +11,30 @@
 
 ---
 
-## Agents
+## 委派
 
-Agents 是由主要 Claude 工作階段呼叫的專用子代理，用於執行特定任務。
+有界工作使用 Claude 內建 general-purpose subagent；聚焦程式碼探索使用 Explore。本專案不定義自訂 agent 角色。共用委派原則由 `AGENTS.md` 管理：當大量輸入、輸出、雜訊或重複作業使交接有具體效益時，委派簡單工作。使用 Claude 可用的最低成本合適模型；Codex 專屬的 Luna 偏好不代表 Claude 支援該模型。
 
-Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡引導。`signal-miner` 是最低成本的原生唯讀苦力，負責有界的高輸出指令；當 tests、benchmarks、廣泛搜尋、verbose diagnostics、dependency traces 或大型 diff/log inspections 值得為了隔離輸出付出一次往返時，就委派給它；短而聚焦的檢查直接在 main context 執行，一般的程式碼定位則使用內建 Explore agent。`task-worker` 則是只供高階 main session 降級執行有界修改的中價選項，任務必須有明確目標、範圍、驗收條件與驗證方式。最低階 main session 應自行處理簡單工作，或視情況使用內建 Explore 或 general-purpose，不升級到 `task-worker`。模糊、跨領域、security-sensitive、architecture 與 planning 工作應留給 main session 或適合的內建 agent。
+長篇翻譯、文件同步、大型 diff/log 檢視與機械式 hook 修復皆遵循此原則。只使用目前 runtime 實際支援的控制選擇模型。若只能繼承主模型，明確回報限制並直接執行；或只在隔離 context、平行處理有具體效益時委派，不宣稱已切換模型或降低成本。需要較多判斷的實作選用合適模型；短工作留在本地；架構、產品、安全敏感與模糊決策由 main session 負責。提供明確範圍與驗收條件，並收集精簡證據而非原始輸出。唯讀指示本身不會限制工具權限。
 
-`.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行模式使用 `sonnet`。不使用 custom agent 將計畫交回 main session。
+文件翻譯或同步由 main session 選定權威來源與明確目標。保留結構、連結、程式碼與識別字；遇到來源衝突或術語不明時回報。
 
-### 工作流程（原創——非來自 ECC）
-
-| Agent               | 模型            | 工具                                | 用途                                                                                                                                            |
-| ------------------- | --------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `commit-specialist` | haiku           | Bash, Read                          | 審查已暫存的變更並草擬 commit 訊息                                                                                                              |
-| `doc-translator`    | haiku           | Read, Write, Edit                   | 低階文件翻譯與同步者：將任何需寫入檔案的翻譯處理到單一明確的非 canonical 目標；main session 決定來源與目標，衝突時以其維護的 canonical 文件為準 |
-| `signal-miner`      | haiku           | Read, Grep, Glob, Bash              | 以最低成本隔離預期會產生大量 log 或 stdout 的指令，僅回傳精簡訊號而非原始輸出                                                                   |
-| `task-worker`       | sonnet (medium) | Read, Grep, Glob, Write, Edit, Bash | 執行已有明確範圍、驗收條件與驗證方式的低至中風險修改；當範圍或風險擴大時停止並回報                                                              |
+Claude 在 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode 使用 `opus`，執行使用 `sonnet`。委派不會改變 main session 的模型選擇，也不會轉移規劃權責。
 
 ### 未從 ECC 移植（含原因）
 
-| Agent                                                                                                                                              | 原因                                                                                                                                                          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代                                                                                  |
-| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能與聚焦 reviewer 已涵蓋其責任，無須重複委派。                                                                                 |
-| `implementation-reviewer`、`plan-reviewer`、`security-reviewer`                                                                                    | 2026-10-02 移除——目前模型、Native Plan Mode、內建 `/code-review`、hosted Codex PR review 與 pre-commit gates 已涵蓋其責任；其餘 agents 的存在是為了節省成本。 |
-| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python                                                                                              |
-| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                                                                                                    |
-| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                                                                                                          |
-| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                                                                                                  |
-| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                                                                                                      |
-| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                                                                                                      |
-| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                                                                                                |
+| Agent                                                                                                                                              | 原因                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `planner`                                                                                                                                          | 2026-06-08 移除——已由 Native Plan Mode（`EnterPlanMode`/`ExitPlanMode`）取代                                                                               |
+| `architect`、`code-reviewer`、`code-simplifier`、`loop-operator`、`performance-optimizer`、`python-reviewer`、`silent-failure-hunter`、`tdd-guide` | 2026-07-13 移除——原生 Claude 功能與聚焦 reviewer 已涵蓋其責任，無須重複委派。                                                                              |
+| `implementation-reviewer`、`plan-reviewer`、`security-reviewer`                                                                                    | 2026-10-02 移除——目前模型、Native Plan Mode、內建 `/code-review`、hosted Codex PR review 與 pre-commit gates 已涵蓋其責任；成本導向的委派改用內建 agents。 |
+| `refactor-cleaner`                                                                                                                                 | 依賴 Node.js 工具（knip、depcheck、ts-prune）；本專案使用 Python                                                                                           |
+| `harness-optimizer`                                                                                                                                | 需要 ECC 內部的 `/harness-audit`；無法移植                                                                                                                 |
+| 所有 `*-build-resolver`（共 11 個 agents）                                                                                                         | 未使用非 Python 語言                                                                                                                                       |
+| 非 Python 語言的程式碼審查器                                                                                                                       | 未使用的語言                                                                                                                                               |
+| `gan-*`、`seo-specialist`                                                                                                                          | 超出範疇                                                                                                                                                   |
+| `homelab-*`、`network-*`、`healthcare-reviewer`                                                                                                    | 領域不符                                                                                                                                                   |
+| `marketing-agent`                                                                                                                                  | 延後——待短片製作規劃啟動時新增                                                                                                                             |
 
 ---
 
@@ -49,7 +42,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 - 互動工作：進入 Native Plan Mode，核准計畫後再回到執行模式。
 - 無人值守工作：使用分離的 planning 與 execution sessions。planning session 寫入受維護的 plan artifact；execution session 讀取已核准 artifact。不要以 planner subagent 作為 main-session handoff。
-- Claude-only 公司移植：保留 instructions、rules、agents、skills 與 hygiene hooks。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
+- Claude-only 公司移植：保留 instructions、rules、skills 與 hygiene hooks。使用公司核准的固定模型 ID 或 alias mapping，不依賴本 repo 個人 Pro 的預設。
 
 `REVIEW.md` 不屬於本機 baseline；只有 repository 加入 Claude 託管的 Team 或 Enterprise Code Review 時才加入。
 
@@ -59,10 +52,10 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 
 ### 工作流程（原創——非來自 ECC）
 
-| Command       | 用途                                                            |
-| ------------- | --------------------------------------------------------------- |
-| `/gen-commit` | 透過 `commit-specialist` 產生符合 Conventional Commits 格式訊息 |
-| `/worktree`   | 建立、接續與完成隔離的任務 worktree                             |
+| Command       | 用途                                       |
+| ------------- | ------------------------------------------ |
+| `/gen-commit` | 透過 `commit-helper` 準備或執行有界 commit |
+| `/worktree`   | 建立、接續與完成隔離的任務 worktree        |
 
 原生 Git／GitHub 操作遵守[共用 Git 工作契約](../en/git-workflow.md)。預設只做本地交付；擁有者啟用 PR 交付後，可推送任務分支與更新 PR，合併仍需另外授權。
 
@@ -72,7 +65,7 @@ Claude 的自動分派主要由各 agent 的 description 與目前任務脈絡�
 | ---------------- | --------------------------------------------------------------------- |
 | `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill               |
 | `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ hosted Codex PR review |
-| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + `signal-miner` agent    |
+| `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + 內建 delegation         |
 | `/python-review` | `python-testing` skill 與內建 `/code-review`                          |
 | `/security-scan` | 內建 `/security-review` + `detect-secrets` gate                       |
 | `/test-coverage` | `python-testing` skill（`pytest --cov`）                              |
@@ -182,7 +175,7 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | --------------- | --------------------- | ------------------------- | -------------------------------------- |
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Logging 與以 log 輔助除錯、pytest 指引 |
 
-詳細流程放在 skills 或 agent definitions。
+詳細流程放在 skills；共用委派原則放在 `AGENTS.md`。
 
 ### 已移除（2026-08-23 清理——併入 CLAUDE.md）
 

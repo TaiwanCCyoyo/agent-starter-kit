@@ -12,35 +12,34 @@ Both agents read a single root `AGENTS.md`. Claude Code and Codex discover that 
 
 `AGENTS.md` is deliberately short. A rule earns a place in it only when no other layer can state or enforce that rule. Everything else lives where it actually takes effect:
 
-| Layer                               | Owns                                                                                                  |
-| :---------------------------------- | :---------------------------------------------------------------------------------------------------- |
-| `AGENTS.md`                         | Authorization, communication preferences, project conventions, review severity, and memory boundaries |
-| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks                      |
-| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                                      |
-| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                                      |
-| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                                               |
-| `.claude/agents/`, `.codex/agents/` | Subagent roles and routing, selected by their own `description`                                       |
+| Layer                               | Owns                                                                                                                         |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                         | Authorization, communication preferences, project conventions, review severity, delegation principles, and memory boundaries |
+| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks                                             |
+| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                                                             |
+| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                                                             |
+| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                                                                      |
 
 Two consequences are worth stating outright:
 
-- **`AGENTS.md` names no individual skill or subagent.** Routing belongs in each component's `description`, where retrieval already happens. Listing names in the contract duplicates that and goes stale.
+- **`AGENTS.md` names no individual skill or subagent.** Skills use their own `description` for retrieval; built-in subagents follow the shared delegation principles. Listing individual component names in the contract duplicates that and goes stale.
 - **`AGENTS.md` states nothing the model already knows.** General engineering craft, reading code before changing it, and not committing secrets are left out, because the model brings the first two and `detect-secrets` enforces the third.
 
 The result is a contract that fits on one screen and changes only when the project's actual constraints change.
 
 ## What to copy
 
-| Path                      | Purpose                                                                   |
-| :------------------------ | :------------------------------------------------------------------------ |
-| `AGENTS.md`               | Shared root operating contract for every agent                            |
-| `.pre-commit-config.yaml` | Repository verification hooks                                             |
-| `scripts/`                | Shell-neutral hygiene and formatting checks shared by every agent         |
-| `.claude/`                | Claude Code settings, hooks, slash commands, subagents, skills, and rules |
-| `.codex/`                 | Codex configuration, hooks, command-like skills, and specialist agents    |
-| `.github/workflows/`      | CI that runs the same checks the agents run locally                       |
-| `docs/en/git-workflow.md` | Git and delivery authorization contract; keep the path, reset the status  |
-| `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project              |
-| `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows            |
+| Path                      | Purpose                                                                  |
+| :------------------------ | :----------------------------------------------------------------------- |
+| `AGENTS.md`               | Shared root operating contract for every agent                           |
+| `.pre-commit-config.yaml` | Repository verification hooks                                            |
+| `scripts/`                | Shell-neutral hygiene and formatting checks shared by every agent        |
+| `.claude/`                | Claude Code settings, hooks, slash commands, skills, and rules           |
+| `.codex/`                 | Codex configuration, hooks, and command-like skills                      |
+| `.github/workflows/`      | CI that runs the same checks the agents run locally                      |
+| `docs/en/git-workflow.md` | Git and delivery authorization contract; keep the path, reset the status |
+| `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project             |
+| `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows           |
 
 Take only the agent directories you use. Neither agent needs the other's layer, but the verification below and the contract tests in `scripts/tests/` read both: drop the assertions and test paths for the layer you did not copy, or they will fail on a directory that is not there.
 
@@ -100,8 +99,8 @@ Codex ships no repository-local permission rules here; it uses its own approval 
 
 Start with the reference for the agent you use. You do not need to configure both.
 
-- **[Claude Code Components](docs/en/claude-components.md)** — subagents, slash commands, skills, hooks, and path-scoped rules in `.claude/`.
-- **[Codex Components](docs/en/codex-components.md)** — specialist agents, command-like skills, hooks, and model routing in `.codex/`.
+- **[Claude Code Components](docs/en/claude-components.md)** — built-in delegation, slash commands, skills, hooks, and path-scoped rules.
+- **[Codex Components](docs/en/codex-components.md)** — built-in delegation, command-like skills, hooks, and model routing.
 - **[Git Workflow Contract](docs/en/git-workflow.md)** — task isolation, delivery authorization, and review and merge boundaries.
 - **[PR Review](docs/en/pr-review.md)** — how this repository's own hosted review and merge conditions are configured.
 
@@ -118,7 +117,7 @@ If hooks do not fire, confirm `uv run pre-commit install` has run, that `.codex/
 
 ## Design influences
 
-- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — the specialist agents and coding rules are adapted from ECC v2.0.0-rc.1. Most development slash commands have since been retired in favour of native Plan Mode and autoloaded project skills.
+- **[Everything Claude Code (ECC)](https://github.com/affaan-m/ECC)** — workflow guidance and coding rules are adapted from ECC v2.0.0-rc.1. Custom agent roles and most development slash commands have since been replaced by built-in delegation, native Plan Mode, and project skills.
 
 ---
 
