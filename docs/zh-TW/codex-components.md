@@ -30,7 +30,6 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Skill                | 用途                                                                  |
 | :------------------- | :-------------------------------------------------------------------- |
 | `python-development` | Python logging 與以 log 輔助除錯                                      |
-| `python-testing`     | 測試執行方式、hook fixtures 與 Windows 路徑細節                       |
 | `gen-commit`         | 有界 local commit、內建委派協助大量 diff 檢視與簡單 hook 修復，並回報 |
 
 ## Claude 能力取捨
@@ -42,9 +41,9 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | `/feature-dev`                                                  | 原生取代                 | Brainstorming、Plan Mode、test-first development、verification 與 review 已構成完整流程。                                                                      |
 | `/build-fix`                                                    | 原生取代                 | Evidence-driven debugging 加 repository verification 已涵蓋逐步診斷與修復。                                                                                    |
 | `/code-review`                                                  | 原生／plugin 取代        | Local review 使用原生 Codex review stance；PR review 使用 GitHub plugin。                                                                                      |
-| `/python-review`                                                | Skill 取代               | `python-testing` 提供 repository-specific behavioral tests 與選配 coverage 指引。                                                                              |
+| `/python-review`                                                | 原生能力取代             | 由原生 Python review 與既有 repository checks 處理。                                                                                                           |
 | `/security-scan`                                                | Agent 與 gates 取代      | 已安裝 detect-secrets、hooks、pre-commit 與 hosted PR review；未安裝 AgentShield。                                                                             |
-| `/test-coverage`                                                | Skill 取代               | 選配 coverage 已在 `python-testing`；Codex 不需要 command wrapper。                                                                                            |
+| `/test-coverage`                                                | 原生能力取代             | 標準 pytest-cov 用法不需要獨立 skill 或 command wrapper。                                                                                                      |
 | `github-ops`                                                    | Plugin 取代              | GitHub plugin 提供 repo、issue、PR、CI、comment 與發布流程，且 connector semantics 可維持更新。                                                                |
 | `cost-aware-llm-pipeline`                                       | 不移植                   | 它是 application-domain 指引，含 provider-specific model names 與易變價格，不是 Codex 工作流。待 repo 真正建立 LLM API pipeline 時，再依官方資料做共享 skill。 |
 | `eval-harness`                                                  | 已移除／延後             | 它引用不存在的 `/eval` commands，且沒有 runner、grader、baseline format、Python commands 或 CI integration。具備這些能力後才恢復。                             |
@@ -62,7 +61,6 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 | Review severity 與 CRITICAL/HIGH completion policy                | `AGENTS.md` review and security section                 |
 | Verification scope                                                | `AGENTS.md` verification section                        |
 | Python development rules                                          | `python-development`                                    |
-| Repository Python test details                                    | `python-testing`                                        |
 | Planning、TDD、debugging、review、verification、branch completion | Native Codex、project agents 與 repository verification |
 
 共享開發行為現在與 Claude common-rule routing layer 對齊：plan 透過 Native Plan Mode；test/debug 透過原生 workflow、task-specific tests 與 project skills；delivery review 透過 hosted PR integration；PR 準備在可用時交給 GitHub plugin；交付與整合權限則遵守[共用 Git 工作契約](../en/git-workflow.md)。

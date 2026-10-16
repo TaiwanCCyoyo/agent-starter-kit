@@ -63,12 +63,12 @@ Claude 在 `.claude/settings.json` 保留 `model: "opusplan"`：原生 Plan Mode
 
 | Command          | 替代方案                                                              |
 | ---------------- | --------------------------------------------------------------------- |
-| `/build-fix`     | 原生 evidence-driven debugging + `python-testing` skill               |
+| `/build-fix`     | 原生 evidence-driven debugging                                        |
 | `/code-review`   | 內建 `/code-review`（含 `ultra` 雲端 review）+ hosted Codex PR review |
 | `/feature-dev`   | Native Plan Mode + 原生 test-first workflow + 內建 delegation         |
-| `/python-review` | `python-testing` skill 與內建 `/code-review`                          |
+| `/python-review` | 內建 `/code-review` 與 repository checks                              |
 | `/security-scan` | 內建 `/security-review` + `detect-secrets` gate                       |
-| `/test-coverage` | `python-testing` skill（`pytest --cov`）                              |
+| `/test-coverage` | 標準 pytest-cov 用法                                                  |
 
 ### 未從 ECC 移植（含原因）
 
@@ -96,12 +96,6 @@ Skills 是內部工作流程文件，在對應的 command 或 agent 需要時載
 | ------------------------ | ------------------------------------------------- |
 | `commit-helper`          | Conventional Commits 格式、限定範圍的 commit 執行 |
 | `dependabot-remediation` | 唯讀警示擷取、最小安全升級與完成證據              |
-
-### 開發（從 ECC v2.0.0-rc.1 移植）
-
-| Skill            | 用途                                                   |
-| ---------------- | ------------------------------------------------------ |
-| `python-testing` | 測試執行方式、hook JSON fixtures 與 Windows 路徑細節。 |
 
 ### 已移除（2026-08-23 清理——原生 GitHub 操作與聚焦的安全工作流）
 
@@ -176,8 +170,6 @@ Rules 是依路徑範圍載入的 Markdown 檔案，當 Claude 處理符合的�
 | `rules/python/` | `**/*.py`、`**/*.pyi` | ECC v2.0.0-rc.1（已修改） | Script logging，方便未來 debug |
 
 詳細流程放在 skills；共用委派原則放在 `AGENTS.md`。
-
-已移除通用的 `rules/python/testing.md`；`python-testing` 僅保留專案專屬的執行方式與 fixture 技術細節。
 
 ### 已移除（2026-08-23 清理——併入 CLAUDE.md）
 

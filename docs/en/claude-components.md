@@ -63,12 +63,12 @@ Native Git/GitHub operations follow the [shared Git workflow contract](git-workf
 
 | Command          | Replacement                                                                   |
 | ---------------- | ----------------------------------------------------------------------------- |
-| `/build-fix`     | Native evidence-driven debugging + `python-testing` skill                     |
+| `/build-fix`     | Native evidence-driven debugging                                              |
 | `/code-review`   | Built-in `/code-review` (incl. `ultra` cloud review) + hosted Codex PR review |
 | `/feature-dev`   | Native Plan Mode + native test-first workflow + built-in delegation           |
-| `/python-review` | `python-testing` skill and built-in `/code-review`                            |
+| `/python-review` | Built-in `/code-review` and repository checks                                 |
 | `/security-scan` | Built-in `/security-review` + `detect-secrets` gate                           |
-| `/test-coverage` | `python-testing` skill (`pytest --cov`)                                       |
+| `/test-coverage` | Standard pytest-cov usage                                                     |
 
 ### Not ported from ECC (with reasons)
 
@@ -96,12 +96,6 @@ Skills are internal workflow documents loaded when a matching command or agent n
 | ------------------------ | ------------------------------------------------------------------------- |
 | `commit-helper`          | Conventional Commits format, scoped commit execution                      |
 | `dependabot-remediation` | Read-only alert retrieval, minimum-safe upgrades, and completion evidence |
-
-### Development (ported from ECC v2.0.0-rc.1)
-
-| Skill            | Purpose                                                            |
-| ---------------- | ------------------------------------------------------------------ |
-| `python-testing` | Repository test invocation, hook JSON fixtures, and Windows paths. |
 
 ### Removed (2026-08-23 cleanup — native GitHub operations and focused security workflow)
 
@@ -176,8 +170,6 @@ Rules are path-scoped markdown files loaded when Claude works with matching file
 | `rules/python/` | `**/*.py`, `**/*.pyi` | ECC v2.0.0-rc.1 (modified) | Script logging for future debugging |
 
 Detailed procedures live in skills; shared delegation principles live in `AGENTS.md`.
-
-The generic `rules/python/testing.md` was removed; `python-testing` retains repository-specific invocation and fixture details as a technical reference.
 
 ### Removed (2026-08-23 cleanup — merged into CLAUDE.md)
 
