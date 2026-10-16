@@ -21,7 +21,7 @@ Codex 將 planning 與 implementation 權責保留在 main agent。Read-only age
 
 當大量輸入、輸出、雜訊或重複作業使隔離脈絡有具體效益時，優先使用 `gpt-6-luna` 處理簡單工作，包括長篇翻譯、文件同步、大型 diff/log 檢視與機械式 hook 修復。若 handoff 沒有實際助益，短檢查直接執行。需要較多判斷的實作則選用合適模型，並保留使用者選擇主要模型的權限。
 
-在平台支援時，建立內建 agent 時指定模型。若需使用新 context，明確提供任務、相關指示、範圍與證據。回傳精簡結果，不複製原始輸出。需要時要求實際的平台限制；只描述唯讀任務並不能強制 sandbox。除非實際 workload 證明需要，否則維持已設定的並行數與深度限制。
+先確認目前 runtime 實際提供的模型控制；本機 Codex client 與 API orchestration 不一定有相同介面。[本機 Codex subagent 文件](https://learn.chatgpt.com/docs/agent-configuration/subagents#choosing-models-and-reasoning) 說明逐次建立時的模型設定與組態預設值。使用支援的控制選取 Luna。若只能繼承主模型，明確回報限制並直接執行；或只在隔離 context、平行處理有具體效益時委派，不宣稱已切換模型或降低成本。若模型選擇需使用新 context，明確提供任務、相關指示、範圍與證據。回傳精簡結果，不複製原始輸出。需要時要求實際的平台限制；只描述唯讀任務並不能強制 sandbox。除非實際 workload 證明需要，否則維持已設定的並行數與深度限制。
 
 文件翻譯或同步由 main agent 選定權威來源與明確目標。保留結構、連結、程式碼與識別字；遇到來源衝突或術語不明時回報。這是共用衍生輸出原則的應用。
 
