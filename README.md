@@ -59,8 +59,6 @@ uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
 
 List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert both agent layers; prune them to the layers your project actually has.
 
-Keep test-module basenames unique across hook directories collected together; agent prefixes such as `test_codex_...py` and `test_claude_...py` avoid pytest import-file-mismatch errors.
-
 ## Adapting it to your project
 
 ### 1. Reset delivery authorization
