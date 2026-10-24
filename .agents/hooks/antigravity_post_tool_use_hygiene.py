@@ -3,6 +3,7 @@
 import io
 import json
 import logging
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -73,6 +74,8 @@ def to_relative_path(root: Path, file_path: str) -> str:
     cleaned = clean_path_value(file_path)
     if not cleaned:
         return ""
+    if "\\" in cleaned and os.sep != "\\":
+        cleaned = cleaned.replace("\\", "/")
     path = Path(cleaned)
     if not path.is_absolute():
         path = root / path
@@ -96,21 +99,39 @@ def collect_dict_paths(mapping: dict[str, object]) -> list[str]:
     return candidates
 
 
-def event_workspace(event: dict[str, object]) -> str:
-    """Resolve the active workspace path from an Antigravity hook payload."""
+def event_workspaces(event: dict[str, object]) -> list[str]:
+    """Resolve all candidate workspace paths from an Antigravity hook payload."""
+    workspaces: list[str] = []
     workspace_paths = event.get("workspacePaths")
     if isinstance(workspace_paths, list):
         for item in workspace_paths:
             if isinstance(item, str) and item.strip():
-                return item.strip()
+                workspaces.append(item.strip())
     cwd = event.get("cwd")
     if isinstance(cwd, str) and cwd.strip():
-        return cwd.strip()
-    return "."
+        workspaces.append(cwd.strip())
+    if not workspaces:
+        workspaces.append(".")
+    return list(dict.fromkeys(workspaces))
 
 
-def event_files(event: dict[str, object], root: Path) -> list[str]:
-    """Extract only explicit existing file paths from an Antigravity event."""
+def workspace_roots(event: dict[str, object]) -> list[Path]:
+    """Return deduplicated existing repository roots for the event workspaces."""
+    roots: list[Path] = []
+    seen: set[Path] = set()
+    for workspace in event_workspaces(event):
+        root = repo_root(workspace)
+        if not root.is_dir():
+            continue
+        resolved = root.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            roots.append(root)
+    return roots
+
+
+def event_candidates(event: dict[str, object]) -> list[str]:
+    """Extract candidate file path strings from an Antigravity event."""
     candidates: list[str] = []
     tool_call = event.get("toolCall")
     if isinstance(tool_call, dict):
@@ -121,13 +142,42 @@ def event_files(event: dict[str, object], root: Path) -> list[str]:
     tool_input = event.get("tool_input")
     if isinstance(tool_input, dict):
         candidates.extend(collect_dict_paths(tool_input))
+    return candidates
 
+
+def event_files(event: dict[str, object], root: Path) -> list[str]:
+    """Extract only explicit existing file paths from an Antigravity event for a single root."""
     files: list[str] = []
-    for candidate in candidates:
+    for candidate in event_candidates(event):
         rel_path = to_relative_path(root, candidate)
         if rel_path and (root / rel_path).is_file():
             files.append(rel_path)
     return list(dict.fromkeys(files))
+
+
+def files_by_workspace(event: dict[str, object], roots: list[Path]) -> list[tuple[Path, list[str]]]:
+    """Group existing Python files by their most specific owning workspace root."""
+    grouped: dict[Path, list[str]] = {root: [] for root in roots}
+    for candidate in event_candidates(event):
+        cleaned = clean_path_value(candidate)
+        if not cleaned:
+            continue
+        if "\\" in cleaned and os.sep != "\\":
+            cleaned = cleaned.replace("\\", "/")
+        is_abs = Path(cleaned).is_absolute()
+        matches: list[tuple[Path, str]] = []
+        for root in roots:
+            rel_path = to_relative_path(root, cleaned)
+            if rel_path and (root / rel_path).is_file() and Path(rel_path).suffix.lower() in PYTHON_SUFFIXES:
+                matches.append((root, rel_path))
+                if not is_abs:
+                    break
+        if not matches:
+            continue
+        chosen_root, chosen_rel = max(matches, key=lambda item: len(item[0].resolve().parts))
+        if chosen_rel not in grouped[chosen_root]:
+            grouped[chosen_root].append(chosen_rel)
+    return [(root, files) for root, files in grouped.items() if files]
 
 
 def main() -> int:
@@ -145,13 +195,12 @@ def main() -> int:
     if not isinstance(event, dict):
         return 0
 
-    root = repo_root(event_workspace(event))
-    if not root.is_dir():
+    roots = workspace_roots(event)
+    if not roots:
         sys.stdout.write("{}\n")
         return 0
 
-    files = [path for path in event_files(event, root) if Path(path).suffix.lower() in PYTHON_SUFFIXES]
-    if files:
+    for root, files in files_by_workspace(event, roots):
         code, stdout, stderr = run(root, ["uv", "run", "--no-sync", "--project", str(root), *RUFF_ARGS, "--", *files])
         if code != 0:
             details = "\n".join(part for part in (stdout, stderr) if part)

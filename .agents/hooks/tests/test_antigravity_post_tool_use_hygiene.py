@@ -34,11 +34,17 @@ def invoke_main(payload: object, root: Path, run_results: list[tuple[int, str, s
         commands.append(args)
         return next(results)
 
+    def fake_repo_root(cwd: str) -> Path:
+        candidate = Path(cwd)
+        if candidate.is_dir():
+            return candidate.resolve()
+        return root
+
     with (
         patch.object(HOOK.sys, "stdin", stdin),
         patch.object(HOOK.sys, "stdout", stdout),
         patch.object(HOOK.sys, "stderr", stderr),
-        patch.object(HOOK, "repo_root", return_value=root),
+        patch.object(HOOK, "repo_root", side_effect=fake_repo_root),
         patch.object(HOOK, "run", side_effect=fake_run),
     ):
         exit_code = HOOK.main()
@@ -213,6 +219,45 @@ def test_windows_path_input_becomes_repo_relative_argument(tmp_path: Path, path_
     _exit_code, _stdout, _stderr, commands = invoke_main(payload, tmp_path, [(0, "", "")])
 
     assert commands == [expected_command(tmp_path, "src/windows.py")]
+
+
+def test_second_workspace_python_target_runs_ruff_in_matching_workspace(tmp_path: Path) -> None:
+    first_ws = tmp_path / "ws-one"
+    second_ws = tmp_path / "ws-two"
+    first_ws.mkdir()
+    target = second_ws / "pkg" / "module.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("value = missing_symbol\n", encoding="utf-8")
+    payload = {
+        "workspacePaths": [str(first_ws), str(second_ws)],
+        "toolCall": {"name": "edit_file", "args": {"Path": str(target)}},
+    }
+
+    exit_code, stdout, stderr, commands = invoke_main(payload, first_ws, [(1, "F821 undefined name `missing_symbol`", "")])
+
+    assert exit_code == 0
+    assert json.loads(stdout) == {}
+    assert "F821 undefined name `missing_symbol`" in stderr
+    assert commands == [expected_command(second_ws.resolve(), "pkg/module.py")]
+
+
+def test_nested_workspace_prefers_most_specific_workspace_root(tmp_path: Path) -> None:
+    outer_ws = tmp_path / "outer"
+    inner_ws = outer_ws / "inner"
+    target = inner_ws / "src" / "nested.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("value = 1\n", encoding="utf-8")
+    payload = {
+        "workspacePaths": [str(outer_ws), str(inner_ws)],
+        "toolCall": {"name": "edit_file", "args": {"Path": str(target)}},
+    }
+
+    exit_code, stdout, stderr, commands = invoke_main(payload, outer_ws, [(0, "", "")])
+
+    assert exit_code == 0
+    assert json.loads(stdout) == {}
+    assert stderr == ""
+    assert commands == [expected_command(inner_ws.resolve(), "src/nested.py")]
 
 
 def test_unknown_payload_does_not_scan_unrelated_dirty_files(tmp_path: Path) -> None:
