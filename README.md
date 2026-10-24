@@ -2,23 +2,23 @@
 
 # AI Agent Starter Kit
 
-A project template that gives Codex and Claude Code a shared operating contract, matching per-agent tooling, and verification that runs the same way locally and in CI.
+A project template that gives Codex, Claude Code, and Antigravity a shared operating contract, matching per-agent tooling, and verification that runs the same way locally and in CI.
 
-Copy it into a new project when you want both agents to find the project's rules, skills, and quality gates without being told where to look.
+Copy it into a new project when you want every configured agent to find the project's rules, skills, and quality gates without being told where to look.
 
 ## The idea: one contract, enforced elsewhere
 
-Both agents read a single root `AGENTS.md`. Claude Code and Codex discover that filename natively, so nothing has to inject it.
+Every agent reads a single root `AGENTS.md`. Claude Code, Codex, and Antigravity discover that filename natively, so nothing has to inject it.
 
 `AGENTS.md` is deliberately short. A rule earns a place in it only when no other layer can state or enforce that rule. Everything else lives where it actually takes effect:
 
-| Layer                               | Owns                                                                                                                         |
-| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| `AGENTS.md`                         | Authorization, communication preferences, project conventions, review severity, delegation principles, and memory boundaries |
-| `.pre-commit-config.yaml`           | Encoding, language boundaries, secret scanning, formatting, linting, type checks                                             |
-| `.github/workflows/ci.yml`          | The repository-wide gate that merging depends on                                                                             |
-| `.claude/rules/`                    | Path-scoped coding rules, loaded when a matching file is touched                                                             |
-| `.claude/skills/`, `.codex/skills/` | Task-class workflows, loaded by their own `description`                                                                      |
+| Layer                                                  | Owns                                                                                                                         |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`                                            | Authorization, communication preferences, project conventions, review severity, delegation principles, and memory boundaries |
+| `.pre-commit-config.yaml`                              | Encoding, language boundaries, secret scanning, formatting, linting, type checks                                             |
+| `.github/workflows/ci.yml`                             | The repository-wide gate that merging depends on                                                                             |
+| `.claude/rules/`                                       | Path-scoped coding rules, loaded when a matching file is touched                                                             |
+| `.claude/skills/`, `.codex/skills/`, `.agents/skills/` | Task-class workflows, loaded by their own `description`                                                                      |
 
 Two consequences are worth stating outright:
 
@@ -36,12 +36,13 @@ The result is a contract that fits on one screen and changes only when the proje
 | `scripts/`                | Shell-neutral hygiene and formatting checks shared by every agent        |
 | `.claude/`                | Claude Code settings, hooks, slash commands, skills, and rules           |
 | `.codex/`                 | Codex configuration, hooks, and command-like skills                      |
+| `.agents/`                | Antigravity hooks and workspace skills                                   |
 | `.github/workflows/`      | CI that runs the same checks the agents run locally                      |
 | `docs/en/git-workflow.md` | Git and delivery authorization contract; keep the path, reset the status |
 | `docs/en/pr-setup.md`     | Owner guide for enabling PR delivery in the adopting project             |
 | `.vscode/`                | Editor defaults that match the file hygiene and Ruff workflows           |
 
-Take only the agent directories you use. Neither agent needs the other's layer, but the verification below and the contract tests in `scripts/tests/` read both: drop the assertions and test paths for the layer you did not copy, or they will fail on a directory that is not there.
+Take only the agent directories you use. No agent needs another's layer, but the verification below and the contract tests in `scripts/tests/` read all three: drop the assertions and test paths for the layers you did not copy, or they will fail on a directory that is not there.
 
 ## Setting up
 
@@ -54,10 +55,10 @@ Then verify the checks run:
 
 ```bash
 uv run pre-commit run --all-files
-uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests .agents/hooks/tests
 ```
 
-List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert both agent layers; prune them to the layers your project actually has.
+List only the hook directories you kept. `scripts/tests/` holds this template's own contract tests, which assert every included agent layer; prune them to the layers your project actually has.
 
 ## Adapting it to your project
 
@@ -93,27 +94,29 @@ That is a deliberate retreat from pattern matching. Permission patterns compare 
 
 The boundary is server-side: a ruleset on the default branch, which no local configuration can weaken.
 
-Codex ships no repository-local permission rules here; it uses its own approval controls.
+Codex and Antigravity ship no repository-local permission rules here; they use their own runtime approval and sandbox controls.
 
 ## Per-agent references
 
-Start with the reference for the agent you use. You do not need to configure both.
+Start with the reference for the agent you use. You do not need to configure all of them.
 
 - **[Claude Code Components](docs/en/claude-components.md)** — built-in delegation, slash commands, skills, hooks, and path-scoped rules.
 - **[Codex Components](docs/en/codex-components.md)** — built-in delegation, command-like skills, hooks, and model routing.
+- **[Antigravity Components](docs/en/antigravity-components.md)** — built-in subagents, workspace skills, hooks, and sandboxed model routing.
 - **[Git Workflow Contract](docs/en/git-workflow.md)** — task isolation, delivery authorization, and review and merge boundaries.
 - **[PR Review](docs/en/pr-review.md)** — how this repository's own hosted review and merge conditions are configured.
 
 ## Hooks
 
-Both agents run one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. Neither runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and the commit workflows establish branch context themselves rather than relying on injected state.
+Each agent runs one read-only `PostToolUse` hook that reports Ruff diagnostics on edited Python files without modifying them. None runs a `SessionStart` hook: the root `AGENTS.md` is discovered natively, and the commit workflows establish branch context themselves rather than relying on injected state.
 
-| Agent           | Script                                          | Reports                                                   |
-| :-------------- | :---------------------------------------------- | :-------------------------------------------------------- |
-| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py` | Ruff `E722,F601,F602,F634`, complementing the Pyright LSP |
-| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`   | Ruff `F` checks, since Codex has no Python LSP            |
+| Agent           | Script                                               | Reports                                                      |
+| :-------------- | :--------------------------------------------------- | :----------------------------------------------------------- |
+| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py`      | Ruff `E722,F601,F602,F634`, complementing the Pyright LSP    |
+| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`        | Ruff `F` checks, since Codex has no Python LSP               |
+| **Antigravity** | `.agents/hooks/antigravity_post_tool_use_hygiene.py` | Ruff `F` checks, since agent tool edits have no attached LSP |
 
-If hooks do not fire, confirm `uv run pre-commit install` has run, that `.codex/config.toml` enables `hooks`, that `.claude/settings.json` declares the `hooks` section, and that the agent trusts the project-local configuration.
+If hooks do not fire, confirm `uv run pre-commit install` has run, that `.codex/config.toml` enables `hooks`, that `.claude/settings.json` declares the `hooks` section, that `.agents/hooks.json` is present, and that the agent trusts the project-local configuration.
 
 ## Design influences
 

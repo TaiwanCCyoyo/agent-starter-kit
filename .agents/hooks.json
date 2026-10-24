@@ -1,0 +1,16 @@
+{
+    "python-hygiene": {
+        "PostToolUse": [
+            {
+                "matcher": "edit_file|write_file",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv run --no-sync --project .. python hooks/antigravity_post_tool_use_hygiene.py",
+                        "timeout": 30
+                    }
+                ]
+            }
+        ]
+    }
+}

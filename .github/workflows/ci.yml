@@ -27,4 +27,4 @@ jobs:
             - name: Repository checks
               run: uv run --no-sync pre-commit run --all-files --show-diff-on-failure
             - name: Tests
-              run: uv run --no-sync python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+              run: uv run --no-sync python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests .agents/hooks/tests

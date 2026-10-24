@@ -2,23 +2,23 @@
 
 # AI Agent Starter Kit
 
-一套專案模板，讓 Codex 與 Claude Code 共享一份操作契約、配對式工具設置與相同的本地及 CI 驗證流程。
+一套專案模板，讓 Codex、Claude Code 與 Antigravity 共享一份操作契約、配對式工具設置與相同的本地及 CI 驗證流程。
 
-當你希望新專案中的兩個 agent 都能無需特別指引而發現專案的規則、skills 與驗收標準時，可以把本套組當作範本複製使用。
+當你希望新專案中的各個 agent 都能無需特別指引而發現專案的規則、skills 與驗收標準時，可以把本套組當作範本複製使用。
 
 ## The idea: one contract, enforced elsewhere
 
-兩個 agent 都讀取單一根目錄的 `AGENTS.md`。Claude Code 與 Codex 原生會自動探索該檔名，所以不需要注入任何設定。
+所有 agent 都讀取單一根目錄的 `AGENTS.md`。Claude Code、Codex 與 Antigravity 原生會自動探索該檔名，所以不需要注入任何設定。
 
 `AGENTS.md` 刻意保持精簡。一項規則只有在無法由其他層級陳述或執行時，才值得列在其中。所有其他指引都存放在實際執行的地方：
 
-| 層級                                | 負責範圍                                                 |
-| :---------------------------------- | :------------------------------------------------------- |
-| `AGENTS.md`                         | 授權、溝通偏好、專案慣例、審查嚴重性、委派原則與記憶邊界 |
-| `.pre-commit-config.yaml`           | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查   |
-| `.github/workflows/ci.yml`          | repository 層級的合併前檢查閘道                          |
-| `.claude/rules/`                    | 路徑限定的程式碼規範，觸發時才載入                       |
-| `.claude/skills/`, `.codex/skills/` | 任務類別工作流程，由各自的 `description` 觸發載入        |
+| 層級                                                   | 負責範圍                                                 |
+| :----------------------------------------------------- | :------------------------------------------------------- |
+| `AGENTS.md`                                            | 授權、溝通偏好、專案慣例、審查嚴重性、委派原則與記憶邊界 |
+| `.pre-commit-config.yaml`                              | 編碼、語言邊界、secret 掃描、格式化、linting、型別檢查   |
+| `.github/workflows/ci.yml`                             | repository 層級的合併前檢查閘道                          |
+| `.claude/rules/`                                       | 路徑限定的程式碼規範，觸發時才載入                       |
+| `.claude/skills/`, `.codex/skills/`, `.agents/skills/` | 任務類別工作流程，由各自的 `description` 觸發載入        |
 
 有兩點值得直言：
 
@@ -36,12 +36,13 @@
 | `scripts/`                | 所有 agent 共用的 shell 中立衛生與格式檢查             |
 | `.claude/`                | Claude Code 設定、hooks、slash commands、skills 與規則 |
 | `.codex/`                 | Codex 組態、hooks、command-like skills                 |
+| `.agents/`                | Antigravity hooks 與 workspace skills                  |
 | `.github/workflows/`      | 執行與 agent 本地相同檢查的 CI                         |
 | `docs/en/git-workflow.md` | Git 與交付授權契約；保留路徑，重置狀態                 |
 | `docs/en/pr-setup.md`     | 擁有者設定指南，用於啟用 PR 交付                       |
 | `.vscode/`                | 檔案衛生與 Ruff 工作流程對齊的編輯器預設值             |
 
-只複製你使用的 agent 目錄。兩個 agent 都不需要另一個的層級，但下方的驗證指令與 `scripts/tests/` 裡的契約測試會同時讀取兩邊：請把未複製那一層的斷言與測試路徑一併移除，否則會因為目錄不存在而失敗。
+只複製你使用的 agent 目錄。任何 agent 都不需要其他 agent 的層級，但下方的驗證指令與 `scripts/tests/` 裡的契約測試會讀取全部三層：請把未複製層級的斷言與測試路徑一併移除，否則會因為目錄不存在而失敗。
 
 ## Setting up
 
@@ -54,10 +55,10 @@ uv run pre-commit install
 
 ```bash
 uv run pre-commit run --all-files
-uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests
+uv run python -m pytest scripts/tests .codex/hooks/tests .claude/hooks/tests .agents/hooks/tests
 ```
 
-只列出你保留的 hook 目錄。`scripts/tests/` 是本範本自己的契約測試，會斷言兩個 agent 層級；請依你的專案實際擁有的層級修剪。
+只列出你保留的 hook 目錄。`scripts/tests/` 是本範本自己的契約測試，會斷言所有包含的 agent 層級；請依你的專案實際擁有的層級修剪。
 
 ## Adapting it to your project
 
@@ -93,27 +94,29 @@ Claude Code 權限位於 `.claude/settings.json` 且無需觸及全域設定即�
 
 邊界在 server 端：default branch 上的 ruleset，那是任何本機設定都削弱不了的。
 
-Codex 此處不提供 repository 本地權限規則；它使用自己的核准控制。
+Codex 與 Antigravity 此處不提供 repository 本地權限規則；它們使用各自的 runtime 核准與 sandbox 控制。
 
 ## Per-agent references
 
-從你使用的 agent 對應參考文件開始。不必設定兩個都。
+從你使用的 agent 對應參考文件開始。不必設定全部。
 
 - **[Claude Code Components](claude-components.md)** — 內建委派、slash commands、skills、hooks 與路徑限定規則。
 - **[Codex Components](codex-components.md)** — 內建委派、command-like skills、hooks 與模型路由。
+- **[Antigravity Components](antigravity-components.md)** — 內建 subagents、workspace skills、hooks 與 sandbox 模型路由。
 - **[Git Workflow Contract](../en/git-workflow.md)** — 任務隔離、交付授權與審查和合併邊界。
 - **[PR Review](pr-review.md)** — 此 repository 自己託管的審查與合併條件如何設定。
 
 ## Hooks
 
-兩個 agent 都執行一個唯讀的 `PostToolUse` hook，在編輯後的 Python 檔案上回報 Ruff 診斷而不修改它們。兩者都不執行 `SessionStart` hook：根目錄 `AGENTS.md` 原生被探索，commit 流程也自行建立 branch context，不依賴被注入的狀態。
+每個 agent 都執行一個唯讀的 `PostToolUse` hook，在編輯後的 Python 檔案上回報 Ruff 診斷而不修改它們。三者都不執行 `SessionStart` hook：根目錄 `AGENTS.md` 原生被探索，commit 流程也自行建立 branch context，不依賴被注入的狀態。
 
-| Agent           | Script                                          | 回報內容                                     |
-| :-------------- | :---------------------------------------------- | :------------------------------------------- |
-| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py` | Ruff `E722,F601,F602,F634`，補充 Pyright LSP |
-| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`   | Ruff `F` checks，因為 Codex 沒有 Python LSP  |
+| Agent           | Script                                               | 回報內容                                           |
+| :-------------- | :--------------------------------------------------- | :------------------------------------------------- |
+| **Claude Code** | `.claude/hooks/claude_post_tool_use_hygiene.py`      | Ruff `E722,F601,F602,F634`，補充 Pyright LSP       |
+| **Codex**       | `.codex/hooks/codex_post_tool_use_hygiene.py`        | Ruff `F` checks，因為 Codex 沒有 Python LSP        |
+| **Antigravity** | `.agents/hooks/antigravity_post_tool_use_hygiene.py` | Ruff `F` checks，因為工具編輯步驟未附加 Python LSP |
 
-若 hooks 未觸發，確認 `uv run pre-commit install` 已執行、`.codex/config.toml` 啟用 `hooks`、`.claude/settings.json` 宣告 `hooks` 區塊，以及 agent 信任了 project 本地設定。
+若 hooks 未觸發，確認 `uv run pre-commit install` 已執行、`.codex/config.toml` 啟用 `hooks`、`.claude/settings.json` 宣告 `hooks` 區塊、`.agents/hooks.json` 存在，以及 agent 信任了 project 本地設定。
 
 ## Design influences
 
