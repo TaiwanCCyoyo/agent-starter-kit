@@ -1,3 +1,8 @@
+# Pin the Node that nodeenv installs for Node hooks ("system" is unsupported on Windows).
+# The default "latest" resolved to an unparseable 27.0.0-alpha build on 2026-10-30 and
+# broke CI; keep this exact release equal to the owner's other projects (stock-research).
+default_language_version:
+    node: 24.22.2
 repos:
     # Basic out-of-the-box checks
     - repo: https://github.com/pre-commit/pre-commit-hooks
